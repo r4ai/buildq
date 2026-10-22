@@ -1,0 +1,7 @@
+[package]
+name = "sample-app"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+sample-util = { path = "../util" }
