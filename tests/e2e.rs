@@ -236,3 +236,127 @@ fn two_worktrees_share_a_pool_member() {
     println!("naive shared CARGO_TARGET_DIR after the same edit prints: {naive:?} (stale)");
     assert!(d2 < dc, "shared member must beat a cold own target dir");
 }
+
+/// Writes a throwaway workspace (no registry deps) and returns the shim env.
+fn tiny_world(root: &Path, files: &[(&str, &str)]) -> World {
+    for (name, text) in files {
+        let p = root.join("ws").join(name);
+        fs::create_dir_all(p.parent().unwrap()).unwrap();
+        fs::write(p, text).unwrap();
+    }
+    let shim = root.join("shim");
+    let st = Command::new(BQ)
+        .args(["shim", "install", "cargo", "--into"])
+        .arg(&shim)
+        .output()
+        .unwrap();
+    assert!(st.status.success());
+    let mut paths = vec![shim.clone()];
+    paths.extend(std::env::split_paths(&std::env::var_os("PATH").unwrap()));
+    World {
+        shim_cargo: shim.join(if cfg!(windows) { "cargo.exe" } else { "cargo" }),
+        path: std::env::join_paths(paths).unwrap(),
+        real_cargo: buildq::cargo::find_real_cargo(None, Some(&shim)).expect("real cargo"),
+        root: root.to_path_buf(),
+    }
+}
+
+const DYLIB_WS: &[(&str, &str)] = &[
+    (
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"dyl\", \"app\"]\nresolver = \"2\"\n",
+    ),
+    // `prefer-dynamic` makes every dylib (and the app) need the toolchain's
+    // std shared library at run time, as `bevy_dylib` does.
+    (
+        ".cargo/config.toml",
+        "[build]\nrustflags = [\"-C\", \"prefer-dynamic\"]\n\n[alias]\ngo = [\"run\", \"-p\", \"app\"]\n",
+    ),
+    (
+        "dyl/Cargo.toml",
+        "[package]\nname = \"dyl\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[lib]\ncrate-type = [\"dylib\"]\n",
+    ),
+    ("dyl/src/lib.rs", "pub fn answer() -> u32 { 42 }\n"),
+    (
+        "app/Cargo.toml",
+        "[package]\nname = \"app\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\ndyl = { path = \"../dyl\" }\n",
+    ),
+    (
+        "app/src/main.rs",
+        "fn main() { println!(\"answer={}\", dyl::answer()); }\n",
+    ),
+];
+
+/// A binary linked against a `dylib` crate and the shared std starts from the
+/// copied run dir, through `cargo run` and through a run alias, with a `PATH`
+/// that holds nothing of the toolchain.
+#[test]
+#[ignore = "compiles a tiny real workspace; run with --ignored"]
+fn run_starts_a_dylib_linked_binary() {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(tmp.path());
+    let w = tiny_world(&root, DYLIB_WS);
+    let ws = root.join("ws");
+    for args in [["run", "-p", "app"], ["go", "--", ""]] {
+        let args: Vec<&str> = args.iter().copied().filter(|a| !a.is_empty()).collect();
+        let (o, _) = w.cargo(&ws, &args);
+        assert_eq!(stdout(&o), "answer=42", "{args:?}");
+    }
+}
+
+/// A shared library that a build script drops into `deps` (as `ort` and the
+/// like do) is not an artifact of any compile unit; `cargo run` finds it
+/// through `deps` on the library path, and so must the copied binary.
+#[cfg(all(windows, target_env = "msvc"))]
+#[test]
+#[ignore = "compiles a tiny real workspace; run with --ignored"]
+fn run_finds_a_dll_a_build_script_left_in_deps() {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(tmp.path());
+    let files: &[(&str, &str)] = &[
+        (
+            "Cargo.toml",
+            "[workspace]\nmembers = [\"app\"]\nresolver = \"2\"\n",
+        ),
+        (
+            "app/Cargo.toml",
+            "[package]\nname = \"app\"\nversion = \"0.1.0\"\nedition = \"2021\"\nbuild = \"build.rs\"\n",
+        ),
+        (
+            "app/native.rs",
+            "#[no_mangle]\npub extern \"C\" fn native_answer() -> u32 { 42 }\n",
+        ),
+        (
+            "app/build.rs",
+            r#"use std::{env, fs, path::PathBuf, process::Command};
+fn main() {
+    let out = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let lib = out.join("implib");
+    fs::create_dir_all(&lib).unwrap();
+    let src = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join("native.rs");
+    let dll = out.join("native.dll");
+    let st = Command::new(env::var("RUSTC").unwrap())
+        .args(["--crate-type", "cdylib", "--crate-name", "native", "--edition", "2021"])
+        .arg("-o").arg(&dll).arg(&src)
+        .status().unwrap();
+    assert!(st.success());
+    // The import library goes to its own dir, the DLL only to `deps`: the
+    // build script's linked paths then do not lead to the DLL.
+    fs::rename(out.join("native.dll.lib"), lib.join("native.lib")).unwrap();
+    let deps = out.ancestors().nth(3).unwrap().join("deps");
+    fs::copy(&dll, deps.join("native.dll")).unwrap();
+    println!("cargo:rustc-link-search=native={}", lib.display());
+    println!("cargo:rustc-link-lib=dylib=native");
+    println!("cargo:rerun-if-changed=native.rs");
+}
+"#,
+        ),
+        (
+            "app/src/main.rs",
+            "extern \"C\" { fn native_answer() -> u32; }\nfn main() { println!(\"answer={}\", unsafe { native_answer() }); }\n",
+        ),
+    ];
+    let w = tiny_world(&root, files);
+    let (o, _) = w.cargo(&root.join("ws"), &["run", "-p", "app"]);
+    assert_eq!(stdout(&o), "answer=42");
+}

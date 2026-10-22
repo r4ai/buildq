@@ -908,6 +908,7 @@ fn cargo_run(
         parsed,
         &dir,
         &art.linked,
+        &exe,
         &pkg_id,
         &manifest,
     );
@@ -920,6 +921,25 @@ fn cargo_run(
     Ok(code)
 }
 
+/// The pool member's `deps` dir and profile dir next to the built binary.
+///
+/// Third-party DLLs and shared libraries that a build script drops there are
+/// not artifacts of any compile unit, so only this search path finds them
+/// (`cargo run` puts `deps` on the path for the same reason). The run dir
+/// comes first, so copied libraries win over these.
+fn build_dirs(exe: &Path) -> Vec<PathBuf> {
+    // `<profile>/app`, or `<profile>/examples/app`.
+    let Some(profile) = exe
+        .ancestors()
+        .skip(1)
+        .take(2)
+        .find(|d| d.join("deps").is_dir())
+    else {
+        return Vec::new();
+    };
+    vec![profile.join("deps"), profile.to_path_buf()]
+}
+
 /// The environment `cargo run` would give the program.
 fn run_env(
     cmd: &mut Command,
@@ -927,11 +947,13 @@ fn run_env(
     parsed: &Parsed,
     dir: &Path,
     linked: &[PathBuf],
+    exe: &Path,
     pkg_id: &str,
     manifest: &str,
 ) {
     let mut paths: Vec<PathBuf> = vec![dir.to_path_buf()];
     paths.extend(linked.iter().cloned());
+    paths.extend(build_dirs(exe));
     if let (Some(sr), Some(tc)) = (
         sysroot(real, parsed.toolchain.as_deref()),
         probe_toolchain(real, parsed.toolchain.as_deref()),
@@ -1084,6 +1106,18 @@ fn sync_into(dir: &Path, files: &[PathBuf]) -> io::Result<u64> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn build_dirs_cover_deps_for_bins_and_examples() {
+        let t = tempfile::tempdir().unwrap();
+        let profile = t.path().join("debug");
+        std::fs::create_dir_all(profile.join("deps")).unwrap();
+        std::fs::create_dir_all(profile.join("examples")).unwrap();
+        let want = vec![profile.join("deps"), profile.clone()];
+        assert_eq!(build_dirs(&profile.join("app")), want);
+        assert_eq!(build_dirs(&profile.join("examples").join("demo")), want);
+        assert!(build_dirs(&t.path().join("elsewhere").join("app")).is_empty());
+    }
+
     use super::*;
 
     #[test]
