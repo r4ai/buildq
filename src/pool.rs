@@ -109,25 +109,26 @@ impl Lease {
     }
 }
 
-/// `<cache>/pools/<repo>-<repohash>-<toolchain>-<tchash>`
-pub fn pool_dir(cache: &Path, wt: &Worktree, toolchain_tag: &str, toolchain_id: &str) -> PathBuf {
-    let tag: String = toolchain_tag
+/// `<cache>/pools/<repo, at most 16 chars>-<hash of repo + toolchain>`.
+/// Kept short on purpose: cargo nests deep paths below a target dir and
+/// Windows tools still trip over long ones. Details live in `pool.json`.
+pub fn pool_dir(cache: &Path, wt: &Worktree, toolchain_id: &str) -> PathBuf {
+    let repo: String = wt
+        .repo_name()
         .chars()
         .map(|c| {
-            if c.is_ascii_alphanumeric() || c == '.' {
+            if c.is_ascii_alphanumeric() || c == '-' || c == '_' {
                 c
             } else {
                 '_'
             }
         })
+        .take(16)
         .collect();
-    cache.join("pools").join(format!(
-        "{}-{}-{}-{}",
-        wt.repo_name(),
-        short_hash(&wt.repo_key()),
-        tag,
-        short_hash(toolchain_id)
-    ))
+    let key = format!("{}\n{}", wt.repo_key(), toolchain_id);
+    cache
+        .join("pools")
+        .join(format!("{repo}-{}", short_hash(&key)))
 }
 
 pub fn read_manifest(path: &Path) -> Manifest {

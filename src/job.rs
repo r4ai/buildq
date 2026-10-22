@@ -356,7 +356,7 @@ fn open_pool(cfg: &Config, real: &Path, parsed: &Parsed) -> Option<PoolCtx> {
     }
     let wt = git::discover(&cwd())?;
     let tc = probe_toolchain(real, parsed.toolchain.as_deref())?;
-    let dir = pool::pool_dir(&cfg.cache_dir, &wt, &tc.release, &tc.id);
+    let dir = pool::pool_dir(&cfg.cache_dir, &wt, &tc.id);
     let name = dir.file_name()?.to_string_lossy().to_string();
     let pool = Pool::open(
         dir,
