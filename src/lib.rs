@@ -1,0 +1,8 @@
+//! buildq: a machine-wide queue and a shared, disk-budgeted target-dir pool
+//! for cargo jobs started by many parallel agents. See README.md.
+
+pub mod config;
+pub mod exec;
+pub mod lock;
+pub mod queue;
+pub mod util;
