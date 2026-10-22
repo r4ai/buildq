@@ -11,5 +11,6 @@ pub mod job;
 pub mod lock;
 pub mod pool;
 pub mod queue;
+pub mod remote;
 pub mod shim;
 pub mod util;
