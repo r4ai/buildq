@@ -3,6 +3,9 @@
 
 pub mod config;
 pub mod exec;
+pub mod gc;
+pub mod git;
 pub mod lock;
+pub mod pool;
 pub mod queue;
 pub mod util;
