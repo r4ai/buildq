@@ -1,0 +1,223 @@
+# buildq
+
+[English](README.md) | 日本語
+
+**複数の Git worktree で並列実行される `cargo` ビルドを制御する、<br>デーモンレスなジョブキュー兼 `target/` 共有プール**
+
+---
+
+## 解決する課題
+
+複数のコーディングエージェントが別々の Git worktree で同時に `cargo` を実行すると、3つの問題が発生する。
+
+- **CPU・メモリの枯渇**
+  - 複数エージェントの同時コンパイルによるマシンのフリーズ
+- **ディスク容量の爆発**
+  - worktree ごとに巨大な `target/`（5〜20 GB）が生成
+  - 数時間で数十 GB のディスク容量を消費
+- **単純な `CARGO_TARGET_DIR` 共有の危険性**
+  - ロック競合による全ビルドの直列化
+  - 更新日時（`mtime`）のズレにより、**古いコードが再利用されるバグ**が発生
+
+`buildq` は透過的な `cargo` shim として動作する。
+バックグラウンドデーモンなしで、これら3つの問題をすべて解決する。
+
+```mermaid
+flowchart LR
+    subgraph Agents["並列エージェント (Git Worktrees)"]
+        A1["Worktree A: cargo build"]
+        A2["Worktree B: cargo test"]
+        A3["Worktree C: cargo run"]
+    end
+
+    Shim["cargo shim"]
+    Queue["FIFO キュー (最大 N 並列)"]
+
+    subgraph Pool["共有 Target プール (容量制限)"]
+        M0["Member m0 (target/)"]
+        M1["Member m1 (target/)"]
+    end
+
+    A1 & A2 & A3 --> Shim
+    Shim --> Queue
+    Queue --> M0 & M1
+```
+
+### 主な機能
+
+- **透過的な `cargo` shim**
+  - 重いコマンド（`build`, `test`, `clippy`, `run`, `nextest` 等）のみ自動でキューへ投入
+  - 軽いコマンド（`fmt`, `metadata`, `tree`, `--version` 等）はそのまま即座に実行
+- **マシン全体のジョブキュー**
+  - 同時ビルド数を上限（デフォルト: `2`）に制限し、優先度付き FIFO 順で実行
+  - OS のファイルロック（`flock` / `LockFileEx`）によるデーモンレス設計
+  - プロセス強制終了時もロックが自動解放され、残留なし
+- **安全な `target/` 共有プール**
+  - 少数の `target/` ディレクトリを全 worktree 間で安全に共有
+  - Git の blob ハッシュでファイル内容を追跡
+  - 変更されたパッケージのキャッシュのみをビルド前に無効化
+- **ディスク容量制限と自動 GC**
+  - 不要なインクリメンタルキャッシュや古い成果物をバックグラウンドで自動削除
+  - プール全体のサイズを指定上限（デフォルト: `60 GB`）以下に維持
+- **ファイルをロックしない `cargo run`**
+  - ビルド完了後、実行ファイルと DLL を専用ディレクトリへコピーしてから起動
+  - アプリ実行中の `target/` ロック（Windows 等）による後続ビルドの失敗を防止
+- **SSH リモートビルド**
+  - 軽量な差分 Git スナップショットを用い、別マシンへビルドをオフロード
+
+### パフォーマンス比較
+
+| 指標 | Worktree ごとに<br>`target/` | 単純な<br>`CARGO_TARGET_DIR` 共有 | `buildq` |
+| :--- | :--- | :--- | :--- |
+| **CPU / メモリ負荷** | 無制限<br>（マシンがフリーズ） | 完全直列<br>（常に1並列のみ） | **最大 `N` 並列に制御** |
+| **別 Worktree での<br>初回ビルド** | `11.2 秒`<br>（8 クレート再ビルド） | `1.4 秒`<br>（0 クレート再ビルド） | **`1.4 秒`<br>（0 クレート再ビルド）** |
+| **古い `mtime` の<br>ファイルを編集** | 安全：`4.3 秒`<br>（3 クレート再ビルド） | **バグ発生**<br>（古いコードが動作） | **安全：`4.3 秒`<br>（3 クレート再ビルド）** |
+| **ディスク消費<br>（`W` Worktrees）** | `W × 110 MiB`<br>（線形に肥大化） | `1 × 113 MiB` | **`≤ slots × 113 MiB`<br>（上限内で維持）** |
+
+> Windows 11 上で2つの Git worktree（`regex` + ワークスペース内3クレート）を用いて実測。
+> `buildq` のオーバーヘッドは1ジョブあたり約 0.4〜0.6 秒
+
+---
+
+## インストール方法
+
+### 1. バイナリのインストール
+
+```sh
+cargo install --git https://github.com/r4ai/buildq
+```
+
+### 2. `cargo` shim のセットアップ
+
+専用ディレクトリに shim を作成し、`PATH` の**先頭**に追加する。
+
+**macOS / Linux**
+```sh
+buildq shim install cargo --into ~/.local/share/buildq/bin
+export PATH="$HOME/.local/share/buildq/bin:$PATH"
+```
+
+**Windows (PowerShell)**
+```powershell
+buildq shim install cargo --into C:\bq\bin
+$env:PATH = "C:\bq\bin;$env:PATH"
+```
+
+> [!TIP]
+> サンドボックス化された複数エージェントで共有する場合は、`BUILDQ_DIR` と `BUILDQ_CACHE` を共通の書き込み可能ディレクトリに設定する。
+> 手順は [マルチエージェント・サンドボックス設定レシピ](docs/development.ja.md#マルチエージェントサンドボックス設定レシピ) を参照
+
+---
+
+## 使い方
+
+### 基本的な使い方
+
+`PATH` に shim を追加した後は、通常通り `cargo` コマンドを実行するだけでよい。
+
+```sh
+cargo build
+cargo test
+cargo run
+```
+
+重いコマンドは自動的にキューイングされ、割り当てられたプールメンバーが表示される。
+
+```text
+buildq: target <pool>/m0 (...)
+```
+
+### CLI コマンド一覧
+
+| コマンド | 説明 |
+| :--- | :--- |
+| `buildq status [--hosts]` | クラスごとの実行中・待機中ジョブを表示 |
+| `buildq history [-n N]` | 直近のジョブ履歴を表示<br>（待機時間・実行時間・終了コード・使用プール） |
+| `buildq cache ls [--refresh]` | プール一覧・各メンバーの容量・空き容量を表示 |
+| `buildq gc [--dry-run]` | キャッシュを手動整理し、ディスク予算内に縮小 |
+| `buildq config` | 現在有効な設定値とディレクトリパスを表示 |
+| `buildq run [-p PRIO] -- <cmd>...` | 任意のコマンドをキュー経由で実行（優先度指定可） |
+| `buildq run --host <H> -- <cmd>...` | SSH 経由でリモートホスト上でコマンドを実行 |
+
+### 設定ファイル (`config.toml`)
+
+設定はすべて任意。
+`$BUILDQ_DIR/config.toml` に配置する（標準パスは `buildq config` で確認可能）。
+
+```toml
+slots = 2                # ビルドの最大同時実行数 (デフォルト: 2)
+run_slots = 2            # `cargo run` のアプリ最大同時実行数 (デフォルト: 2)
+
+[cache]
+max_members = 3          # リポジトリ×ツールチェインあたりの最大 target/ 数 (デフォルト: slots + 1)
+budget = "45G"           # BUILDQ_CACHE 全体の最大ディスク使用量 (デフォルト: "60G")
+min_free = "25G"         # ドライブ上に最低限残す空き容量 (デフォルト: "20G")
+
+[cargo]
+rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を無効化 ("none" | "keep" | "/path")
+# jobs = 8               # 1ビルドあたりの CARGO_BUILD_JOBS (デフォルト: コア数 / slots)
+```
+
+### リモートビルド (SSH)
+
+`config.toml` にホストを追記すると、SSH と Git 経由でリモートマシンへビルドを分散できる。
+
+```toml
+[hosts.box]
+ssh = "box"              # ~/.ssh/config のホスト名
+slots = 4                # このホストへ同時に送る最大ジョブ数
+
+auto_hosts = ["local", "box"]
+```
+
+ホスト名を指定するか、`auto` で空きホストを自動選択して実行する。
+
+```sh
+buildq run --host box -- cargo test
+buildq run --host auto -- cargo clippy --all-targets
+buildq run --host box --fetch target/debug/app -- cargo build --bin app
+```
+
+---
+
+## 技術的な仕組み
+
+```mermaid
+flowchart TD
+    Start["cargo build / test / run"] --> Check["サブコマンド・エイリアス判定"]
+    Check -- "軽いコマンド (fmt, tree)" --> Pass["そのまま cargo を実行"]
+    Check -- "重いコマンド (build, test, run)" --> Lock["OS ファイルロックを取得 (BUILDQ_DIR)"]
+    Lock --> Lease["差分が最小の target/ (m0) をリース"]
+    Lease --> Diff["Git blob と m0.manifest を比較"]
+    Diff --> Invalidate["変更クレートの .fingerprint/ を削除"]
+    Invalidate --> Build["CARGO_TARGET_DIR=m0 でビルド"]
+```
+
+1. **OS ファイルロックによるデーモンレスキュー**
+   - `$BUILDQ_DIR` 内のファイルを OS レベル（`flock` / `LockFileEx`）で排他ロック
+   - プロセス異常終了時も OS が自動でロックを解放し、デッドロックを防止
+   - 再帰的な `cargo` 呼び出しは環境変数 `BUILDQ_HELD` で検知してバイパス
+2. **Git Blob マニフェストによる安全なキャッシュ無効化**
+   - Cargo はワークスペース内クレートを相対パスでハッシュ化するため、別 worktree でも成果物を再利用可能
+   - 各メンバーに全ソースファイルの Git blob ID（`m0.manifest`）を記録
+   - ビルド前に現在の worktree と比較し、**変更パッケージの `.fingerprint/<pkg>-*` のみを削除**
+   - `mtime` に依存せず、安全かつ高速なインクリメンタルビルドを実現
+3. **`cargo run` の2フェーズ分割**
+   - フェーズ1：`build` スロットでビルドし、実行ファイルと DLL を `runs/r0` に差分コピー
+   - フェーズ2：`build` スロットと `target/` メンバーを解放後、`run` スロットでアプリを起動
+   - アプリ実行中も `target/` がロックされず、他エージェントがビルドを継続可能
+
+---
+
+## 詳細ドキュメント
+
+- **[アーキテクチャと内部設計](docs/architecture.ja.md)**
+  - キューのロック設計・マニフェスト無効化の不変条件・メンバー選択アルゴリズム
+  - 5段階 GC・SSH リモートプロトコル・既知の制限事項
+- **[開発・セットアップガイド](docs/development.ja.md)**
+  - モジュール構成・単体 / E2E テストの実行手順
+  - マルチエージェント用サンドボックス設定・環境変数一覧
+
+## ライセンス
+
+MIT または Apache-2.0 のデュアルライセンス（[LICENSE-MIT](LICENSE-MIT) / [LICENSE-APACHE](LICENSE-APACHE)）
