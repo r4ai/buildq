@@ -364,17 +364,23 @@ pub fn prune_member(
                 .filter(|p| p.is_dir())
                 .map(|p| (newest_mtime(&p), p))
                 .collect();
-            sessions.sort();
-            let newest = sessions.last().map(|(t, _)| *t).unwrap_or(0);
+            // rustc loads the newest finalized session; `-working` ones are
+            // leftovers of interrupted compiles (no rustc runs: we hold the member).
+            sessions.sort_by_key(|(t, p)| (!is_working(p), *t));
+            let newest = sessions.iter().map(|(t, _)| *t).max().unwrap_or(0);
             let old = now.saturating_sub(newest) > cfg.incremental_days * DAY_MS;
             let victims: Vec<PathBuf> = if old {
                 vec![crate_dir.clone()]
             } else {
-                sessions
+                let keep = sessions
                     .iter()
                     .rev()
-                    .skip(1)
+                    .find(|(_, p)| !is_working(p))
+                    .map(|(_, p)| p.clone());
+                sessions
+                    .iter()
                     .map(|(_, p)| p.clone())
+                    .filter(|p| Some(p) != keep.as_ref())
                     .collect()
             };
             for v in victims {
@@ -463,6 +469,11 @@ pub fn remove_unit(profile_dir: &Path, pkg: &str, hash: &str, dry: bool) -> u64 
         }
     }
     size
+}
+
+fn is_working(p: &Path) -> bool {
+    p.file_name()
+        .is_some_and(|n| n.to_string_lossy().ends_with("-working"))
 }
 
 fn find_named_dirs(root: &Path, name: &str, depth: usize) -> Vec<PathBuf> {
@@ -589,6 +600,11 @@ mod tests {
         // Two sessions: only the newest survives. An old crate dir goes entirely.
         file(&d.join("incremental/core-aaa/s-old/x.bin"), 100, 1);
         file(&d.join("incremental/core-aaa/s-new/x.bin"), 100, 0);
+        file(
+            &d.join("incremental/core-aaa/s-newer-working/x.bin"),
+            100,
+            0,
+        );
         file(&d.join("incremental/gone-bbb/s-1/x.bin"), 100, 10);
         // serde: an old variant and a current one.
         file(
@@ -609,6 +625,7 @@ mod tests {
         let r = gc(&c, &Options::default());
         assert!(!d.join("incremental/core-aaa/s-old").exists());
         assert!(d.join("incremental/core-aaa/s-new").exists());
+        assert!(!d.join("incremental/core-aaa/s-newer-working").exists());
         assert!(!d.join("incremental/gone-bbb").exists());
         assert!(!d.join("deps/libserde-1111111111111111.rlib").exists());
         assert!(!d.join(".fingerprint/serde-1111111111111111").exists());
