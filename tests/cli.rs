@@ -130,17 +130,32 @@ fn exit_code_passes_through() {
 #[test]
 fn killed_holder_releases_its_slot() {
     let e = Env::new();
+    let pids = e.root.join("pids");
+    fs::create_dir_all(&pids).unwrap();
+    // The holder's command has a child of its own, like cargo and rustc.
     let mut holder = e
         .cmd(1)
-        .args(["run", "--", BQ, "__helper", "sleep", "60000"])
+        .args(["run", "--", BQ, "__helper", "tree"])
+        .arg(&pids)
+        .arg("1")
         .stderr(Stdio::null())
         .spawn()
         .unwrap();
-    wait_until("holder to start", || busy(&e.status(), "build") == 1);
-    // A second job queues behind it.
+    wait_until("holder to start", || {
+        busy(&e.status(), "build") == 1 && fs::read_dir(&pids).unwrap().count() == 2
+    });
+    // A second job queues behind it; on Unix it checks that the killed
+    // holder's whole command tree is gone by the time it gets the slot.
+    let probe: &[&str] = if cfg!(unix) {
+        &["dead"]
+    } else {
+        &["exit", "0"]
+    };
     let mut waiter = e
         .cmd(1)
-        .args(["run", "--", BQ, "__helper", "exit", "0"])
+        .args(["run", "--", BQ, "__helper"])
+        .args(probe)
+        .arg(&pids)
         .stderr(Stdio::null())
         .spawn()
         .unwrap();

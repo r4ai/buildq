@@ -91,6 +91,12 @@ enum Cmd {
     },
     /// Print the effective configuration.
     Config,
+    #[command(name = "__watch", hide = true)]
+    Watch {
+        pid: i32,
+        #[arg(long)]
+        kill_tree: bool,
+    },
     #[command(name = "__helper", hide = true)]
     Helper {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
@@ -277,6 +283,13 @@ fn main() -> ExitCode {
             print!("{}", config::describe(&cfg));
             ExitCode::SUCCESS
         }
+        Cmd::Watch { pid, kill_tree } => {
+            #[cfg(unix)]
+            buildq::exec::watch(pid, kill_tree);
+            #[cfg(not(unix))]
+            let _ = (pid, kill_tree);
+            ExitCode::SUCCESS
+        }
         Cmd::Helper { args } => helper(&args),
     }
 }
@@ -402,6 +415,34 @@ fn helper(args: &[String]) -> ExitCode {
                 format!("{start} {end}"),
             );
             ExitCode::SUCCESS
+        }
+        Some("tree") => {
+            // tree <dir> <depth>: a chain of <depth> helpers below this one,
+            // each recording its pid in <dir>; the last one sleeps.
+            let dir = PathBuf::from(&args[1]);
+            let depth: u32 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(0);
+            let _ = std::fs::write(dir.join(format!("pid-{}", std::process::id())), "");
+            if depth == 0 {
+                std::thread::sleep(Duration::from_secs(60));
+                return ExitCode::SUCCESS;
+            }
+            let st = std::process::Command::new(std::env::current_exe().unwrap())
+                .args(["__helper", "tree"])
+                .arg(&dir)
+                .arg((depth - 1).to_string())
+                .status();
+            exit(st.map(|s| s.code().unwrap_or(1)).unwrap_or(1))
+        }
+        #[cfg(unix)]
+        Some("dead") => {
+            // dead <dir>: fails while any pid recorded by `tree` is alive.
+            let alive = std::fs::read_dir(&args[1])
+                .unwrap()
+                .flatten()
+                .filter_map(|e| e.file_name().to_str()?.strip_prefix("pid-")?.parse().ok())
+                .filter(|&pid: &i32| unsafe { libc::kill(pid, 0) } == 0)
+                .count();
+            exit(if alive == 0 { 0 } else { 3 })
         }
         Some("env") => {
             for k in &args[1..] {

@@ -21,7 +21,7 @@ src/
   cargo.rs     # Cargo 引数パース・エイリアス解決・メタデータ取得
   gc.rs        # ディスク予算管理と5段階ガベージコレクション
   remote.rs    # SSH + Git リモート実行トランスポートとプロトコル
-  exec.rs      # プロセス起動・シグナル転送・Windows Job Object 制御
+  exec.rs      # プロセス起動・シグナル転送・Windows Job Object 制御・Unix 監視プロセス
   lock.rs      # クロスプラットフォーム OS ファイルロック (LockFileEx / flock)
   history.rs   # ジョブ実行履歴の記録と読み出し
   external.rs  # プール外で使われた明示 target ディレクトリの記録

@@ -75,6 +75,8 @@ $BUILDQ_DIR/<class>/
   - A freed slot never hides a lingering background build
 - **Unix**
   - Forwards `SIGTERM` and `SIGHUP` directly to the child process
+  - A watchdog process (`buildq __watch`) inherits the slot and pool-member locks
+  - If `buildq` dies first (even by `SIGKILL`), the watchdog kills the child's process tree (`kill_tree = true`) or waits for the child to exit (`kill_tree = false`), and only then releases the locks
 
 ---
 

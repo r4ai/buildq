@@ -21,7 +21,7 @@ src/
   cargo.rs     # Cargo argument parsing, alias resolution, and metadata inspection
   gc.rs        # Disk budget tracking and 5-stage garbage collection
   remote.rs    # SSH + Git remote execution transport and protocol
-  exec.rs      # Process spawning, signal forwarding, and Windows Job Objects
+  exec.rs      # Process spawning, signal forwarding, Windows Job Objects, and the Unix watchdog
   lock.rs      # Cross-platform OS file locks (LockFileEx / flock)
   history.rs   # Job execution history log
   external.rs  # Registry of explicit target dirs used outside the pool
