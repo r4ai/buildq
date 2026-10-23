@@ -158,7 +158,7 @@ mod tests {
             Path::new("/child"),
         );
         let vars = values(entries, |name| name == "B");
-        assert_eq!(vars["A"], Path::new("/parent/data").as_os_str());
+        assert_eq!(vars["A"], Path::new("/parent").join("data").as_os_str());
         assert!(!vars.contains_key("B"));
     }
 
