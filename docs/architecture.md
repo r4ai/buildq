@@ -154,12 +154,19 @@ Because invalidation happens *before* Cargo runs, this holds across partial buil
 Under `pool.lock`, `buildq` scores every free member by the tuple:
 
 ```text
-(never_built, packages_to_invalidate, differing_files, last_used_by_other_worktree, least_recent)
+(never_built, packages_to_rebuild, differing_files, last_used_by_other_worktree, least_recent)
 ```
 
+The rebuild cost counts the union of invalidated packages and their transitive
+workspace dependents from `cargo metadata --no-deps --offline`. Shared dependents
+count once. Optional, build, dev, and target-specific dependencies are included
+conservatively; this estimates package rebuilds, rather than compile time.
+If metadata is unavailable, scoring falls back to the invalidated package count.
+Source-root changes still invalidate every local package before scoring.
+
 The lowest score wins:
-1. Re-leases the exact member the worktree used last (`0` packages to invalidate)
-2. Otherwise picks the member whose sources are closest to the current worktree
+1. Prefers an already-built member with the fewest packages to rebuild
+2. Breaks ties by differing files, worktree affinity, and recency
 3. Creates a new member only when all members are busy, count is below `max_members`, and the disk budget has room
 
 ## 3. Two-Phase `cargo run`

@@ -365,6 +365,7 @@ struct PoolCtx {
     pool: Pool,
     name: String,
     manifest: pool::Manifest,
+    rebuild_graph: pool::RebuildGraph,
     /// An explicit target dir inside the worktree pooled under
     /// `cache.pool_explicit`: (requested dir, its path relative to the worktree).
     explicit: Option<(PathBuf, String)>,
@@ -456,6 +457,10 @@ fn pool_ctx(
     .ok()?;
     Some(PoolCtx {
         manifest: git::manifest(&wt)?,
+        rebuild_graph: workspace_metadata(real, parsed)
+            .as_ref()
+            .and_then(pool::RebuildGraph::from_metadata)
+            .unwrap_or_default(),
         wt,
         pool,
         name,
@@ -494,6 +499,7 @@ fn lease_member(cfg: &Config, ctx: &mut PoolCtx) -> Result<Lease, String> {
         .lease(
             &ctx.wt,
             &ctx.manifest,
+            &ctx.rebuild_graph,
             &mut owners,
             cfg.max_members,
             &mut may_grow,
@@ -829,23 +835,45 @@ fn pick_bin(real: &Path, parsed: &Parsed) -> Option<String> {
     if parsed.opt(&["--bin"]).is_some() || parsed.opt(&["--example"]).is_some() {
         return None;
     }
+    let meta = workspace_metadata(real, parsed)?;
+    pick_bin_from_metadata(&meta, parsed)
+}
+
+/// Offline, dependency-free workspace inspection; failure only loses a hint.
+fn workspace_metadata(real: &Path, parsed: &Parsed) -> Option<Value> {
     let mut c = Command::new(real);
     let mut args = vec![
         "metadata".to_string(),
         "--no-deps".into(),
         "--format-version".into(),
         "1".into(),
+        "--offline".into(),
     ];
     if let Some(m) = parsed.opt(&["--manifest-path"]) {
         args.push("--manifest-path".into());
         args.push(m);
+    }
+    let mut options = parsed.args.iter().take_while(|a| a.as_str() != "--");
+    while let Some(arg) = options.next() {
+        if arg == "--config" {
+            args.push(arg.clone());
+            args.push(options.next()?.clone());
+        } else if arg.starts_with("--config=") {
+            args.push(arg.clone());
+        }
     }
     c.args(with_toolchain(parsed, args))
         .env("BUILDQ_HELD", held_with("build"))
         .stdin(Stdio::null())
         .stderr(Stdio::null());
     let out = c.output().ok()?;
-    let meta: Value = serde_json::from_slice(&out.stdout).ok()?;
+    if !out.status.success() {
+        return None;
+    }
+    serde_json::from_slice(&out.stdout).ok()
+}
+
+fn pick_bin_from_metadata(meta: &Value, parsed: &Parsed) -> Option<String> {
     let packages = meta["packages"].as_array()?;
     let want_pkg = parsed
         .opt(&["-p", "--package"])

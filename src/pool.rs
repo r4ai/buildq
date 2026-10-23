@@ -33,8 +33,8 @@
 //! ## Picking a member
 //!
 //! Free members are scored by the number of packages that would have to be
-//! invalidated (then by differing files, then by "this worktree built here
-//! last", then by recency). A new member is only created when every member is
+//! rebuilt, including transitive workspace dependents (then by differing
+//! files, worktree affinity, and recency). A new member is only created when every member is
 //! busy and the pool is below `max_members` (and the disk budget allows it).
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -52,6 +52,70 @@ use crate::util::{now_ms, read_json, short_hash, write_atomic, write_json};
 
 /// path -> content id
 pub type Manifest = BTreeMap<String, String>;
+
+/// Reverse workspace dependencies from `cargo metadata --no-deps`.
+/// Optional, build, dev, and target-specific edges are included conservatively.
+#[derive(Debug, Default)]
+pub struct RebuildGraph {
+    dependents: BTreeMap<String, BTreeSet<String>>,
+}
+
+impl RebuildGraph {
+    pub fn from_metadata(meta: &serde_json::Value) -> Option<Self> {
+        let members = meta["workspace_members"].as_array()?;
+        let packages: Vec<_> = meta["packages"]
+            .as_array()?
+            .iter()
+            .filter(|p| members.contains(&p["id"]))
+            .collect();
+        let mut names_by_root = BTreeMap::new();
+        for package in &packages {
+            let manifest = Path::new(package["manifest_path"].as_str()?);
+            names_by_root.insert(
+                crate::util::canonical(manifest.parent()?),
+                package["name"].as_str()?,
+            );
+        }
+        let mut graph = Self::default();
+        for package in &packages {
+            let name = package["name"].as_str()?;
+            for dep in package["dependencies"].as_array()? {
+                let Some(path) = dep["path"].as_str() else {
+                    continue;
+                };
+                // Match paths, not the dependency's (possibly renamed) key or
+                // a registry package with the same name.
+                let path = crate::util::canonical(Path::new(path));
+                if let Some(dependency) = names_by_root.get(&path) {
+                    graph
+                        .dependents
+                        .entry((*dependency).into())
+                        .or_default()
+                        .insert(name.into());
+                }
+            }
+        }
+        Some(graph)
+    }
+
+    /// Count the union, so shared dependents and cycles are counted once.
+    /// Unknown/deleted packages still cost one; unavailable metadata reduces
+    /// to the original raw invalidation count.
+    pub fn cost(&self, invalidated: &BTreeSet<String>) -> usize {
+        let mut affected = invalidated.clone();
+        let mut pending: Vec<_> = invalidated.iter().cloned().collect();
+        while let Some(package) = pending.pop() {
+            if let Some(dependents) = self.dependents.get(&package) {
+                for dependent in dependents {
+                    if affected.insert(dependent.clone()) {
+                        pending.push(dependent.clone());
+                    }
+                }
+            }
+        }
+        affected.len()
+    }
+}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
@@ -356,6 +420,7 @@ impl Pool {
         &self,
         wt: &Worktree,
         current: &Manifest,
+        graph: &RebuildGraph,
         owners: &mut dyn FnMut(&str, Option<&str>) -> Option<String>,
         max_members: usize,
         may_grow: &mut dyn FnMut(usize) -> bool,
@@ -392,7 +457,7 @@ impl Pool {
                 let built = self.dir.join(format!("m{id}")).exists() && !manifest.is_empty();
                 let score = Score {
                     empty: !built,
-                    packages: p.packages.len(),
+                    packages: graph.cost(&p.packages),
                     files: p.changed.len(),
                     other_worktree: meta.last_worktree.as_deref() != Some(&wt.key()),
                     stale: u64::MAX - meta.last_used_ms,
@@ -646,6 +711,7 @@ mod tests {
             .lease(
                 &wt("a"),
                 &a,
+                &RebuildGraph::default(),
                 &mut owners,
                 3,
                 &mut |_| true,
@@ -658,6 +724,7 @@ mod tests {
             .lease(
                 &wt("b"),
                 &b,
+                &RebuildGraph::default(),
                 &mut owners,
                 3,
                 &mut |_| true,
@@ -679,6 +746,7 @@ mod tests {
             .lease(
                 &wt("b"),
                 &b,
+                &RebuildGraph::default(),
                 &mut owners,
                 3,
                 &mut |_| true,
@@ -695,6 +763,7 @@ mod tests {
             .lease(
                 &wt("b"),
                 &b,
+                &RebuildGraph::default(),
                 &mut owners,
                 3,
                 &mut |_| true,
@@ -713,6 +782,7 @@ mod tests {
             .lease(
                 &wt("c"),
                 &c,
+                &RebuildGraph::default(),
                 &mut owners,
                 3,
                 &mut |_| true,
@@ -728,6 +798,108 @@ mod tests {
     }
 
     #[test]
+    fn rebuild_graph_counts_transitive_union_and_handles_cycles_and_unknowns() {
+        use serde_json::json;
+        let package = |name: &str, deps: Vec<serde_json::Value>| {
+            json!({
+                "id": name, "name": name,
+                "manifest_path": format!("/workspace/{name}/Cargo.toml"),
+                "dependencies": deps,
+            })
+        };
+        let path_dep = |name: &str| {
+            json!({
+                "name": name, "path": format!("/workspace/{name}"),
+            })
+        };
+        let meta = json!({
+            "workspace_members": ["core", "a", "b", "app", "unrelated"],
+            "packages": [
+                package("core", vec![]),
+                package("a", vec![json!({"name": "core", "rename": "base", "path": "/workspace/core"})]),
+                package("b", vec![path_dep("core")]),
+                package("app", vec![path_dep("a"), path_dep("b")]),
+                package("unrelated", vec![json!({"name": "core", "path": null})]),
+                package("nonmember", vec![path_dep("core")]),
+            ],
+        });
+        let mut graph = RebuildGraph::from_metadata(&meta).unwrap();
+        let cost = |names: &[&str]| graph.cost(&names.iter().map(|s| s.to_string()).collect());
+        assert_eq!(cost(&["core"]), 4);
+        assert_eq!(cost(&["a", "b"]), 3);
+        assert_eq!(cost(&["core", "deleted"]), 5);
+        assert_eq!(cost(&["unrelated"]), 1);
+        assert_eq!(cost(&[]), 0);
+        graph
+            .dependents
+            .entry("app".into())
+            .or_default()
+            .insert("core".into());
+        assert_eq!(graph.cost(&BTreeSet::from(["core".into()])), 4);
+        assert!(RebuildGraph::from_metadata(&json!({})).is_none());
+        assert_eq!(
+            RebuildGraph::default().cost(&BTreeSet::from(["a".into(), "b".into()])),
+            2
+        );
+    }
+
+    #[test]
+    fn lease_prefers_two_leaves_over_a_shared_foundation() {
+        let dir = tempfile::tempdir().unwrap();
+        let pool = Pool::open(dir.path().join("p"), PoolInfo::default()).unwrap();
+        let current = m(&[
+            ("crates/core/src/lib.rs", "new"),
+            ("crates/a/src/lib.rs", "new"),
+            ("crates/b/src/lib.rs", "new"),
+            ("crates/app/src/main.rs", "new"),
+        ]);
+        for id in 0..2 {
+            let mut previous = current.clone();
+            for name in if id == 0 {
+                vec!["core"]
+            } else {
+                vec!["a", "b"]
+            } {
+                previous.insert(format!("crates/{name}/src/lib.rs"), "old".into());
+            }
+            fs::create_dir_all(pool.dir.join(format!("m{id}"))).unwrap();
+            write_manifest(&pool.manifest_path(id), &previous).unwrap();
+            write_json(
+                &pool.meta_path(id),
+                &MemberMeta {
+                    id,
+                    last_worktree: Some(wt("a").key()),
+                    source_root: Some(wt("a").key()),
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+        }
+        let graph = RebuildGraph {
+            dependents: BTreeMap::from([(
+                "core".into(),
+                BTreeSet::from(["a".into(), "b".into(), "app".into()]),
+            )]),
+        };
+        let lease = pool
+            .lease(
+                &wt("a"),
+                &current,
+                &graph,
+                &mut |f, _| owner(f),
+                2,
+                &mut |_| false,
+                Duration::from_millis(5),
+                &mut || {},
+            )
+            .unwrap();
+        assert_eq!(
+            lease.id, 1,
+            "rebuild two leaves instead of core and all its dependents"
+        );
+    }
+
+    #[test]
     fn lease_waits_when_full() {
         let dir = tempfile::tempdir().unwrap();
         let root = dir.path().join("p");
@@ -739,6 +911,7 @@ mod tests {
             .lease(
                 &wt("a"),
                 &a,
+                &RebuildGraph::default(),
                 &mut owners,
                 1,
                 &mut |_| true,
@@ -755,6 +928,7 @@ mod tests {
                 .lease(
                     &wt("b"),
                     &a,
+                    &RebuildGraph::default(),
                     &mut owners,
                     1,
                     &mut |_| true,
