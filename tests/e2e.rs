@@ -584,3 +584,31 @@ fn run_applies_effective_cargo_config_environment() {
     assert!(expected.contains("BQ_FORCE=forced"));
     assert_eq!(run(&w.shim_cargo, true), expected);
 }
+
+#[test]
+fn rebuild_graph_reads_real_cargo_workspace_metadata() {
+    let out = Command::new("cargo")
+        .args([
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline",
+            "--manifest-path",
+        ])
+        .arg(Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/sample-ws/Cargo.toml"))
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let graph =
+        buildq::pool::RebuildGraph::from_metadata(&serde_json::from_slice(&out.stdout).unwrap())
+            .unwrap();
+    let set = |name: &str| std::collections::BTreeSet::from([name.to_string()]);
+    assert_eq!(graph.cost(&set("sample-core")), 3);
+    assert_eq!(graph.cost(&set("sample-util")), 2);
+    assert_eq!(graph.cost(&set("sample-app")), 1);
+}

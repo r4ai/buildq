@@ -799,6 +799,104 @@ mod tests {
         assert_eq!(pool.member_ids().len(), 2);
     }
 
+    fn diamond_graph() -> RebuildGraph {
+        // Renamed, optional build dependencies and an unrelated registry edge;
+        // dependency names deliberately differ from workspace package names.
+        let package = |name: &str, deps: &[&str]| {
+            serde_json::json!({
+                "id": name, "name": name, "manifest_path": format!("/ws/{name}/Cargo.toml"),
+                "dependencies": deps.iter().map(|dep| serde_json::json!({
+                    "name": "alias", "rename": "renamed", "path": format!("/ws/{dep}"),
+                    "kind": "build", "optional": true, "target": "cfg(unix)"
+                })).chain(std::iter::once(serde_json::json!({"name": "core", "path": null}))).collect::<Vec<_>>()
+            })
+        };
+        let metadata = serde_json::json!({
+            "workspace_members": ["core", "left", "right", "app", "leaf"],
+            "packages": [package("core", &[]), package("left", &["core"]),
+                package("right", &["core"]), package("app", &["left", "right"]),
+                package("leaf", &[]), package("external", &["core"])]
+        });
+        RebuildGraph::from_metadata(&metadata).unwrap()
+    }
+
+    #[test]
+    fn rebuild_cost_counts_transitive_union_and_unknown_packages() {
+        let graph = diamond_graph();
+        let set = |names: &[&str]| names.iter().map(|s| s.to_string()).collect();
+        assert_eq!(graph.cost(&set(&["core"])), 4);
+        assert_eq!(graph.cost(&set(&["left", "right"])), 3);
+        assert_eq!(graph.cost(&set(&["core", "left", "app"])), 4);
+        assert_eq!(graph.cost(&set(&["leaf", "deleted"])), 2);
+        assert_eq!(graph.cost(&BTreeSet::new()), 0);
+        assert_eq!(RebuildGraph::default().cost(&set(&["core", "app"])), 2);
+        assert!(RebuildGraph::from_metadata(&serde_json::json!({})).is_none());
+        // Dev-dependency cycles are legal; traversal must terminate.
+        let mut cyclic = graph;
+        cyclic
+            .dependents
+            .entry("app".into())
+            .or_default()
+            .insert("core".into());
+        assert_eq!(cyclic.cost(&set(&["core"])), 4);
+    }
+
+    #[test]
+    fn lease_prefers_two_leaf_changes_over_one_core_change() {
+        let dir = tempfile::tempdir().unwrap();
+        let pool = Pool::open(dir.path().join("p"), PoolInfo::default()).unwrap();
+        let wt = wt("a");
+        let current = m(&[
+            ("crates/core/src/lib.rs", "1"),
+            ("crates/app/src/main.rs", "1"),
+            ("crates/leaf/src/main.rs", "1"),
+        ]);
+        for (id, files) in [
+            m(&[
+                ("crates/core/src/lib.rs", "0"),
+                ("crates/app/src/main.rs", "1"),
+                ("crates/leaf/src/main.rs", "1"),
+            ]),
+            m(&[
+                ("crates/core/src/lib.rs", "1"),
+                ("crates/app/src/main.rs", "0"),
+                ("crates/leaf/src/main.rs", "0"),
+            ]),
+        ]
+        .iter()
+        .enumerate()
+        {
+            fs::create_dir_all(pool.dir.join(format!("m{id}"))).unwrap();
+            write_manifest(&pool.manifest_path(id), files).unwrap();
+            write_json(
+                &pool.meta_path(id),
+                &MemberMeta {
+                    source_root: Some(wt.key()),
+                    last_worktree: Some(wt.key()),
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+        }
+        let lease = pool
+            .lease(
+                &wt,
+                &current,
+                &diamond_graph(),
+                &mut |f, _| owner(f),
+                2,
+                &mut |_| panic!("must reuse free member"),
+                Duration::from_millis(5),
+                &mut || {},
+            )
+            .unwrap();
+        assert_eq!(lease.id, 1);
+        assert_eq!(
+            lease.plan.packages,
+            BTreeSet::from(["app".into(), "leaf".into()])
+        );
+    }
+
     #[test]
     fn rebuild_graph_counts_transitive_union_and_handles_cycles_and_unknowns() {
         use serde_json::json;
