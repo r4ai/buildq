@@ -222,6 +222,25 @@ remote `target/` survives synchronization. Use `rsync_exclude = ["/secrets/",
 "/cache/"]` for other private or remote build paths. Exclude sensitive ignored
 files explicitly before using this mode. SSH options also apply to rsync.
 
+
+To run the opt-in Linux SSH integration test, use an existing passwordless SSH
+host with Git, Cargo/Rust, scp, and buildq on its noninteractive PATH. Its host key
+must already be trusted. The test creates and removes its own remote directory
+under `/tmp`, sends only a temporary fixture repository, and uses the host's
+normal buildq queue and pool. It never changes SSH configuration.
+
+```sh
+ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=5 localhost true
+BUILDQ_SSH_TEST_HOST=localhost cargo test --test remote_ssh -- --nocapture
+```
+
+Run the test against localhost only if the first command already succeeds.
+Set `BUILDQ_SSH_TEST_BUILDQ` if the remote buildq needs an absolute path. With no
+`BUILDQ_SSH_TEST_HOST`, the test reports a skip and returns without connecting.
+It checks dirty-source sync, two incremental Cargo builds, artifact fetch, exit
+codes, `status --hosts`, and Ctrl+C through a real PTY. The build uses an offline,
+dependency-free fixture and requires an installed default Rust toolchain.
+
 ## How It Works
 
 ```mermaid
