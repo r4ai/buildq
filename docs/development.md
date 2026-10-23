@@ -65,6 +65,45 @@ cargo test --test e2e -- --ignored --nocapture
 
 ---
 
+## Python Benchmark Tools
+
+`scripts/` is a standalone Python project managed by uv.
+`.python-version` pins Python 3.12.14; `uv.lock` pins dependency versions and distribution hashes.
+Run these commands from the repository root.
+
+```sh
+uv sync --project scripts --locked
+uv run --project scripts --locked python scripts/stress-bevy.py \
+  --root /tmp/buildq-bevy-new \
+  --buildq "$PWD/target/release/buildq"
+uv run --project scripts --locked python scripts/plot-bevy-benchmark.py
+```
+
+- Activate the Rust toolchain and build buildq with `cargo build --release` first
+- Use a new measurement directory; the Linux benchmark needs approximately 12 GiB of free space
+- Japanese figures use the system Noto Sans CJK font
+  - Select another installation path with `--font /path/to/NotoSansCJK-Regular.ttc`
+- Request optional PNG previews with `--preview-dir /tmp/buildq-figures`
+
+Each CLI handles arguments; shared implementation uses normal imports.
+
+| Module | Responsibility |
+| :--- | :--- |
+| `buildq_bench/measurement.py` | Subprocess measurements, resource sampling, JSONL output |
+| `buildq_bench/scenarios.py` | Worktree, cache, and concurrency scenarios |
+| `buildq_bench/plotting.py` | Bilingual comparison figures from recorded data |
+
+```sh
+uv run --directory scripts --locked pytest
+uv run --directory scripts --locked ruff check .
+uv run --directory scripts --locked ruff format --check .
+```
+
+After changing dependencies, run `uv lock --project scripts` and commit `pyproject.toml` and `uv.lock` together.
+Do not commit `.venv`, tool caches, or `__pycache__`.
+
+---
+
 ## Multi-Agent Sandbox Recipe
 
 When running multiple coding agents (e.g., Codex CLI, Claude Code) in restricted sandboxes on the same machine, every agent must share access to `$BUILDQ_DIR` and `$BUILDQ_CACHE`.
