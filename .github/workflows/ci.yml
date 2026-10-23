@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_call:
   schedule:
@@ -61,6 +62,34 @@ jobs:
         if: runner.os != 'Windows'
         run: cargo test --locked --all-features --test rsync -- --ignored --nocapture
 
+  coverage:
+    name: Coverage (Linux)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install LLVM coverage tools for the pinned toolchain
+        run: rustup component add llvm-tools-preview
+      - name: Install cargo-llvm-cov
+        run: cargo install --locked cargo-llvm-cov --version 0.9.1
+      - name: Run unit and integration tests with coverage
+        run: cargo llvm-cov --locked --all-features --no-report
+      - name: Generate coverage reports
+        run: |
+          mkdir -p target/llvm-cov
+          cargo llvm-cov report --lcov --output-path target/llvm-cov/lcov.info
+          cargo llvm-cov report --html --output-dir target/llvm-cov
+          cargo llvm-cov report
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-linux
+          path: target/llvm-cov/
+          if-no-files-found: error
+          retention-days: 14
+
   msrv:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -107,7 +136,7 @@ jobs:
   ci:
     name: CI passed
     if: always()
-    needs: [quality, test, msrv, dependencies, workflows]
+    needs: [quality, test, coverage, msrv, dependencies, workflows]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
@@ -115,4 +144,4 @@ jobs:
         env:
           RESULTS: ${{ join(needs.*.result, ',') }}
         run: |
-          test "$RESULTS" = success,success,success,success,success
+          test "$RESULTS" = success,success,success,success,success,success
