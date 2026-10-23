@@ -24,6 +24,7 @@ src/
   exec.rs      # プロセス起動・シグナル転送・Windows Job Object 制御
   lock.rs      # クロスプラットフォーム OS ファイルロック (LockFileEx / flock)
   history.rs   # ジョブ実行履歴の記録と読み出し
+  external.rs  # プール外で使われた明示 target ディレクトリの記録
   util.rs      # バイト表記・時間フォーマット・パス正規化ユーティリティ
 tests/
   cli.rs       # 結合テスト (並列数制限・優先度・shim・GC・リモートプロトコル)
@@ -129,6 +130,7 @@ buildq shim install cargo --into C:\bq\bin
 | `BUILDQ_SLOTS` | `slots`（`build` クラスの最大同時実行数）を上書き |
 | `BUILDQ_BUDGET` | ディスク予算を上書き（例: `45G`） |
 | `BUILDQ_POOL` | `0` を指定するとターゲットプールを無効化（キューのみ使用） |
+| `BUILDQ_POOL_EXPLICIT` | `1` を指定すると worktree 内の明示 target ディレクトリもプールする<br>（`[cache] pool_explicit` と同じ） |
 | `BUILDQ_GC` | `0` を指定するとジョブ終了後の自動バックグラウンド GC を無効化 |
 | `BUILDQ_PRIORITY` | `cargo` shim 経由での実行時のデフォルト優先度 |
 | `BUILDQ_LABEL` | `status` や `history` に表示する任意のジョブラベル |

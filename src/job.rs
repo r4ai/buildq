@@ -133,10 +133,20 @@ pub fn acquire(cfg: &Config, opts: &Opts, cmd: &str) -> Result<SlotGuard, String
     Ok(g)
 }
 
-fn record(cfg: &Config, g: &SlotGuard, exit: i32, lease: Option<&Lease>, pool_name: Option<&str>) {
+fn record(
+    cfg: &Config,
+    g: &SlotGuard,
+    exit: i32,
+    lease: Option<&Lease>,
+    pool_name: Option<&str>,
+    external: Option<&Path>,
+) {
     let mut target = g.info.target.clone();
     if let (Some(l), Some(p)) = (lease, pool_name) {
         target = Some(format!("{p}/{}", l.name()));
+    }
+    if let Some(dir) = external {
+        crate::external::record(cfg, dir, &g.info.cwd);
     }
     history::append(
         &cfg.queue_dir,
@@ -150,6 +160,7 @@ fn record(cfg: &Config, g: &SlotGuard, exit: i32, lease: Option<&Lease>, pool_na
             ended_ms: now_ms(),
             exit,
             target,
+            external: external.map(|d| d.display().to_string()),
             invalidated: lease.map(|l| l.plan.packages.len()).unwrap_or(0),
             fresh_member: lease.map(|l| l.fresh_member).unwrap_or(false),
             label: g.info.label.clone(),
@@ -173,7 +184,7 @@ pub fn run_command(cfg: &Config, opts: &Opts, argv: &[String]) -> Result<i32, St
     let g = acquire(cfg, opts, &display_cmd(argv))?;
     cmd.env("BUILDQ_HELD", held_with(&opts.class));
     let code = exec::run(&mut cmd, cfg.kill_tree).map_err(|e| format!("{}: {e}", argv[0]));
-    record(cfg, &g, *code.as_ref().unwrap_or(&127), None, None);
+    record(cfg, &g, *code.as_ref().unwrap_or(&127), None, None, None);
     code
 }
 
@@ -348,13 +359,80 @@ struct PoolCtx {
     pool: Pool,
     name: String,
     manifest: pool::Manifest,
+    /// An explicit target dir inside the worktree pooled under
+    /// `cache.pool_explicit`: (requested dir, its path relative to the worktree).
+    explicit: Option<(PathBuf, String)>,
 }
 
-fn open_pool(cfg: &Config, real: &Path, parsed: &Parsed) -> Option<PoolCtx> {
-    if !cfg.pool || cargo::target_dir_choice(parsed) == TargetDirChoice::Explicit {
-        return None;
+/// The absolute dir a job's explicit target-dir choice points at, if any:
+/// `--target-dir`/`CARGO_TARGET_DIR`, or an absolute `build.target-dir`
+/// (relative ones are re-rooted into the member anyway).
+fn explicit_target_dir(choice: &TargetDirChoice, here: &Path) -> Option<PathBuf> {
+    let value = match choice {
+        TargetDirChoice::Explicit { value, .. } if !value.is_empty() => value,
+        TargetDirChoice::Config(_, value) if Path::new(value).is_absolute() => value,
+        _ => return None,
+    };
+    Some(crate::util::resolve(here, Path::new(value)))
+}
+
+/// `dir` relative to the worktree root (forward slashes), if it lies inside.
+fn inside_worktree(dir: &Path, wt: &Worktree) -> Option<String> {
+    let root = crate::util::canonical(&wt.root);
+    let rel = dir.strip_prefix(&root).ok()?;
+    Some(rel.to_string_lossy().replace('\\', "/"))
+}
+
+/// The pool to build in, or else the explicit target dir the job uses
+/// outside the pool (which is then announced and recorded).
+fn open_pool(cfg: &Config, real: &Path, parsed: &Parsed) -> (Option<PoolCtx>, Option<PathBuf>) {
+    if !cfg.pool {
+        return (None, None);
     }
-    let wt = git::discover(&cwd())?;
+    let here = cwd();
+    let explicit = explicit_target_dir(&cargo::target_dir_choice(parsed), &here);
+    let wt = git::discover(&here);
+    let explicit = match (explicit, &wt) {
+        (None, _) => None,
+        (Some(dir), Some(wt)) if cfg.pool_explicit => match inside_worktree(&dir, wt) {
+            Some(rel) => Some((dir, rel)),
+            None => return (None, Some(note_unpooled(dir, false))),
+        },
+        (Some(dir), wt) => {
+            let hint = wt
+                .as_ref()
+                .is_some_and(|w| inside_worktree(&dir, w).is_some());
+            return (None, Some(note_unpooled(dir, hint)));
+        }
+    };
+    let ctx = wt.and_then(|wt| pool_ctx(real, parsed, cfg, wt, explicit.clone()));
+    match (ctx, explicit) {
+        (Some(c), _) => (Some(c), None),
+        (None, explicit) => (None, explicit.map(|(dir, _)| dir)),
+    }
+}
+
+/// One line on stderr: this job's target dir is outside the pool and the budget.
+fn note_unpooled(dir: PathBuf, hint: bool) -> PathBuf {
+    note(&format!(
+        "explicit target dir {}: not pooled, outside the disk budget{}",
+        dir.display(),
+        if hint {
+            " (set [cache] pool_explicit = true to pool it)"
+        } else {
+            ""
+        }
+    ));
+    dir
+}
+
+fn pool_ctx(
+    real: &Path,
+    parsed: &Parsed,
+    cfg: &Config,
+    wt: Worktree,
+    explicit: Option<(PathBuf, String)>,
+) -> Option<PoolCtx> {
     let tc = probe_toolchain(real, parsed.toolchain.as_deref())?;
     let dir = pool::pool_dir(&cfg.cache_dir, &wt, &tc.id);
     let name = dir.file_name()?.to_string_lossy().to_string();
@@ -375,6 +453,7 @@ fn open_pool(cfg: &Config, real: &Path, parsed: &Parsed) -> Option<PoolCtx> {
         wt,
         pool,
         name,
+        explicit,
     })
 }
 
@@ -520,14 +599,14 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     trace("parsed");
     let mut g = acquire(cfg, opts, &format!("cargo {}", display_cmd(args)))?;
     trace("slot acquired");
-    let mut ctx = open_pool(cfg, &real, &parsed);
+    let (mut ctx, external) = open_pool(cfg, &real, &parsed);
     trace("pool opened (git + toolchain + manifest)");
     let mut lease = match ctx.as_mut() {
         Some(c) => Some(lease_member(cfg, c)?),
         None => None,
     };
     trace("member leased");
-    let (cmd_args, target) = cargo_args(args, &parsed, lease.as_ref());
+    let (cmd_args, target) = cargo_args(args, &parsed, lease.as_ref(), ctx.as_ref());
     if let (Some(l), Some(c)) = (&lease, &ctx) {
         g.set_target(&format!("{}/{}", c.name, l.name()));
     }
@@ -541,8 +620,10 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     if let (Some(c), Some(l)) = (ctx.as_mut(), lease.as_mut()) {
         after_job(c, l, started);
         trace("after-job check");
-        if cfg.mirror_bins && code == 0 {
-            mirror_bins(&l.target_dir, &c.wt.root, started);
+        if code == 0
+            && let Some(dest) = mirror_dest(cfg, c, &parsed)
+        {
+            mirror_bins(target.as_deref().unwrap_or(&l.target_dir), &dest, started);
         }
     }
     record(
@@ -551,6 +632,7 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
         code,
         lease.as_ref(),
         ctx.as_ref().map(|c| c.name.as_str()),
+        external.as_deref(),
     );
     drop(lease);
     drop(g);
@@ -568,41 +650,75 @@ fn opt_absent(p: &Parsed, name: &str) -> bool {
 }
 
 /// Arguments for the real cargo plus the CARGO_TARGET_DIR to set.
+/// A `build.target-dir` from `--config`, or an explicit target dir pooled
+/// under `cache.pool_explicit`, is re-rooted into `<member>/sub/`.
+/// CARGO_TARGET_DIR outranks `--config` in cargo, so it carries the
+/// re-rooted dir too.
 fn cargo_args(
     args: &[String],
     parsed: &Parsed,
     lease: Option<&Lease>,
+    ctx: Option<&PoolCtx>,
 ) -> (Vec<String>, Option<PathBuf>) {
     let Some(l) = lease else {
         return (args.to_vec(), None);
     };
-    if let TargetDirChoice::Config(idx, value) = cargo::target_dir_choice(parsed)
-        && let Some(new) = cargo::reroot_target_dir(&value, &l.target_dir)
-    {
-        let mut a = parsed.args.clone();
-        let v = format!(
-            "build.target-dir={:?}",
-            new.display().to_string().replace('\\', "/")
-        );
-        a[idx] = if a[idx].starts_with("--config=") {
-            format!("--config={v}")
-        } else {
-            v
-        };
-        return (with_toolchain(parsed, a), Some(l.target_dir.clone()));
-    }
-    (args.to_vec(), Some(l.target_dir.clone()))
+    let choice = cargo::target_dir_choice(parsed);
+    let explicit = ctx.and_then(|c| c.explicit.as_ref());
+    let new = match (&choice, explicit) {
+        (_, Some((_, rel))) => cargo::reroot_target_dir(rel, &l.target_dir),
+        (TargetDirChoice::Config(_, value), None) => cargo::reroot_target_dir(value, &l.target_dir),
+        _ => None,
+    };
+    let Some(new) = new else {
+        return (args.to_vec(), Some(l.target_dir.clone()));
+    };
+    let shown = new.display().to_string().replace('\\', "/");
+    let rewrite = match choice {
+        TargetDirChoice::Config(idx, _) => {
+            Some((idx, "--config=", format!("build.target-dir={shown:?}")))
+        }
+        TargetDirChoice::Explicit { arg: Some(idx), .. } => Some((idx, "--target-dir=", shown)),
+        _ => None,
+    };
+    let Some((idx, prefix, v)) = rewrite else {
+        return (args.to_vec(), Some(new));
+    };
+    let mut a = parsed.args.clone();
+    a[idx] = if a[idx].starts_with(prefix) {
+        format!("{prefix}{v}")
+    } else {
+        v
+    };
+    (with_toolchain(parsed, a), Some(new))
 }
 
-/// Copies new top-level executables of a pooled build into the worktree's
-/// own `target/<profile>/`, for scripts that call `target/debug/x.exe`.
-fn mirror_bins(member: &Path, wt_root: &Path, since_ms: u64) {
-    for profile in fs::read_dir(member).into_iter().flatten().flatten() {
+/// Where top-level binaries of a successful pooled build are copied back
+/// to: the target dir cargo would have used without buildq. Always for an
+/// explicit target dir pooled under `cache.pool_explicit` (the job named
+/// that path), otherwise only with `cargo.mirror_bins`.
+fn mirror_dest(cfg: &Config, ctx: &PoolCtx, parsed: &Parsed) -> Option<PathBuf> {
+    if let Some((requested, _)) = &ctx.explicit {
+        return Some(requested.clone());
+    }
+    if !cfg.mirror_bins {
+        return None;
+    }
+    Some(match cargo::target_dir_choice(parsed) {
+        TargetDirChoice::Config(_, v) => crate::util::resolve(&cwd(), Path::new(&v)),
+        _ => ctx.wt.root.join("target"),
+    })
+}
+
+/// Copies new top-level executables of a pooled build (`<src>/<profile>/`)
+/// into `<dest>/<profile>/`, for scripts that call `target/debug/x.exe`.
+fn mirror_bins(src: &Path, dest: &Path, since_ms: u64) {
+    for profile in fs::read_dir(src).into_iter().flatten().flatten() {
         let pdir = profile.path();
         if !pdir.join(".fingerprint").is_dir() {
             continue;
         }
-        let dest = wt_root.join("target").join(profile.file_name());
+        let dest = dest.join(profile.file_name());
         for f in fs::read_dir(&pdir).into_iter().flatten().flatten() {
             let p = f.path();
             let Ok(md) = f.metadata() else { continue };
@@ -793,7 +909,7 @@ fn cargo_run(
         .or_else(|| parsed.opt(&["--example"]));
 
     let mut g = acquire(cfg, opts, &format!("cargo {}", display_cmd(args)))?;
-    let mut ctx = open_pool(cfg, real, &build_parsed);
+    let (mut ctx, external) = open_pool(cfg, real, &build_parsed);
     let mut lease = match ctx.as_mut() {
         Some(c) => Some(lease_member(cfg, c)?),
         None => None,
@@ -802,6 +918,7 @@ fn cargo_run(
         &with_toolchain(parsed, build),
         &build_parsed,
         lease.as_ref(),
+        ctx.as_ref(),
     );
     if let (Some(l), Some(c)) = (&lease, &ctx) {
         g.set_target(&format!("{}/{}", c.name, l.name()));
@@ -873,6 +990,7 @@ fn cargo_run(
         code,
         lease.as_ref(),
         ctx.as_ref().map(|c| c.name.as_str()),
+        external.as_deref(),
     );
     drop(lease);
     drop(g);
@@ -915,7 +1033,7 @@ fn cargo_run(
     let code =
         exec::run(&mut cmd, cfg.kill_tree).map_err(|e| format!("{}: {e}", local.display()))?;
     if let Some(rg) = &rg {
-        record(cfg, rg, code, None, None);
+        record(cfg, rg, code, None, None, None);
     }
     Ok(code)
 }

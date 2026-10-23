@@ -286,10 +286,11 @@ pub fn split_unit(name: &str) -> Option<(&str, &str)> {
     (hash.len() == 16 && hash.bytes().all(|b| b.is_ascii_hexdigit())).then_some((pkg, hash))
 }
 
-/// All `.fingerprint` directories up to three levels below a target dir.
+/// All `.fingerprint` directories up to three levels below a target dir, and
+/// below each re-rooted target dir in `<member>/sub/<name>`.
 pub fn fingerprint_dirs(target_dir: &Path) -> Vec<PathBuf> {
     let mut out = Vec::new();
-    fn rec(dir: &Path, depth: usize, out: &mut Vec<PathBuf>) {
+    fn rec(dir: &Path, depth: usize, top: bool, out: &mut Vec<PathBuf>) {
         let Ok(rd) = fs::read_dir(dir) else { return };
         for e in rd.flatten() {
             if !e.file_type().map(|t| t.is_dir()).unwrap_or(false) {
@@ -299,14 +300,20 @@ pub fn fingerprint_dirs(target_dir: &Path) -> Vec<PathBuf> {
             let name = name.to_string_lossy();
             if name == ".fingerprint" {
                 out.push(e.path());
+            } else if top && name == "sub" {
+                for s in fs::read_dir(e.path()).into_iter().flatten().flatten() {
+                    if s.file_type().map(|t| t.is_dir()).unwrap_or(false) {
+                        rec(&s.path(), 2, false, out);
+                    }
+                }
             } else if depth > 0
                 && !matches!(name.as_ref(), "deps" | "build" | "incremental" | "examples")
             {
-                rec(&e.path(), depth - 1, out);
+                rec(&e.path(), depth - 1, false, out);
             }
         }
     }
-    rec(target_dir, 2, &mut out);
+    rec(target_dir, 2, true, &mut out);
     out
 }
 
@@ -520,6 +527,26 @@ mod tests {
             Some(("open-racing-app", "0123456789abcdef"))
         );
         assert_eq!(split_unit("foo-123"), None);
+    }
+
+    #[test]
+    fn fingerprints_include_rerooted_sub_dirs() {
+        let dir = tempfile::tempdir().unwrap();
+        let t = dir.path();
+        let want = [
+            t.join("debug/.fingerprint"),
+            t.join("x86_64-unknown-linux-gnu/debug/.fingerprint"),
+            t.join("sub/native/release/.fingerprint"),
+            t.join("sub/base/aarch64-apple-darwin/debug/.fingerprint"),
+        ];
+        for d in &want {
+            fs::create_dir_all(d).unwrap();
+        }
+        let mut got = fingerprint_dirs(t);
+        got.sort();
+        let mut want = want.to_vec();
+        want.sort();
+        assert_eq!(got, want);
     }
 
     #[test]

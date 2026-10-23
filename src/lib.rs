@@ -4,6 +4,7 @@
 pub mod cargo;
 pub mod config;
 pub mod exec;
+pub mod external;
 pub mod gc;
 pub mod git;
 pub mod history;

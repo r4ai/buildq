@@ -40,6 +40,9 @@ pub struct CacheFile {
     pub dir: Option<PathBuf>,
     /// Share target dirs between worktrees (default true).
     pub pool: Option<bool>,
+    /// Also pool jobs whose explicit `--target-dir`/`CARGO_TARGET_DIR` lies
+    /// inside the worktree (default false: such jobs build there, outside the budget).
+    pub pool_explicit: Option<bool>,
     /// Members per pool (default = slots + 1).
     pub max_members: Option<usize>,
     /// Upper bound for everything under the pool root, e.g. "60G".
@@ -114,6 +117,7 @@ pub struct Config {
     pub poll_ms: u64,
     pub kill_tree: bool,
     pub pool: bool,
+    pub pool_explicit: bool,
     pub max_members: usize,
     pub budget: u64,
     pub min_free: u64,
@@ -220,6 +224,9 @@ impl Config {
             poll_ms: f.poll_ms.unwrap_or(250).max(10),
             kill_tree: f.kill_tree.unwrap_or(true),
             pool: env_bool("BUILDQ_POOL").or(f.cache.pool).unwrap_or(true),
+            pool_explicit: env_bool("BUILDQ_POOL_EXPLICIT")
+                .or(f.cache.pool_explicit)
+                .unwrap_or(false),
             max_members: f.cache.max_members.unwrap_or(slots + 1).max(slots),
             budget,
             min_free,
@@ -293,7 +300,16 @@ pub fn describe(cfg: &Config) -> String {
     p(
         &mut s,
         "pool",
-        format!("{} (max {} members)", cfg.pool, cfg.max_members),
+        format!(
+            "{} (max {} members{})",
+            cfg.pool,
+            cfg.max_members,
+            if cfg.pool_explicit {
+                ", explicit target dirs in the worktree too"
+            } else {
+                ""
+            }
+        ),
     );
     p(
         &mut s,

@@ -202,6 +202,18 @@ GC prunes artifacts in five stages from cheapest to most aggressive, skipping bu
 4. **Idle run directories**: removes `runs/r<i>` directories unused for 2 days
 5. **LRU member eviction**: evicts complete idle pool members in least-recently-used order until under budget
 
+### Explicit Target Dirs
+
+A job that sets `--target-dir` or `CARGO_TARGET_DIR` itself (e.g. an agent building an A/B baseline) bypasses the pool by default:
+
+- buildq prints a one-line notice (`explicit target dir ...: not pooled, outside the disk budget`)
+- The dir is recorded in `<cache>/external.json` and in the job's history entry
+- `buildq cache ls` and `buildq gc` report its size and warn when pool + explicit dirs exceed the budget
+  - GC never deletes these dirs: the job chose the path
+- With `[cache] pool_explicit = true`, an explicit dir **inside the worktree** is pooled instead
+  - Re-rooted into the member as `m<i>/sub/<relative path>` and counted in the budget
+  - Fresh top-level binaries are copied back to the requested dir
+
 ---
 
 ## 5. Remote Execution Protocol (SSH)

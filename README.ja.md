@@ -152,6 +152,7 @@ run_slots = 2            # `cargo run` のアプリ最大同時実行数 (デフ
 max_members = 3          # リポジトリ×ツールチェインあたりの最大 target/ 数 (デフォルト: slots + 1)
 budget = "45G"           # BUILDQ_CACHE 全体の最大ディスク使用量 (デフォルト: "60G")
 min_free = "25G"         # ドライブ上に最低限残す空き容量 (デフォルト: "20G")
+# pool_explicit = true   # worktree 内を指す --target-dir / CARGO_TARGET_DIR もプールする (デフォルト: false)
 
 [cargo]
 rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を無効化 ("none" | "keep" | "/path")
