@@ -259,6 +259,7 @@ fn main() -> ExitCode {
             if json {
                 println!("{}", serde_json::to_string_pretty(&r).unwrap());
             } else if !auto {
+                println!("accounting: {}", r.accounting.name());
                 if let Some(s) = &r.skipped {
                     println!("skipped: {s}");
                 }

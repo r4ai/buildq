@@ -15,17 +15,17 @@
 //! Explicit target dirs that jobs used outside the pool (`external.rs`) are
 //! reported next to the budget but never pruned.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
-use crate::config::Config;
+use crate::config::{CacheAccounting, Config};
 use crate::external::{self, ExternalDir};
 use crate::lock::{self, LockFile};
 use crate::pool::{self, MemberMeta, PoolInfo};
-use crate::util::{self, dir_size, human_bytes, newest_mtime, now_ms, read_json, write_json};
+use crate::util::{self, human_bytes, newest_mtime, now_ms, read_json, write_json};
 
 const DAY_MS: u64 = 86_400_000;
 /// Estimates are shared by jobs and inspection processes, not process-local.
@@ -79,6 +79,7 @@ pub struct Usage {
     pub trash_bytes: u64,
     pub budget: u64,
     pub effective_budget: u64,
+    pub accounting: CacheAccounting,
     pub over_budget: bool,
     pub over_budget_bytes: u64,
     pub over_budget_reasons: Vec<String>,
@@ -131,11 +132,14 @@ impl Usage {
 /// Measure at most once per TTL while the caller owns the member lease.
 /// This also seeds the first size estimate after a new member's build.
 pub fn completed_member_warning(cfg: &Config, dir: &Path, meta: &mut MemberMeta) -> Option<String> {
-    if (meta.size_ms == 0 || now_ms().saturating_sub(meta.size_ms) >= SIZE_CACHE_MS)
-        && let Ok(size) = util::path_size(dir)
+    if (meta.size_accounting != Some(cfg.accounting)
+        || meta.size_ms == 0
+        || now_ms().saturating_sub(meta.size_ms) >= SIZE_CACHE_MS)
+        && let Ok(size) = util::size_for(dir, cfg.accounting)
     {
         meta.size_bytes = size;
         meta.size_ms = now_ms();
+        meta.size_accounting = Some(cfg.accounting);
     }
     oversized_member_warning(dir, meta.size_bytes, cfg.budget)
 }
@@ -151,6 +155,16 @@ fn oversized_member_warning(dir: &Path, size: u64, budget: u64) -> Option<String
             human_bytes(budget)
         )
     })
+}
+
+fn trash_estimates_path(trash: &Path, accounting: CacheAccounting) -> PathBuf {
+    trash.with_extension(format!("{}.sizes.json", accounting.name()))
+}
+
+fn trash_estimates(trash: &Path, accounting: CacheAccounting) -> BTreeMap<PathBuf, u64> {
+    read_json(&trash_estimates_path(trash, accounting))
+        .or_else(|| read_json(&trash.with_extension("sizes.json")))
+        .unwrap_or_default()
 }
 
 pub fn runs_dir(cfg: &Config) -> PathBuf {
@@ -208,12 +222,14 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
                 let busy = _member_lock.is_none();
                 let mut meta = read_json::<MemberMeta>(&meta_path).unwrap_or_default();
                 if (refresh
+                    || meta.size_accounting != Some(cfg.accounting)
                     || meta.size_ms == 0
                     || (!busy && now_ms().saturating_sub(meta.size_ms) >= SIZE_CACHE_MS))
-                    && let Ok(size) = util::path_size(&mdir)
+                    && let Ok(size) = util::size_for(&mdir, cfg.accounting)
                 {
                     meta.size_bytes = size;
                     meta.size_ms = now_ms();
+                    meta.size_accounting = Some(cfg.accounting);
                     // Busy sizes are transient estimates; never replace the
                     // lease holder's metadata while it is updating the member.
                     if !busy {
@@ -248,20 +264,19 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
             }
             let busy = lock::is_held(&dir.with_extension("lock"));
             runs.push(RunEntry {
-                size: dir_size(&dir),
+                size: util::dir_size_for(&dir, cfg.accounting),
                 last_used_ms: newest_mtime(&dir.with_extension("json")),
                 busy,
                 dir,
             });
         }
     }
-    let estimates: BTreeMap<PathBuf, u64> =
-        read_json(&cfg.trash_dir().with_extension("sizes.json")).unwrap_or_default();
+    let estimates = trash_estimates(&cfg.trash_dir(), cfg.accounting);
     let trash_bytes = match fs::read_dir(cfg.trash_dir()) {
         Ok(entries) => entries
             .flatten()
             .map(|e| {
-                util::path_size(&e.path())
+                util::size_for(&e.path(), cfg.accounting)
                     .unwrap_or_else(|_| estimates.get(&e.path()).copied().unwrap_or(0))
             })
             .sum::<u64>(),
@@ -282,6 +297,7 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
         total,
         trash_bytes,
         budget: cfg.budget,
+        accounting: cfg.accounting,
         free_disk,
         external: Vec::new(),
         external_total: 0,
@@ -312,6 +328,7 @@ pub struct Report {
     pub before: u64,
     pub after: u64,
     pub effective_budget: u64,
+    pub accounting: CacheAccounting,
     pub over_budget: bool,
     pub over_budget_bytes: u64,
     pub over_budget_reasons: Vec<String>,
@@ -320,12 +337,15 @@ pub struct Report {
     pub external: u64,
     pub warnings: Vec<String>,
     pub failed_deletions: usize,
+    #[serde(skip)]
+    planned_removals: BTreeSet<PathBuf>,
 }
 
 impl Report {
     fn observe(&mut self, usage: &Usage) {
         self.after = usage.total;
         self.effective_budget = usage.effective_budget;
+        self.accounting = usage.accounting;
         self.over_budget = usage.over_budget;
         self.over_budget_bytes = usage.over_budget_bytes;
         self.over_budget_reasons = usage.over_budget_reasons.clone();
@@ -335,7 +355,7 @@ impl Report {
     fn act(&mut self, what: String, bytes: u64) {
         self.freed += bytes;
         self.actions
-            .push(format!("{what} ({})", human_bytes(bytes)));
+            .push(format!("{what} (path footprint {})", human_bytes(bytes)));
     }
 }
 
@@ -351,6 +371,7 @@ fn reclaim(
     action: String,
 ) -> u64 {
     if dry {
+        report.planned_removals.insert(path.to_path_buf());
         report.act(action, bytes);
         return bytes;
     }
@@ -370,7 +391,7 @@ fn reclaim(
     let (freed, remaining) = match result {
         Ok(()) => (bytes, None),
         Err(error) => {
-            let measured = util::path_size(&error.path);
+            let measured = util::size_for(&error.path, report.accounting);
             let left = measured.as_ref().copied().unwrap_or(bytes);
             report.failed_deletions += 1;
             report.warnings.push(if measured.is_ok() {
@@ -385,8 +406,8 @@ fn reclaim(
         }
     };
     if !trash.as_os_str().is_empty() {
-        let metadata = trash.with_extension("sizes.json");
-        let mut estimates: BTreeMap<PathBuf, u64> = read_json(&metadata).unwrap_or_default();
+        let metadata = trash_estimates_path(trash, report.accounting);
+        let mut estimates = trash_estimates(trash, report.accounting);
         let mut changed = estimates.remove(path).is_some();
         if let Some((path, bytes)) = remaining
             && path.starts_with(trash)
@@ -405,7 +426,10 @@ fn reclaim(
 }
 
 pub fn gc(cfg: &Config, opts: &Options) -> Report {
-    let mut report = Report::default();
+    let mut report = Report {
+        accounting: cfg.accounting,
+        ..Default::default()
+    };
     let mut cfg = cfg.clone();
     if let Some(b) = opts.budget {
         cfg.budget = b;
@@ -452,9 +476,8 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     let trash = cfg.trash_dir();
     if let Ok(rd) = fs::read_dir(&trash) {
         for e in rd.flatten() {
-            let estimates: BTreeMap<PathBuf, u64> =
-                read_json(&trash.with_extension("sizes.json")).unwrap_or_default();
-            let size = util::path_size(&e.path())
+            let estimates = trash_estimates(&trash, cfg.accounting);
+            let size = util::size_for(&e.path(), cfg.accounting)
                 .unwrap_or_else(|_| estimates.get(&e.path()).copied().unwrap_or(0));
             reclaim(
                 &e.path(),
@@ -477,10 +500,14 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             let label = format!("{}/m{}", p.name, m.id);
             let freed = prune_member(&m.dir, &cfg, now, dry, &label, &mut report);
             pruned.insert(m.dir.clone(), freed);
-            if freed > 0 && !dry {
+            if !dry {
                 let mp = p.dir.join(format!("m{}.json", m.id));
                 let mut meta = read_json::<MemberMeta>(&mp).unwrap_or_else(|| m.meta.clone());
-                meta.size_bytes = meta.size_bytes.saturating_sub(freed);
+                if let Ok(size) = util::size_for(&m.dir, cfg.accounting) {
+                    meta.size_bytes = size;
+                    meta.size_ms = now_ms();
+                    meta.size_accounting = Some(cfg.accounting);
+                }
                 let _ = write_json(&mp, &meta);
             }
         }
@@ -517,7 +544,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             if !dir.is_dir() {
                 continue;
             }
-            let size = util::path_size(&dir)
+            let size = util::size_for(&dir, cfg.accounting)
                 .unwrap_or_else(|_| {
                     p.members
                         .iter()
@@ -704,7 +731,9 @@ pub fn prune_member(
     label: &str,
     report: &mut Report,
 ) -> u64 {
-    let mut freed = 0;
+    report.accounting = cfg.accounting;
+    let before = util::size_for(dir, cfg.accounting).ok();
+    let previous_freed = report.freed;
     // Incremental: `<profile>/incremental/<crate>-<hash>/s-<session>[.lock]`.
     for inc in find_named_dirs(dir, "incremental", 3) {
         let Ok(rd) = fs::read_dir(&inc) else { continue };
@@ -737,8 +766,8 @@ pub fn prune_member(
                     .collect()
             };
             for v in victims {
-                let size = dir_size(&v);
-                let removed = reclaim(
+                let size = util::dir_size_for(&v, cfg.accounting);
+                reclaim(
                     &v,
                     size,
                     dry,
@@ -750,7 +779,6 @@ pub fn prune_member(
                 if !dry && !v.exists() {
                     let _ = fs::remove_file(v.with_extension("lock"));
                 }
-                freed += removed;
             }
         }
     }
@@ -779,7 +807,7 @@ pub fn prune_member(
                 {
                     continue;
                 }
-                let size = remove_unit_logged(
+                remove_unit_logged(
                     &profile_dir,
                     &pkg,
                     hash,
@@ -787,23 +815,31 @@ pub fn prune_member(
                     report,
                     &format!("{label}: stale {pkg}-{hash} ({} old)", util::ago(*t)),
                 );
-                freed += size;
             }
         }
     }
+    let after = if dry {
+        util::size_excluding(dir, cfg.accounting, &report.planned_removals)
+    } else {
+        util::size_for(dir, cfg.accounting)
+    }
+    .ok();
+    let freed = before
+        .zip(after)
+        .map(|(before, after)| before.saturating_sub(after))
+        .unwrap_or(0);
+    report.freed = previous_freed.saturating_add(freed);
     freed
 }
 
 /// Removes one unit's fingerprint, build dir and deps files; returns bytes.
 pub fn remove_unit(profile_dir: &Path, pkg: &str, hash: &str, dry: bool) -> u64 {
-    remove_unit_logged(
-        profile_dir,
-        pkg,
-        hash,
-        dry,
-        &mut Report::default(),
-        "remove unit",
-    )
+    let mut report = Report::default();
+    let before = util::size_for(profile_dir, report.accounting).unwrap_or(0);
+    remove_unit_logged(profile_dir, pkg, hash, dry, &mut report, "remove unit");
+    let after = util::size_excluding(profile_dir, report.accounting, &report.planned_removals)
+        .unwrap_or(before);
+    before.saturating_sub(after)
 }
 
 fn remove_unit_logged(
@@ -823,7 +859,7 @@ fn remove_unit_logged(
         if d.exists() {
             size += reclaim(
                 &d,
-                dir_size(&d),
+                util::dir_size_for(&d, report.accounting),
                 dry,
                 Path::new(""),
                 false,
@@ -844,7 +880,7 @@ fn remove_unit_logged(
             let path = e.path();
             size += reclaim(
                 &path,
-                util::path_size(&path).unwrap_or(0),
+                util::size_for(&path, report.accounting).unwrap_or(0),
                 dry,
                 Path::new(""),
                 false,
@@ -924,11 +960,12 @@ pub fn render(u: &Usage) -> String {
         ));
     }
     s.push_str(&format!(
-        "total {} / budget {} (effective {}), free disk {}\n",
+        "total {} / budget {} (effective {}), free disk {} [{} accounting]\n",
         human_bytes(u.total),
         human_bytes(u.budget),
         human_bytes(u.effective_budget),
-        u.free_disk.map(human_bytes).unwrap_or_else(|| "?".into())
+        u.free_disk.map(human_bytes).unwrap_or_else(|| "?".into()),
+        u.accounting.name()
     ));
     if let Some(warning) = u.budget_warning() {
         s.push_str(&format!("warning: {warning}\n"));
@@ -973,6 +1010,8 @@ mod tests {
         );
         c.cache_dir = root.join("cache");
         c.min_free = 0;
+        // Tiny byte-level fixtures exercise the portable logical policy.
+        c.accounting = CacheAccounting::Logical;
         c
     }
 
@@ -1062,6 +1101,92 @@ mod tests {
         drop(leasing);
         gc(&c, &Options::default());
         assert!(!dir.exists());
+    }
+
+    #[test]
+    fn a_hardlinked_member_that_fits_the_budget_keeps_its_cache() {
+        let temp = tempfile::tempdir().unwrap();
+        let mut c = cfg(temp.path());
+        c.budget = 6000;
+        let dir = member(&c.cache_dir, "p", 0, now_ms(), 4096);
+        fs::hard_link(
+            dir.join("debug/deps/libbig-0000000000000001.rlib"),
+            dir.join("debug/app"),
+        )
+        .unwrap();
+        let report = gc(&c, &Options::default());
+        assert!(dir.exists(), "{report:?}");
+        assert_eq!(report.before, 4096);
+        assert_eq!(report.freed, 0);
+    }
+
+    #[test]
+    fn allocated_accounting_and_mode_changes_refresh_member_estimates() {
+        let temp = tempfile::tempdir().unwrap();
+        let mut c = cfg(temp.path());
+        let dir = member(&c.cache_dir, "p", 0, now_ms(), 4096);
+        fs::hard_link(
+            dir.join("debug/deps/libbig-0000000000000001.rlib"),
+            dir.join("debug/app"),
+        )
+        .unwrap();
+        scan(&c, true);
+        c.accounting = CacheAccounting::default();
+        assert_eq!(c.accounting, CacheAccounting::Allocated);
+        let allocated = util::size_for(&dir, c.accounting).unwrap();
+        c.budget = allocated + 1;
+        let usage = scan(&c, false);
+        assert_eq!(usage.total, allocated);
+        assert_eq!(
+            usage.pools[0].members[0].meta.size_accounting,
+            Some(CacheAccounting::Allocated)
+        );
+        let report = gc(&c, &Options::default());
+        assert_eq!(report.accounting, CacheAccounting::Allocated);
+        assert!(dir.exists());
+        assert_eq!(report.freed, 0);
+        c.accounting = CacheAccounting::Logical;
+        assert_eq!(scan(&c, false).total, 4096);
+    }
+
+    #[test]
+    fn pruning_one_hardlink_does_not_claim_the_retained_inodes_bytes() {
+        for accounting in [CacheAccounting::Logical, CacheAccounting::Allocated] {
+            let temp = tempfile::tempdir().unwrap();
+            let mut c = cfg(temp.path());
+            c.accounting = accounting;
+            let dir = member(&c.cache_dir, "p", 0, now_ms(), 4096);
+            let old = dir.join("debug/deps/libbig-0000000000000001.rlib");
+            fs::hard_link(&old, dir.join("debug/libbig.rlib")).unwrap();
+            file(
+                &dir.join("debug/deps/libbig-2222222222222222.rlib"),
+                4096,
+                0,
+            );
+            let fp = dir.join("debug/.fingerprint/big-0000000000000001");
+            file(&fp.join("lib-big"), 1, 30);
+            file(
+                &dir.join("debug/.fingerprint/big-2222222222222222/lib-big"),
+                1,
+                0,
+            );
+            let before = util::size_for(&dir, accounting).unwrap();
+            let removable = util::size_for(&fp, accounting).unwrap();
+            let preview = gc(
+                &c,
+                &Options {
+                    dry_run: true,
+                    ..Default::default()
+                },
+            );
+            assert_eq!(preview.freed, removable, "{preview:?}");
+            assert_eq!(preview.after, before - removable);
+            let actual = gc(&c, &Options::default());
+            assert_eq!((actual.freed, actual.after), (preview.freed, preview.after));
+            assert!(!old.exists());
+            assert!(dir.join("debug/libbig.rlib").exists());
+            assert_eq!(scan(&c, true).total, actual.after);
+        }
     }
 
     #[test]

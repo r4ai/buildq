@@ -151,9 +151,10 @@ fn render(
     let members: Vec<_> = usage.pools.iter().flat_map(|p| &p.members).collect();
     let _ = writeln!(
         out,
-        "Cache: {} / {} effective budget | {} members ({} busy) | {} run copies | disk free {}",
+        "Cache: {} / {} effective budget ({} bytes) | {} members ({} busy) | {} run copies | disk free {}",
         human_bytes(usage.total),
         human_bytes(usage.effective_budget),
+        usage.accounting.name(),
         members.len(),
         members.iter().filter(|m| m.busy).count(),
         usage.runs.len(),

@@ -63,6 +63,13 @@ assert!(status.success());
 
 ## Cache Budget
 
+The default `accounting = "allocated"` counts file allocation and deduplicates
+hardlinks within each cache member/run/trash item. Sparse holes are excluded.
+Choose `[cache] accounting = "logical"` to budget unique logical file lengths
+instead. `cache ls`, `gc`, `top`, and `config` label the basis; JSON includes
+`accounting`. Allocation excludes directory metadata and conservatively counts
+sharing across separate cache items.
+
 `[cache] budget` controls cache retention, rather than the maximum size of a
 running build. Busy artifacts are protected. Use `buildq cache ls --refresh`
 or `buildq gc --json` to see remaining overflow and its reason. GC can exit

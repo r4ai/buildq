@@ -263,6 +263,29 @@ The effective budget adapts to available volume space:
 
 $$\text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})$$
 
+### Size Accounting
+
+`[cache] accounting = "allocated"` is the default. Unix uses allocated file
+blocks (`st_blocks * 512`); Windows uses file allocation size. Both deduplicate
+hardlinks by volume/device and file identity within each member, run directory,
+or trash entry. Symlinks and directory metadata are excluded. Sparse holes do
+not consume this budget until blocks are allocated.
+
+`accounting = "logical"` instead counts each unique file's logical length,
+including sparse holes. Cache estimates record their basis and refresh when it
+changes. JSON reports expose `accounting`; text output labels the selected basis.
+
+Accounting units remain independent for cached estimates and eviction. Hardlinks
+across units, and reflink/shared extents across different file identities, are
+conservatively charged to each unit. `freed` reports removed accounted capacity,
+not an exact change in volume free space. Action sizes describe path footprints
+and are not additive: pruning remeasures the member so deleting one alias cannot
+claim a retained inode's bytes. Dry runs project the same exclusions. Failed-trash
+estimates are kept separately for each accounting mode, with legacy estimates
+retained when permissions prevent remeasurement.
+
+### Collection Stages
+
 GC prunes artifacts in five stages from cheapest to most aggressive, skipping busy members:
 
 1. **Trash cleanup**: deletes leftover directories in `trash/`
