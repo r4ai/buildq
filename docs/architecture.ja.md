@@ -17,7 +17,7 @@ flowchart TD
     Cargo --> IsRun{"cargo run か?"}
     IsRun -- "No" --> Release["マニフェスト保存・メンバーとスロットを解放"]
     IsRun -- "Yes" --> CopyBin["バイナリと DLL を runs/r0 へコピー"]
-    CopyBin --> ReleaseBuild["build スロットとメンバーを解放"]
+    CopyBin --> ReleaseBuild["build スロットを解放"]
     ReleaseBuild --> RunSlot["run スロットを取得しバイナリを起動"]
 ```
 
@@ -196,9 +196,15 @@ Windows では実行中の `.exe` ファイルが OS によってロックされ
    - `--message-format=json-render-diagnostics` と対象の `--bin` を付与して `cargo build` を実行
    - JSON メッセージから実行ファイル・DLL / 共有ライブラリ・`.pdb`・リンクパスを特定
    - サイズまたは `mtime` が変化したファイルのみを `$BUILDQ_CACHE/runs/r<j>` へ差分コピー
-2. **実行フェーズ**（`run` スロットを保持、`build` スロットと `m<i>` は解放済み）
+2. **実行フェーズ**（`run` スロットを保持、`build` スロットは解放済み）
    - 呼び出し元のカレントディレクトリを維持したまま、`runs/r<j>` 内のバイナリを実行
    - `PATH` / `LD_LIBRARY_PATH`、`CARGO_MANIFEST_DIR`、`CARGO_PKG_*` を `cargo run` と同様に設定（Bevy の `assets/` 等もそのまま動作）
+
+ネイティブ共有ライブラリがメンバー内に残る場合は、run 待機中からアプリ終了までメンバーの排他リースを保持する。
+ビルド出力・リンク検索先・profile/deps の共有ライブラリを調べ、コピー済みの Rust ライブラリは除外する。
+絶対パス参照や遅延ロードを壊さないため、依存するメンバーを使用中として GC から保護する。
+ビルドスロットは解放するが、利用できるプールメンバー数は減る。
+この容量は使用中データとして計上し、アプリ終了後にリースを解放して GC を再試行する。
 
 ホーム・祖先ディレクトリ・`--config` の Cargo `[env]` を適用する。
 `force` と設定ファイル基準の相対パスにも対応する。

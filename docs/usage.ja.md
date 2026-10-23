@@ -55,6 +55,12 @@ rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を�
 `budget` を増やしても無効にはならない。
 詳細は [Disk Budget & Garbage Collection](architecture.ja.md#4-disk-budget--garbage-collection) を参照する。
 
+`cargo run` がネイティブ依存のためメンバーを保持する場合は、その旨を表示する。
+run 待機中・実行中とも GC から保護し、残る予算超過を報告する。
+長時間動くネイティブアプリは、ビルドに使えるメンバー数を減らす場合がある。
+保持する分も見込んで `cache.max_members` を設定するか、アプリを終了して解放する。
+ビルドスロットはアプリ実行前に解放する。
+
 ## Live Monitoring
 
 `buildq top` は実行中ジョブ、待機列と待機時間、リモートの待機列、ターゲットプール容量を1秒ごとに更新する。

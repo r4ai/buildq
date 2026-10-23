@@ -780,6 +780,7 @@ struct Artifacts {
     exe: Option<(String, String, PathBuf, Vec<PathBuf>)>, // (package_id, manifest_path, exe, its files)
     libs: Vec<PathBuf>,
     linked: Vec<PathBuf>,
+    build_outputs: Vec<PathBuf>,
 }
 
 #[derive(Debug, Clone)]
@@ -838,6 +839,9 @@ fn collect(line: &str, want: Option<&RunTarget>, art: &mut Artifacts) -> bool {
             }
         }
         "build-script-executed" => {
+            if let Some(out) = v["out_dir"].as_str() {
+                art.build_outputs.push(out.into());
+            }
             for p in strs(&v["linked_paths"]) {
                 let path = match p.split_once('=') {
                     Some(("native" | "dependency" | "crate" | "framework" | "all", rest)) => {
@@ -1124,6 +1128,21 @@ fn cargo_run(
         ctx.as_ref().map(|c| c.name.as_str()),
         external.as_deref(),
     );
+    let _runtime = RuntimeLease {
+        lease: if run.is_some()
+            && lease
+                .as_ref()
+                .is_some_and(|l| native_runtime_in_member(l, &art))
+        {
+            note(
+                "native shared libraries keep the target member leased until the app exits; build slots are released",
+            );
+            lease.take()
+        } else {
+            None
+        },
+        cfg,
+    };
     drop(lease);
     drop(g);
     if ctx.is_some() {
@@ -1179,6 +1198,82 @@ fn cargo_run(
         record(cfg, rg, code, None, None, None);
     }
     Ok(code)
+}
+
+/// Native libraries can embed absolute loader paths or be loaded later with
+/// dlopen/LoadLibrary. Retain their accounting lease instead of guessing which
+/// files and paths must be rewritten into a self-contained runtime.
+struct RuntimeLease<'a> {
+    lease: Option<Lease>,
+    cfg: &'a Config,
+}
+
+impl Drop for RuntimeLease<'_> {
+    fn drop(&mut self) {
+        if let Some(mut lease) = self.lease.take() {
+            lease.finish();
+            drop(lease);
+            spawn_gc(self.cfg);
+        }
+    }
+}
+
+fn native_runtime_in_member(lease: &Lease, art: &Artifacts) -> bool {
+    fn contains_native(dir: &Path, copied: &[PathBuf], recursive: bool) -> bool {
+        let entries = match fs::read_dir(dir) {
+            Ok(entries) => entries,
+            Err(error) => return error.kind() != io::ErrorKind::NotFound,
+        };
+        for entry in entries {
+            let Ok(entry) = entry else { return true };
+            let path = entry.path();
+            let Ok(kind) = entry.file_type() else {
+                return true;
+            };
+            if kind.is_symlink() && path.is_dir() {
+                return true;
+            }
+            if kind.is_dir() {
+                if recursive && contains_native(&path, copied, true) {
+                    return true;
+                }
+            } else {
+                let name = entry.file_name().to_string_lossy().to_ascii_lowercase();
+                let dynamic = name.ends_with(".dll")
+                    || name.ends_with(".dylib")
+                    || name.ends_with(".so")
+                    || name.contains(".so.");
+                if dynamic && !copied.contains(&path) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+    let mut dirs = art.linked.clone();
+    dirs.extend(art.build_outputs.iter().cloned());
+    dirs.sort_by_key(|dir| dir.components().count());
+    let mut roots = Vec::new();
+    for dir in dirs {
+        if dir.starts_with(&lease.target_dir)
+            && !roots.iter().any(|root: &PathBuf| dir.starts_with(root))
+        {
+            roots.push(dir);
+        }
+    }
+    if roots
+        .iter()
+        .any(|dir| contains_native(dir, &art.libs, true))
+    {
+        return true;
+    }
+    // Cargo profile/deps directories need only a shallow scan: generated
+    // outputs were covered above, so do not walk the whole warm target tree.
+    art.exe.as_ref().is_some_and(|(_, _, exe, _)| {
+        build_dirs(exe)
+            .iter()
+            .any(|dir| dir.starts_with(&lease.target_dir) && contains_native(dir, &art.libs, false))
+    })
 }
 
 /// The pool member's `deps` dir and profile dir next to the built binary.
