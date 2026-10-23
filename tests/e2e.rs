@@ -267,6 +267,41 @@ fn copied_runs_honor_cargo_runner_config_environment_and_cli() {
     );
 }
 
+#[test]
+fn run_manifest_path_selects_the_requested_member_instead_of_the_cwd_package() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(temp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='parent-app'\nversion='0.1.0'\nedition='2021'\n[workspace]\nmembers=['a']\nresolver='2'\n",
+            ),
+            ("src/main.rs", "fn main(){println!(\"parent-app\");}"),
+            (
+                "a/Cargo.toml",
+                "[package]\nname='child-app'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            ("a/src/main.rs", "fn main(){println!(\"child-app\");}"),
+            (".gitignore", "target/\n"),
+        ],
+    );
+    let ws = root.join("ws");
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "."]);
+    git(&ws, &["commit", "-qm", "fixture"]);
+    let absolute = ws.join("a/Cargo.toml");
+    for manifest in ["a/Cargo.toml", absolute.to_str().unwrap()] {
+        let args = ["run", "--offline", "--manifest-path", manifest];
+        let (plain, _) = w.plain(&ws, &root.join("control"), &args);
+        assert_eq!(stdout(&plain), "child-app");
+        let (pooled, _) = w.cargo(&ws, &args);
+        assert_eq!(stdout(&pooled), stdout(&plain));
+    }
+    assert_eq!(stdout(&w.cargo(&ws, &["run", "--offline"]).0), "parent-app");
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     fs::create_dir_all(to).unwrap();
     for e in fs::read_dir(from).unwrap().flatten() {
