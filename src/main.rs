@@ -1,3 +1,4 @@
+use std::io::{IsTerminal, Write};
 use std::path::PathBuf;
 use std::process::ExitCode;
 use std::time::Duration;
@@ -59,6 +60,15 @@ enum Cmd {
         /// Also ask every configured host (needs `buildq` set for the host).
         #[arg(long)]
         hosts: bool,
+    },
+    /// Live queue, remote hosts and target pool usage (Ctrl+C to quit).
+    Top {
+        /// Seconds between updates.
+        #[arg(long, default_value_t = 2, value_parser = clap::value_parser!(u64).range(1..=3600))]
+        interval: u64,
+        /// Stop after this many snapshots (default: continuous on a terminal, one otherwise).
+        #[arg(long, value_parser = clap::value_parser!(u64).range(1..))]
+        iterations: Option<u64>,
     },
     /// Recent jobs.
     History {
@@ -173,6 +183,10 @@ fn main() -> ExitCode {
         }
         Cmd::Cargo { args } => finish(job::run_cargo(&cfg, &Opts::from_env(), &args)),
         Cmd::Status { json, hosts } => status(&cfg, json, hosts),
+        Cmd::Top {
+            interval,
+            iterations,
+        } => top(&cfg, interval, iterations),
         Cmd::History { n, json } => {
             let entries = history::read(&cfg.queue_dir, n);
             if json {
@@ -336,6 +350,13 @@ fn status(cfg: &Config, json: bool, hosts: bool) -> ExitCode {
     for st in &classes {
         print_class(st, "");
     }
+    print_hosts(remote);
+    ExitCode::SUCCESS
+}
+
+type HostStatus = Vec<(String, Result<serde_json::Value, String>)>;
+
+fn print_hosts(remote: HostStatus) {
     for (h, r) in remote {
         println!("== host {h}");
         match r {
@@ -348,6 +369,57 @@ fn status(cfg: &Config, json: bool, hosts: bool) -> ExitCode {
             }
             Err(e) => println!("  {e}"),
         }
+    }
+}
+
+fn top(cfg: &Config, interval: u64, iterations: Option<u64>) -> ExitCode {
+    let terminal =
+        std::io::stdout().is_terminal() && std::env::var("TERM").as_deref() != Ok("dumb");
+    let limit = iterations.or(if terminal { None } else { Some(1) });
+    let interval = Duration::from_secs(interval);
+    // Remote SSH can be slow or unavailable. Never block local updates on it.
+    let (tx, rx) = std::sync::mpsc::sync_channel(1);
+    let remote_cfg = cfg.clone();
+    let mut hosts: HostStatus = cfg
+        .hosts
+        .keys()
+        .map(|h| (h.clone(), Err("checking remote status...".into())))
+        .collect();
+    if limit == Some(1) {
+        hosts = remote::host_status(cfg);
+    } else if !cfg.hosts.is_empty() {
+        std::thread::spawn(move || {
+            loop {
+                if tx.send(remote::host_status(&remote_cfg)).is_err() {
+                    break;
+                }
+                std::thread::sleep(interval);
+            }
+        });
+    }
+    for frame in 1u64.. {
+        if let Ok(update) = rx.try_recv() {
+            hosts = update;
+        }
+        if terminal {
+            // Keep normal terminal modes and cursor visibility: Ctrl+C needs no cleanup.
+            print!("\x1b[2J\x1b[H");
+        }
+        println!(
+            "buildq top — update {frame}, every {}s (Ctrl+C to quit)",
+            interval.as_secs()
+        );
+        status(cfg, false, false);
+        print_hosts(hosts.clone());
+        println!("== target pool (cached sizes; use cache ls --refresh to remeasure)");
+        print!("{}", gc::render(&gc::scan(cfg, false)));
+        if std::io::stdout().flush().is_err() {
+            return ExitCode::from(1);
+        }
+        if limit == Some(frame) {
+            break;
+        }
+        std::thread::sleep(interval);
     }
     ExitCode::SUCCESS
 }

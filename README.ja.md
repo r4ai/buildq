@@ -141,12 +141,18 @@ buildq: target <pool>/m0 (...)
 | コマンド | 説明 |
 | :--- | :--- |
 | `buildq status [--hosts]` | クラスごとの実行中・待機中ジョブを表示 |
+| `buildq top [--interval SECONDS] [--iterations N]` | キュー・待機時間・リモートホスト・プール使用量を定期表示 |
 | `buildq history [-n N]` | 直近のジョブ履歴を表示<br>（待機時間・実行時間・終了コード・使用プール） |
 | `buildq cache ls [--refresh]` | プール一覧・各メンバーの容量・空き容量を表示 |
 | `buildq gc [--dry-run]` | キャッシュを手動整理し、ディスク予算内に縮小 |
 | `buildq config` | 現在有効な設定値とディレクトリパスを表示 |
 | `buildq run [-p PRIO] -- <cmd>...` | 任意のコマンドをキュー経由で実行（優先度指定可） |
 | `buildq run --host <H> -- <cmd>...` | SSH 経由でリモートホスト上でコマンドを実行 |
+
+`buildq top` は端末上で2秒ごとに更新する。終了は Ctrl+C。
+リダイレクト時は1回だけ表示する。`--iterations N` で更新回数を指定できる。
+継続表示中のリモート照会はバックグラウンドで行う。
+プール容量は `buildq cache ls` と同じキャッシュ済み計測値を使用する。
 
 ### Configuration (`config.toml`)
 

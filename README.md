@@ -141,12 +141,18 @@ buildq: target <pool>/m0 (...)
 | Command | Description |
 | :--- | :--- |
 | `buildq status [--hosts]` | Show active slot holders and waiting jobs per class |
+| `buildq top [--interval SECONDS] [--iterations N]` | Live queue, wait times, remote hosts, and target pool usage |
 | `buildq history [-n N]` | Show recent jobs<br>(wait time, run time, exit code, pool member) |
 | `buildq cache ls [--refresh]` | Show target pools, member sizes, budget, and free space |
 | `buildq gc [--dry-run]` | Manually prune caches to fit within the disk budget |
 | `buildq config` | Print effective configuration and directory paths |
 | `buildq run [-p PRIO] -- <cmd>...` | Queue any arbitrary command (with optional priority) |
 | `buildq run --host <H> -- <cmd>...` | Run a queued command on a remote SSH host |
+
+`buildq top` refreshes every 2 seconds on a terminal; press Ctrl+C to quit.
+Redirected output prints one snapshot. Use `--iterations N` for a finite number
+of updates. Remote host checks run in the background during live updates.
+Pool sizes use the same cached measurements as `buildq cache ls`.
 
 ### Configuration (`config.toml`)
 
