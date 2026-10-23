@@ -270,6 +270,9 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             );
         }
     }
+    // Trash is outside Usage.total. Its reclamation improves physical free
+    // space, but must not reduce the simulated live-cache usage.
+    let trash_freed = report.freed;
 
     // The cheap auto-GC throttle above may use estimates. Once GC actually
     // runs, refresh even in auto mode so eviction never uses stale sizes.
@@ -277,6 +280,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     report.before = usage.total;
 
     // 2. inside idle members
+    let mut pruned = BTreeMap::new();
     for p in &usage.pools {
         for m in &p.members {
             let Ok(Some(_l)) = lock::try_lock(&p.dir.join(format!("m{}.lock", m.id))) else {
@@ -284,6 +288,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             };
             let label = format!("{}/m{}", p.name, m.id);
             let freed = prune_member(&m.dir, &cfg, now, dry, &label, &mut report);
+            pruned.insert(m.dir.clone(), freed);
             if freed > 0 && !dry {
                 let mp = p.dir.join(format!("m{}.json", m.id));
                 let mut meta = m.meta.clone();
@@ -295,12 +300,21 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
 
     // 3. idle pools
     let mut usage = scan(&cfg, false);
+    let mut removed_pools = Vec::new();
     for p in &usage.pools {
         if now.saturating_sub(p.last_used()) < cfg.pool_idle_days * DAY_MS {
             continue;
         }
         let Some(locks) = lock_all(p) else { continue };
-        let size = p.size();
+        let already_pruned = if dry {
+            p.members
+                .iter()
+                .map(|m| pruned.get(&m.dir).copied().unwrap_or(0))
+                .sum()
+        } else {
+            0
+        };
+        let size = p.size().saturating_sub(already_pruned);
         if !dry {
             let _ = remove_tree(&p.dir, &trash);
         }
@@ -313,6 +327,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             ),
             size,
         );
+        removed_pools.push(p.dir.clone());
     }
 
     // 4. idle run dirs
@@ -338,10 +353,21 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     if !dry {
         usage = scan(&cfg, false);
     }
-    let mut total = usage
-        .total
-        .saturating_sub(if dry { report.freed } else { 0 });
-    let budget = usage.effective_budget;
+    let mut total = usage.total.saturating_sub(if dry {
+        report.freed.saturating_sub(trash_freed)
+    } else {
+        0
+    });
+    // Reclaiming live artifacts decreases used and increases free equally.
+    // Reclaiming trash only increases free, since it is not in live usage.
+    let budget = effective_budget(
+        cfg.budget,
+        cfg.min_free,
+        usage.total,
+        usage
+            .free_disk
+            .map(|free| free.saturating_add(if dry { trash_freed } else { 0 })),
+    );
     report.effective_budget = budget;
     let mut runs: Vec<_> = usage
         .runs
@@ -373,6 +399,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         let mut members: Vec<(&PoolEntry, &MemberEntry)> = usage
             .pools
             .iter()
+            .filter(|p| !removed_pools.contains(&p.dir))
             .flat_map(|p| p.members.iter().map(move |m| (p, m)))
             .filter(|(_, m)| !m.busy)
             .collect();
@@ -394,7 +421,12 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             if !dry {
                 let _ = fs::remove_file(&lock_path);
             }
-            total = total.saturating_sub(m.size);
+            let size = m.size.saturating_sub(if dry {
+                pruned.get(&m.dir).copied().unwrap_or(0)
+            } else {
+                0
+            });
+            total = total.saturating_sub(size);
             report.act(
                 format!(
                     "evict {}/m{} (last used {} ago, over budget {})",
@@ -403,7 +435,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
                     util::ago(m.meta.last_used_ms),
                     human_bytes(budget)
                 ),
-                m.size,
+                size,
             );
         }
     }
@@ -801,6 +833,62 @@ mod tests {
         assert_eq!(report.before, 4100);
         assert_eq!(report.after, 0);
         assert!(!md.exists());
+    }
+
+    #[test]
+    fn dry_run_trash_does_not_hide_budget_eviction() {
+        for reserve in [false, true] {
+            let dir = tempfile::tempdir().unwrap();
+            let mut c = cfg(dir.path());
+            c.budget = 1024 * 1024;
+            let md = member(&c.cache_dir, "p", 0, now_ms(), 2 * 1024 * 1024);
+            file(&c.trash_dir().join("old/artifact"), 4 * 1024 * 1024, 0);
+            if reserve {
+                c.min_free = util::free_disk_bytes(&c.cache_dir).unwrap() + 2 * 1024 * 1024;
+            }
+            let preview = gc(
+                &c,
+                &Options {
+                    dry_run: true,
+                    ..Default::default()
+                },
+            );
+            assert!(md.exists());
+            assert!(
+                preview.actions.iter().any(|a| a.contains("evict p/m0")),
+                "{preview:?}"
+            );
+            let actual = gc(&c, &Options::default());
+            assert_eq!(preview.freed, actual.freed);
+            assert_eq!(preview.after, actual.after);
+            assert_eq!(preview.effective_budget, actual.effective_budget);
+            assert!(!md.exists());
+        }
+    }
+
+    #[test]
+    fn dry_run_does_not_count_pruned_artifacts_again_when_evicting() {
+        for idle_pool in [false, true] {
+            let dir = tempfile::tempdir().unwrap();
+            let mut c = cfg(dir.path());
+            c.budget = 2000;
+            let used = now_ms().saturating_sub(if idle_pool { 30 * DAY_MS } else { 1000 });
+            let old = member(&c.cache_dir, "old", 0, used, 4000);
+            member(&c.cache_dir, "recent", 0, now_ms(), 4000);
+            file(&old.join("debug/incremental/core/s-old/a"), 1000, 1);
+            file(&old.join("debug/incremental/core/s-new/a"), 1000, 0);
+            let preview = gc(
+                &c,
+                &Options {
+                    dry_run: true,
+                    ..Default::default()
+                },
+            );
+            let actual = gc(&c, &Options::default());
+            assert_eq!(preview.freed, 10_000, "{preview:?}");
+            assert_eq!(preview.freed, actual.freed);
+            assert_eq!(preview.after, actual.after);
+        }
     }
 
     #[test]
