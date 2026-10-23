@@ -78,7 +78,9 @@ pub struct MemberMeta {
     pub last_head: Option<String>,
     pub last_cmd: String,
     pub jobs: u64,
+    /// Last measured size; cheap scans reuse it briefly across builds.
     pub size_bytes: u64,
+    /// Measurement time, independent of last_used_ms (a build need not rescan).
     pub size_ms: u64,
 }
 

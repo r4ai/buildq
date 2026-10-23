@@ -57,6 +57,8 @@ flowchart LR
 - **Automatic disk budget & GC**
   - Prunes stale incremental sessions and unused artifacts in the background
   - Keeps total cache size under a configurable disk budget (default: `60 GB`)
+  - Reuses idle member size estimates for up to 60 seconds across builds; automatic budget checks may defer enforcement until the next refresh
+  - `cache ls --refresh` and actual GC passes remeasure before eviction
 - **Lock-free `cargo run`**
   - Copies compiled binaries and DLLs to an isolated run directory before execution
   - Prevents running executables from locking the shared `target/` directory on Windows
