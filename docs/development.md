@@ -26,6 +26,7 @@ src/
   util.rs      # Byte formatting, time helpers, and path canonicalization
 tests/
   cli.rs       # Integration tests (queue concurrency, priority, shim, GC, remote)
+  gc.rs        # GC filesystem regressions in a dedicated test process
   e2e.rs       # End-to-end multi-worktree Cargo build & invalidation benchmark
   fixtures/    # Sample workspace used by E2E tests
 ```
@@ -50,6 +51,11 @@ Verified behaviors:
 - Pool member selection, manifest invalidation, and budget-aware GC skip busy members
 - Two-phase `cargo run` binary/DLL syncing and JSON artifact parsing
 - Remote snapshot creation, incremental Git push, remote worktree checkout, execution, and `--fetch`
+
+GC filesystem tests use their own integration-test binary. On Unix, a fork in
+an unrelated process-spawning test can briefly inherit a lock before exec closes
+the descriptor, making an idle fixture appear busy. Separating these tests keeps
+deterministic dry-run/actual comparisons without weakening nonblocking GC locks.
 
 ### End-to-End (E2E) Cargo Tests
 

@@ -148,6 +148,43 @@ pub(crate) fn apply_env(cmd: &mut Command, cwd: &Path, parsed: &Parsed) -> Resul
     Ok(())
 }
 
+/// Configured target directory, with Cargo's explicit/environment/config precedence.
+/// A missing setting leaves workspace-default selection to Cargo.
+pub(crate) fn target_directory(cwd: &Path, parsed: &Parsed) -> Result<Option<PathBuf>, String> {
+    let mut target = None;
+    let mut collect = |table: &toml::Table, root: &Path| {
+        if let Some(value) = table
+            .get("build")
+            .and_then(|v| v.get("target-dir"))
+            .and_then(toml::Value::as_str)
+        {
+            target = Some(crate::util::resolve(root, Path::new(value)));
+        }
+    };
+    for file in config_files(cwd).iter().rev() {
+        visit_file(file, &mut Vec::new(), &mut collect)?;
+    }
+    if let Some(value) = env::var_os("CARGO_BUILD_TARGET_DIR").filter(|v| !v.is_empty()) {
+        target = Some(crate::util::resolve(cwd, Path::new(&value)));
+    }
+    visit_cli(cwd, parsed, &mut |table, root| {
+        if let Some(value) = table
+            .get("build")
+            .and_then(|v| v.get("target-dir"))
+            .and_then(toml::Value::as_str)
+        {
+            target = Some(crate::util::resolve(root, Path::new(value)));
+        }
+    })?;
+    if let Some(value) = env::var_os("CARGO_TARGET_DIR").filter(|v| !v.is_empty()) {
+        target = Some(crate::util::resolve(cwd, Path::new(&value)));
+    }
+    if let Some(value) = parsed.opt(&["--target-dir"]) {
+        target = Some(crate::util::resolve(cwd, Path::new(&value)));
+    }
+    Ok(target)
+}
+
 #[derive(Default)]
 struct Runners {
     target: Option<toml::Value>,

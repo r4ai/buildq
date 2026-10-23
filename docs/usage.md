@@ -88,6 +88,34 @@ overflow. A long-running native application can therefore reduce build capacity;
 allow enough `cache.max_members` for its retained member, or stop the application
 to release it. Compilations still release their build slots before execution.
 
+## Project Cache Cleanup
+
+`cargo clean` keeps Cargo's normal selection: `-p`, `--release`, `--profile`,
+`--target`, and `--manifest-path` affect its local/explicit target only. buildq
+prints a notice that pooled caches remain unchanged. Explicit target directories
+and Cargo target-dir settings retain their normal precedence; paths overlapping
+managed cache storage are refused so live leases cannot be bypassed.
+
+To remove this Git repository's pooled targets across all worktrees and toolchains:
+
+```sh
+buildq cache clean --dry-run
+buildq cache clean
+buildq cache clean --json
+```
+
+Run this from the intended repository, including when the previous clean used
+`--manifest-path` elsewhere. The command clears whole idle target members, rather
+than accepting Cargo's package/profile selectors. If any member or leasing section
+in a pool is busy or inaccessible, that pool is skipped and the command exits `1`;
+other idle toolchain pools may already have been cleaned. Stop/wait for those
+jobs and retry. Stable lock files remain.
+
+Other repositories, run copies, and external target directories are preserved.
+GC handles eligible run copies; use ordinary Cargo clean on an external directory
+you own. Report before/after totals cover the managed cache, while actions identify
+this repository's removed members. Failed deletions also exit nonzero.
+
 ## Live Monitoring
 
 `buildq top` refreshes running jobs, waiters and wait durations, remote queues,
