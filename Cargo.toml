@@ -30,3 +30,16 @@ libc = "0.2"
 
 [dev-dependencies]
 tempfile = "3"
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+# Selected pedantic lints catch mistakes without requiring broad API rewrites.
+checked_conversions = "warn"
+copy_iterator = "warn"
+explicit_into_iter_loop = "warn"
+explicit_iter_loop = "warn"
+manual_let_else = "warn"
+naive_bytecount = "warn"
