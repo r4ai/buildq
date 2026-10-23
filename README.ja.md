@@ -4,9 +4,7 @@
 
 **複数の Git worktree で並列実行される `cargo` ビルドを制御する、<br>デーモンレスなジョブキュー兼 `target/` 共有プール**
 
----
-
-## 解決する課題
+## Why buildq?
 
 複数のコーディングエージェントが別々の Git worktree で同時に `cargo` を実行すると、3つの問題が発生する。
 
@@ -20,7 +18,7 @@
   - 更新日時（`mtime`）のズレにより、**古いコードが再利用されるバグ**が発生
 
 `buildq` は透過的な `cargo` shim として動作する。
-バックグラウンドデーモンなしで、これら3つの問題をすべて解決する。
+`buildq` はバックグラウンドデーモンなしで、これら3つの問題をすべて解決する。
 
 ```mermaid
 flowchart LR
@@ -43,7 +41,7 @@ flowchart LR
     Queue --> M0 & M1
 ```
 
-### 主な機能
+### Key Features
 
 - **透過的な `cargo` shim**
   - 重いコマンド（`build`, `test`, `clippy`, `run`, `nextest` 等）のみ自動でキューへ投入
@@ -65,7 +63,7 @@ flowchart LR
 - **SSH リモートビルド**
   - 軽量な差分 Git スナップショットを用い、別マシンへビルドをオフロード
 
-### パフォーマンス比較
+### Performance & Impact
 
 Bevy を使う **3 つの worktree の同時ビルド**で実測。
 共有キャッシュの再利用により、ビルド時間とリソース消費を削減。
@@ -92,17 +90,15 @@ Bevy を使う **3 つの worktree の同時ビルド**で実測。
 
 [測定方法・補足結果・注意点は詳細レポートへ](docs/benchmarks/bevy-2026-10-23.ja.md)
 
----
+## Installation
 
-## インストール方法
-
-### 1. バイナリのインストール
+### 1. Install the binary
 
 ```sh
 cargo install --git https://github.com/r4ai/buildq
 ```
 
-### 2. `cargo` shim のセットアップ
+### 2. Install the `cargo` shim
 
 専用ディレクトリに shim を作成し、`PATH` の**先頭**に追加する。
 
@@ -120,13 +116,11 @@ $env:PATH = "C:\bq\bin;$env:PATH"
 
 > [!TIP]
 > サンドボックス化された複数エージェントで共有する場合は、`BUILDQ_DIR` と `BUILDQ_CACHE` を共通の書き込み可能ディレクトリに設定する。
-> 手順は [マルチエージェント・サンドボックス設定レシピ](docs/development.ja.md#マルチエージェントサンドボックス設定レシピ) を参照
+> 手順は [マルチエージェント・サンドボックス設定レシピ](docs/development.ja.md#multi-agent-sandbox-recipe) を参照
 
----
+## Usage
 
-## 使い方
-
-### 基本的な使い方
+### Everyday Use
 
 `PATH` に shim を追加した後は、通常通り `cargo` コマンドを実行するだけでよい。
 
@@ -142,7 +136,7 @@ cargo run
 buildq: target <pool>/m0 (...)
 ```
 
-### CLI コマンド一覧
+### CLI Commands
 
 | コマンド | 説明 |
 | :--- | :--- |
@@ -154,7 +148,7 @@ buildq: target <pool>/m0 (...)
 | `buildq run [-p PRIO] -- <cmd>...` | 任意のコマンドをキュー経由で実行（優先度指定可） |
 | `buildq run --host <H> -- <cmd>...` | SSH 経由でリモートホスト上でコマンドを実行 |
 
-### 設定ファイル (`config.toml`)
+### Configuration (`config.toml`)
 
 設定はすべて任意。
 `$BUILDQ_DIR/config.toml` に配置する（標準パスは `buildq config` で確認可能）。
@@ -174,7 +168,7 @@ rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を�
 # jobs = 8               # 1ビルドあたりの CARGO_BUILD_JOBS (デフォルト: コア数 / slots)
 ```
 
-### リモートビルド (SSH)
+### Remote Builds (SSH)
 
 `config.toml` にホストを追記すると、SSH と Git 経由でリモートマシンへビルドを分散できる。
 
@@ -194,9 +188,7 @@ buildq run --host auto -- cargo clippy --all-targets
 buildq run --host box --fetch target/debug/app -- cargo build --bin app
 ```
 
----
-
-## 技術的な仕組み
+## How It Works
 
 ```mermaid
 flowchart TD
@@ -223,17 +215,15 @@ flowchart TD
    - フェーズ2：`build` スロットと `target/` メンバーを解放後、`run` スロットでアプリを起動
    - アプリ実行中も `target/` がロックされず、他エージェントがビルドを継続可能
 
----
-
-## 詳細ドキュメント
+## Documentation
 
 - **[アーキテクチャと内部設計](docs/architecture.ja.md)**
-  - キューのロック設計・マニフェスト無効化の不変条件・メンバー選択アルゴリズム
-  - 5段階 GC・SSH リモートプロトコル・既知の制限事項
+   - キューのロック設計・マニフェスト無効化の不変条件・メンバー選択アルゴリズム
+   - 5段階 GC・SSH リモートプロトコル・既知の制限事項
 - **[開発・セットアップガイド](docs/development.ja.md)**
-  - モジュール構成・単体 / E2E テストの実行手順
-  - マルチエージェント用サンドボックス設定・環境変数一覧
+   - モジュール構成・単体 / E2E テストの実行手順
+   - マルチエージェント用サンドボックス設定・環境変数一覧
 
-## ライセンス
+## License
 
 MIT または Apache-2.0 のデュアルライセンス（[LICENSE-MIT](LICENSE-MIT) / [LICENSE-APACHE](LICENSE-APACHE)）

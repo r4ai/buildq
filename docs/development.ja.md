@@ -1,12 +1,10 @@
-# 開発・セットアップガイド
+# Development & Setup Guide
 
 [English](development.md) | 日本語
 
 本ガイドでは `buildq` のディレクトリ構成、テストの実行手順、マルチエージェント・サンドボックス環境の設定手順を解説する。
 
----
-
-## ディレクトリ構成
+## Repository Structure
 
 ```text
 src/
@@ -32,11 +30,9 @@ tests/
   fixtures/    # E2E テスト用のサンプルワークスペース
 ```
 
----
+## Running Tests
 
-## テストの実行
-
-### 単体テスト・結合テスト
+### Unit & Integration Tests
 
 単体テスト、複数プロセスによるキュー制御テスト、shim ルーティング、GC、ローカル擬似トランスポートによるリモートプロトコルテストを実行する。
 
@@ -55,7 +51,7 @@ cargo test
 - 2フェーズ `cargo run` のバイナリ / DLL 差分同期と JSON 成果物パース
 - リモートスナップショット作成・差分プッシュ・worktree チェックアウト・実行・`--fetch` の一連の動作
 
-### E2E テスト
+### End-to-End (E2E) Cargo Tests
 
 `tests/fixtures/sample-ws` を用い、2つの Git worktree 上で実際の `cargo` ビルドを実行する（ローカルの Cargo キャッシュに `regex` クレートが必要）。
 
@@ -63,9 +59,7 @@ cargo test
 cargo test --test e2e -- --ignored --nocapture
 ```
 
----
-
-## Python ベンチマークツール
+## Python Benchmark Tools
 
 `scripts/` は uv で管理する独立した Python プロジェクトである。
 Python 3.12.14 を `.python-version`、依存バージョンと配布物のハッシュを `uv.lock` で固定する。
@@ -103,20 +97,18 @@ uv run --directory scripts --locked ruff format --check .
 依存を変更した場合は `uv lock --project scripts` を実行し、`pyproject.toml` と `uv.lock` を同時にコミットする。
 `.venv`・ツールキャッシュ・`__pycache__` はコミットしない。
 
----
-
-## マルチエージェント・サンドボックス設定レシピ
+## Multi-Agent Sandbox Recipe
 
 同一マシン上で複数のコーディングエージェント（Codex CLI、Claude Code 等）を制限付きサンドボックス内で動かす場合、全エージェントが `$BUILDQ_DIR` と `$BUILDQ_CACHE` に読み書きできる必要がある。
 
-### 1. パスの短い共有ディレクトリを作成
+### 1. Create a Short Shared Directory
 
 worktree と同一ドライブ上に、**パスが短いディレクトリ**を用意する（`target/` 内のパスが深いため、Windows の `MAX_PATH` 制限を回避するため）。
 
 - **Windows**: `C:\bq`
 - **Unix / macOS**: `/tmp/bq` または `/var/tmp/bq`
 
-### 2. サンドボックスの権限設定
+### 2. Configure Sandbox Permissions
 
 - **エージェントの書き込み許可リスト**
   - 各エージェントの writable roots 設定に `C:\bq`（または `/tmp/bq`）を追加
@@ -127,7 +119,7 @@ worktree と同一ドライブ上に、**パスが短いディレクトリ**を�
     icacls C:\bq /grant "<sandbox-user-or-group>:(OI)(CI)M"
     ```
 
-### 3. 環境変数の設定
+### 3. Set Agent Environment Variables
 
 ユーザー環境変数またはエージェントの起動スクリプトに以下を設定する。
 
@@ -145,7 +137,7 @@ export BUILDQ_CACHE=/tmp/bq/c
 export PATH="/tmp/bq/bin:$PATH"
 ```
 
-### 4. Shim のインストール
+### 4. Install the Shim
 
 ```sh
 buildq shim install cargo --into C:\bq\bin
@@ -158,9 +150,7 @@ buildq shim install cargo --into C:\bq\bin
 - **Unix**
   - 2行のシェルスクリプトを生成（Windows でも `--sh` で生成可能）
 
----
-
-## 環境変数一覧
+## Environment Variables Reference
 
 | 変数名 | 説明 |
 | :--- | :--- |

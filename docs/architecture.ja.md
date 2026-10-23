@@ -1,4 +1,4 @@
-# アーキテクチャと内部設計
+# Architecture & Internals
 
 [English](architecture.md) | 日本語
 
@@ -21,14 +21,12 @@ flowchart TD
     ReleaseBuild --> RunSlot["run スロットを取得しバイナリを起動"]
 ```
 
----
-
-## 1. デーモンレスキュー
+## 1. Daemonless Queue
 
 `buildq` はバックグラウンドデーモンを持たず、プレーンファイルと OS レベルのファイルロックのみで動作する。
 すべてのプロセス（および各エージェントのサンドボックス）は、共有ディレクトリ（`$BUILDQ_DIR`）を介して協調する。
 
-### ディレクトリ構造
+### Directory Layout
 
 ```text
 $BUILDQ_DIR/<class>/
@@ -38,7 +36,7 @@ $BUILDQ_DIR/<class>/
   tickets/t-<seq>-<pid>.lock / .json   # 待機中ジョブごとのロックとメタデータ
 ```
 
-### ロックとクラッシュ安全性
+### Locking & Crash Safety
 
 - すべてのロックに OS ファイルロックを使用（Windows は `LockFileEx`、Unix は `flock`）
 - ロックの生存期間はオープン中のファイルディスクリプタに紐づく
@@ -46,7 +44,7 @@ $BUILDQ_DIR/<class>/
   - ロック取得可能なチケットは死んだプロセスとみなされ、自動的に掃除される
   - ロック取得可能なスロットは空きスロットとして扱われる
 
-### スケジューリングと優先度制御
+### Scheduling & Priority
 
 - 待機プロセスは一定間隔（デフォルト `250 ms`、`poll_ms` で変更可）でポーリングを実行
 - `queue.lock` 保持下で生存チケットを `(priority DESC, seq ASC)` 順にソート
@@ -54,7 +52,7 @@ $BUILDQ_DIR/<class>/
 - 同一優先度内では厳密な FIFO 順を保証
 - 高優先度ジョブは待機中ジョブを追い越すが、実行中ジョブをプリエンプトしない
 
-### ジョブクラスとネスト実行
+### Job Classes & Nesting
 
 - クラスごとに独立したスロットプールを保持
   - `build`: コンパイル用スロット（デフォルト: `slots = 2`）
@@ -66,7 +64,7 @@ $BUILDQ_DIR/<class>/
   - ネストされた `buildq` や `cargo` shim は、対象クラスが `BUILDQ_HELD` に含まれていればキューをバイパスして即時実行
   - ビルドスクリプト内の `cargo metadata` やテスト内の `cargo build` が親スロット待ちでデッドロックしない
 
-### プロセスツリーとシグナル処理
+### Process Tree & Signal Handling
 
 - 子プロセス実行中、`buildq` 自身は `Ctrl+C` を無視（コンソールから子へ直接届く）し、子の終了コードをそのまま返す
 - **Windows**
@@ -78,11 +76,9 @@ $BUILDQ_DIR/<class>/
   - 監視プロセス（`buildq __watch`）がスロットとプールメンバーのロックを引き継いで保持
   - `buildq` が先に終了すると（`SIGKILL` でも）、監視プロセスが子のプロセスツリーを終了させてから（`kill_tree = false` なら子の終了を待ってから）ロックを解放
 
----
+## 2. Shared `target/` Pool
 
-## 2. `target/` 共有プール
-
-### ディレクトリ構造
+### Directory Layout
 
 ```text
 $BUILDQ_CACHE/
@@ -101,7 +97,7 @@ $BUILDQ_CACHE/
 - **メンバー数**: 1プールあたり最大 `max_members` 個の `target/` ディレクトリ（`m0`, `m1`, ...）を保持
 - **排他リース**: 各ビルドジョブは1つのメンバーを実行完了まで排他リース（並列ビルドには最低 `slots` 個のメンバーが必要）
 
-### なぜ単純な共有は壊れるのか
+### Why Naive Sharing Fails
 
 Cargo は成果物に `<crate>-<hash>` という名前を付ける。
 ワークスペース内のクレートでは、このハッシュ計算に**ワークスペースルートからの相対パス**が使われる。
@@ -113,7 +109,7 @@ Cargo は成果物に `<crate>-<hash>` という名前を付ける。
 - Worktree B には、それより前の `12:00` に編集・チェックアウトされた `crates/core/src/lib.rs` があるとする
 - Worktree B が同じ `target/` でビルドすると、Cargo は「成果物（`12:05`）がソース（`12:00`）より新しい」と判定し、**Worktree A の古いコードを黙って再利用してしまう**
 
-### 解決策：Git Blob マニフェストと Fingerprint 無効化
+### The Fix: Git Blob Manifests & Fingerprint Invalidation
 
 `buildq` はタイムスタンプではなく、ファイル内容のハッシュ（Git blob ID）を追跡することでこの問題を解決する。
 各メンバーは「どのファイル内容から成果物が作られたか」を `m<i>.manifest` に記録する。
@@ -153,7 +149,7 @@ sequenceDiagram
 メンバー `m<i>` 内のすべてのパッケージについて、「`.fingerprint` が存在しない」か「成果物が `m<i>.manifest` の内容と一致する」のいずれかが常に成り立つ。
 ビルド実行前に無効化を行いロールバックしないため、部分ビルド（`-p foo`）・ビルド失敗・強制終了が起きてもこの不変条件は崩れない。
 
-### メンバー選択アルゴリズム
+### Member Selection Algorithm
 
 `pool.lock` 保持下で、すべての空きメンバーを以下のタプルでスコアリングする。
 
@@ -166,9 +162,7 @@ sequenceDiagram
 2. 空いていなければ、ブランチ元が近いなどソース差分が最小のメンバーを選択
 3. 全メンバーが使用中かつ `max_members` 未満であり、ディスク予算に余裕がある場合のみ新規メンバーを作成
 
----
-
-## 3. `cargo run` の2フェーズ分割
+## 3. Two-Phase `cargo run`
 
 Windows では実行中の `.exe` ファイルが OS によってロックされる。
 共有 `target/` 内のバイナリを直接起動すると、アプリ終了までそのメンバーでの後続ビルドがすべて失敗する。
@@ -183,13 +177,9 @@ Windows では実行中の `.exe` ファイルが OS によってロックされ
    - 呼び出し元のカレントディレクトリを維持したまま、`runs/r<j>` 内のバイナリを実行
    - `PATH` / `LD_LIBRARY_PATH`、`CARGO_MANIFEST_DIR`、`CARGO_PKG_*` を `cargo run` と同様に設定（Bevy の `assets/` 等もそのまま動作）
 
----
-
-## 4. ディスク予算とガベージコレクション
+## 4. Disk Budget & Garbage Collection
 
 プールを使用したビルドの終了後、バックグラウンドで `buildq gc` が自動実行される（予算超過時を除き、10分に1回へスロットリング）。
-
-実効ディスク予算はドライブの空き容量に応じて動的に計算される。
 
 $$\text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})$$
 
@@ -204,7 +194,7 @@ GC は使用中メンバーには一切触れず、コストの低い順（5段�
 4. **放置 Run ディレクトリの削除**: 2日以上使われていない `runs/r<i>` を削除
 5. **LRU メンバー削除**: それでも予算を超過している場合、最終使用が古いメンバーから丸ごと削除
 
-### 明示的な target ディレクトリ
+### Explicit Target Dirs
 
 ジョブ自身が `--target-dir` や `CARGO_TARGET_DIR` を指定した場合（例: エージェントによる A/B 比較用ベースラインのビルド）、デフォルトではプールを経由しない。
 
@@ -216,9 +206,7 @@ GC は使用中メンバーには一切触れず、コストの低い順（5段�
   - メンバー内の `m<i>/sub/<相対パス>` に付け替え、予算の対象にする
   - 新しくビルドされたトップレベルのバイナリは指定先ディレクトリへコピーする
 
----
-
-## 5. リモート実行プロトコル (SSH)
+## 5. Remote Execution Protocol (SSH)
 
 `buildq run --host <host>` は標準の SSH と Git のみを用いてビルドをリモートマシンへオフロードする。
 リモート側に必要なのは `git`、POSIX シェル、Rust ツールチェインのみ（リモート側の `buildq` は任意）。
@@ -240,9 +228,7 @@ GC は使用中メンバーには一切触れず、コストの低い順（5段�
 6. **成果物の取得**
    - `--fetch <path>` 指定時、`scp` で `target/buildq-remote/<host>/` へ成果物を回収
 
----
-
-## 6. 検討した代替案との比較
+## 6. Design Alternatives Considered
 
 | アプローチ | 採用しなかった理由 |
 | :--- | :--- |
@@ -252,9 +238,7 @@ GC は使用中メンバーには一切触れず、コストの低い順（5段�
 | **`--remap-path-prefix`** | デバッグ情報やパニック文字列内のパスを書き換えるのみで、<br>Cargo のハッシュ計算（元々相対パス）には無関係 |
 | **`sccache`** | インクリメンタルビルド（`dev` プロファイル）を共有できず、<br>サンドボックス内から起動したサーバーは他サンドボックスへ書けない |
 
----
-
-## 7. 既知の制限事項
+## 7. Known Limitations
 
 - **gitignore されたファイル**
   - gitignore 配下の自動生成ソース等の鮮度判定は Cargo 標準の `mtime` ルールに依存
