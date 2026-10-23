@@ -1,0 +1,68 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running unittests src/lib.rs (target/debug/deps/buildq-04ffd43c80dd9b14)
+
+running 25 tests
+test cargo::tests::routes_heavy_and_passthrough ... ok
+test cargo::tests::alias_expansion_keeps_args ... ok
+test cargo::tests::target_dir_config_is_rerooted ... ok
+test gc::tests::budget_shrinks_with_free_disk ... ok
+test git::tests::porcelain_parse ... ok
+test cargo::tests::aliases_from_config_files ... ok
+test job::tests::build_dirs_cover_deps_for_bins_and_examples ... ok
+test job::tests::package_ids ... ok
+test job::tests::artifacts_from_messages ... ok
+test job::tests::sync_copies_only_changes ... ok
+test pool::tests::invalidate_removes_only_named_packages ... ok
+test pool::tests::lease_prefers_closest_member_and_grows_only_when_busy ... ok
+test gc::tests::evicts_lru_members_over_budget_and_skips_busy ... ok
+test gc::tests::prunes_incremental_and_stale_variants ... ok
+test pool::tests::plan_groups_by_package ... ok
+test pool::tests::unit_names ... ok
+test pool::tests::owners_from_manifests ... ok
+test queue::tests::status_reports_holder ... ok
+test remote::tests::host_choice ... ok
+test remote::tests::quoting ... ok
+test util::tests::hash_is_stable ... ok
+test util::tests::sizes_parse ... ok
+test pool::tests::lease_waits_when_full ... ok
+test queue::tests::fifo_and_priority_order ... ok
+test queue::tests::concurrency_never_exceeds_slots ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running unittests src/main.rs (target/debug/deps/buildq-6cc7f931664a3418)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli.rs (target/debug/deps/cli-5da8220b22ee2d85)
+
+running 8 tests
+buildq: definitely-not-a-command-xyz: No such file or directory (os error 2)
+test exit_code_passes_through ... ok
+test nested_calls_do_not_deadlock ... ok
+test shim_inside_a_held_job_is_passthrough ... ok
+test shim_passes_light_commands_straight_through ... ok
+test shim_routes_heavy_commands_through_queue_and_pool ... ok
+test killed_holder_releases_its_slot ... ok
+test concurrency_never_exceeds_slots_across_processes ... ok
+test priority_overtakes_waiting_jobs ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.08s
+
+     Running tests/e2e.rs (target/debug/deps/e2e-4f4ac1fa7bc270be)
+
+running 2 tests
+test run_starts_a_dylib_linked_binary ... ignored, compiles a tiny real workspace; run with --ignored
+test two_worktrees_share_a_pool_member ... ignored, compiles a small real workspace; run with --ignored
+
+test result: ok. 0 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/remote.rs (target/debug/deps/remote-6f7343afc377daa9)
+
+running 1 test
+test sync_run_fetch_roundtrip ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

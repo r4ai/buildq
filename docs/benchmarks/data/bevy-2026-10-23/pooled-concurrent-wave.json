@@ -1,0 +1,58 @@
+{
+  "wall_s": 116.62288450799997,
+  "peak_tree_rss_bytes": 1607307264,
+  "peak_rustc_processes": 3,
+  "jobs": [
+    {
+      "name": "pooled-concurrent-2",
+      "command": [
+        "/workspace/buildq/target/release/buildq",
+        "cargo",
+        "build",
+        "--offline",
+        "--locked"
+      ],
+      "cwd": "/workspace/buildq-bench/wt2",
+      "wall_s": 0.304645727000036,
+      "exit": 0,
+      "peak_tree_rss_bytes": 75067392,
+      "sampled_cpu_s": 0.11,
+      "peak_processes": 3,
+      "compiling_lines": 0
+    },
+    {
+      "name": "pooled-concurrent-3",
+      "command": [
+        "/workspace/buildq/target/release/buildq",
+        "cargo",
+        "build",
+        "--offline",
+        "--locked"
+      ],
+      "cwd": "/workspace/buildq-bench/wt3",
+      "wall_s": 116.58958121800003,
+      "exit": 0,
+      "peak_tree_rss_bytes": 1607217152,
+      "sampled_cpu_s": 186.03,
+      "peak_processes": 10,
+      "compiling_lines": 210
+    },
+    {
+      "name": "pooled-concurrent-4",
+      "command": [
+        "/workspace/buildq/target/release/buildq",
+        "cargo",
+        "build",
+        "--offline",
+        "--locked"
+      ],
+      "cwd": "/workspace/buildq-bench/wt4",
+      "wall_s": 0.46214302100003124,
+      "exit": 0,
+      "peak_tree_rss_bytes": 70209536,
+      "sampled_cpu_s": 0.1,
+      "peak_processes": 3,
+      "compiling_lines": 0
+    }
+  ]
+}

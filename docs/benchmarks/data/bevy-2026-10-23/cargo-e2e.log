@@ -1,0 +1,19 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests/e2e.rs (target/debug/deps/e2e-4f4ac1fa7bc270be)
+
+running 2 tests
+test run_starts_a_dylib_linked_binary ... ok
+
+step                                        wall  compiled
+wt1 cold build (new member)                4.06s         8
+wt2 first build, shared member             0.08s         0
+control: wt2 with its own target/          3.48s         8
+wt2 edit core + run (old mtime)            0.59s         3
+wt1 run via alias after wt2 edit           0.61s         3
+
+pool member m0: 96.8 MiB for both worktrees; one own target/: 96.8 MiB
+naive shared CARGO_TARGET_DIR after the same edit prints: "greeting v1 (3 words)" (stale)
+test two_worktrees_share_a_pool_member ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.31s
+

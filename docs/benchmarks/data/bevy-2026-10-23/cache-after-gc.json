@@ -1,0 +1,29 @@
+{
+  "pools": [
+    {
+      "name": "wt1-126410f7",
+      "dir": "/workspace/buildq-bench/cache/pools/wt1-126410f7",
+      "info": {
+        "repo": "wt1",
+        "repo_key": "/workspace/buildq-bench/wt1/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792719202908,
+        "last_used_ms": 1792719750237
+      },
+      "members": []
+    }
+  ],
+  "runs": [
+    {
+      "dir": "/workspace/buildq-bench/cache/runs/r0",
+      "busy": false,
+      "size": 289066968,
+      "last_used_ms": 1792719814413
+    }
+  ],
+  "total": 289066968,
+  "budget": 12884901888,
+  "effective_budget": 12884901888,
+  "free_disk": 24343900160
+}

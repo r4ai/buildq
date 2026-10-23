@@ -1,0 +1,50 @@
+{
+  "classes": [
+    {
+      "class": "build",
+      "holders": [
+        {
+          "busy": false,
+          "job": null,
+          "slot": 0
+        },
+        {
+          "busy": false,
+          "job": null,
+          "slot": 1
+        }
+      ],
+      "slots": 2,
+      "waiters": []
+    },
+    {
+      "class": "run",
+      "holders": [
+        {
+          "busy": true,
+          "job": {
+            "class": "run",
+            "cmd": "bevy-heavy-probe ",
+            "cwd": "/workspace/buildq-bench/wt1",
+            "enqueued_ms": 1792719744707,
+            "label": "confirmed-sleeping-app",
+            "pid": 28297,
+            "priority": 0,
+            "seq": 1792719744707,
+            "started_ms": 1792719744707,
+            "target": null
+          },
+          "slot": 0
+        },
+        {
+          "busy": false,
+          "job": null,
+          "slot": 1
+        }
+      ],
+      "slots": 2,
+      "waiters": []
+    }
+  ],
+  "hosts": {}
+}

@@ -1,0 +1,11 @@
+{
+  "actions": [
+    "evict wt1-126410f7/m1 (last used 69s ago, over budget 1.0 MiB) (1.1 GiB)",
+    "evict wt1-126410f7/m0 (last used 0s ago, over budget 1.0 MiB) (1.7 GiB)"
+  ],
+  "freed": 2986353401,
+  "before": 3275420369,
+  "after": 289066968,
+  "effective_budget": 1048576,
+  "skipped": null
+}

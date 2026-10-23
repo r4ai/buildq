@@ -51,14 +51,14 @@ flowchart LR
 - **Machine-wide job queue**
   - Caps concurrent builds (default: `2`) in FIFO order with priority support
   - Uses OS file locks (`flock` / `LockFileEx`) with no background daemon
-  - Releases locks automatically if a process crashes or is killed
+  - Releases OS locks automatically if the holder exits; Unix child-process cleanup has a [known limitation](https://github.com/r4ai/buildq/issues/13)
 - **Safe shared `target/` pool**
   - Shares a small pool of `target/` directories across all worktrees of a repository
   - Tracks file content via Git blob hashes
   - Invalidates only modified packages before each build
 - **Automatic disk budget & GC**
   - Prunes stale incremental sessions and unused artifacts in the background
-  - Keeps total cache size under a configurable disk budget (default: `60 GB`)
+  - Evicts idle build members toward a configurable disk budget (default: `60 GB`); busy artifacts and recent run copies can keep usage above it ([#14](https://github.com/r4ai/buildq/issues/14))
 - **Lock-free `cargo run`**
   - Copies compiled binaries and DLLs to an isolated run directory before execution
   - Prevents running executables from locking the shared `target/` directory on Windows
@@ -67,15 +67,23 @@ flowchart LR
 
 ### Performance & Impact
 
-| Metric | Per-worktree<br>`target/` | Naive shared<br>`CARGO_TARGET_DIR` | `buildq` |
-| :--- | :--- | :--- | :--- |
-| **CPU / RAM usage** | Unbounded<br>(machine freezes) | Serialized<br>(1 build at a time) | **Bounded to `N` builds** |
-| **2nd worktree<br>1st build** | `11.2 s`<br>(8 crates compiled) | `1.4 s`<br>(0 crates compiled) | **`1.4 s`<br>(0 crates compiled)** |
-| **Edit file with<br>older `mtime`** | Safe: `4.3 s`<br>(3 crates compiled) | **Broken**<br>(runs stale code) | **Safe: `4.3 s`<br>(3 crates compiled)** |
-| **Disk usage<br>(`W` worktrees)** | `W × 110 MiB`<br>(grows linearly) | `1 × 113 MiB` | **`≤ slots × 113 MiB`<br>(capped by budget)** |
+Measured on 2026-10-23 with **Bevy 0.16.1** (PBR, PNG, multithreading; 210 compilation steps), Linux x86_64, Rust 1.89.0, a **4-CPU quota / 16 GiB RAM**, and two Cargo jobs per build. buildq used **2 slots / 2 pool members**. Dependencies were fetched before timing; builds used `--offline --locked` and `debug = 0`.
 
-> Measured on a sample workspace (`regex` + 3 workspace crates) across two Git worktrees on Windows 11.
-> `buildq` adds ~0.4–0.6 s of overhead per queued build.
+| Metric | Plain Cargo, independent targets | buildq |
+| :--- | :--- | :--- |
+| Single cold build | 116.05 s | 114.32 s |
+| Three worktree builds, all caches initially empty | 165.14 s | **120.80 s (26.8% less time)** |
+| Peak aggregate process-tree RSS during those three builds | 4.37 GiB | **2.89 GiB (33.8% lower)** |
+| Allocated target disk space after those builds | 3.21 GiB (3 targets) | **2.14 GiB (2 members)** |
+| Warm build, median of 10 runs | 0.203 s | 0.220 s via `buildq cargo`; **0.235 s via the installed cargo shim** |
+
+A second worktree reused the pool in **0.204 s with no recompilation**. After a source edit with an artificially old `mtime`, naive target sharing ran stale code; buildq rebuilt the app and ran the correct version in **3.55 s**. Bevy's `dynamic_linking` run and a build while another app was running also passed.
+
+The three-build comparison includes pool reuse: two builds compile from cold, and the third reuses a completed member. Cold measurements are one batch per condition; the single-build difference is not evidence of a speedup. RSS is sampled process-tree RSS, not exclusive physical memory. This is a headless build/run benchmark, not a GPU-rendering benchmark or a guarantee for other machines.
+
+**Known limitations found in this run:** killing only the buildq parent on Unix can leave Cargo alive after the slot/member is released ([#13](https://github.com/r4ai/buildq/issues/13)); recent idle run copies can remain above the requested GC budget ([#14](https://github.com/r4ai/buildq/issues/14)). Neither issue is fixed by these measurements.
+
+[Detailed report and methodology (Japanese)](docs/benchmarks/bevy-2026-10-23.ja.md) · [Raw results](docs/benchmarks/data/bevy-2026-10-23/summary.json) · [Reproducible benchmark](scripts/stress-bevy.py)
 
 ---
 
@@ -134,7 +142,7 @@ buildq: target <pool>/m0 (...)
 | `buildq status [--hosts]` | Show active slot holders and waiting jobs per class |
 | `buildq history [-n N]` | Show recent jobs<br>(wait time, run time, exit code, pool member) |
 | `buildq cache ls [--refresh]` | Show target pools, member sizes, budget, and free space |
-| `buildq gc [--dry-run]` | Manually prune caches to fit within the disk budget |
+| `buildq gc [--dry-run]` | Manually prune caches toward the disk budget (busy artifacts and recent run copies may remain) |
 | `buildq config` | Print effective configuration and directory paths |
 | `buildq run [-p PRIO] -- <cmd>...` | Queue any arbitrary command (with optional priority) |
 | `buildq run --host <H> -- <cmd>...` | Run a queued command on a remote SSH host |
