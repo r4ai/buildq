@@ -223,6 +223,8 @@ flowchart TD
    - Cross-worktree artifact reuse via Cargo's workspace-relative path hashing
    - Per-file Git blob tracking in `m0.manifest`
    - Targeted `.fingerprint/<pkg>-*` deletion for modified packages before each build
+   - On source-root changes, invalidate every local package so `CARGO_MANIFEST_DIR` and other compiled paths refer to the current worktree
+   - Registry/git dependencies stay shared; same-root builds keep normal incremental reuse
    - Fast, accurate incremental rebuilds independent of file `mtime`
 3. **Two-Phase `cargo run`**
    - Phase 1: Compile under a `build` slot and copy the binary + DLLs to `runs/r0`
