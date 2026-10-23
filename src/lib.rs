@@ -2,6 +2,7 @@
 //! for cargo jobs started by many parallel agents. See README.md.
 
 pub mod cargo;
+mod cargo_config;
 pub mod config;
 pub mod exec;
 pub mod external;

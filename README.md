@@ -230,6 +230,7 @@ flowchart TD
    - Phase 1: Compile under a `build` slot and copy the binary + DLLs to `runs/r0`
    - Phase 2: Release the `build` slot and `target/` member, then launch the binary under a `run` slot
    - Zero `target/` locking while applications are running
+   - Applies Cargo `[env]` from home/ancestor configs and `--config`, including `force` and config-relative paths ([Cargo rules](https://doc.rust-lang.org/cargo/reference/config.html#env))
 
 ## Documentation
 

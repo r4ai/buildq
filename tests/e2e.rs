@@ -392,6 +392,7 @@ fn reads_own_data() {
                std::env::var("EXPECTED_DATA").unwrap());
     assert_eq!(root, std::env::current_dir().unwrap());
 }
+
 "#,
             ),
         ],
@@ -425,4 +426,82 @@ fn reads_own_data() {
         );
         assert!(String::from_utf8_lossy(&out.stderr).contains("/m0 ("));
     }
+}
+
+/// Compare the launched environment with Cargo itself (no registry dependencies).
+#[test]
+fn run_applies_effective_cargo_config_environment() {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(tmp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='env-app'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            (
+                "src/main.rs",
+                r#"fn main() {
+            for name in ["BQ_DEFAULT", "BQ_KEEP", "BQ_FORCE", "BQ_RELATIVE", "BQ_HOME", "BQ_ORIGIN", "BQ_CLI"] {
+                println!("{name}={}", std::env::var(name).unwrap());
+            }
+        }"#,
+            ),
+            (".cargo/config.toml", "[env]\nBQ_DEFAULT='ignored'\n"),
+            (
+                ".cargo/config",
+                "[env]\nBQ_DEFAULT='local'\nBQ_KEEP='config'\nBQ_FORCE={value='forced',force=true}\nBQ_RELATIVE={value='assets',relative=true}\nBQ_ORIGIN={force=true}\nBQ_CLI={value='local'}\n",
+            ),
+            (
+                ".cargo/extra.toml",
+                "[env]\nBQ_CLI={value='extra',relative=true}\n",
+            ),
+        ],
+    );
+    let home = root.join("cargo-home");
+    fs::create_dir_all(&home).unwrap();
+    fs::write(
+        home.join("config.toml"),
+        "[env]\nBQ_HOME='home'\nBQ_DEFAULT='home'\nBQ_ORIGIN={value='origin',relative=true}\n",
+    )
+    .unwrap();
+    let args = [
+        "run",
+        "--offline",
+        "--config",
+        ".cargo/extra.toml",
+        "--config=env.BQ_CLI.value='cli'",
+    ];
+    let run = |cargo: &Path, shim: bool| {
+        let mut cmd = Command::new(cargo);
+        cmd.args(args)
+            .current_dir(root.join("ws"))
+            .env("PATH", &w.path)
+            .env("CARGO_HOME", &home)
+            .env("CARGO_TARGET_DIR", root.join("target"))
+            .env("BUILDQ_DIR", root.join("q"))
+            .env("BUILDQ_CACHE", root.join("cache"))
+            .env("BUILDQ_GC", "0")
+            .env("BUILDQ_POOL", "0")
+            .env("BUILDQ_REAL_CARGO", &w.real_cargo)
+            .env("BQ_KEEP", "inherited")
+            .env("BQ_FORCE", "inherited")
+            .env_remove("BUILDQ_HELD");
+        if !shim {
+            cmd.env("RUSTC_WRAPPER", "");
+        }
+        let out = cmd.output().unwrap();
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        stdout(&out)
+    };
+    let expected = run(&w.real_cargo, false);
+    assert!(expected.contains("BQ_DEFAULT=local"));
+    assert!(expected.contains("BQ_KEEP=inherited"));
+    assert!(expected.contains("BQ_FORCE=forced"));
+    assert_eq!(run(&w.shim_cargo, true), expected);
 }
