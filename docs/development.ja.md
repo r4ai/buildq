@@ -65,6 +65,44 @@ Unix では別テストの fork が exec 前に一時的にロックを継承し
 cargo test --test e2e -- --ignored --nocapture
 ```
 
+### Code Coverage
+
+リポジトリで固定したツールチェーン用の LLVM ツールと `cargo-llvm-cov` を導入する。
+
+```sh
+rustup component add llvm-tools-preview
+cargo install --locked cargo-llvm-cov --version 0.9.1
+```
+
+通常の Rust 単体・結合テストを一度実行し、両形式のレポートを生成する。
+
+```sh
+cargo llvm-cov --locked --all-features --no-report
+mkdir -p target/llvm-cov
+cargo llvm-cov report --lcov --output-path target/llvm-cov/lcov.info
+cargo llvm-cov report --html --output-dir target/llvm-cov
+cargo llvm-cov report
+```
+
+ファイル別のカバレッジは `target/llvm-cov/html/index.html` で確認できる。
+最初のコマンドは過去の計測データを消去し、レポート生成は同じ実行結果を再利用する。
+生成物は Git の追跡対象外である `target/` 内に保存する。
+
+CI は Linux 上でこのテストを実行し、HTML・LCOV レポートを
+`coverage-linux` アーティファクトとして14日間保存する。
+外部カバレッジサービスやトークンは不要である。
+**CI passed** には計測とレポート生成の成功を必須とするが、最低カバレッジ率は設けない。
+Actions の実行サマリーには行・関数・領域のカバレッジ率、行カバレッジが低い順の
+10ファイル、レポートのダウンロードリンクを表示する。
+同一リポジトリ内の PR には bot コメントも投稿し、計測成功時に同じコメントを更新する。
+fork からの PR は Actions サマリーとアーティファクトで確認する。
+コメント投稿は PR 書き込み権限を持つ独立ジョブで実行し、checkout は行わない。
+投稿の成否は **CI passed** に影響しない。
+リリースワークフローは再利用する CI にこの権限を許可するが、投稿ジョブは同一リポジトリの PR でのみ実行する。
+ignored の実 Cargo・rsync E2E テストは既存のテストマトリクスで別途実行し、計測には含めない。
+macOS・Windows 固有コードも Linux レポートの対象外である。
+Python のベンチマーク・リリースツールは計測しない。
+
 ## Python Benchmark Tools
 
 `scripts/` は uv で管理する独立した Python プロジェクトである。

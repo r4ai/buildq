@@ -17,6 +17,9 @@ env:
 
 jobs:
   checks:
+    permissions:
+      contents: read
+      pull-requests: write
     uses: ./.github/workflows/ci.yml
 
   validate:
