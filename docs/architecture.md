@@ -204,6 +204,21 @@ including `force` and config-relative paths ([Cargo rules](https://doc.rust-lang
 
 `buildq gc` runs automatically in the background after pooled builds (throttled to every 10 minutes unless over budget).
 
+The cache budget is a soft retention limit. Busy members and run copies are
+protected, so active builds may temporarily exceed it. `cache ls --json` and
+`gc --json` expose `over_budget`, `over_budget_bytes`, and
+`over_budget_reasons`; text output and `top` also show warnings. GC reports
+remaining overflow without treating protected busy artifacts as a deletion
+failure. Its exit status remains successful unless a deletion fails.
+
+An oversized build may finish if the free-space guard permits it. A completed
+member larger than the entire configured budget produces a warning with guidance
+to increase the budget or reduce artifacts. GC can evict that member once idle,
+even if it is the only one; the next invocation then starts cold. Member-size
+diagnostics reuse estimates for up to 60 seconds, with an initial measurement
+after the first build and fresh measurements during actual GC. This avoids
+walking a warm target directory after every job.
+
 The effective budget adapts to available volume space:
 
 $$\text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})$$
@@ -226,7 +241,6 @@ If permissions prevent measuring failed trash, the last known remaining size
 is retained as an estimate. GC does not change permissions automatically: repair
 the reported path's permissions or file locks and rerun GC.
 
-Idle member size estimates are reused across builds for up to 60 seconds.
 Automatic budget checks may defer enforcement until the next refresh.
 `cache ls --refresh` and actual GC passes remeasure before eviction.
 

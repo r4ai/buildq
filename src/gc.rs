@@ -79,10 +79,78 @@ pub struct Usage {
     pub trash_bytes: u64,
     pub budget: u64,
     pub effective_budget: u64,
+    pub over_budget: bool,
+    pub over_budget_bytes: u64,
+    pub over_budget_reasons: Vec<String>,
     pub free_disk: Option<u64>,
     /// Explicit target dirs jobs used outside the pool (filled by `scan_all`).
     pub external: Vec<ExternalDir>,
     pub external_total: u64,
+}
+
+impl Usage {
+    fn budget_state(&mut self) {
+        self.over_budget_bytes = self.total.saturating_sub(self.effective_budget);
+        self.over_budget = self.over_budget_bytes > 0;
+        self.over_budget_reasons.clear();
+        if !self.over_budget {
+            return;
+        }
+        if self.pools.iter().flat_map(|p| &p.members).any(|m| m.busy)
+            || self.runs.iter().any(|r| r.busy)
+        {
+            self.over_budget_reasons
+                .push("busy artifacts are protected; retry GC after jobs finish".into());
+        }
+        if self.trash_bytes > 0 {
+            self.over_budget_reasons.push(
+                "pending trash still consumes space; resolve deletion errors and retry GC".into(),
+            );
+        }
+        if self.effective_budget < self.budget {
+            self.over_budget_reasons
+                .push("the volume free-space reserve reduces the effective budget".into());
+        }
+        if self.over_budget_reasons.is_empty() {
+            self.over_budget_reasons
+                .push("idle artifacts await GC or could not be reclaimed".into());
+        }
+    }
+
+    pub fn budget_warning(&self) -> Option<String> {
+        self.over_budget.then(|| {
+            format!(
+                "cache exceeds its effective budget by {} (soft limit): {}",
+                human_bytes(self.over_budget_bytes),
+                self.over_budget_reasons.join("; ")
+            )
+        })
+    }
+}
+
+/// Measure at most once per TTL while the caller owns the member lease.
+/// This also seeds the first size estimate after a new member's build.
+pub fn completed_member_warning(cfg: &Config, dir: &Path, meta: &mut MemberMeta) -> Option<String> {
+    if (meta.size_ms == 0 || now_ms().saturating_sub(meta.size_ms) >= SIZE_CACHE_MS)
+        && let Ok(size) = util::path_size(dir)
+    {
+        meta.size_bytes = size;
+        meta.size_ms = now_ms();
+    }
+    oversized_member_warning(dir, meta.size_bytes, cfg.budget)
+}
+
+fn oversized_member_warning(dir: &Path, size: u64, budget: u64) -> Option<String> {
+    (size > budget).then(|| {
+        format!(
+            "completed cache member {} ({}) exceeds the entire cache budget {}; \
+         GC may evict it and the next build will be cold. Increase [cache].budget \
+         or reduce build artifacts to retain reuse",
+            dir.display(),
+            human_bytes(size),
+            human_bytes(budget)
+        )
+    })
 }
 
 pub fn runs_dir(cfg: &Config) -> PathBuf {
@@ -125,6 +193,11 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
             let mut members = Vec::new();
             for id in pool::member_ids(&dir) {
                 let mdir = dir.join(format!("m{id}"));
+                // Eviction retains lock inodes for safety. A lock-only ID is
+                // not a cache member; do not republish empty size metadata.
+                if !mdir.is_dir() {
+                    continue;
+                }
                 let meta_path = dir.join(format!("m{id}.json"));
                 // Keep the lock through measurement and metadata publication:
                 // otherwise a finishing build can overwrite a refreshed size,
@@ -196,7 +269,10 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
         + runs.iter().map(|r| r.size).sum::<u64>()
         + trash_bytes;
     let free_disk = util::free_disk_bytes(&cfg.cache_dir);
-    Usage {
+    let mut usage = Usage {
+        over_budget: false,
+        over_budget_bytes: 0,
+        over_budget_reasons: Vec::new(),
         effective_budget: effective_budget(cfg.budget, cfg.min_free, total, free_disk),
         pools,
         runs,
@@ -206,7 +282,9 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
         free_disk,
         external: Vec::new(),
         external_total: 0,
-    }
+    };
+    usage.budget_state();
+    usage
 }
 
 pub fn effective_budget(budget: u64, min_free: u64, used: u64, free: Option<u64>) -> u64 {
@@ -231,6 +309,9 @@ pub struct Report {
     pub before: u64,
     pub after: u64,
     pub effective_budget: u64,
+    pub over_budget: bool,
+    pub over_budget_bytes: u64,
+    pub over_budget_reasons: Vec<String>,
     pub skipped: Option<String>,
     /// Explicit target dirs outside the pool: counted, never pruned.
     pub external: u64,
@@ -239,6 +320,15 @@ pub struct Report {
 }
 
 impl Report {
+    fn observe(&mut self, usage: &Usage) {
+        self.after = usage.total;
+        self.effective_budget = usage.effective_budget;
+        self.over_budget = usage.over_budget;
+        self.over_budget_bytes = usage.over_budget_bytes;
+        self.over_budget_reasons = usage.over_budget_reasons.clone();
+        self.warnings.extend(usage.budget_warning());
+    }
+
     fn act(&mut self, what: String, bytes: u64) {
         self.freed += bytes;
         self.actions
@@ -313,16 +403,18 @@ fn reclaim(
 
 pub fn gc(cfg: &Config, opts: &Options) -> Report {
     let mut report = Report::default();
-    let _ = fs::create_dir_all(&cfg.cache_dir);
-    let Ok(Some(_gc_lock)) = lock::try_lock(&cfg.cache_dir.join("gc.lock")) else {
-        report.skipped = Some("another gc is running".into());
-        return report;
-    };
-    let stamp = cfg.cache_dir.join("gc.stamp");
     let mut cfg = cfg.clone();
     if let Some(b) = opts.budget {
         cfg.budget = b;
     }
+    let _ = fs::create_dir_all(&cfg.cache_dir);
+    let Ok(Some(_gc_lock)) = lock::try_lock(&cfg.cache_dir.join("gc.lock")) else {
+        report.skipped = Some("another gc is running".into());
+        report.observe(&scan(&cfg, false));
+        report.before = report.after;
+        return report;
+    };
+    let stamp = cfg.cache_dir.join("gc.stamp");
     if opts.auto {
         let last = fs::read_to_string(&stamp)
             .ok()
@@ -331,6 +423,8 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         let usage = scan(&cfg, false);
         if now_ms() - last < 10 * 60_000 && usage.total <= usage.effective_budget {
             report.skipped = Some("ran recently and within budget".into());
+            report.observe(&usage);
+            report.before = report.after;
             return report;
         }
     }
@@ -338,6 +432,18 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     let now = now_ms();
     let usage = scan(&cfg, true);
     report.before = usage.total;
+    for member in usage
+        .pools
+        .iter()
+        .flat_map(|p| &p.members)
+        .filter(|m| !m.busy)
+    {
+        report.warnings.extend(oversized_member_warning(
+            &member.dir,
+            member.size,
+            cfg.budget,
+        ));
+    }
 
     // 1. trash
     let trash = cfg.trash_dir();
@@ -521,11 +627,14 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             total = total.saturating_sub(freed);
         }
     }
-    report.after = if dry {
-        total
-    } else {
-        scan(&cfg, report.failed_deletions > 0).total
-    };
+    let mut remaining = scan(&cfg, report.failed_deletions > 0);
+    if dry {
+        remaining.total = total;
+        // Dry-run trash cleanup is projected as successful, like other actions.
+        remaining.trash_bytes = 0;
+        remaining.budget_state();
+    }
+    report.observe(&remaining);
     if !opts.auto {
         report.external = external::scan(&cfg, false)
             .iter()
@@ -784,6 +893,9 @@ pub fn render(u: &Usage) -> String {
         human_bytes(u.effective_budget),
         u.free_disk.map(human_bytes).unwrap_or_else(|| "?".into())
     ));
+    if let Some(warning) = u.budget_warning() {
+        s.push_str(&format!("warning: {warning}\n"));
+    }
     if !u.external.is_empty() {
         s.push_str(&format!(
             "explicit target dirs (not pooled, not pruned by gc): {}\n",
@@ -857,6 +969,73 @@ mod tests {
         )
         .unwrap();
         md
+    }
+
+    #[test]
+    fn busy_overflow_reports_why_gc_cannot_meet_the_soft_budget() {
+        let temp = tempfile::tempdir().unwrap();
+        let mut c = cfg(temp.path());
+        c.budget = 1000;
+        let dir = member(&c.cache_dir, "p", 0, now_ms(), 4000);
+        let held = lock::try_lock(&c.cache_dir.join("pools/p/m0.lock"))
+            .unwrap()
+            .unwrap();
+        let usage = scan(&c, true);
+        assert!(usage.over_budget);
+        assert_eq!(usage.over_budget_bytes, 3000);
+        assert!(render(&usage).contains("busy artifacts are protected"));
+        for dry_run in [false, true] {
+            let report = gc(
+                &c,
+                &Options {
+                    dry_run,
+                    ..Default::default()
+                },
+            );
+            assert!(report.over_budget);
+            assert_eq!(report.over_budget_bytes, 3000);
+            assert!(
+                report
+                    .warnings
+                    .iter()
+                    .any(|w| w.contains("busy artifacts are protected"))
+            );
+            assert!(dir.exists());
+        }
+        {
+            let _gc = lock::try_lock(&c.cache_dir.join("gc.lock"))
+                .unwrap()
+                .unwrap();
+            let skipped = gc(&c, &Options::default());
+            assert!(skipped.skipped.is_some());
+            assert!(skipped.over_budget);
+            assert_eq!(skipped.over_budget_bytes, 3000);
+        }
+        drop(held);
+        let report = gc(&c, &Options::default());
+        assert!(!report.over_budget);
+        assert_eq!(report.over_budget_bytes, 0);
+        assert!(!dir.exists());
+    }
+
+    #[test]
+    fn completed_member_warning_reuses_and_expires_the_size_estimate() {
+        let temp = tempfile::tempdir().unwrap();
+        let mut c = cfg(temp.path());
+        c.budget = 1000;
+        let dir = member(&c.cache_dir, "p", 0, now_ms(), 4000);
+        let mut meta = MemberMeta::default();
+        let warning = completed_member_warning(&c, &dir, &mut meta).unwrap();
+        assert!(warning.contains("next build will be cold"));
+        assert_eq!(meta.size_bytes, 4000);
+        file(&dir.join("new-artifact"), 4000, 0);
+        completed_member_warning(&c, &dir, &mut meta);
+        assert_eq!(meta.size_bytes, 4000, "warm jobs must reuse the estimate");
+        meta.size_ms = now_ms() - SIZE_CACHE_MS - 1;
+        completed_member_warning(&c, &dir, &mut meta);
+        assert_eq!(meta.size_bytes, 8000);
+        c.budget = 9000;
+        assert!(completed_member_warning(&c, &dir, &mut meta).is_none());
     }
 
     #[test]

@@ -42,6 +42,20 @@ stop if the reserve is breached. Use `buildq cache ls --refresh` and
 for the volume; `min_free = "0"` disables this guard. See the
 [free-space guard](architecture.md#free-space-guard) for scope and limitations.
 
+## Cache Budget
+
+`[cache] budget` controls cache retention, rather than the maximum size of a
+running build. Busy artifacts are protected. Use `buildq cache ls --refresh`
+or `buildq gc --json` to see remaining overflow and its reason. GC can exit
+successfully while still over budget when busy artifacts prevent reclamation.
+
+A completed member larger than the entire budget warns that GC may remove it,
+causing another cold build next time. Increase `budget` to fit the working set
+or reduce build artifacts. Oversized idle members have no retention exemption.
+The separate `min_free` guard still refuses or stops pooled builds under disk
+pressure; increasing `budget` does not disable it. See
+[Disk Budget & Garbage Collection](architecture.md#4-disk-budget--garbage-collection) for details.
+
 ## Live Monitoring
 
 `buildq top` refreshes running jobs, waiters and wait durations, remote queues,

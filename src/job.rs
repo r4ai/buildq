@@ -544,7 +544,7 @@ fn lease_member(cfg: &Config, ctx: &mut PoolCtx) -> Result<Lease, String> {
 /// its old or new form, so its package is invalidated for the next worktree.
 /// Only uncommitted files touched since the job started can be affected,
 /// which keeps this to one `git status`.
-fn after_job(ctx: &mut PoolCtx, lease: &mut Lease, started_ms: u64) {
+fn after_job(cfg: &Config, ctx: &mut PoolCtx, lease: &mut Lease, started_ms: u64) {
     let changed: Vec<String> = git::dirty(&ctx.wt)
         .into_iter()
         .filter(|p| {
@@ -573,6 +573,11 @@ fn after_job(ctx: &mut PoolCtx, lease: &mut Lease, started_ms: u64) {
             pool::invalidate(&lease.target_dir, &p.packages);
             let _ = pool::write_manifest(&ctx.pool.manifest_path(lease.id), &now);
         }
+    }
+    if let Some(warning) =
+        crate::gc::completed_member_warning(cfg, &lease.target_dir, &mut lease.meta)
+    {
+        eprintln!("buildq: warning: {warning}");
     }
     lease.finish();
 }
@@ -636,7 +641,7 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     let code = execution.as_ref().copied().unwrap_or(125);
     trace("cargo finished");
     if let (Some(c), Some(l)) = (ctx.as_mut(), lease.as_mut()) {
-        after_job(c, l, started);
+        after_job(cfg, c, l, started);
         trace("after-job check");
         if code == 0
             && let Some(dest) = mirror_dest(cfg, c, &parsed)
@@ -1041,7 +1046,7 @@ fn cargo_run(
         }
     }
     if let (Some(c), Some(l)) = (ctx.as_mut(), lease.as_mut()) {
-        after_job(c, l, started);
+        after_job(cfg, c, l, started);
     }
     record(
         cfg,
