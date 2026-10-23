@@ -30,6 +30,8 @@ use crate::util::{
 };
 
 const DAY_MS: u64 = 86_400_000;
+/// Bound repeated accounting walks during bursts of incremental builds.
+const SIZE_CACHE_MS: u64 = 5 * 60_000;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct MemberEntry {
@@ -109,7 +111,9 @@ pub fn external_warning(pool: u64, external: u64, budget: u64) -> Option<String>
     })
 }
 
-/// Sizes come from member metadata unless `refresh` (or never measured).
+/// Reuse member size estimates for five minutes after a measurement, even
+/// across builds. Unchanged members keep their measurement indefinitely.
+/// Explicit refresh forces an exact measurement of idle members.
 pub fn scan(cfg: &Config, refresh: bool) -> Usage {
     let mut pools = Vec::new();
     if let Ok(rd) = fs::read_dir(cfg.cache_dir.join("pools")) {
@@ -124,14 +128,36 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
                 let mdir = dir.join(format!("m{id}"));
                 let meta_path = dir.join(format!("m{id}.json"));
                 let mut meta = read_json::<MemberMeta>(&meta_path).unwrap_or_default();
-                let busy = lock::is_held(&dir.join(format!("m{id}.lock")));
-                if refresh
-                    || (meta.size_ms == 0 && mdir.exists())
-                    || meta.size_ms < meta.last_used_ms && !busy
-                {
-                    meta.size_bytes = dir_size(&mdir);
-                    meta.size_ms = now_ms();
-                    let _ = write_json(&meta_path, &meta);
+                let lock_path = dir.join(format!("m{id}.lock"));
+                let mut busy = lock::is_held(&lock_path);
+                let needs_measurement = |meta: &MemberMeta| {
+                    refresh
+                        || (meta.size_ms == 0 && mdir.exists())
+                        || (!busy
+                            && meta.size_ms < meta.last_used_ms
+                            && now_ms().saturating_sub(meta.size_ms) >= SIZE_CACHE_MS)
+                };
+                if needs_measurement(&meta) {
+                    // A build may start after the busy check. Hold its member
+                    // lock while reading and writing metadata, so accounting
+                    // cannot overwrite the builder's newer state.
+                    match lock::try_lock(&lock_path) {
+                        Ok(Some(_guard)) => {
+                            meta = read_json::<MemberMeta>(&meta_path).unwrap_or_default();
+                            if needs_measurement(&meta) {
+                                meta.size_bytes = dir_size(&mdir);
+                                meta.size_ms = now_ms();
+                                let _ = write_json(&meta_path, &meta);
+                            }
+                        }
+                        _ => {
+                            busy = true;
+                            // Report a read-only snapshot for explicit refresh
+                            // or an as-yet unmeasured active build. Never write
+                            // over metadata owned by its lease.
+                            meta.size_bytes = dir_size(&mdir);
+                        }
+                    }
                 }
                 members.push(MemberEntry {
                     id,
@@ -270,7 +296,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             let freed = prune_member(&m.dir, &cfg, now, dry, &label, &mut report);
             if freed > 0 && !dry {
                 let mp = p.dir.join(format!("m{}.json", m.id));
-                let mut meta = m.meta.clone();
+                let mut meta = read_json::<MemberMeta>(&mp).unwrap_or_else(|| m.meta.clone());
                 meta.size_bytes = meta.size_bytes.saturating_sub(freed);
                 let _ = write_json(&mp, &meta);
             }
@@ -685,6 +711,47 @@ mod tests {
         )
         .unwrap();
         md
+    }
+
+    #[test]
+    fn recent_measurement_is_reused_across_builds_until_refresh() {
+        let dir = tempfile::tempdir().unwrap();
+        let c = cfg(dir.path());
+        let md = member(&c.cache_dir, "p", 0, now_ms(), 10);
+        let initial = scan(&c, true).pools[0].members[0].meta.clone();
+        file(&md.join("new-artifact"), 100, 0);
+        let mut meta = initial.clone();
+        meta.last_used_ms = initial.size_ms + 1;
+        let meta_path = md.with_extension("json");
+        write_json(&meta_path, &meta).unwrap();
+        let cached = scan(&c, false).pools[0].members[0].meta.clone();
+        assert_eq!(cached.size_bytes, initial.size_bytes);
+        assert_eq!(cached.size_ms, initial.size_ms);
+        let refreshed = scan(&c, true).pools[0].members[0].meta.clone();
+        assert_eq!(refreshed.size_bytes, initial.size_bytes + 100);
+    }
+
+    #[test]
+    fn expired_dirty_measurements_refresh_but_busy_members_keep_metadata() {
+        let dir = tempfile::tempdir().unwrap();
+        let c = cfg(dir.path());
+        let md = member(&c.cache_dir, "p", 0, now_ms(), 10);
+        let mut meta = scan(&c, true).pools[0].members[0].meta.clone();
+        file(&md.join("new-artifact"), 100, 0);
+        meta.size_ms = now_ms().saturating_sub(SIZE_CACHE_MS + 1);
+        meta.last_used_ms = now_ms();
+        let meta_path = md.with_extension("json");
+        write_json(&meta_path, &meta).unwrap();
+        let held = lock::lock(&md.with_extension("lock")).unwrap();
+        for refresh in [false, true] {
+            let entry = &scan(&c, refresh).pools[0].members[0];
+            assert!(entry.busy);
+            assert_eq!(entry.size, if refresh { 110 } else { 10 });
+            let stored: MemberMeta = read_json(&meta_path).unwrap();
+            assert_eq!(stored.size_ms, meta.size_ms);
+        }
+        drop(held);
+        assert_eq!(scan(&c, false).pools[0].members[0].size, 110);
     }
 
     #[test]

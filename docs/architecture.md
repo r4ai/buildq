@@ -203,6 +203,14 @@ GC prunes artifacts in five stages from cheapest to most aggressive, skipping bu
 4. **Idle run directories**: removes `runs/r<i>` directories unused for 2 days
 5. **LRU member eviction**: evicts complete idle pool members in least-recently-used order until under budget
 
+Member sizes are cached in metadata. After a build, ordinary accounting reuses
+that estimate for up to five minutes instead of walking the entire target tree.
+Unchanged members keep their measurement indefinitely. `buildq cache ls --refresh`
+and manual `buildq gc` request fresh measurements; automatic GC reuses estimates.
+An active member keeps its cached estimate unless explicitly refreshed or never
+measured. Such measurements are read-only snapshots: accounting never overwrites
+metadata owned by a running build. Estimates may temporarily lag disk usage.
+
 ### Explicit Target Dirs
 
 A job that sets `--target-dir` or `CARGO_TARGET_DIR` itself (e.g. an agent building an A/B baseline) bypasses the pool by default:
