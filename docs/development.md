@@ -86,6 +86,13 @@ CI runs this suite on Linux and stores HTML and LCOV reports in the
 `coverage-linux` artifact for 14 days. No external coverage service or token is
 required. Coverage collection and report generation must succeed for **CI passed**;
 there is no minimum percentage gate yet.
+The Actions run summary shows line, function, and region coverage, the ten files
+with the lowest line coverage, and a report download link.
+PRs from this repository also receive a single bot comment that is updated on each
+successful coverage run. Fork PRs use the Actions summary and artifacts only.
+Comment publishing runs in a separate job with PR write permission and no checkout;
+it does not affect **CI passed**. The release workflow allows this permission for
+the reusable CI workflow, but the comment job runs only on same-repository PRs.
 Ignored real Cargo and rsync E2E tests run separately in the existing test matrix
 and are not included in coverage. Platform-specific macOS and Windows code is
 also outside this Linux report. Python benchmark and release tools are not measured.

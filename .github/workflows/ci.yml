@@ -66,6 +66,8 @@ jobs:
     name: Coverage (Linux)
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    outputs:
+      summary: ${{ steps.summary.outputs.body }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -81,14 +83,56 @@ jobs:
           mkdir -p target/llvm-cov
           cargo llvm-cov report --lcov --output-path target/llvm-cov/lcov.info
           cargo llvm-cov report --html --output-dir target/llvm-cov
+          cargo llvm-cov report --json --summary-only --output-path target/llvm-cov/summary.json
           cargo llvm-cov report
       - name: Upload coverage reports
+        id: artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-linux
           path: target/llvm-cov/
           if-no-files-found: error
           retention-days: 14
+      - name: Publish coverage summary
+        id: summary
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          COVERAGE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          COVERAGE_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          COVERAGE_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            await require('./.github/scripts/coverage-summary.cjs')({ core });
+
+  coverage-comment:
+    name: Update PR coverage comment
+    needs: coverage
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      # This job executes no checked-out PR code and only publishes Markdown.
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          COVERAGE_BODY: ${{ needs.coverage.outputs.summary }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100,
+            });
+            const previous = comments.find(comment =>
+              comment.user.login === 'github-actions[bot]' &&
+              comment.body?.startsWith('<!-- buildq-coverage -->'));
+            const body = process.env.COVERAGE_BODY;
+            if (previous) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
 
   msrv:
     runs-on: ubuntu-24.04
