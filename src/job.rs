@@ -889,7 +889,12 @@ fn pick_bin_from_metadata(meta: &Value, parsed: &Parsed) -> Option<String> {
     let want_pkg = parsed
         .opt(&["-p", "--package"])
         .map(|p| p.split('@').next().unwrap_or("").to_string());
-    let here = crate::util::canonical(&cwd());
+    let here = parsed
+        .opt(&["--manifest-path"])
+        .map(|manifest| crate::util::resolve(&cwd(), Path::new(&manifest)))
+        .and_then(|manifest| manifest.parent().map(Path::to_path_buf))
+        .unwrap_or_else(cwd);
+    let here = crate::util::canonical(&here);
     let pkg = match want_pkg {
         Some(name) => packages
             .iter()
