@@ -181,7 +181,9 @@ Windows では実行中の `.exe` ファイルが OS によってロックされ
 
 プールを使用したビルドの終了後、バックグラウンドで `buildq gc` が自動実行される（予算超過時を除き、10分に1回へスロットリング）。
 
-$$\text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})$$
+```math
+\text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})
+```
 
 GC は使用中メンバーには一切触れず、コストの低い順（5段階）で削除を進める。
 
