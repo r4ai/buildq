@@ -94,6 +94,26 @@ pub fn dir_size(path: &Path) -> u64 {
     total
 }
 
+/// Strict size measurement for reclamation accounting; symlinks are not followed.
+pub fn path_size(path: &Path) -> io::Result<u64> {
+    let md = match fs::symlink_metadata(path) {
+        Ok(md) => md,
+        Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(0),
+        Err(e) => return Err(e),
+    };
+    if md.is_file() {
+        return Ok(md.len());
+    }
+    if !md.is_dir() {
+        return Ok(0);
+    }
+    let mut size: u64 = 0;
+    for entry in fs::read_dir(path)? {
+        size = size.saturating_add(path_size(&entry?.path())?);
+    }
+    Ok(size)
+}
+
 /// Calls `f` for every regular file below `path`, without following symlinks.
 pub fn walk(path: &Path, f: &mut dyn FnMut(&Path, &fs::Metadata)) {
     let Ok(rd) = fs::read_dir(path) else { return };
@@ -199,6 +219,24 @@ pub fn norm_key(p: &Path) -> String {
 /// Removes a directory tree, first renaming it aside so a half-finished delete
 /// (killed process) never leaves a half-valid tree under the original name.
 pub fn remove_tree(path: &Path, trash_dir: &Path) -> io::Result<()> {
+    remove_tree_tracked(path, trash_dir).map_err(|e| io::Error::new(e.error.kind(), e))
+}
+
+#[derive(Debug)]
+pub struct RemovalError {
+    pub path: PathBuf,
+    pub error: io::Error,
+}
+
+impl std::fmt::Display for RemovalError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}: {}", self.path.display(), self.error)
+    }
+}
+impl std::error::Error for RemovalError {}
+
+/// Preserve the actual remaining path when a moved-aside tree cannot be deleted.
+pub fn remove_tree_tracked(path: &Path, trash_dir: &Path) -> Result<(), RemovalError> {
     if !path.exists() {
         return Ok(());
     }
@@ -208,10 +246,15 @@ pub fn remove_tree(path: &Path, trash_dir: &Path) -> io::Result<()> {
         .map(|n| n.to_string_lossy().to_string())
         .unwrap_or_default();
     let aside = trash_dir.join(format!("{name}-{}-{}", std::process::id(), now_ms()));
-    match fs::rename(path, &aside) {
-        Ok(()) => fs::remove_dir_all(&aside),
-        Err(_) => fs::remove_dir_all(path),
-    }
+    let target = if fs::rename(path, &aside).is_ok() {
+        aside
+    } else {
+        path.to_path_buf()
+    };
+    fs::remove_dir_all(&target).map_err(|error| RemovalError {
+        path: target,
+        error,
+    })
 }
 
 /// Writes a file atomically enough for our metadata: write a sibling, then rename.

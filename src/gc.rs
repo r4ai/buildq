@@ -25,9 +25,7 @@ use crate::config::Config;
 use crate::external::{self, ExternalDir};
 use crate::lock::{self, LockFile};
 use crate::pool::{self, MemberMeta, PoolInfo};
-use crate::util::{
-    self, dir_size, human_bytes, newest_mtime, now_ms, read_json, remove_tree, write_json,
-};
+use crate::util::{self, dir_size, human_bytes, newest_mtime, now_ms, read_json, write_json};
 
 const DAY_MS: u64 = 86_400_000;
 /// Estimates are shared by jobs and inspection processes, not process-local.
@@ -76,8 +74,9 @@ pub struct RunEntry {
 pub struct Usage {
     pub pools: Vec<PoolEntry>,
     pub runs: Vec<RunEntry>,
-    /// Pools and run dirs: what the budget governs.
+    /// Pools, run dirs, and pending trash: what the budget governs.
     pub total: u64,
+    pub trash_bytes: u64,
     pub budget: u64,
     pub effective_budget: u64,
     pub free_disk: Option<u64>,
@@ -135,11 +134,12 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
                     .flatten();
                 let busy = _member_lock.is_none();
                 let mut meta = read_json::<MemberMeta>(&meta_path).unwrap_or_default();
-                if refresh
+                if (refresh
                     || meta.size_ms == 0
-                    || (!busy && now_ms().saturating_sub(meta.size_ms) >= SIZE_CACHE_MS)
+                    || (!busy && now_ms().saturating_sub(meta.size_ms) >= SIZE_CACHE_MS))
+                    && let Ok(size) = util::path_size(&mdir)
                 {
-                    meta.size_bytes = dir_size(&mdir);
+                    meta.size_bytes = size;
                     meta.size_ms = now_ms();
                     // Busy sizes are transient estimates; never replace the
                     // lease holder's metadata while it is updating the member.
@@ -179,14 +179,29 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
             });
         }
     }
-    let total =
-        pools.iter().map(|p| p.size()).sum::<u64>() + runs.iter().map(|r| r.size).sum::<u64>();
+    let estimates: BTreeMap<PathBuf, u64> =
+        read_json(&cfg.trash_dir().with_extension("sizes.json")).unwrap_or_default();
+    let trash_bytes = match fs::read_dir(cfg.trash_dir()) {
+        Ok(entries) => entries
+            .flatten()
+            .map(|e| {
+                util::path_size(&e.path())
+                    .unwrap_or_else(|_| estimates.get(&e.path()).copied().unwrap_or(0))
+            })
+            .sum::<u64>(),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => 0,
+        Err(_) => estimates.values().copied().sum(),
+    };
+    let total = pools.iter().map(|p| p.size()).sum::<u64>()
+        + runs.iter().map(|r| r.size).sum::<u64>()
+        + trash_bytes;
     let free_disk = util::free_disk_bytes(&cfg.cache_dir);
     Usage {
         effective_budget: effective_budget(cfg.budget, cfg.min_free, total, free_disk),
         pools,
         runs,
         total,
+        trash_bytes,
         budget: cfg.budget,
         free_disk,
         external: Vec::new(),
@@ -220,6 +235,7 @@ pub struct Report {
     /// Explicit target dirs outside the pool: counted, never pruned.
     pub external: u64,
     pub warnings: Vec<String>,
+    pub failed_deletions: usize,
 }
 
 impl Report {
@@ -228,6 +244,71 @@ impl Report {
         self.actions
             .push(format!("{what} ({})", human_bytes(bytes)));
     }
+}
+
+/// Only account bytes actually removed; preserve a conservative estimate when
+/// permissions also prevent measuring a failed deletion's remainder.
+fn reclaim(
+    path: &Path,
+    bytes: u64,
+    dry: bool,
+    trash: &Path,
+    move_aside: bool,
+    report: &mut Report,
+    action: String,
+) -> u64 {
+    if dry {
+        report.act(action, bytes);
+        return bytes;
+    }
+    let result = if move_aside {
+        util::remove_tree_tracked(path, trash)
+    } else {
+        let result = if path.is_dir() {
+            fs::remove_dir_all(path)
+        } else {
+            fs::remove_file(path)
+        };
+        result.map_err(|error| util::RemovalError {
+            path: path.to_path_buf(),
+            error,
+        })
+    };
+    let (freed, remaining) = match result {
+        Ok(()) => (bytes, None),
+        Err(error) => {
+            let measured = util::path_size(&error.path);
+            let left = measured.as_ref().copied().unwrap_or(bytes);
+            report.failed_deletions += 1;
+            report.warnings.push(if measured.is_ok() {
+                format!("could not remove {error}; {} remain", human_bytes(left))
+            } else {
+                format!(
+                    "could not remove {error}; remaining size unavailable, retaining estimate {}",
+                    human_bytes(left)
+                )
+            });
+            (bytes.saturating_sub(left), Some((error.path, left)))
+        }
+    };
+    if !trash.as_os_str().is_empty() {
+        let metadata = trash.with_extension("sizes.json");
+        let mut estimates: BTreeMap<PathBuf, u64> = read_json(&metadata).unwrap_or_default();
+        let mut changed = estimates.remove(path).is_some();
+        if let Some((path, bytes)) = remaining
+            && path.starts_with(trash)
+        {
+            estimates.insert(path, bytes);
+            changed = true;
+        }
+        if changed {
+            let _ = write_json(&metadata, &estimates);
+        }
+    }
+    if freed > 0 {
+        report.act(action, freed);
+    }
+    freed
 }
 
 pub fn gc(cfg: &Config, opts: &Options) -> Report {
@@ -255,30 +336,28 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     }
     let dry = opts.dry_run;
     let now = now_ms();
+    let usage = scan(&cfg, true);
+    report.before = usage.total;
 
     // 1. trash
     let trash = cfg.trash_dir();
     if let Ok(rd) = fs::read_dir(&trash) {
         for e in rd.flatten() {
-            let size = dir_size(&e.path());
-            if !dry {
-                let _ = fs::remove_dir_all(e.path());
-            }
-            report.act(
-                format!("remove trash {}", e.file_name().to_string_lossy()),
+            let estimates: BTreeMap<PathBuf, u64> =
+                read_json(&trash.with_extension("sizes.json")).unwrap_or_default();
+            let size = util::path_size(&e.path())
+                .unwrap_or_else(|_| estimates.get(&e.path()).copied().unwrap_or(0));
+            reclaim(
+                &e.path(),
                 size,
+                dry,
+                &trash,
+                false,
+                &mut report,
+                format!("remove trash {}", e.file_name().to_string_lossy()),
             );
         }
     }
-    // Trash is outside Usage.total. Its reclamation improves physical free
-    // space, but must not reduce the simulated live-cache usage.
-    let trash_freed = report.freed;
-
-    // The cheap auto-GC throttle above may use estimates. Once GC actually
-    // runs, refresh even in auto mode so eviction never uses stale sizes.
-    let usage = scan(&cfg, true);
-    report.before = usage.total;
-
     // 2. inside idle members
     let mut pruned = BTreeMap::new();
     for p in &usage.pools {
@@ -291,7 +370,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             pruned.insert(m.dir.clone(), freed);
             if freed > 0 && !dry {
                 let mp = p.dir.join(format!("m{}.json", m.id));
-                let mut meta = m.meta.clone();
+                let mut meta = read_json::<MemberMeta>(&mp).unwrap_or_else(|| m.meta.clone());
                 meta.size_bytes = meta.size_bytes.saturating_sub(freed);
                 let _ = write_json(&mp, &meta);
             }
@@ -299,7 +378,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     }
 
     // 3. idle pools
-    let mut usage = scan(&cfg, false);
+    let mut usage = scan(&cfg, report.failed_deletions > 0);
     let mut removed_pools = Vec::new();
     for p in &usage.pools {
         if now.saturating_sub(p.last_used()) < cfg.pool_idle_days * DAY_MS {
@@ -315,18 +394,20 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             0
         };
         let size = p.size().saturating_sub(already_pruned);
-        if !dry {
-            let _ = remove_tree(&p.dir, &trash);
-        }
-        drop(locks);
-        report.act(
+        reclaim(
+            &p.dir,
+            size,
+            dry,
+            &trash,
+            true,
+            &mut report,
             format!(
                 "remove idle pool {} (unused {})",
                 p.name,
                 util::ago(p.last_used())
             ),
-            size,
         );
+        drop(locks);
         removed_pools.push(p.dir.clone());
     }
 
@@ -339,35 +420,31 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         let Ok(Some(_l)) = lock::try_lock(&r.dir.with_extension("lock")) else {
             continue;
         };
-        if !dry {
-            if remove_tree(&r.dir, &trash).is_err() {
-                continue;
-            }
+        reclaim(
+            &r.dir,
+            r.size,
+            dry,
+            &trash,
+            true,
+            &mut report,
+            format!("remove run dir {}", r.dir.display()),
+        );
+        if !dry && !r.dir.exists() {
             let _ = fs::remove_file(r.dir.with_extension("json"));
         }
-        report.act(format!("remove run dir {}", r.dir.display()), r.size);
         removed_runs.push(r.dir.clone());
     }
 
     // 5. budget: discard run copies before reusable build artifacts.
     if !dry {
-        usage = scan(&cfg, false);
+        usage = scan(&cfg, report.failed_deletions > 0);
     }
-    let mut total = usage.total.saturating_sub(if dry {
-        report.freed.saturating_sub(trash_freed)
-    } else {
-        0
-    });
-    // Reclaiming live artifacts decreases used and increases free equally.
-    // Reclaiming trash only increases free, since it is not in live usage.
-    let budget = effective_budget(
-        cfg.budget,
-        cfg.min_free,
-        usage.total,
-        usage
-            .free_disk
-            .map(|free| free.saturating_add(if dry { trash_freed } else { 0 })),
-    );
+    let mut total = usage
+        .total
+        .saturating_sub(if dry { report.freed } else { 0 });
+    // Both live artifacts and trash contribute to usage. Deleting either
+    // decreases used and increases free equally in the dry-run projection.
+    let budget = usage.effective_budget;
     report.effective_budget = budget;
     let mut runs: Vec<_> = usage
         .runs
@@ -382,18 +459,20 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         let Ok(Some(_lock)) = lock::try_lock(&r.dir.with_extension("lock")) else {
             continue;
         };
-        if !dry {
-            if remove_tree(&r.dir, &trash).is_err() {
-                continue;
-            }
+        let freed = reclaim(
+            &r.dir,
+            r.size,
+            dry,
+            &trash,
+            true,
+            &mut report,
+            format!("evict run dir {} (over budget)", r.dir.display()),
+        );
+        if !dry && !r.dir.exists() {
             let _ = fs::remove_file(r.dir.with_extension("json"));
         }
         // Keep the lock file: unlinking it could create two independent locks.
-        total = total.saturating_sub(r.size);
-        report.act(
-            format!("evict run dir {} (over budget)", r.dir.display()),
-            r.size,
-        );
+        total = total.saturating_sub(freed);
     }
     if total > budget {
         let mut members: Vec<(&PoolEntry, &MemberEntry)> = usage
@@ -412,22 +491,18 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             let Ok(Some(l)) = lock::try_lock(&lock_path) else {
                 continue;
             };
-            if !dry {
-                let _ = remove_tree(&m.dir, &trash);
-                let _ = fs::remove_file(p.dir.join(format!("m{}.json", m.id)));
-                let _ = fs::remove_file(p.dir.join(format!("m{}.manifest", m.id)));
-            }
-            drop(l);
-            if !dry {
-                let _ = fs::remove_file(&lock_path);
-            }
             let size = m.size.saturating_sub(if dry {
                 pruned.get(&m.dir).copied().unwrap_or(0)
             } else {
                 0
             });
-            total = total.saturating_sub(size);
-            report.act(
+            let freed = reclaim(
+                &m.dir,
+                size,
+                dry,
+                &trash,
+                true,
+                &mut report,
                 format!(
                     "evict {}/m{} (last used {} ago, over budget {})",
                     p.name,
@@ -435,11 +510,22 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
                     util::ago(m.meta.last_used_ms),
                     human_bytes(budget)
                 ),
-                size,
             );
+            if !dry && !m.dir.exists() {
+                let _ = fs::remove_file(p.dir.join(format!("m{}.json", m.id)));
+                let _ = fs::remove_file(p.dir.join(format!("m{}.manifest", m.id)));
+            }
+            drop(l);
+            // Keep the lock inode so a concurrent lease cannot acquire a
+            // replacement lock while an existing handle is still held.
+            total = total.saturating_sub(freed);
         }
     }
-    report.after = total;
+    report.after = if dry {
+        total
+    } else {
+        scan(&cfg, report.failed_deletions > 0).total
+    };
     if !opts.auto {
         report.external = external::scan(&cfg, false)
             .iter()
@@ -447,7 +533,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             .sum();
         report
             .warnings
-            .extend(external_warning(total, report.external, budget));
+            .extend(external_warning(report.after, report.external, budget));
     }
     if !dry {
         let _ = fs::write(&stamp, now_ms().to_string());
@@ -506,14 +592,19 @@ pub fn prune_member(
             };
             for v in victims {
                 let size = dir_size(&v);
-                if !dry {
-                    let _ = fs::remove_dir_all(&v);
+                let removed = reclaim(
+                    &v,
+                    size,
+                    dry,
+                    &cfg.trash_dir(),
+                    false,
+                    report,
+                    format!("{label}: incremental {}", rel(dir, &v)),
+                );
+                if !dry && !v.exists() {
                     let _ = fs::remove_file(v.with_extension("lock"));
                 }
-                freed += size;
-                if size > 0 {
-                    report.act(format!("{label}: incremental {}", rel(dir, &v)), size);
-                }
+                freed += removed;
             }
         }
     }
@@ -542,12 +633,15 @@ pub fn prune_member(
                 {
                     continue;
                 }
-                let size = remove_unit(&profile_dir, &pkg, hash, dry);
-                freed += size;
-                report.act(
-                    format!("{label}: stale {pkg}-{hash} ({} old)", util::ago(*t)),
-                    size,
+                let size = remove_unit_logged(
+                    &profile_dir,
+                    &pkg,
+                    hash,
+                    dry,
+                    report,
+                    &format!("{label}: stale {pkg}-{hash} ({} old)", util::ago(*t)),
                 );
+                freed += size;
             }
         }
     }
@@ -556,6 +650,24 @@ pub fn prune_member(
 
 /// Removes one unit's fingerprint, build dir and deps files; returns bytes.
 pub fn remove_unit(profile_dir: &Path, pkg: &str, hash: &str, dry: bool) -> u64 {
+    remove_unit_logged(
+        profile_dir,
+        pkg,
+        hash,
+        dry,
+        &mut Report::default(),
+        "remove unit",
+    )
+}
+
+fn remove_unit_logged(
+    profile_dir: &Path,
+    pkg: &str,
+    hash: &str,
+    dry: bool,
+    report: &mut Report,
+    label: &str,
+) -> u64 {
     let mut size = 0;
     let fp = profile_dir
         .join(".fingerprint")
@@ -563,10 +675,15 @@ pub fn remove_unit(profile_dir: &Path, pkg: &str, hash: &str, dry: bool) -> u64 
     let build = profile_dir.join("build").join(format!("{pkg}-{hash}"));
     for d in [fp, build] {
         if d.exists() {
-            size += dir_size(&d);
-            if !dry {
-                let _ = fs::remove_dir_all(&d);
-            }
+            size += reclaim(
+                &d,
+                dir_size(&d),
+                dry,
+                Path::new(""),
+                false,
+                report,
+                format!("{label}: {}", d.display()),
+            );
         }
     }
     let suffix = format!("-{hash}");
@@ -578,15 +695,16 @@ pub fn remove_unit(profile_dir: &Path, pkg: &str, hash: &str, dry: bool) -> u64 
         let name = e.file_name().to_string_lossy().to_string();
         let stem = name.split('.').next().unwrap_or("");
         if stem.ends_with(&suffix) {
-            size += e.metadata().map(|m| m.len()).unwrap_or(0);
-            if !dry {
-                let p = e.path();
-                if p.is_dir() {
-                    let _ = fs::remove_dir_all(p);
-                } else {
-                    let _ = fs::remove_file(p);
-                }
-            }
+            let path = e.path();
+            size += reclaim(
+                &path,
+                util::path_size(&path).unwrap_or(0),
+                dry,
+                Path::new(""),
+                false,
+                report,
+                format!("{label}: {}", path.display()),
+            );
         }
     }
     size
@@ -625,6 +743,12 @@ fn rel(base: &Path, p: &Path) -> String {
 /// Human-readable `cache ls`.
 pub fn render(u: &Usage) -> String {
     let mut s = String::new();
+    if u.trash_bytes > 0 {
+        s.push_str(&format!(
+            "trash: {} (pending removal, included in total)\n",
+            human_bytes(u.trash_bytes)
+        ));
+    }
     for p in &u.pools {
         s.push_str(&format!(
             "{}  {}  (rustc {}, last used {} ago)\n",

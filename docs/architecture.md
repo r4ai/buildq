@@ -203,6 +203,13 @@ GC prunes artifacts in five stages from cheapest to most aggressive, skipping bu
 4. **Idle run directories**: removes `runs/r<i>` directories unused for 2 days
 5. **LRU member eviction**: evicts complete idle pool members in least-recently-used order until under budget
 
+Failed deletions report their remaining path and error, and `buildq gc` exits
+nonzero. Only reclaimed bytes count as freed. Pending trash is included in
+`cache ls` totals and budget calculations; GC retries it on subsequent runs.
+If permissions prevent measuring failed trash, the last known remaining size
+is retained as an estimate. GC does not change permissions automatically: repair
+the reported path's permissions or file locks and rerun GC.
+
 ### Explicit Target Dirs
 
 A job that sets `--target-dir` or `CARGO_TARGET_DIR` itself (e.g. an agent building an A/B baseline) bypasses the pool by default:
