@@ -67,6 +67,41 @@ Alternatively set `BUILDQ_GC=0` and have an orchestrator invoke foreground
 `buildq gc` and wait for it. Manual GC and free-space admission checks remain
 available. See [Container Process Lifecycle](development.md#container-process-lifecycle).
 
+## Temporary Directory Isolation
+
+Target-pool members and queue slots do not isolate temporary fixtures. Tests that
+use process-local counters under a fixed temporary root can collide across
+independent worktrees, including when invoked without buildq. buildq preserves
+the caller's temporary-directory environment by default.
+
+Opt in per invocation by creating a fresh directory and setting all three
+variables for the command and its descendants. This POSIX example assumes the
+command's entire process tree finishes before it returns:
+
+```sh
+job_tmp="$(mktemp -d /var/tmp/buildq-job.XXXXXXXX)" || exit 1
+job_status=0
+TMPDIR="$job_tmp" TMP="$job_tmp" TEMP="$job_tmp" buildq cargo test || job_status=$?
+# The foreground command and all its descendants have exited here
+rm -rf -- "$job_tmp"
+exit "$job_status"
+```
+
+Choose an executable temporary volume: rustdoc compiles and runs doctest
+executables there, so a `noexec` mount can cause failures independently of buildq.
+`/var/tmp` above is an example; verify its mount policy. Keep the directory
+outside Git checkouts and `BUILDQ_CACHE`. Arbitrary job temporary files are not
+pool members, are not counted by the cache budget, and are not GC-owned. The
+caller must monitor their disk usage, limit retention, and remove abandoned
+directories after verifying that their process trees have exited.
+
+For commands that leave background descendants, have a supervisor wait for the
+whole tree before removal. A shell EXIT trap or the initial command's exit alone
+does not establish that condition. On cancellation, retain the directory until
+that check is complete. This recipe supplies unique inherited paths; programs
+that ignore TMPDIR/TMP/TEMP or share other fixed paths still need their own
+isolation. See [Container Process Lifecycle](development.md#container-process-lifecycle).
+
 ## Nested Cargo
 
 Build scripts can build helpers in separate Cargo workspaces without inheriting

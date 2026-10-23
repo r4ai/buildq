@@ -47,6 +47,7 @@ Verified behaviors:
 - Killing a slot holder immediately frees its slot for the next waiter
 - Nested calls (`BUILDQ_HELD`) bypass the queue without deadlocking
 - Exit codes (including non-zero and Windows NTSTATUS codes) pass through
+- Caller-supplied TMPDIR/TMP/TEMP isolate otherwise-colliding concurrent fixtures on Unix
 - `cargo` shim queues heavy commands (including `.cargo/config.toml` aliases) and passes light commands through
 - Pool member selection, manifest invalidation, and budget-aware GC skip busy members
 - Two-phase `cargo run` binary/DLL syncing and JSON artifact parsing

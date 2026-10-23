@@ -66,6 +66,40 @@ gc_mode = "inline"
 手動 GC と空き容量の開始前チェックは引き続き利用できる。
 [Container Process Lifecycle](development.ja.md#container-process-lifecycle) を参照する。
 
+## Temporary Directory Isolation
+
+プールメンバーとキュースロットは一時ファイルの fixture を分離しない。
+固定の一時ルート内でプロセス内カウンターを使うテストは、独立した worktree 間でも衝突しうる。
+これは buildq を使わない直接実行でも起こる。デフォルトでは呼び出し元の一時ディレクトリ環境を維持する。
+
+呼び出しごとに新しいディレクトリを作り、コマンドと子孫へ3つの環境変数を渡すことで分離を選べる。
+次の POSIX の例は、コマンドが返る時点でプロセスツリー全体が終了する場合を対象とする。
+
+```sh
+job_tmp="$(mktemp -d /var/tmp/buildq-job.XXXXXXXX)" || exit 1
+job_status=0
+TMPDIR="$job_tmp" TMP="$job_tmp" TEMP="$job_tmp" buildq cargo test || job_status=$?
+# 前景のコマンドとその子孫がすべて終了した時点で削除する
+rm -rf -- "$job_tmp"
+exit "$job_status"
+```
+
+一時領域には実行可能なボリュームを選ぶ。
+rustdoc は一時領域で doctest の実行ファイルを生成・起動するため、
+`noexec` マウントは buildq と無関係に失敗の原因となる。
+例の `/var/tmp` も実際のマウント設定を確認する。
+一時ディレクトリは Git チェックアウトと `BUILDQ_CACHE` の外に置く。
+任意のジョブの一時ファイルはプールメンバーではなく、キャッシュ予算に含まれず、GC の管理対象でもない。
+使用量の監視、保持期限の制限、中断後の残骸の削除は呼び出し元が担う。
+残骸もプロセスツリー全体の終了を確認してから削除する。
+
+バックグラウンドの子孫を残すコマンドは、管理側でツリー全体の終了を待ってから削除する。
+シェルの EXIT trap や最初のコマンドの終了だけでは、その条件を満たしたことにならない。
+キャンセル時も確認が終わるまで一時ディレクトリを保持する。
+この手順は継承するパスを一意にするものである。
+TMPDIR/TMP/TEMP を無視するプログラムや別の固定パスを共有する処理には、個別の分離が必要である。
+[Container Process Lifecycle](development.ja.md#container-process-lifecycle) を参照する。
+
 ## Nested Cargo
 
 build script は、親のプール target を継承せずに別 Cargo ワークスペースの helper をビルドできる。

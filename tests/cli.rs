@@ -1211,3 +1211,85 @@ fn cached_member_sizes_refresh_before_gc_budget_decisions() {
     assert_eq!(report["after"], 0);
     assert!(!member.exists());
 }
+
+#[test]
+#[cfg(unix)]
+fn caller_temp_directories_isolate_otherwise_colliding_concurrent_jobs() {
+    let e = Env::new();
+    let script = r#"
+set -eu
+test "$TMPDIR" = "$TMP" && test "$TMP" = "$TEMP" || exit 74
+mkdir "$TMPDIR/fixed-fixture" 2>/dev/null || exit 73
+touch "$1"
+attempt=0
+while ! test -f "$2"; do
+    attempt=$((attempt + 1))
+    test "$attempt" -lt 1200 || exit 75
+    sleep 0.01
+done
+test -d "$TMPDIR/fixed-fixture"
+"#;
+    for isolated in [false, true] {
+        let phase = e.root.join(if isolated { "isolated" } else { "shared" });
+        fs::create_dir_all(&phase).unwrap();
+        let release = phase.join("release");
+        let ready = [phase.join("ready-0"), phase.join("ready-1")];
+        let mut children: Vec<Child> = (0..2)
+            .map(|i| {
+                let temp = phase.join(if isolated {
+                    format!("tmp-{i}")
+                } else {
+                    "tmp".into()
+                });
+                fs::create_dir_all(&temp).unwrap();
+                e.cmd(2)
+                    .env("BUILDQ_MAX_PER_WORKTREE", "0")
+                    .env("TMPDIR", &temp)
+                    .env("TMP", &temp)
+                    .env("TEMP", &temp)
+                    .args(["run", "--", "sh", "-c", script, "temp-fixture"])
+                    .arg(&ready[i])
+                    .arg(&release)
+                    .stderr(Stdio::null())
+                    .spawn()
+                    .unwrap()
+            })
+            .collect();
+        let start = Instant::now();
+        let concurrent = loop {
+            let running = ready.iter().filter(|p| p.is_file()).count();
+            let finished = children
+                .iter_mut()
+                .map(|c| c.try_wait().unwrap())
+                .filter(Option::is_some)
+                .count();
+            let observed = if isolated {
+                running == 2 && finished == 0
+            } else {
+                running == 1 && finished == 1
+            };
+            if observed || finished == 2 || start.elapsed() > Duration::from_secs(10) {
+                break observed;
+            }
+            thread::sleep(Duration::from_millis(10));
+        };
+        // Release and wait before asserting or removing caller-owned temp dirs.
+        // The shell's bounded loop also prevents a failed coordinator from
+        // leaving its fixture running indefinitely.
+        fs::write(&release, "").unwrap();
+        let mut codes: Vec<_> = children
+            .iter_mut()
+            .map(|c| c.wait().unwrap().code())
+            .collect();
+        codes.sort();
+        assert!(concurrent, "both jobs must overlap (isolated={isolated})");
+        assert_eq!(
+            codes,
+            if isolated {
+                vec![Some(0), Some(0)]
+            } else {
+                vec![Some(0), Some(73)]
+            }
+        );
+    }
+}
