@@ -61,6 +61,8 @@ def render():
                 ax.text(value + maximum * .018, y, f'{value:.2f}', va='center', fontproperties=font, fontsize=10, color='#222222')
         filename = 'bevy-performance.ja.svg' if japanese else 'bevy-performance.svg'
         fig.savefig(OUT / filename, format='svg', bbox_inches='tight', pad_inches=.16, metadata={'Date': None, 'Description': 'Three simultaneous Bevy worktree builds, initially empty caches; each metric starts at zero. Pool reuse is included.'})
+        svg = OUT / filename
+        svg.write_text('\n'.join(line.rstrip() for line in svg.read_text().splitlines()) + '\n')
         fig.savefig(f'/tmp/buildq-performance-{locale}.png', dpi=150, bbox_inches='tight', pad_inches=.16)
         plt.close(fig)
 
