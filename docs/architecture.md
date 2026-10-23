@@ -183,7 +183,9 @@ Running a binary directly inside `m0/debug/app.exe` would cause subsequent build
 
 The effective budget adapts to available volume space:
 
-$$\text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})$$
+```math
+\text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})
+```
 
 GC prunes artifacts in five stages from cheapest to most aggressive, skipping busy members:
 
