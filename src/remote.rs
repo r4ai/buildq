@@ -151,7 +151,14 @@ impl Transport for Ssh {
         }
         vec![(
             "GIT_SSH_COMMAND".into(),
-            format!("ssh {}", self.args.join(" ")),
+            format!(
+                "ssh {}",
+                self.args
+                    .iter()
+                    .map(|a| sh_quote(a))
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
         )]
     }
 
@@ -361,6 +368,7 @@ pub fn run_on(
 ) -> Result<i32, String> {
     let root = job.cfg.root.clone().unwrap_or_else(|| ".buildq".into());
     let l = layout(&root, wt);
+    check_toolchain(t, job.cfg)?;
     let sha = t.sync(job.host, wt, &l, scratch)?;
     job::note(&format!(
         "{}: synced {} to {}",
@@ -384,6 +392,13 @@ pub fn run_on(
         .iter()
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect();
+    let command: Vec<String> = match &job.cfg.rust_toolchain {
+        Some(tc) => s(&["rustup", "run", tc])
+            .into_iter()
+            .chain(job.argv.iter().cloned())
+            .collect(),
+        None => job.argv.to_vec(),
+    };
     let argv: Vec<String> = match &job.cfg.buildq {
         Some(bq) => {
             if !job.fetch.is_empty() {
@@ -392,10 +407,10 @@ pub fn run_on(
             }
             [bq.clone(), "run".into(), "--".into()]
                 .into_iter()
-                .chain(job.argv.iter().cloned())
+                .chain(command)
                 .collect()
         }
-        None => job.argv.to_vec(),
+        None => command,
     };
     let (code, _) = t
         .exec(Some(&cwd), &env, &argv, false)
@@ -531,6 +546,23 @@ pub fn choose(loads: &[HostLoad], affinity: Option<&str>) -> Option<String> {
         .map(|l| l.name.clone())
 }
 
+fn check_toolchain(t: &dyn Transport, host: &HostConfig) -> Result<(), String> {
+    if let Some(tc) = &host.rust_toolchain {
+        ok(
+            t.probe(
+                &host
+                    .env
+                    .iter()
+                    .map(|(k, v)| (k.clone(), v.clone()))
+                    .collect::<Vec<_>>(),
+                &s(&["rustup", "run", tc, "rustc", "--version"]),
+            ),
+            &format!("remote toolchain {tc}"),
+        )?;
+    }
+    Ok(())
+}
+
 fn check_rustc(t: &dyn Transport, host: &HostConfig) -> Result<(), String> {
     let Some(expected) = &host.rustc_release else {
         return Ok(());
@@ -540,7 +572,17 @@ fn check_rustc(t: &dyn Transport, host: &HostConfig) -> Result<(), String> {
         .iter()
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect();
-    let out = ok(t.probe(&env, &s(&["rustc", "--version"])), "remote rustc")?;
+    let out = ok(
+        t.probe(
+            &env,
+            &host
+                .rust_toolchain
+                .as_ref()
+                .map(|tc| s(&["rustup", "run", tc, "rustc", "--version"]))
+                .unwrap_or_else(|| s(&["rustc", "--version"])),
+        ),
+        "remote rustc",
+    )?;
     let actual = out
         .split_whitespace()
         .nth(1)
@@ -554,6 +596,7 @@ fn check_rustc(t: &dyn Transport, host: &HostConfig) -> Result<(), String> {
 }
 
 fn probe_load(t: &dyn Transport, name: &str, host: &HostConfig) -> Result<HostLoad, String> {
+    check_toolchain(t, host)?;
     check_rustc(t, host)?;
     let env: Vec<_> = host
         .env
@@ -827,6 +870,46 @@ mod tests {
             io::ErrorKind::TimedOut
         );
         assert!(started.elapsed() < Duration::from_secs(3));
+    }
+
+    #[test]
+    fn installed_toolchain_probe_uses_host_environment() {
+        struct ToolchainProbe;
+        impl Transport for ToolchainProbe {
+            fn exec(
+                &self,
+                _: Option<&str>,
+                env: &[(String, String)],
+                argv: &[String],
+                capture: bool,
+            ) -> io::Result<(i32, String)> {
+                assert!(capture);
+                assert_eq!(env, &[("CUSTOM".into(), "value".into())]);
+                assert_eq!(argv, s(&["rustup", "run", "stable", "rustc", "--version"]));
+                Ok((0, "rustc 1.99.0 (hash date)".into()))
+            }
+            fn git_url(&self, _: &str) -> String {
+                unreachable!()
+            }
+            fn fetch(&self, _: &str, _: &Path) -> io::Result<()> {
+                unreachable!()
+            }
+        }
+        let host = HostConfig {
+            rust_toolchain: Some("stable".into()),
+            rustc_release: Some("1.99.0".into()),
+            env: BTreeMap::from([("CUSTOM".into(), "value".into())]),
+            ..Default::default()
+        };
+        check_toolchain(&ToolchainProbe, &host).unwrap();
+        check_rustc(&ToolchainProbe, &host).unwrap();
+        let unavailable = Probe {
+            replies: std::cell::RefCell::new(std::collections::VecDeque::from([(
+                1,
+                String::new(),
+            )])),
+        };
+        assert!(check_toolchain(&unavailable, &host).is_err());
     }
 
     #[test]

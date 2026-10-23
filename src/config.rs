@@ -99,6 +99,8 @@ pub struct HostConfig {
     pub buildq: Option<String>,
     /// Optional required remote `rustc --version` release (e.g. "1.99.0").
     pub rustc_release: Option<String>,
+    /// Installed rustup toolchain used for remote probes and jobs.
+    pub rust_toolchain: Option<String>,
     /// Environment for remote jobs.
     pub env: BTreeMap<String, String>,
 }

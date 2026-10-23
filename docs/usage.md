@@ -65,6 +65,7 @@ auto_hosts = ["local", "box"]
 ssh = "box"              # Host alias from ~/.ssh/config
 slots = 4                # Max concurrent jobs sent to this host
 # buildq = "buildq"      # Probe remote queue load before automatic selection
+# rust_toolchain = "stable" # Optional installed rustup toolchain
 # rustc_release = "1.99.0" # Optional required remote rustc release
 ```
 
@@ -77,3 +78,14 @@ buildq run --host box --fetch target/debug/app -- cargo build --bin app
 ```
 
 See [Remote Execution Protocol](architecture.md#5-remote-execution-protocol-ssh) for host selection and transport details.
+
+
+`--host auto` (and comma-separated candidates) probes each remote before choosing.
+With `buildq` configured it reads the remote build queue; otherwise it uses Linux
+CPU count and one-minute system load. Local dispatch limits and worktree affinity
+still apply. Unreachable hosts and failed probes are excluded; no eligible host is
+an error. SSH probes use batch mode and a five-second connection timeout.
+`rust_toolchain` optionally checks an already installed rustup toolchain and runs
+the command through it; buildq never installs toolchains. Explicit hosts also
+receive this check. Remote job `env` applies to probes too.
+

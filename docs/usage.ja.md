@@ -63,6 +63,7 @@ auto_hosts = ["local", "box"]
 ssh = "box"              # ~/.ssh/config のホスト名
 slots = 4                # このホストへ同時に送る最大ジョブ数
 # buildq = "buildq"      # 自動選択前にリモートの待機列を確認
+# rust_toolchain = "stable" # Optional installed rustup toolchain
 # rustc_release = "1.99.0" # リモートの Rust リリースを検査（任意）
 ```
 
@@ -75,3 +76,12 @@ buildq run --host box --fetch target/debug/app -- cargo build --bin app
 ```
 
 ホスト選択の判定・同期方式の詳細は [Remote Execution Protocol](architecture.ja.md#5-remote-execution-protocol-ssh) を参照する。
+
+
+`--host auto` とカンマ区切りの候補指定では、選択前に各リモートの実負荷を取得する。
+`buildq` 設定時はリモートのビルドキュー、それ以外は Linux の CPU 数と1分平均負荷を用いる。
+ローカルの送信上限と worktree の親和性も考慮する。接続不可・検査失敗の候補は除外し、候補がなければエラーとなる。
+SSH 検査は batch mode と5秒の接続タイムアウトを用いる。
+`rust_toolchain` は導入済みの rustup toolchain を検査し、その toolchain でコマンドを実行する任意設定である。
+自動インストールは行わず、明示的なホスト指定にも検査を適用する。リモートの `env` 設定は検査にも適用する。
+
