@@ -1,10 +1,12 @@
 //! The remote protocol against a transport that treats a local directory as
 //! the remote home: same git push / worktree / run / fetch steps, no ssh.
 
+mod common;
+
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::Stdio;
 
 use buildq::config::HostConfig;
 use buildq::remote::{self, RemoteJob, Transport};
@@ -46,7 +48,7 @@ impl Transport for LocalHost {
                 .unwrap_or_else(|| self.home.clone());
             return Ok((if base.join(path).exists() { 0 } else { 1 }, String::new()));
         }
-        let mut c = Command::new(&argv[0]);
+        let mut c = common::command(&argv[0]);
         c.args(&argv[1..]).current_dir(
             cwd.map(|d| self.path(d))
                 .unwrap_or_else(|| self.home.clone()),
@@ -74,7 +76,7 @@ impl Transport for LocalHost {
 }
 
 fn git(dir: &Path, args: &[&str]) {
-    let st = Command::new("git")
+    let st = common::command("git")
         .args([
             "-c",
             "user.name=t",
@@ -155,7 +157,7 @@ fn sync_run_fetch_roundtrip() {
         fs::read_to_string(repo.join(".git/HEAD")).unwrap(),
         head_before
     );
-    let st = Command::new("git")
+    let st = common::command("git")
         .args(["status", "--porcelain"])
         .current_dir(&repo)
         .output()

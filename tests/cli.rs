@@ -1,6 +1,8 @@
 //! Process-level tests against the real binary: separate processes, real
 //! OS locks, real kills.
 
+mod common;
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Output, Stdio};
@@ -24,7 +26,7 @@ impl Env {
     }
 
     fn cmd(&self, slots: usize) -> Command {
-        let mut c = Command::new(BQ);
+        let mut c = common::command(BQ);
         c.env("BUILDQ_DIR", self.root.join("q"))
             .env("BUILDQ_CACHE", self.root.join("cache"))
             .env("BUILDQ_SLOTS", slots.to_string())
@@ -725,7 +727,7 @@ fn fake_cargo(dir: &Path) {
 }
 
 fn git(dir: &Path, args: &[&str]) {
-    let st = Command::new("git")
+    let st = common::command("git")
         .args([
             "-c",
             "user.name=t",
@@ -809,7 +811,7 @@ impl ShimSetup {
             .shim
             .join(if cfg!(windows) { "cargo.exe" } else { "cargo" });
         let c = self.e.cmd(2);
-        let mut c2 = Command::new(exe);
+        let mut c2 = common::command(exe);
         for (k, v) in c.get_envs() {
             match v {
                 Some(v) => c2.env(k, v),
@@ -910,7 +912,7 @@ fn shim_inside_a_held_job_is_passthrough() {
         .shim
         .join(if cfg!(windows) { "cargo.exe" } else { "cargo" });
     // What a build script or test calling cargo sees: the slot is already held.
-    let out = Command::new(exe)
+    let out = common::command(exe)
         .args(["build"])
         .current_dir(&s.repo)
         .env("BUILDQ_DIR", s.e.root.join("q"))
@@ -1263,6 +1265,14 @@ fn top_refreshes_and_validates_options() {
 fn output_commands_exit_quietly_when_stdout_pipe_is_closed() {
     use std::os::fd::{FromRawFd, OwnedFd};
     let e = Env::new();
+    assert!(
+        e.cmd(1)
+            .args(["run", "--", BQ, "__helper", "exit", "0"])
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
     for args in [
         vec!["status"],
         vec!["status", "--json"],
@@ -1299,5 +1309,47 @@ fn output_commands_exit_quietly_when_stdout_pipe_is_closed() {
             .unwrap();
         assert!(out.status.success(), "{args:?}: {}", stderr(&out));
         assert!(out.stderr.is_empty(), "{args:?}: {}", stderr(&out));
+    }
+}
+
+#[test]
+fn harness_clears_inherited_queue_and_target_overrides() {
+    const MARKER: &str = "T207_HARNESS_CHILD";
+    let names = [
+        "BUILDQ_DIR",
+        "BUILDQ_HELD",
+        "BUILDQ_POOL",
+        "BUILDQ_REAL_CARGO",
+        "BUILDQ_FUTURE_SETTING",
+        "CARGO_TARGET_DIR",
+    ];
+    if std::env::var_os(MARKER).is_none() {
+        let out = common::command(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "harness_clears_inherited_queue_and_target_overrides",
+            ])
+            .env(MARKER, "1")
+            .envs(names.map(|name| (name, "inherited-fixture-value")))
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "{}\n{}",
+            stderr(&out),
+            String::from_utf8_lossy(&out.stdout)
+        );
+        return;
+    }
+    // Run in a subprocess so the test never mutates the parallel harness's env.
+    let command = common::command(BQ);
+    for name in names {
+        assert_eq!(std::env::var(name).unwrap(), "inherited-fixture-value");
+        assert!(
+            command
+                .get_envs()
+                .any(|(key, value)| key == name && value.is_none()),
+            "{name}"
+        );
     }
 }

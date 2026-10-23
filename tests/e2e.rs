@@ -9,9 +9,11 @@
 //! cargo test --test e2e -- --ignored --nocapture
 //! ```
 
+mod common;
+
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Output, Stdio};
+use std::process::{Output, Stdio};
 use std::time::{Duration, Instant, SystemTime};
 
 const BQ: &str = env!("CARGO_BIN_EXE_buildq");
@@ -38,7 +40,7 @@ fn pooled_builds_refuse_an_unavailable_reserve_and_retry_cleanly() {
     let reserve = buildq::util::free_disk_bytes(&root).unwrap() + (1 << 30);
     fs::write(&config, format!("[cache]\nmin_free='{reserve}'\n")).unwrap();
     let run = |sub: &str| {
-        Command::new(&w.shim_cargo)
+        common::command(&w.shim_cargo)
             .args([sub, "--offline"])
             .current_dir(root.join("ws"))
             .env("PATH", &w.path)
@@ -70,7 +72,7 @@ fn pooled_builds_refuse_an_unavailable_reserve_and_retry_cleanly() {
         String::from_utf8_lossy(&out.stderr)
     );
     assert_eq!(stdout(&out), "reserve-ok");
-    let status = Command::new(BQ)
+    let status = common::command(BQ)
         .args(["status", "--json"])
         .env("BUILDQ_DIR", root.join("q"))
         .env("BUILDQ_CONFIG", &config)
@@ -105,7 +107,7 @@ fn copy_dir(from: &Path, to: &Path) {
 }
 
 fn git(dir: &Path, args: &[&str]) {
-    let st = Command::new("git")
+    let st = common::command("git")
         .args([
             "-c",
             "user.name=t",
@@ -138,7 +140,7 @@ impl World {
             fs::write(&config, "[cache]\nmin_free='0'\n").unwrap();
         }
         let t = Instant::now();
-        let out = Command::new(&self.shim_cargo)
+        let out = common::command(&self.shim_cargo)
             .args(args)
             .current_dir(dir)
             .env("PATH", &self.path)
@@ -163,7 +165,7 @@ impl World {
 
     fn plain(&self, dir: &Path, target: &Path, args: &[&str]) -> (Output, Duration) {
         let t = Instant::now();
-        let out = Command::new(&self.real_cargo)
+        let out = common::command(&self.real_cargo)
             .args(args)
             .current_dir(dir)
             .env("CARGO_TARGET_DIR", target)
@@ -217,7 +219,7 @@ fn two_worktrees_share_a_pool_member() {
     git(&wt1, &["worktree", "add", "-q", wt2.to_str().unwrap()]);
 
     let shim = root.join("shim");
-    let st = Command::new(BQ)
+    let st = common::command(BQ)
         .args(["shim", "install", "cargo", "--into"])
         .arg(&shim)
         .output()
@@ -328,7 +330,7 @@ fn tiny_world(root: &Path, files: &[(&str, &str)]) -> World {
         fs::write(p, text).unwrap();
     }
     let shim = root.join("shim");
-    let st = Command::new(BQ)
+    let st = common::command(BQ)
         .args(["shim", "install", "cargo", "--into"])
         .arg(&shim)
         .output()
@@ -553,7 +555,7 @@ fn run_applies_effective_cargo_config_environment() {
         "--config=env.BQ_CLI.value='cli'",
     ];
     let run = |cargo: &Path, shim: bool| {
-        let mut cmd = Command::new(cargo);
+        let mut cmd = common::command(cargo);
         cmd.args(args)
             .current_dir(root.join("ws"))
             .env("PATH", &w.path)
@@ -587,7 +589,7 @@ fn run_applies_effective_cargo_config_environment() {
 
 #[test]
 fn rebuild_graph_reads_real_cargo_workspace_metadata() {
-    let out = Command::new("cargo")
+    let out = common::command("cargo")
         .args([
             "metadata",
             "--no-deps",

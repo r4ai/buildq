@@ -302,6 +302,13 @@ pub enum TargetDirChoice {
 /// Follows cargo's precedence: `--target-dir` > `CARGO_TARGET_DIR` >
 /// `--config build.target-dir` > `CARGO_BUILD_TARGET_DIR`.
 pub fn target_dir_choice(parsed: &Parsed) -> TargetDirChoice {
+    target_dir_choice_with_env(parsed, |name| env::var_os(name))
+}
+
+fn target_dir_choice_with_env(
+    parsed: &Parsed,
+    lookup: impl Fn(&str) -> Option<std::ffi::OsString>,
+) -> TargetDirChoice {
     let end = parsed
         .args
         .iter()
@@ -323,7 +330,7 @@ pub fn target_dir_choice(parsed: &Parsed) -> TargetDirChoice {
         }
     }
     let from_env = |var: &str| {
-        env::var_os(var)
+        lookup(var)
             .filter(|v| !v.is_empty())
             .map(|v| TargetDirChoice::Explicit {
                 value: v.to_string_lossy().to_string(),
@@ -473,7 +480,7 @@ mod tests {
     #[test]
     fn target_dir_config_is_rerooted() {
         let p = parse(&v("trainer train"), &aliases());
-        match target_dir_choice(&p) {
+        match target_dir_choice_with_env(&p, |_| None) {
             TargetDirChoice::Config(i, val) => {
                 assert_eq!(p.args[i], "build.target-dir=\"target/native\"");
                 assert_eq!(val, "target/native");
@@ -484,7 +491,7 @@ mod tests {
         }
         let p = parse(&v("build --target-dir x"), &aliases());
         assert_eq!(
-            target_dir_choice(&p),
+            target_dir_choice_with_env(&p, |_| None),
             TargetDirChoice::Explicit {
                 value: "x".into(),
                 arg: Some(2)
@@ -495,13 +502,37 @@ mod tests {
             &aliases(),
         );
         assert_eq!(
-            target_dir_choice(&p),
+            target_dir_choice_with_env(&p, |_| None),
             TargetDirChoice::Explicit {
                 value: "../y".into(),
                 arg: Some(1)
             }
         );
         assert_eq!(p.args[1], "--target-dir=../y");
+    }
+
+    #[test]
+    fn target_dir_environment_precedence_is_explicit() {
+        let p = parse(
+            &v("build --config build.target-dir='configured'"),
+            &aliases(),
+        );
+        let inherited = |name: &str| Some(std::ffi::OsString::from(name));
+        assert_eq!(
+            target_dir_choice_with_env(&p, inherited),
+            TargetDirChoice::Explicit {
+                value: "CARGO_TARGET_DIR".into(),
+                arg: None,
+            }
+        );
+        let p = parse(&v("build --target-dir explicit"), &aliases());
+        assert_eq!(
+            target_dir_choice_with_env(&p, inherited),
+            TargetDirChoice::Explicit {
+                value: "explicit".into(),
+                arg: Some(2),
+            }
+        );
     }
 
     #[test]

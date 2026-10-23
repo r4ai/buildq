@@ -1,6 +1,8 @@
 //! Opt-in Linux SSH integration test. Never sets up keys, hosts, or sshd.
 #![cfg(target_os = "linux")]
 
+mod common;
+
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::os::fd::{AsRawFd, FromRawFd};
@@ -45,7 +47,7 @@ impl Drop for RemoteTemp<'_> {
 }
 
 fn cli(repo: &Path, config: &Path, queue: &Path) -> Command {
-    let mut c = Command::new(BQ);
+    let mut c = common::command(BQ);
     c.current_dir(repo)
         .env("BUILDQ_CONFIG", config)
         .env("BUILDQ_DIR", queue)
@@ -188,7 +190,7 @@ fn real_ssh_dirty_incremental_fetch_status_and_ctrl_c() {
         ],
     ] {
         checked(
-            Command::new("git")
+            common::command("git")
                 .current_dir(&repo)
                 .args(args)
                 .output()

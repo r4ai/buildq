@@ -1,16 +1,18 @@
 //! Real rsync and Cargo, with a local shell standing in for SSH.
 #![cfg(unix)]
 
+mod common;
+
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
-use std::process::{Command, Output};
+use std::process::Output;
 
 const BQ: &str = env!("CARGO_BIN_EXE_buildq");
 
 fn git(repo: &Path, args: &[&str]) {
     assert!(
-        Command::new("git")
+        common::command("git")
             .current_dir(repo)
             .args(["-c", "user.name=test", "-c", "user.email=test@localhost"])
             .args(args)
@@ -25,7 +27,7 @@ fn git(repo: &Path, args: &[&str]) {
 #[ignore = "requires POSIX rsync; CI runs this on Linux and macOS"]
 fn rsync_sends_ignored_sources_preserves_incremental_builds_and_fetches() {
     assert!(
-        Command::new("rsync")
+        common::command("rsync")
             .arg("--version")
             .output()
             .unwrap()
@@ -86,7 +88,7 @@ fn rsync_sends_ignored_sources_preserves_incremental_builds_and_fetches() {
         .unwrap();
     };
     let run = || -> Output {
-        Command::new(BQ)
+        common::command(BQ)
             .current_dir(&repo)
             .env("PATH", &path)
             .env("BUILDQ_CONFIG", &config)
@@ -165,14 +167,14 @@ fn rsync_sends_ignored_sources_preserves_incremental_builds_and_fetches() {
         String::from_utf8_lossy(&out.stderr)
     );
     assert!(!mirror.join("untracked").exists());
-    let fetched = Command::new(root.join("fetched/rsync-app"))
+    let fetched = common::command(root.join("fetched/rsync-app"))
         .output()
         .unwrap();
     assert_eq!(
         String::from_utf8_lossy(&fetched.stdout).trim(),
         "v2 updated"
     );
-    let status = Command::new("git")
+    let status = common::command("git")
         .current_dir(&repo)
         .args(["status", "--porcelain"])
         .output()

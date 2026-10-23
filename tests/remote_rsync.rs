@@ -1,15 +1,16 @@
 //! Real rsync protocol with a test-only SSH stand-in; no network or SSH setup.
 #![cfg(unix)]
 
+mod common;
+
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
-use std::process::Command;
 
 use buildq::config::{FileConfig, HostConfig, RemoteTransport};
 
 #[test]
 fn rsync_cli_sync_run_and_fetch() {
-    if Command::new("rsync").arg("--version").output().is_err() {
+    if common::command("rsync").arg("--version").output().is_err() {
         eprintln!("skipping: rsync is not installed");
         return;
     }
@@ -33,7 +34,7 @@ fn rsync_cli_sync_run_and_fetch() {
         &["config", "user.email", "test@example.invalid"],
     ] {
         assert!(
-            Command::new("git")
+            common::command("git")
                 .current_dir(&repo)
                 .args(args)
                 .status()
@@ -45,7 +46,7 @@ fn rsync_cli_sync_run_and_fetch() {
     fs::write(repo.join("tracked"), "initial").unwrap();
     for args in [["add", "."].as_slice(), &["commit", "-qm", "fixture"]] {
         assert!(
-            Command::new("git")
+            common::command("git")
                 .current_dir(&repo)
                 .args(args)
                 .status()
@@ -71,7 +72,7 @@ fn rsync_cli_sync_run_and_fetch() {
     let path = std::env::join_paths(paths).unwrap();
     let fetched = root.join("fetch with spaces");
     let run = |script: &str| {
-        Command::new(env!("CARGO_BIN_EXE_buildq"))
+        common::command(env!("CARGO_BIN_EXE_buildq"))
             .current_dir(&repo)
             .env("PATH", &path)
             .env("BUILDQ_CONFIG", &config)

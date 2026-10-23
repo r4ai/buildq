@@ -968,7 +968,8 @@ mod tests {
             let md = member(&c.cache_dir, "p", 0, now_ms(), 2 * 1024 * 1024);
             file(&c.trash_dir().join("old/artifact"), 4 * 1024 * 1024, 0);
             if reserve {
-                c.min_free = util::free_disk_bytes(&c.cache_dir).unwrap() + 2 * 1024 * 1024;
+                // Force a zero effective budget independently of concurrent disk activity.
+                c.min_free = u64::MAX;
             }
             let preview = gc(
                 &c,
