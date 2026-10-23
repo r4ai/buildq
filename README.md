@@ -189,11 +189,13 @@ Nested calls using `BUILDQ_HELD` remain exempt.
 Add remote hosts to `config.toml` to offload builds over SSH and Git:
 
 ```toml
+auto_hosts = ["local", "box"]
+
 [hosts.box]
 ssh = "box"              # Host alias from ~/.ssh/config
 slots = 4                # Max concurrent jobs sent to this host
-
-auto_hosts = ["local", "box"]
+# buildq = "buildq"      # Probe remote queue load before automatic selection
+# rustc_release = "1.99.0" # Optional required remote rustc release
 ```
 
 Run commands on a specific host or let `buildq` pick one automatically:
@@ -203,6 +205,16 @@ buildq run --host box -- cargo test
 buildq run --host auto -- cargo clippy --all-targets
 buildq run --host box --fetch target/debug/app -- cargo build --bin app
 ```
+
+Automatic selection probes each candidate before choosing it. With `buildq` set,
+it reads the host's build slots and queue via `status --json`; otherwise it uses
+Linux `/proc/loadavg` and the CPU count. Local dispatch limits still apply.
+Failed probes and Rust version mismatches exclude that host. `local` is used as a
+fallback only when listed among the candidates. Each probe has a five-second
+deadline and does not prompt for SSH passwords. Set `rustc_release` to require the
+remote default `rustc --version` release (including for explicitly selected hosts);
+`hosts.<name>.env` also applies to probes. This checks the configured default
+compiler, not every Cargo `+toolchain` override or installed compilation target.
 
 ## How It Works
 

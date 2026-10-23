@@ -108,6 +108,46 @@ fn concurrency_never_exceeds_slots_across_processes() {
 }
 
 #[test]
+#[cfg(unix)]
+fn automatic_host_selection_uses_live_remote_load() {
+    use std::os::unix::fs::PermissionsExt;
+    let e = Env::new();
+    let bin = e.root.join("bin");
+    fs::create_dir_all(&bin).unwrap();
+    let ssh = bin.join("ssh");
+    fs::write(&ssh, "#!/bin/sh\nprintf '%s\\n' '{\"classes\":[{\"class\":\"build\",\"slots\":1,\"holders\":[{\"slot\":0,\"busy\":true,\"job\":null}],\"waiters\":[]}]}'\n").unwrap();
+    fs::set_permissions(&ssh, fs::Permissions::from_mode(0o755)).unwrap();
+    fs::create_dir_all(e.root.join("q")).unwrap();
+    fs::write(
+        e.root.join("q/config.toml"),
+        "auto_hosts=['local','box']\n[hosts.box]\nbuildq='buildq'\nslots=1\n",
+    )
+    .unwrap();
+    let wt = buildq::git::discover(&std::env::current_dir().unwrap()).unwrap();
+    buildq::util::write_json(
+        &e.root.join("q/affinity.json"),
+        &std::collections::BTreeMap::from([(wt.key(), "box")]),
+    )
+    .unwrap();
+    let path = std::env::join_paths(
+        std::iter::once(bin).chain(std::env::split_paths(&std::env::var_os("PATH").unwrap())),
+    )
+    .unwrap();
+    let out = e
+        .cmd(1)
+        .env("PATH", path)
+        .args(["run", "--host", "auto", "--", BQ, "__helper", "exit", "0"])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert!(String::from_utf8_lossy(&out.stderr).contains("picked host local"));
+}
+
+#[test]
 fn exit_code_passes_through() {
     let e = Env::new();
     let st = e

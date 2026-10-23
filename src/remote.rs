@@ -22,9 +22,10 @@
 
 use std::collections::BTreeMap;
 use std::fs;
-use std::io::{self, IsTerminal};
+use std::io::{self, IsTerminal, Read};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::time::{Duration, Instant};
 
 use crate::config::{Config, HostConfig};
 use crate::git::{self, Worktree};
@@ -41,6 +42,10 @@ pub trait Transport {
         argv: &[String],
         capture: bool,
     ) -> io::Result<(i32, String)>;
+    /// Small, read-only request. SSH bounds these independently of job runs.
+    fn probe(&self, env: &[(String, String)], argv: &[String]) -> io::Result<(i32, String)> {
+        self.exec(None, env, argv, true)
+    }
     /// Something `git push` accepts for a remote path.
     fn git_url(&self, path: &str) -> String;
     /// Extra environment for local git talking to the host.
@@ -90,6 +95,15 @@ pub fn remote_script(cwd: Option<&str>, env: &[(String, String)], argv: &[String
 }
 
 impl Transport for Ssh {
+    fn probe(&self, env: &[(String, String)], argv: &[String]) -> io::Result<(i32, String)> {
+        let mut cmd = Command::new("ssh");
+        cmd.args(&self.args)
+            .args(["-o", "BatchMode=yes", "-o", "ConnectTimeout=3"])
+            .arg(&self.dest)
+            .arg(remote_script(None, env, argv));
+        capture_probe(&mut cmd, Duration::from_secs(5))
+    }
+
     fn exec(
         &self,
         cwd: Option<&str>,
@@ -149,6 +163,51 @@ impl Transport for Ssh {
             Err(io::Error::other(format!("scp {remote} failed")))
         }
     }
+}
+
+/// Drain output while waiting so a full pipe cannot stall a probe. Requests
+/// have a fixed deadline and bounded output; neither limit affects real jobs.
+fn capture_probe(cmd: &mut Command, timeout: Duration) -> io::Result<(i32, String)> {
+    let mut child = cmd
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()?;
+    let stdout = child.stdout.take().unwrap();
+    let reader = std::thread::spawn(move || {
+        let mut bytes = Vec::new();
+        stdout
+            .take(1024 * 1024)
+            .read_to_end(&mut bytes)
+            .map(|_| bytes)
+    });
+    let started = Instant::now();
+    let result = loop {
+        match child.try_wait() {
+            Ok(Some(status)) => break Ok(status),
+            Ok(None) if started.elapsed() < timeout => {
+                std::thread::sleep(Duration::from_millis(10))
+            }
+            Ok(None) => {
+                break Err(io::Error::new(
+                    io::ErrorKind::TimedOut,
+                    "host probe timed out",
+                ));
+            }
+            Err(error) => break Err(error),
+        }
+    };
+    if result.is_err() {
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+    let output = reader
+        .join()
+        .map_err(|_| io::Error::other("probe reader failed"))??;
+    Ok((
+        crate::exec::exit_code(result?),
+        String::from_utf8_lossy(&output).into_owned(),
+    ))
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -366,7 +425,7 @@ pub fn run(
         } else {
             host_arg.split(',').map(|s| s.trim().to_string()).collect()
         };
-        let h = pick_host(cfg, &cands, &wt.key());
+        let h = pick_host(cfg, &cands, &wt.key())?;
         job::note(&format!("picked host {h}"));
         h
     } else {
@@ -381,6 +440,10 @@ pub fn run(
             cfg.config_path.display()
         )
     })?;
+    let t = transport(&host, &hc);
+    if hc.rustc_release.is_some() && host_arg != "auto" && !host_arg.contains(',') {
+        check_rustc(&t, &hc)?;
+    }
     let host_opts = Opts {
         class: format!("host-{host}"),
         ..opts.clone()
@@ -388,7 +451,6 @@ pub fn run(
     let mut g = job::acquire(cfg, &host_opts, &display_cmd(argv))?;
     g.set_target(&host);
     remember_affinity(cfg, &wt.key(), &host);
-    let t = transport(&host, &hc);
     let rj = RemoteJob {
         host: &host,
         cfg: &hc,
@@ -446,17 +508,113 @@ pub fn choose(loads: &[HostLoad], affinity: Option<&str>) -> Option<String> {
     loads
         .iter()
         .min_by(|a, b| {
-            let la = (a.busy + a.waiters) as f64 / a.slots as f64;
-            let lb = (b.busy + b.waiters) as f64 / b.slots as f64;
+            let la = a.busy.saturating_add(a.waiters) as f64 / a.slots as f64;
+            let lb = b.busy.saturating_add(b.waiters) as f64 / b.slots as f64;
             la.total_cmp(&lb)
         })
         .map(|l| l.name.clone())
 }
 
-pub fn pick_host(cfg: &Config, cands: &[String], wt_key: &str) -> String {
+fn check_rustc(t: &dyn Transport, host: &HostConfig) -> Result<(), String> {
+    let Some(expected) = &host.rustc_release else {
+        return Ok(());
+    };
+    let env: Vec<_> = host
+        .env
+        .iter()
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect();
+    let out = ok(t.probe(&env, &s(&["rustc", "--version"])), "remote rustc")?;
+    let actual = out
+        .split_whitespace()
+        .nth(1)
+        .ok_or("invalid remote rustc version")?;
+    if actual != expected {
+        return Err(format!(
+            "remote rustc release {actual} does not match required {expected}"
+        ));
+    }
+    Ok(())
+}
+
+fn probe_load(t: &dyn Transport, name: &str, host: &HostConfig) -> Result<HostLoad, String> {
+    check_rustc(t, host)?;
+    let env: Vec<_> = host
+        .env
+        .iter()
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect();
+    if let Some(bq) = &host.buildq {
+        let out = ok(
+            t.probe(&env, &[bq.clone(), "status".into(), "--json".into()]),
+            "remote status",
+        )?;
+        let status: serde_json::Value = serde_json::from_str(&out).map_err(|e| e.to_string())?;
+        let classes: Vec<crate::queue::ClassStatus> =
+            serde_json::from_value(status["classes"].clone()).map_err(|e| e.to_string())?;
+        let build = classes
+            .iter()
+            .find(|c| c.class == "build")
+            .ok_or("remote status has no build class")?;
+        if build.slots == 0 {
+            return Err("remote status has no build slots".into());
+        }
+        return Ok(HostLoad {
+            name: name.into(),
+            slots: build.slots,
+            busy: build.busy(),
+            waiters: build.waiters.len(),
+        });
+    }
+    // Linux fallback when buildq is not installed on the host. Convert the
+    // one-minute CPU load into occupied configured dispatch slots.
+    let out = ok(
+        t.probe(
+            &env,
+            &s(&["sh", "-c", "cat /proc/loadavg && getconf _NPROCESSORS_ONLN"]),
+        ),
+        "remote system load",
+    )?;
+    let mut lines = out.lines();
+    let load: f64 = lines
+        .next()
+        .and_then(|l| l.split_whitespace().next())
+        .ok_or("missing remote load")?
+        .parse()
+        .map_err(|_| "invalid remote load")?;
+    let cores: usize = lines
+        .next()
+        .ok_or("missing remote CPU count")?
+        .trim()
+        .parse()
+        .map_err(|_| "invalid remote CPU count")?;
+    if !load.is_finite() || load < 0.0 || cores == 0 {
+        return Err("invalid remote system load".into());
+    }
+    let slots = host.slots.unwrap_or(2).max(1);
+    Ok(HostLoad {
+        name: name.into(),
+        slots,
+        busy: (load / cores as f64 * slots as f64).ceil() as usize,
+        waiters: 0,
+    })
+}
+
+pub fn pick_host(cfg: &Config, cands: &[String], wt_key: &str) -> Result<String, String> {
+    pick_host_with(cfg, cands, wt_key, &mut |name, host| {
+        probe_load(&transport(name, host), name, host)
+    })
+}
+
+fn pick_host_with(
+    cfg: &Config,
+    cands: &[String],
+    wt_key: &str,
+    probe: &mut dyn FnMut(&str, &HostConfig) -> Result<HostLoad, String>,
+) -> Result<String, String> {
     let loads: Vec<HostLoad> = cands
         .iter()
-        .map(|name| {
+        .filter_map(|name| {
             let class = if name == "local" {
                 "build".to_string()
             } else {
@@ -470,17 +628,43 @@ pub fn pick_host(cfg: &Config, cands: &[String], wt_key: &str) -> String {
             )
             .with_max_per_worktree(cfg.max_per_worktree);
             let st = q.status();
-            HostLoad {
+            let mut local = HostLoad {
                 name: name.clone(),
                 slots: st.slots,
                 busy: st.busy(),
                 waiters: st.waiters.len(),
+            };
+            if name != "local" {
+                let live = cfg
+                    .hosts
+                    .get(name)
+                    .ok_or_else(|| "host is not configured".to_string())
+                    .and_then(|h| probe(name, h));
+                match live {
+                    Ok(live) => {
+                        let free = local
+                            .slots
+                            .saturating_sub(local.busy)
+                            .min(live.slots.saturating_sub(live.busy));
+                        local.busy = local.slots - free;
+                        local.waiters = local
+                            .waiters
+                            .saturating_add(live.waiters)
+                            .saturating_add(live.busy.saturating_sub(live.slots));
+                    }
+                    Err(error) => {
+                        job::note(&format!("skipping host {name}: {error}"));
+                        return None;
+                    }
+                }
             }
+            Some(local)
         })
         .collect();
     let aff: BTreeMap<String, String> =
         read_json(&cfg.queue_dir.join("affinity.json")).unwrap_or_default();
-    choose(&loads, aff.get(wt_key).map(String::as_str)).unwrap_or_else(|| "local".into())
+    choose(&loads, aff.get(wt_key).map(String::as_str))
+        .ok_or_else(|| "no available host among the requested candidates".into())
 }
 
 fn remember_affinity(cfg: &Config, wt_key: &str, host: &str) {
@@ -519,6 +703,114 @@ pub fn host_status(cfg: &Config) -> Vec<(String, Result<serde_json::Value, Strin
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    struct Probe {
+        replies: std::cell::RefCell<std::collections::VecDeque<(i32, String)>>,
+    }
+
+    impl Transport for Probe {
+        fn exec(
+            &self,
+            _: Option<&str>,
+            _: &[(String, String)],
+            _: &[String],
+            _: bool,
+        ) -> io::Result<(i32, String)> {
+            self.replies
+                .borrow_mut()
+                .pop_front()
+                .ok_or_else(|| io::Error::other("no reply"))
+        }
+        fn git_url(&self, _: &str) -> String {
+            unreachable!()
+        }
+        fn fetch(&self, _: &str, _: &Path) -> io::Result<()> {
+            unreachable!()
+        }
+    }
+
+    #[test]
+    fn probes_validate_load_and_required_rust_release() {
+        let host = HostConfig {
+            slots: Some(4),
+            rustc_release: Some("1.99.0".into()),
+            ..Default::default()
+        };
+        let t = Probe {
+            replies: std::cell::RefCell::new(std::collections::VecDeque::from([
+                (0, "rustc 1.99.0 (hash date)\n".into()),
+                (0, "2.00 1.00 0.50 1/50 123\n8\n".into()),
+                (0, "rustc 1.89.0 (hash date)\n".into()),
+            ])),
+        };
+        assert_eq!(
+            probe_load(&t, "box", &host).unwrap(),
+            HostLoad {
+                name: "box".into(),
+                slots: 4,
+                busy: 1,
+                waiters: 0
+            }
+        );
+        assert!(
+            check_rustc(&t, &host)
+                .unwrap_err()
+                .contains("does not match")
+        );
+        for out in ["NaN 0 0\n8\n", "0 0 0\n0\n", "garbage", "-1 0 0\n8\n"] {
+            let t = Probe {
+                replies: std::cell::RefCell::new(std::collections::VecDeque::from([(
+                    0,
+                    out.into(),
+                )])),
+            };
+            assert!(probe_load(&t, "box", &HostConfig::default()).is_err());
+        }
+    }
+
+    #[test]
+    fn unreachable_candidates_do_not_fall_back_outside_the_requested_list() {
+        let dir = tempfile::tempdir().unwrap();
+        let cfg = Config::from_parts(
+            dir.path().join("q"),
+            dir.path().join("config.toml"),
+            crate::config::FileConfig {
+                hosts: BTreeMap::from([("box".into(), HostConfig::default())]),
+                ..Default::default()
+            },
+        );
+        let mut fail = |_: &str, _: &HostConfig| Err("offline".into());
+        assert!(pick_host_with(&cfg, &s(&["box"]), "wt", &mut fail).is_err());
+        assert!(pick_host_with(&cfg, &[], "wt", &mut fail).is_err());
+        assert_eq!(
+            pick_host_with(&cfg, &s(&["box", "local"]), "wt", &mut fail).unwrap(),
+            "local"
+        );
+    }
+
+    #[test]
+    fn probe_capture_has_a_deadline() {
+        #[cfg(unix)]
+        let mut cmd = {
+            let mut cmd = Command::new("sh");
+            cmd.args(["-c", "exec sleep 5"]);
+            cmd
+        };
+        #[cfg(windows)]
+        let mut cmd = {
+            let mut cmd = Command::new("powershell");
+            cmd.args(["-NoProfile", "-Command", "Start-Sleep -Seconds 5"]);
+            cmd
+        };
+        let started = Instant::now();
+        assert_eq!(
+            capture_probe(&mut cmd, Duration::from_millis(50))
+                .unwrap_err()
+                .kind(),
+            io::ErrorKind::TimedOut
+        );
+        assert!(started.elapsed() < Duration::from_secs(3));
+    }
 
     #[test]
     fn quoting() {
