@@ -187,11 +187,12 @@ Nested calls using `BUILDQ_HELD` remain exempt.
 Add remote hosts to `config.toml` to offload builds over SSH and Git:
 
 ```toml
+auto_hosts = ["local", "box"]
+
 [hosts.box]
 ssh = "box"              # Host alias from ~/.ssh/config
 slots = 4                # Max concurrent jobs sent to this host
-
-auto_hosts = ["local", "box"]
+rust_toolchain = "stable" # Optional: require this installed rustup toolchain
 ```
 
 Run commands on a specific host or let `buildq` pick one automatically:
@@ -201,6 +202,16 @@ buildq run --host box -- cargo test
 buildq run --host auto -- cargo clippy --all-targets
 buildq run --host box --fetch target/debug/app -- cargo build --bin app
 ```
+
+
+`--host auto` (and comma-separated candidates) probes each remote before choosing.
+With `buildq` configured it reads the remote build queue; otherwise it uses Linux
+CPU count and one-minute system load. Local dispatch limits and worktree affinity
+still apply. Unreachable hosts and failed probes are excluded; no eligible host is
+an error. SSH probes use batch mode and a five-second connection timeout.
+`rust_toolchain` optionally checks an already installed rustup toolchain and runs
+the command through it; buildq never installs toolchains. Explicit hosts also
+receive this check. Remote job `env` applies to probes too.
 
 ## How It Works
 

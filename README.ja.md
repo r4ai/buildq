@@ -173,11 +173,12 @@ rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を�
 `config.toml` にホストを追記すると、SSH と Git 経由でリモートマシンへビルドを分散できる。
 
 ```toml
+auto_hosts = ["local", "box"]
+
 [hosts.box]
 ssh = "box"              # ~/.ssh/config のホスト名
 slots = 4                # このホストへ同時に送る最大ジョブ数
-
-auto_hosts = ["local", "box"]
+rust_toolchain = "stable" # Optional: require this installed rustup toolchain
 ```
 
 ホスト名を指定するか、`auto` で空きホストを自動選択して実行する。
@@ -187,6 +188,14 @@ buildq run --host box -- cargo test
 buildq run --host auto -- cargo clippy --all-targets
 buildq run --host box --fetch target/debug/app -- cargo build --bin app
 ```
+
+
+`--host auto` とカンマ区切りの候補指定では、選択前に各リモートの実負荷を取得する。
+`buildq` 設定時はリモートのビルドキュー、それ以外は Linux の CPU 数と1分平均負荷を用いる。
+ローカルの送信上限と worktree の親和性も考慮する。接続不可・検査失敗の候補は除外し、候補がなければエラーとなる。
+SSH 検査は batch mode と5秒の接続タイムアウトを用いる。
+`rust_toolchain` は導入済みの rustup toolchain を検査し、その toolchain でコマンドを実行する任意設定である。
+自動インストールは行わず、明示的なホスト指定にも検査を適用する。リモートの `env` 設定は検査にも適用する。
 
 ## How It Works
 

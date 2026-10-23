@@ -125,7 +125,14 @@ impl Transport for Ssh {
         }
         vec![(
             "GIT_SSH_COMMAND".into(),
-            format!("ssh {}", self.args.join(" ")),
+            format!(
+                "ssh {}",
+                self.args
+                    .iter()
+                    .map(|a| sh_quote(a))
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
         )]
     }
 
@@ -290,6 +297,7 @@ pub fn run_on(
 ) -> Result<i32, String> {
     let root = job.cfg.root.clone().unwrap_or_else(|| ".buildq".into());
     let l = layout(&root, wt);
+    check_toolchain(t, job.cfg)?;
     let sha = sync(t, job.host, wt, &l, scratch)?;
     job::note(&format!(
         "{}: synced {} to {}",
@@ -313,6 +321,13 @@ pub fn run_on(
         .iter()
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect();
+    let command: Vec<String> = match &job.cfg.rust_toolchain {
+        Some(tc) => s(&["rustup", "run", tc])
+            .into_iter()
+            .chain(job.argv.iter().cloned())
+            .collect(),
+        None => job.argv.to_vec(),
+    };
     let argv: Vec<String> = match &job.cfg.buildq {
         Some(bq) => {
             if !job.fetch.is_empty() {
@@ -321,10 +336,10 @@ pub fn run_on(
             }
             [bq.clone(), "run".into(), "--".into()]
                 .into_iter()
-                .chain(job.argv.iter().cloned())
+                .chain(command)
                 .collect()
         }
-        None => job.argv.to_vec(),
+        None => command,
     };
     let (code, _) = t
         .exec(Some(&cwd), &env, &argv, false)
@@ -366,7 +381,7 @@ pub fn run(
         } else {
             host_arg.split(',').map(|s| s.trim().to_string()).collect()
         };
-        let h = pick_host(cfg, &cands, &wt.key());
+        let h = pick_host(cfg, &cands, &wt.key())?;
         job::note(&format!("picked host {h}"));
         h
     } else {
@@ -453,34 +468,140 @@ pub fn choose(loads: &[HostLoad], affinity: Option<&str>) -> Option<String> {
         .map(|l| l.name.clone())
 }
 
-pub fn pick_host(cfg: &Config, cands: &[String], wt_key: &str) -> String {
-    let loads: Vec<HostLoad> = cands
-        .iter()
-        .map(|name| {
-            let class = if name == "local" {
-                "build".to_string()
-            } else {
-                format!("host-{name}")
-            };
-            let q = crate::queue::ClassQueue::new(
-                &cfg.queue_dir,
-                &class,
-                cfg.class_slots(&class),
-                std::time::Duration::from_millis(cfg.poll_ms),
-            )
-            .with_max_per_worktree(cfg.max_per_worktree);
-            let st = q.status();
-            HostLoad {
-                name: name.clone(),
-                slots: st.slots,
-                busy: st.busy(),
-                waiters: st.waiters.len(),
-            }
-        })
-        .collect();
+/// Check without installing or downloading a toolchain.
+fn check_toolchain(t: &dyn Transport, h: &HostConfig) -> Result<(), String> {
+    if let Some(tc) = &h.rust_toolchain {
+        ok(
+            t.exec(
+                None,
+                &host_env(h),
+                &s(&["rustup", "run", tc, "rustc", "--version"]),
+                true,
+            ),
+            &format!("remote toolchain {tc}"),
+        )?;
+    }
+    Ok(())
+}
+
+fn host_env(h: &HostConfig) -> Vec<(String, String)> {
+    h.env.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+}
+
+/// Live build queue, or Linux system load when no remote buildq is configured.
+pub fn probe_load(t: &dyn Transport, name: &str, h: &HostConfig) -> Result<HostLoad, String> {
+    check_toolchain(t, h)?;
+    if let Some(bq) = &h.buildq {
+        let out = ok(
+            t.exec(None, &host_env(h), &s(&[bq, "status", "--json"]), true),
+            "remote status",
+        )?;
+        let v: serde_json::Value = serde_json::from_str(&out).map_err(|e| e.to_string())?;
+        let classes: Vec<crate::queue::ClassStatus> =
+            serde_json::from_value(v["classes"].clone()).map_err(|e| e.to_string())?;
+        let st = classes
+            .iter()
+            .find(|c| c.class == "build")
+            .ok_or("remote status lacks build class")?;
+        if st.slots == 0 {
+            return Err("remote build slots is zero".into());
+        }
+        return Ok(HostLoad {
+            name: name.into(),
+            slots: st.slots,
+            busy: st.busy(),
+            waiters: st.waiters.len(),
+        });
+    }
+    let out = ok(
+        t.exec(
+            None,
+            &host_env(h),
+            &s(&["sh", "-c", "getconf _NPROCESSORS_ONLN && cat /proc/loadavg"]),
+            true,
+        ),
+        "remote system load",
+    )?;
+    let mut words = out.split_whitespace();
+    let cores: usize = words
+        .next()
+        .and_then(|s| s.parse().ok())
+        .filter(|n| *n > 0)
+        .ok_or("invalid remote CPU count")?;
+    let load: f64 = words
+        .next()
+        .and_then(|s| s.parse().ok())
+        .filter(|n: &f64| n.is_finite() && *n >= 0.0)
+        .ok_or("invalid remote load")?;
+    Ok(HostLoad {
+        name: name.into(),
+        slots: cores,
+        busy: load.ceil() as usize,
+        waiters: 0,
+    })
+}
+
+/// Respect both the local dispatch limit and live host pressure. A remote
+/// probe failure excludes that candidate; never silently dispatch elsewhere.
+fn combine_load(local: HostLoad, live: HostLoad) -> HostLoad {
+    let pressure = (live.busy.saturating_add(live.waiters)) as f64 / live.slots as f64;
+    let occupied = (pressure * local.slots as f64).ceil() as usize;
+    HostLoad {
+        busy: local.busy.max(occupied.min(local.slots)),
+        waiters: local.waiters.max(occupied.saturating_sub(local.slots)),
+        ..local
+    }
+}
+
+pub fn pick_host(cfg: &Config, cands: &[String], wt_key: &str) -> Result<String, String> {
+    let mut loads = Vec::new();
+    for name in cands {
+        let class = if name == "local" {
+            "build".to_string()
+        } else {
+            format!("host-{name}")
+        };
+        let st = crate::queue::ClassQueue::new(
+            &cfg.queue_dir,
+            &class,
+            cfg.class_slots(&class),
+            std::time::Duration::from_millis(cfg.poll_ms),
+        )
+        .with_max_per_worktree(cfg.max_per_worktree)
+        .status();
+        let local = HostLoad {
+            name: name.clone(),
+            slots: st.slots,
+            busy: st.busy(),
+            waiters: st.waiters.len(),
+        };
+        if name == "local" {
+            loads.push(local);
+            continue;
+        }
+        let Some(h) = cfg.hosts.get(name) else {
+            continue;
+        };
+        let mut t = transport(name, h);
+        t.args.extend(s(&[
+            "-o",
+            "BatchMode=yes",
+            "-o",
+            "ConnectTimeout=5",
+            "-o",
+            "ServerAliveInterval=5",
+            "-o",
+            "ServerAliveCountMax=1",
+        ]));
+        match probe_load(&t, name, h) {
+            Ok(live) => loads.push(combine_load(local, live)),
+            Err(e) => job::note(&format!("skipping host {name}: {e}")),
+        }
+    }
     let aff: BTreeMap<String, String> =
         read_json(&cfg.queue_dir.join("affinity.json")).unwrap_or_default();
-    choose(&loads, aff.get(wt_key).map(String::as_str)).unwrap_or_else(|| "local".into())
+    choose(&loads, aff.get(wt_key).map(String::as_str))
+        .ok_or_else(|| "no eligible hosts (live load or toolchain probe failed)".into())
 }
 
 fn remember_affinity(cfg: &Config, wt_key: &str, host: &str) {
@@ -498,10 +619,20 @@ pub fn host_status(cfg: &Config) -> Vec<(String, Result<serde_json::Value, Strin
             let r = match &h.buildq {
                 None => Err("no remote buildq configured (local accounting only)".to_string()),
                 Some(bq) => {
-                    let t = transport(name, h);
+                    let mut t = transport(name, h);
+                    t.args.extend(s(&[
+                        "-o",
+                        "BatchMode=yes",
+                        "-o",
+                        "ConnectTimeout=5",
+                        "-o",
+                        "ServerAliveInterval=5",
+                        "-o",
+                        "ServerAliveCountMax=1",
+                    ]));
                     match t.exec(
                         None,
-                        &[],
+                        &host_env(h),
                         &[bq.clone(), "status".into(), "--json".into()],
                         true,
                     ) {
@@ -519,6 +650,96 @@ pub fn host_status(cfg: &Config) -> Vec<(String, Result<serde_json::Value, Strin
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    struct Probe {
+        reply: &'static str,
+        code: i32,
+    }
+    impl Transport for Probe {
+        fn exec(
+            &self,
+            _: Option<&str>,
+            _: &[(String, String)],
+            argv: &[String],
+            _: bool,
+        ) -> io::Result<(i32, String)> {
+            if argv[0] == "rustup" {
+                return Ok((self.code, String::new()));
+            }
+            Ok((self.code, self.reply.into()))
+        }
+        fn git_url(&self, _: &str) -> String {
+            unreachable!()
+        }
+        fn fetch(&self, _: &str, _: &Path) -> io::Result<()> {
+            unreachable!()
+        }
+    }
+
+    #[test]
+    fn live_pressure_overrides_warm_host() {
+        let local = HostLoad {
+            name: "box".into(),
+            slots: 2,
+            busy: 0,
+            waiters: 0,
+        };
+        let live = probe_load(
+            &Probe {
+                reply: "4\n8.0 0 0",
+                code: 0,
+            },
+            "box",
+            &HostConfig::default(),
+        )
+        .unwrap();
+        let busy = combine_load(local, live);
+        assert_eq!((busy.busy, busy.waiters), (2, 2));
+        let idle = HostLoad {
+            name: "local".into(),
+            slots: 1,
+            busy: 0,
+            waiters: 0,
+        };
+        assert_eq!(choose(&[busy, idle], Some("box")).as_deref(), Some("local"));
+    }
+
+    #[test]
+    fn remote_queue_and_failed_probes() {
+        let h = HostConfig {
+            buildq: Some("buildq".into()),
+            rust_toolchain: Some("stable".into()),
+            ..Default::default()
+        };
+        let p = Probe {
+            reply: r#"{"classes":[{"class":"build","slots":2,"holders":[{"slot":0,"busy":true,"job":null}],"waiters":[]}]}"#,
+            code: 0,
+        };
+        assert_eq!(probe_load(&p, "box", &h).unwrap().busy, 1);
+        assert!(probe_load(&Probe { reply: "", code: 1 }, "box", &h).is_err());
+        assert!(
+            probe_load(
+                &Probe {
+                    reply: "invalid",
+                    code: 0
+                },
+                "box",
+                &h
+            )
+            .is_err()
+        );
+        assert!(
+            probe_load(
+                &Probe {
+                    reply: "4 NaN",
+                    code: 0
+                },
+                "box",
+                &HostConfig::default()
+            )
+            .is_err()
+        );
+    }
 
     #[test]
     fn quoting() {

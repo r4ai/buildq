@@ -95,6 +95,8 @@ pub struct HostConfig {
     pub root: Option<String>,
     /// Remote buildq binary; when set, jobs also queue (and pool) on the remote side.
     pub buildq: Option<String>,
+    /// Optional rustup toolchain, checked before dispatch and used for the job.
+    pub rust_toolchain: Option<String>,
     /// Environment for remote jobs.
     pub env: BTreeMap<String, String>,
 }
