@@ -27,12 +27,24 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 
-use crate::config::{Config, HostConfig};
+use crate::config::{Config, HostConfig, RemoteTransport};
 use crate::git::{self, Worktree};
 use crate::job::{self, Opts};
 use crate::util::{display_cmd, read_json, short_hash, write_json};
 
+mod rsync;
+pub use rsync::Rsync;
+
 pub trait Transport {
+    fn sync(
+        &self,
+        host: &str,
+        wt: &Worktree,
+        layout: &Layout,
+        scratch: &Path,
+    ) -> Result<String, String> {
+        sync(self, host, wt, layout, scratch)
+    }
     /// Runs `argv` on the host in `cwd` (relative to the remote home unless
     /// absolute). Streams output unless `capture`; returns (exit code, stdout).
     fn exec(
@@ -248,8 +260,8 @@ fn s(v: &[&str]) -> Vec<String> {
 }
 
 /// Steps 2-4. Returns the snapshot commit.
-pub fn sync(
-    t: &dyn Transport,
+pub fn sync<T: Transport + ?Sized>(
+    t: &T,
     host: &str,
     wt: &Worktree,
     l: &Layout,
@@ -349,7 +361,7 @@ pub fn run_on(
 ) -> Result<i32, String> {
     let root = job.cfg.root.clone().unwrap_or_else(|| ".buildq".into());
     let l = layout(&root, wt);
-    let sha = sync(t, job.host, wt, &l, scratch)?;
+    let sha = t.sync(job.host, wt, &l, scratch)?;
     job::note(&format!(
         "{}: synced {} to {}",
         job.host,
@@ -440,9 +452,13 @@ pub fn run(
             cfg.config_path.display()
         )
     })?;
-    let t = transport(&host, &hc);
+    let ssh = transport(&host, &hc);
+    let t: Box<dyn Transport> = match hc.transport {
+        RemoteTransport::Git => Box::new(ssh),
+        RemoteTransport::Rsync => Box::new(Rsync { ssh }),
+    };
     if hc.rustc_release.is_some() && host_arg != "auto" && !host_arg.contains(',') {
-        check_rustc(&t, &hc)?;
+        check_rustc(t.as_ref(), &hc)?;
     }
     let host_opts = Opts {
         class: format!("host-{host}"),
@@ -459,7 +475,7 @@ pub fn run(
         fetch_into: fetch_into
             .unwrap_or_else(|| wt.root.join("target").join("buildq-remote").join(&host)),
     };
-    let code = run_on(&t, &rj, &wt, &here, &cfg.queue_dir.join("scratch"))?;
+    let code = run_on(t.as_ref(), &rj, &wt, &here, &cfg.queue_dir.join("scratch"))?;
     crate::history::append(
         &cfg.queue_dir,
         &crate::history::Entry {

@@ -192,6 +192,7 @@ Add remote hosts to `config.toml` to offload builds over SSH and Git:
 auto_hosts = ["local", "box"]
 
 [hosts.box]
+# transport = "rsync"    # Optional: sync ignored generated files too
 ssh = "box"              # Host alias from ~/.ssh/config
 slots = 4                # Max concurrent jobs sent to this host
 # buildq = "buildq"      # Probe remote queue load before automatic selection
@@ -215,6 +216,15 @@ deadline and does not prompt for SSH passwords. Set `rustc_release` to require t
 remote default `rustc --version` release (including for explicitly selected hosts);
 `hosts.<name>.env` also applies to probes. This checks the configured default
 compiler, not every Cargo `+toolchain` override or installed compilation target.
+
+Set `transport = "rsync"` for a POSIX client (Linux, macOS, or WSL) with `rsync`
+installed on both ends. This mirrors all files, including gitignored generated
+inputs, except the root `.git` entry and `target/`. Deleted source files are
+removed remotely; remote `target/` artifacts survive subsequent syncs. Checksums
+catch source changes even when size and timestamps match. Remote Git snapshots
+are recorded on the host, including generated inputs, so remote buildq pooling
+retains content invalidation. `--fetch` also uses rsync. The default `git`
+transport remains available on Windows and requires no rsync installation.
 
 ## How It Works
 

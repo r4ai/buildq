@@ -85,6 +85,8 @@ pub struct CargoFile {
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 #[serde(default, deny_unknown_fields)]
 pub struct HostConfig {
+    /// Source and artifact transfer protocol (default git + scp).
+    pub transport: RemoteTransport,
     /// ssh destination (an alias from ~/.ssh/config); defaults to the table name.
     pub ssh: Option<String>,
     /// Extra ssh options, e.g. ["-p", "2222"].
@@ -99,6 +101,14 @@ pub struct HostConfig {
     pub rustc_release: Option<String>,
     /// Environment for remote jobs.
     pub env: BTreeMap<String, String>,
+}
+
+#[derive(Debug, Default, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum RemoteTransport {
+    #[default]
+    Git,
+    Rsync,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
