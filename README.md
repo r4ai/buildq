@@ -51,14 +51,14 @@ flowchart LR
 - **Machine-wide job queue**
   - Caps concurrent builds (default: `2`) in FIFO order with priority support
   - Uses OS file locks (`flock` / `LockFileEx`) with no background daemon
-  - Releases OS locks automatically when the holder exits
+  - Releases locks automatically if a process crashes or is killed
 - **Safe shared `target/` pool**
   - Shares a small pool of `target/` directories across all worktrees of a repository
   - Tracks file content via Git blob hashes
   - Invalidates only modified packages before each build
 - **Automatic disk budget & GC**
   - Prunes stale incremental sessions and unused artifacts in the background
-  - Prunes unused members according to a configurable disk budget (default: `60 GB`)
+  - Keeps total cache size under a configurable disk budget (default: `60 GB`)
 - **Lock-free `cargo run`**
   - Copies compiled binaries and DLLs to an isolated run directory before execution
   - Prevents running executables from locking the shared `target/` directory on Windows
@@ -67,21 +67,30 @@ flowchart LR
 
 ### Performance & Impact
 
-Measured with **three Bevy worktrees building at once**. Reusing the shared cache reduces build time and resource usage.
+Measured with **three Bevy worktrees building at once**.
+Shared-cache reuse reduces build time and resource usage.
 
 ![Plain Cargo versus buildq: build time 165.14 s to 120.80 s, peak RSS 4.37 to 2.89 GiB, target disk space 3.21 to 2.14 GiB](docs/benchmarks/assets/bevy-performance.svg)
 
 <details>
-<summary>Environment and benchmark setup</summary>
+<summary>Measurements and environment</summary>
 
-- Bevy 0.16.1 (PBR, PNG, multithreading), Linux x86_64, Rust 1.89.0
+| Metric | Plain Cargo<br>Independent targets | buildq<br>Shared pool |
+| :--- | ---: | ---: |
+| Build time | 165.14 s | 120.80 s |
+| Peak RSS | 4.37 GiB | 2.89 GiB |
+| Allocated target disk space | 3.21 GiB | 2.14 GiB |
+
+- Bevy 0.16.1: PBR, PNG, multithreading
+- Linux x86_64, Rust 1.89.0
 - 4-CPU quota, 16 GiB RAM, 2 Cargo jobs per build
-- buildq: 2 slots, at most 2 pool members; all caches initially empty
+- buildq: 2 slots, at most 2 pool members
+- All caches initially empty
 - Measured on 2026-10-23
 
 </details>
 
-[Methodology, additional results, and caveats (Japanese report)](docs/benchmarks/bevy-2026-10-23.ja.md)
+[Methodology, additional results, and caveats](docs/benchmarks/bevy-2026-10-23.md)
 
 ---
 
@@ -140,13 +149,12 @@ buildq: target <pool>/m0 (...)
 | `buildq status [--hosts]` | Show active slot holders and waiting jobs per class |
 | `buildq history [-n N]` | Show recent jobs<br>(wait time, run time, exit code, pool member) |
 | `buildq cache ls [--refresh]` | Show target pools, member sizes, budget, and free space |
-| `buildq gc [--dry-run]` | Manually prune unused cache artifacts |
+| `buildq gc [--dry-run]` | Manually prune caches to fit within the disk budget |
 | `buildq config` | Print effective configuration and directory paths |
 | `buildq run [-p PRIO] -- <cmd>...` | Queue any arbitrary command (with optional priority) |
 | `buildq run --host <H> -- <cmd>...` | Run a queued command on a remote SSH host |
 
-<details>
-<summary>Configuration (config.toml)</summary>
+### Configuration (`config.toml`)
 
 All settings are optional.
 Place `config.toml` in `$BUILDQ_DIR/config.toml` (check `buildq config` for the default path on your OS):
@@ -166,10 +174,7 @@ rustc_wrapper = "none"   # Disable global sccache per job ("none" | "keep" | "/p
 # jobs = 8               # CARGO_BUILD_JOBS per build (default: cores / slots)
 ```
 
-</details>
-
-<details>
-<summary>Remote builds (SSH)</summary>
+### Remote Builds (SSH)
 
 Add remote hosts to `config.toml` to offload builds over SSH and Git:
 
@@ -189,7 +194,34 @@ buildq run --host auto -- cargo clippy --all-targets
 buildq run --host box --fetch target/debug/app -- cargo build --bin app
 ```
 
-</details>
+---
+
+## How It Works
+
+```mermaid
+flowchart TD
+    Start["cargo build / test / run"] --> Check["Check subcommand & aliases"]
+    Check -- "Light (fmt, tree)" --> Pass["Bypass buildq"]
+    Check -- "Heavy (build, test, run)" --> Lock["Acquire OS lock (BUILDQ_DIR)"]
+    Lock --> Lease["Lease warm target/ member (m0)"]
+    Lease --> Diff["Diff Git blobs vs m0.manifest"]
+    Diff --> Invalidate["Delete .fingerprint/ of changed crates"]
+    Invalidate --> Build["Run cargo (CARGO_TARGET_DIR=m0)"]
+```
+
+1. **OS File-Locked Queue**
+   - Exclusive OS file locks (`flock` / `LockFileEx`) in `$BUILDQ_DIR`
+   - Automatic lock release on process crash or kill—no stale locks
+   - Deadlock-free nested `cargo` calls via `BUILDQ_HELD` detection
+2. **Content-Addressed Manifest Invalidation**
+   - Cross-worktree artifact reuse via Cargo's workspace-relative path hashing
+   - Per-file Git blob tracking in `m0.manifest`
+   - Targeted `.fingerprint/<pkg>-*` deletion for modified packages before each build
+   - Fast, accurate incremental rebuilds independent of file `mtime`
+3. **Two-Phase `cargo run`**
+   - Phase 1: Compile under a `build` slot and copy the binary + DLLs to `runs/r0`
+   - Phase 2: Release the `build` slot and `target/` member, then launch the binary under a `run` slot
+   - Zero `target/` locking while applications are running
 
 ---
 
