@@ -848,6 +848,15 @@ fn line<'a>(out: &'a Output, key: &str) -> &'a str {
         .trim()
 }
 
+fn scoped_target(out: &Output) -> String {
+    let args = line(out, "ARGS").replace('"', "");
+    args.split_once("--target-dir=")
+        .expect("scoped target argument")
+        .1
+        .trim()
+        .into()
+}
+
 #[test]
 fn shim_routes_heavy_commands_through_queue_and_pool() {
     let s = shim_setup();
@@ -857,11 +866,16 @@ fn shim_routes_heavy_commands_through_queue_and_pool() {
         "{}",
         String::from_utf8_lossy(&out.stderr)
     );
-    assert_eq!(line(&out, "ARGS"), "build -p a");
-    let target = line(&out, "TARGET=");
+    assert!(line(&out, "ARGS").starts_with("build -p a "));
+    assert_eq!(
+        line(&out, "TARGET="),
+        "",
+        "buildq must not export the pool target"
+    );
+    let target = scoped_target(&out);
     let cache = s.e.root.join("cache").join("pools");
     assert!(
-        Path::new(target).starts_with(&cache),
+        Path::new(&target).starts_with(&cache),
         "target {target} should be a pool member under {}",
         cache.display()
     );
@@ -869,16 +883,27 @@ fn shim_routes_heavy_commands_through_queue_and_pool() {
     assert!(!line(&out, "JOBS=").is_empty());
     assert_eq!(s.history_len(), 1);
 
-    // Alias to a heavy command: queued, args untouched (cargo expands it itself).
+    // Cargo still expands the alias; buildq adds an invocation-scoped target.
     let out = s.cargo(&["lint"], 0);
-    assert_eq!(line(&out, "ARGS"), "lint");
-    assert!(line(&out, "TARGET=").contains("pools"));
+    assert!(line(&out, "ARGS").starts_with("lint "));
+    assert!(scoped_target(&out).contains("pools"));
+    assert_eq!(line(&out, "TARGET="), "");
     assert_eq!(s.history_len(), 2);
 
     // Exit codes come back unchanged.
     let out = s.cargo(&["test"], 101);
     assert_eq!(out.status.code(), Some(101));
     assert_eq!(s.history_len(), 3);
+    let out = s.cargo(&["test", "--", "--nocapture"], 0);
+    let args = line(&out, "ARGS");
+    assert!(args.contains("--target-dir="));
+    assert!(args.ends_with("-- --nocapture"), "{args}");
+    let out = s.cargo(&["llvm-cov", "run"], 0);
+    assert_eq!(line(&out, "ARGS"), "llvm-cov run");
+    assert!(
+        line(&out, "TARGET=").contains("pools"),
+        "plugins keep their CLI contract"
+    );
 }
 
 #[test]
@@ -981,7 +1006,7 @@ fn shim_touches_only_changed_outside_files_in_built_members() {
     assert!(!stderr(&unchanged).contains("outside packages touched"));
 
     // A member directory may survive without a manifest (e.g. interrupted setup).
-    let target = PathBuf::from(line(&first, "TARGET="));
+    let target = PathBuf::from(scoped_target(&first));
     let manifest = target.with_extension("manifest");
     fs::remove_file(&manifest).unwrap();
     let changed_mtime = set_old(&changed);
@@ -1086,12 +1111,12 @@ fn pool_explicit_reroots_target_dirs_inside_the_worktree() {
     // Rust quotes arguments it hands to a .cmd shim on Windows; cargo itself
     // sees them unquoted, so compare without the quotes.
     let args = line(&out, "ARGS").replace('"', "");
-    let target = line(&out, "TARGET=");
-    let rewritten = args.strip_prefix("build --target-dir=").unwrap();
-    assert_eq!(rewritten, target.replace('\\', "/"));
-    assert!(Path::new(target).starts_with(&pools), "{target}");
+    let target = scoped_target(&out);
+    assert_eq!(line(&out, "TARGET="), "");
+    assert!(args.starts_with("build --target-dir="));
+    assert!(Path::new(&target).starts_with(&pools), "{target}");
     assert!(
-        Path::new(target).ends_with(Path::new("sub").join("target-base")),
+        Path::new(&target).ends_with(Path::new("sub").join("target-base")),
         "{target}"
     );
 
@@ -1104,10 +1129,15 @@ fn pool_explicit_reroots_target_dirs_inside_the_worktree() {
             ("CARGO_TARGET_DIR", "target/ab"),
         ],
     );
-    let target = line(&out, "TARGET=");
+    let target = scoped_target(&out);
+    assert_eq!(
+        line(&out, "TARGET="),
+        "target/ab",
+        "preserve the caller's explicit environment"
+    );
     assert!(
-        Path::new(target).starts_with(&pools)
-            && Path::new(target).ends_with(Path::new("sub").join("ab")),
+        Path::new(&target).starts_with(&pools)
+            && Path::new(&target).ends_with(Path::new("sub").join("ab")),
         "{target}"
     );
 

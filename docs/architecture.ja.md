@@ -69,7 +69,24 @@ $BUILDQ_DIR/<class>/
 - **デッドロック防止**
   - 実行中ジョブは子プロセスへ環境変数 `BUILDQ_HELD=<保持中クラス>` を引き継ぐ
   - ネストされた `buildq` や `cargo` shim は、対象クラスが `BUILDQ_HELD` に含まれていればキューをバイパスして即時実行
-  - ビルドスクリプト内の `cargo metadata` やテスト内の `cargo build` が親スロット待ちでデッドロックしない
+  - 入れ子呼び出しが祖先の保持するキュースロットを再取得しない
+
+### Nested Cargo
+
+組み込みのコンパイルコマンドと clippy には、プールの target を `--target-dir` で渡す。
+親のロック済み target を helper に強制しないよう、buildq は `CARGO_TARGET_DIR` を新たにエクスポートしない。
+別ワークスペースの helper は通常の target を使い、さらに入れ子の helper も独立して選択する。
+明示的な利用者の環境変数は保持する。
+
+ソースマニフェスト内の別 Cargo.toml の隣に見つかった通常の target は、外部容量のレジストリに記録する。
+プール予算の管理対象外であり、GC は削除しない。
+Cargo 設定による任意の別パスは、この探索では推測しない。
+`OUT_DIR` 配下を helper の `--target-dir` に指定すれば、親メンバー内で容量とロックを管理できる。
+
+カスタム Cargo plugin は CLI の互換性を保つため、環境変数による target 指定を継続する。
+plugin 内の helper は独立した target を明示する必要がある。
+同じワークスペースを再帰的にビルドする場合の Cargo 自身のロック制約は残る。
+`BUILDQ_HELD` が防ぐのはキューの再取得だけである。
 
 ### Process Tree & Signal Handling
 
@@ -92,7 +109,7 @@ $BUILDQ_CACHE/
   pools/<repo>-<hash(repo, toolchain)>/
     pool.json                 # リポジトリ共通 git dir とツールチェイン (rustc -vV)
     pool.lock                 # メンバー選択用の短いクリティカルセクション
-    m<i>/                     # 実際の cargo target ディレクトリ (CARGO_TARGET_DIR)
+    m<i>/                     # 実際の cargo target ディレクトリ (--target-dir)
     m<i>.lock                 # メンバー i を使用中のジョブが保持する排他ロック
     m<i>.json                 # 最終使用時刻・最終 worktree・サイズ・累計ジョブ数
     m<i>.manifest             # 相対ファイルパス -> Git blob ID の対応表
@@ -134,7 +151,7 @@ sequenceDiagram
     BQ->>BQ: 変更ファイルを所属パッケージ (Cargo.toml) に紐づけ
     BQ->>Mem: 対象パッケージの .fingerprint/ を削除
     BQ->>Mem: 新しい m0.manifest を書き込み
-    BQ->>Cargo: CARGO_TARGET_DIR=m0 で cargo を実行
+    BQ->>Cargo: --target-dir=m0 で cargo を実行
 ```
 
 メンバー `m<i>` でビルドを開始する前の手順：

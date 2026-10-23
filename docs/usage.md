@@ -42,6 +42,25 @@ stop if the reserve is breached. Use `buildq cache ls --refresh` and
 for the volume; `min_free = "0"` disables this guard. See the
 [free-space guard](architecture.md#free-space-guard) for scope and limitations.
 
+## Nested Cargo
+
+Build scripts can build helpers in separate Cargo workspaces without inheriting
+the parent's pooled target. Normal helper targets stay outside the pool; discovered
+default directories appear in `cache ls` as external storage and are not pruned.
+To keep helper artifacts inside the parent's budget and lease, scope its target
+explicitly to `OUT_DIR`:
+
+```rust
+let target = std::path::PathBuf::from(std::env::var_os("OUT_DIR").unwrap())
+    .join("helper-target");
+let status = std::process::Command::new(std::env::var_os("CARGO").unwrap())
+    .args(["build", "--manifest-path", "helper/Cargo.toml", "--target-dir"])
+    .arg(target)
+    .status()
+    .unwrap();
+assert!(status.success());
+```
+
 ## Cache Budget
 
 `[cache] budget` controls cache retention, rather than the maximum size of a

@@ -571,6 +571,85 @@ fn native_runtime_leases_survive_gc_while_queued_and_during_late_loading() {
     wait(|| !pool.join("m0").exists() && !buildq::lock::is_held(&root.join("cache/gc.lock")));
 }
 
+#[test]
+fn nested_helper_workspaces_do_not_inherit_the_parent_pool_target() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(temp.path());
+    let script = |manifest: &str| {
+        format!(
+            r#"fn main() {{
+        let mut child=std::process::Command::new(std::env::var("CARGO").unwrap())
+            .args(["build","--offline","--manifest-path","{manifest}"]).spawn().unwrap();
+        let until=std::time::Instant::now()+std::time::Duration::from_secs(15);
+        loop {{
+            if let Some(status)=child.try_wait().unwrap() {{ assert!(status.success()); break; }}
+            if std::time::Instant::now()>=until {{ let _=child.kill();let _=child.wait();panic!("nested Cargo target lock timed out"); }}
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }}
+        println!("cargo:rerun-if-changed=build.rs");
+    }}"#
+        )
+    };
+    let parent_script = script("helper/Cargo.toml");
+    let helper_script = script("grand/Cargo.toml");
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='nested-parent'\nversion='0.1.0'\nedition='2021'\n[workspace]\nexclude=['helper']\n",
+            ),
+            ("src/main.rs", "fn main(){}"),
+            ("build.rs", &parent_script),
+            (
+                "helper/Cargo.toml",
+                "[package]\nname='nested-helper'\nversion='0.1.0'\nedition='2021'\n[workspace]\nexclude=['grand']\n",
+            ),
+            ("helper/src/main.rs", "fn main(){}"),
+            ("helper/build.rs", &helper_script),
+            (
+                "helper/grand/Cargo.toml",
+                "[package]\nname='nested-grand'\nversion='0.1.0'\nedition='2021'\n[workspace]\n",
+            ),
+            ("helper/grand/src/main.rs", "fn main(){}"),
+            (".gitignore", "**/target/\n"),
+        ],
+    );
+    let ws = root.join("ws");
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "."]);
+    git(&ws, &["commit", "-qm", "fixture"]);
+    let control = Command::new(&w.real_cargo)
+        .args(["build", "--offline", "--target-dir"])
+        .arg(root.join("control"))
+        .current_dir(&ws)
+        .env_remove("CARGO_TARGET_DIR")
+        .output()
+        .unwrap();
+    assert!(
+        control.status.success(),
+        "{}",
+        String::from_utf8_lossy(&control.stderr)
+    );
+    for dir in [ws.join("helper/target"), ws.join("helper/grand/target")] {
+        fs::remove_dir_all(dir).unwrap();
+    }
+    w.cargo(&ws, &["build", "--offline"]);
+    for dir in [ws.join("helper/target"), ws.join("helper/grand/target")] {
+        assert!(dir.exists());
+    }
+    let report = Command::new(BQ)
+        .args(["cache", "ls", "--refresh", "--json"])
+        .env("BUILDQ_DIR", root.join("q"))
+        .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+        .env("BUILDQ_CACHE", root.join("cache"))
+        .output()
+        .unwrap();
+    let usage: serde_json::Value = serde_json::from_slice(&report.stdout).unwrap();
+    assert!(usage["external_total"].as_u64().unwrap() > 0);
+    assert_eq!(usage["external"].as_array().unwrap().len(), 2, "{usage}");
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     fs::create_dir_all(to).unwrap();
     for e in fs::read_dir(from).unwrap().flatten() {
