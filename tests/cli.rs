@@ -657,7 +657,9 @@ fn pool_explicit_reroots_target_dirs_inside_the_worktree() {
 
     let out = s.cargo_with(&["build", "--target-dir=target-base"], 0, &on);
     assert!(out.status.success(), "{}", stderr(&out));
-    let args = line(&out, "ARGS");
+    // Rust quotes arguments it hands to a .cmd shim on Windows; cargo itself
+    // sees them unquoted, so compare without the quotes.
+    let args = line(&out, "ARGS").replace('"', "");
     let target = line(&out, "TARGET=");
     let rewritten = args.strip_prefix("build --target-dir=").unwrap();
     assert_eq!(rewritten, target.replace('\\', "/"));

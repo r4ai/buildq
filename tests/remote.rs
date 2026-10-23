@@ -35,6 +35,17 @@ impl Transport for LocalHost {
         self.log
             .borrow_mut()
             .push(remote::remote_script(cwd, env, argv));
+        // `test -e` is a POSIX utility the remote would have; Windows has none
+        // on PATH (git's bundled one is not guaranteed), so answer it here.
+        if let [t, e, path] = argv
+            && t == "test"
+            && e == "-e"
+        {
+            let base = cwd
+                .map(|d| self.path(d))
+                .unwrap_or_else(|| self.home.clone());
+            return Ok((if base.join(path).exists() { 0 } else { 1 }, String::new()));
+        }
         let mut c = Command::new(&argv[0]);
         c.args(&argv[1..]).current_dir(
             cwd.map(|d| self.path(d))
