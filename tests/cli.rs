@@ -27,6 +27,7 @@ impl Env {
             .env("BUILDQ_CACHE", self.root.join("cache"))
             .env("BUILDQ_SLOTS", slots.to_string())
             .env("BUILDQ_GC", "0")
+            .env_remove("BUILDQ_MAX_PER_WORKTREE")
             .env_remove("BUILDQ_HELD")
             .env_remove("BUILDQ_CONFIG")
             .env_remove("CARGO_TARGET_DIR")
@@ -270,6 +271,162 @@ fn priority_overtakes_waiting_jobs() {
     };
     assert!(start(2) < start(0), "priority 10 runs first");
     assert!(start(0) < start(1), "FIFO within a priority");
+}
+
+// Gates keep admission assertions independent of scheduler timing and job duration.
+fn gated_job(e: &Env, cwd: &Path, name: &str, cap: usize, nested: bool) -> Child {
+    let mut cmd = e.cmd(2);
+    cmd.current_dir(cwd)
+        .env("BUILDQ_MAX_PER_WORKTREE", cap.to_string())
+        .args(["run", "--"]);
+    if nested {
+        cmd.args([BQ, "run", "--"]);
+    }
+    cmd.args([BQ, "__helper", "gate"])
+        .arg(e.root.join(format!("{name}.started")))
+        .arg(e.root.join(format!("{name}.release")))
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap()
+}
+
+fn release_job(e: &Env, name: &str, child: &mut Child) {
+    fs::write(e.root.join(format!("{name}.release")), "").unwrap();
+    assert!(child.wait().unwrap().success());
+}
+
+#[test]
+fn worktree_cap_defers_extra_jobs_and_preserves_fifo() {
+    use buildq::queue::{ClassQueue, JobInfo};
+    let e = Env::new();
+    let a = e.root.join("a");
+    let b = e.root.join("b");
+    fs::create_dir_all(a.join("sub")).unwrap();
+    git(&a, &["init", "-q"]);
+    git(&a, &["commit", "--allow-empty", "-qm", "init"]);
+    git(
+        &a,
+        &["worktree", "add", "-qb", "other", b.to_str().unwrap()],
+    );
+    let q = ClassQueue::new(&e.root.join("q"), "build", 2, Duration::from_millis(10))
+        .with_max_per_worktree(1);
+    let blocker = || q.acquire(JobInfo::default(), &mut |_| {}).unwrap();
+    let block0 = blocker();
+    let block1 = blocker();
+    let mut jobs = Vec::new();
+    for (i, cwd) in [a.clone(), a.join("sub"), a.clone(), b].iter().enumerate() {
+        jobs.push(gated_job(&e, cwd, &i.to_string(), 1, i == 0));
+        wait_until("ticket", || q.status().waiters.len() == i + 1);
+    }
+    drop(block0);
+    wait_until("first worktree job (including nested call)", || {
+        e.root.join("0.started").exists()
+    });
+    assert!(!e.root.join("1.started").exists());
+    let st = q.status();
+    assert_eq!(
+        st.waiters[0].worktree.as_deref(),
+        Some(buildq::util::norm_key(&e.root.join("b")).as_str())
+    );
+    assert!(
+        st.waiters[1..]
+            .iter()
+            .all(|w| w.wait_reason.as_deref() == Some("worktree cap"))
+    );
+    let out = e
+        .cmd(2)
+        .env("BUILDQ_MAX_PER_WORKTREE", "1")
+        .arg("status")
+        .output()
+        .unwrap();
+    assert!(String::from_utf8_lossy(&out.stdout).contains("waiting: worktree cap"));
+    drop(block1);
+    wait_until("competing worktree", || e.root.join("3.started").exists());
+    assert!(!e.root.join("1.started").exists());
+    assert!(!e.root.join("2.started").exists());
+    release_job(&e, "0", &mut jobs[0]);
+    wait_until("second FIFO job", || e.root.join("1.started").exists());
+    assert!(!e.root.join("2.started").exists());
+    release_job(&e, "3", &mut jobs[3]);
+    // A already holds its cap, but B has no waiting ticket: use the idle slot.
+    wait_until("work-conserving third job", || {
+        e.root.join("2.started").exists()
+    });
+    release_job(&e, "1", &mut jobs[1]);
+    release_job(&e, "2", &mut jobs[2]);
+}
+
+#[test]
+fn worktree_cap_allows_idle_slots_without_competitors() {
+    let e = Env::new();
+    let mut first = gated_job(&e, &e.root, "first", 1, false);
+    wait_until("first", || e.root.join("first.started").exists());
+    let mut second = gated_job(&e, &e.root, "second", 1, false);
+    wait_until("second despite cap", || {
+        e.root.join("second.started").exists()
+    });
+    release_job(&e, "first", &mut first);
+    release_job(&e, "second", &mut second);
+}
+
+#[test]
+fn worktree_cap_configuration_and_environment_override() {
+    let e = Env::new();
+    let config = || {
+        let out = e.cmd(3).arg("config").output().unwrap();
+        assert!(out.status.success());
+        String::from_utf8(out.stdout).unwrap()
+    };
+    assert!(
+        config()
+            .lines()
+            .any(|s| s.starts_with("max per worktree") && s.ends_with('2'))
+    );
+    fs::create_dir_all(e.root.join("q")).unwrap();
+    fs::write(e.root.join("q/config.toml"), "max_per_worktree = 3\n").unwrap();
+    assert!(
+        config()
+            .lines()
+            .any(|s| s.starts_with("max per worktree") && s.ends_with('3'))
+    );
+    let out = e
+        .cmd(3)
+        .env("BUILDQ_MAX_PER_WORKTREE", "0")
+        .arg("config")
+        .output()
+        .unwrap();
+    assert!(out.status.success());
+    assert!(
+        String::from_utf8_lossy(&out.stdout)
+            .lines()
+            .any(|s| s.starts_with("max per worktree") && s.ends_with('0'))
+    );
+}
+
+#[test]
+fn disabled_worktree_cap_keeps_fifo_across_worktrees() {
+    use buildq::queue::{ClassQueue, JobInfo};
+    let e = Env::new();
+    let other = e.root.join("other");
+    fs::create_dir_all(&other).unwrap();
+    let q = ClassQueue::new(&e.root.join("q"), "build", 2, Duration::from_millis(10))
+        .with_max_per_worktree(0);
+    let block = q.acquire(JobInfo::default(), &mut |_| {}).unwrap();
+    let mut first = gated_job(&e, &e.root, "first", 0, false);
+    wait_until("first", || e.root.join("first.started").exists());
+    let mut second = gated_job(&e, &e.root, "second", 0, false);
+    wait_until("second queued", || q.status().waiters.len() == 1);
+    let mut competitor = gated_job(&e, &other, "competitor", 0, false);
+    wait_until("competitor queued", || q.status().waiters.len() == 2);
+    drop(block);
+    wait_until("second follows FIFO", || {
+        e.root.join("second.started").exists()
+    });
+    assert!(!e.root.join("competitor.started").exists());
+    release_job(&e, "first", &mut first);
+    wait_until("competitor", || e.root.join("competitor.started").exists());
+    release_job(&e, "second", &mut second);
+    release_job(&e, "competitor", &mut competitor);
 }
 
 // ---------------------------------------------------------------------------

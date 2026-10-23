@@ -155,6 +155,7 @@ Place `config.toml` in `$BUILDQ_DIR/config.toml` (check `buildq config` for the 
 
 ```toml
 slots = 2                # Max concurrent build jobs (default: 2)
+# max_per_worktree = 1   # Soft cap per worktree in each class (default: ceil(slots / 2); 0 disables)
 run_slots = 2            # Max concurrent app runs for `cargo run` (default: 2)
 
 [cache]
@@ -167,6 +168,19 @@ min_free = "25G"         # Minimum free disk space to preserve on volume (defaul
 rustc_wrapper = "none"   # Disable global sccache per job ("none" | "keep" | "/path")
 # jobs = 8               # CARGO_BUILD_JOBS per build (default: cores / slots)
 ```
+
+| Setting | Environment override | Default |
+| :--- | :--- | :--- |
+| `max_per_worktree` | `BUILDQ_MAX_PER_WORKTREE` | `ceil(slots / 2)`; `0` disables |
+
+The cap applies separately within each job class, using the Git worktree root
+(or the current directory outside Git) as identity.
+When another worktree is queued below its cap, its tickets precede tickets
+from worktrees already at their cap.
+Within each group, higher priority runs first, then strict FIFO.
+When all waiting worktrees are at their cap, jobs can still use idle slots.
+`buildq status` marks deferred tickets with `waiting: worktree cap`.
+Nested calls using `BUILDQ_HELD` remain exempt.
 
 ### Remote Builds (SSH)
 

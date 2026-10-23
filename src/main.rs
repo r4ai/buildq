@@ -315,6 +315,7 @@ fn status(cfg: &Config, json: bool, hosts: bool) -> ExitCode {
                 cfg.class_slots(c),
                 Duration::from_millis(cfg.poll_ms),
             )
+            .with_max_per_worktree(cfg.max_per_worktree)
             .status()
         })
         .collect();
@@ -383,13 +384,17 @@ fn print_class(st: &ClassStatus, indent: &str) {
     }
     for (i, w) in st.waiters.iter().enumerate() {
         println!(
-            "{indent}  #{} prio {} waiting {:>5}  {}  (pid {}, {})",
+            "{indent}  #{} prio {} waiting {:>5}  {}  (pid {}, {}){}",
             i + 1,
             w.priority,
             duration_str(now_ms().saturating_sub(w.enqueued_ms) / 1000),
             w.cmd,
             w.pid,
-            w.cwd
+            w.cwd,
+            w.wait_reason
+                .as_ref()
+                .map(|r| format!(" waiting: {r}"))
+                .unwrap_or_default()
         );
     }
 }
@@ -403,6 +408,20 @@ fn helper(args: &[String]) -> ExitCode {
             ExitCode::SUCCESS
         }
         Some("exit") => exit(args.get(1).and_then(|s| s.parse().ok()).unwrap_or(0)),
+        Some("gate") => {
+            // gate <started> <release>: deterministic process-level queue tests.
+            if std::fs::write(&args[1], "started").is_err() {
+                return exit(125);
+            }
+            let deadline = std::time::Instant::now() + Duration::from_secs(30);
+            while !std::path::Path::new(&args[2]).exists() {
+                if std::time::Instant::now() >= deadline {
+                    return exit(125);
+                }
+                std::thread::sleep(Duration::from_millis(10));
+            }
+            ExitCode::SUCCESS
+        }
         Some("span") => {
             // span <dir> <ms>: record [start, end] of this process for overlap checks.
             let dir = PathBuf::from(&args[1]);
