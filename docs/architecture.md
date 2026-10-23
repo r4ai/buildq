@@ -17,7 +17,7 @@ flowchart TD
     Cargo --> IsRun{"Is cargo run?"}
     IsRun -- "No" --> Release["Save manifest, release member & slot"]
     IsRun -- "Yes" --> CopyBin["Copy binary & DLLs to runs/r0"]
-    CopyBin --> ReleaseBuild["Release build slot & pool member"]
+    CopyBin --> ReleaseBuild["Release build slot"]
     ReleaseBuild --> RunSlot["Acquire run slot & execute binary"]
 ```
 
@@ -199,9 +199,17 @@ Running a binary directly inside `m0/debug/app.exe` would cause subsequent build
    - Runs `cargo build` with `--message-format=json-render-diagnostics` and the resolved `--bin`
    - Parses Cargo's JSON artifact messages for the executable, DLLs/dylibs, `.pdb` symbols, and link paths
    - Incrementally copies new or modified files (by size and `mtime`) into `$BUILDQ_CACHE/runs/r<j>`
-2. **Run Phase** (holds `run` slot; `build` slot and `m<i>` released)
+2. **Run Phase** (holds `run` slot; `build` slot released)
    - Executes the copied binary from `runs/r<j>` in the caller's working directory
    - Sets `PATH` / `LD_LIBRARY_PATH`, `CARGO_MANIFEST_DIR`, and `CARGO_PKG_*` so asset paths (e.g., Bevy's `assets/`) resolve normally
+
+When native shared libraries remain in the member, its exclusive lease stays
+held from run-slot waiting through application exit. Build outputs, link-search
+directories, and profile/deps libraries are inspected, excluding copied Rust
+libraries. Keeping the dependency member busy protects absolute loader paths
+and late loading from GC. The build slot is released, but available pool
+capacity is reduced. These bytes remain accounted as busy artifacts; application
+exit releases the lease and triggers another GC attempt.
 
 The application receives Cargo `[env]` from home/ancestor configs and `--config`,
 including `force` and config-relative paths ([Cargo rules](https://doc.rust-lang.org/cargo/reference/config.html#env)).

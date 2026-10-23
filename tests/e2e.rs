@@ -409,6 +409,168 @@ fn ambiguous_runs_do_not_build_or_launch_an_arbitrary_workspace_binary() {
     );
 }
 
+#[test]
+#[cfg(unix)]
+fn native_runtime_leases_survive_gc_while_queued_and_during_late_loading() {
+    use std::process::Child;
+    struct Children(Vec<Child>);
+    impl Drop for Children {
+        fn drop(&mut self) {
+            for child in &mut self.0 {
+                let _ = child.kill();
+                let _ = child.wait();
+            }
+        }
+    }
+    fn wait(mut predicate: impl FnMut() -> bool) {
+        let until = Instant::now() + Duration::from_secs(30);
+        while !predicate() {
+            assert!(Instant::now() < until, "native runtime barrier timed out");
+            std::thread::sleep(Duration::from_millis(10));
+        }
+    }
+    let temp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(temp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='native-runtime'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            ("native.c", "int answer(void){return 42;}"),
+            (
+                "build.rs",
+                r#"fn main() {
+            let out = std::env::var("OUT_DIR").unwrap();
+            let ext = if cfg!(target_os="macos") { "dylib" } else { "so" };
+            for name in ["qa_native", "qa_late"] {
+                let mut cc = std::process::Command::new("cc");
+                cc.args(["-shared", "-fPIC", "native.c", "-o"])
+                    .arg(std::path::Path::new(&out).join(format!("lib{name}.{ext}")));
+                assert!(cc.status().unwrap().success());
+            }
+            println!("cargo:rustc-link-search=native={out}");
+            println!("cargo:rustc-link-lib=dylib=qa_native");
+            println!("cargo:rerun-if-changed=native.c");
+        }"#,
+            ),
+            (
+                "src/main.rs",
+                r#"use std::{ffi::CString, path::Path, time::{Duration,Instant}};
+            extern "C" { fn answer() -> i32; }
+            #[cfg_attr(not(target_os="macos"), link(name="dl"))]
+            extern "C" { fn dlopen(path:*const std::ffi::c_char, flags:i32)->*mut std::ffi::c_void; fn dlsym(handle:*mut std::ffi::c_void,name:*const std::ffi::c_char)->*mut std::ffi::c_void; }
+            fn main() {
+                assert_eq!(unsafe { answer() }, 42);
+                let args:Vec<_> = std::env::args().collect();
+                std::fs::write(&args[1], "ready").unwrap();
+                let until=Instant::now()+Duration::from_secs(30);
+                while !Path::new(&args[2]).exists() { assert!(Instant::now()<until); std::thread::sleep(Duration::from_millis(10)); }
+                let lib = CString::new(if cfg!(target_os="macos") { "libqa_late.dylib" } else { "libqa_late.so" }).unwrap();
+                unsafe {
+                    let handle=dlopen(lib.as_ptr(),2); assert!(!handle.is_null());
+                    let symbol=dlsym(handle,CString::new("answer").unwrap().as_ptr()); assert!(!symbol.is_null());
+                    let late:unsafe extern "C" fn()->i32=std::mem::transmute(symbol);
+                    println!("answer={} late={}",answer(),late());
+                }
+            }"#,
+            ),
+            (".gitignore", "target/\n"),
+        ],
+    );
+    let ws = root.join("ws");
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "."]);
+    git(&ws, &["commit", "-qm", "fixture"]);
+    fs::create_dir_all(root.join("q")).unwrap();
+    fs::write(
+        root.join("q/config.toml"),
+        "slots=1\nrun_slots=1\n[cargo]\nmirror_bins=false\n[cache]\nmin_free='0'\nbudget='1M'\n",
+    )
+    .unwrap();
+    let command = || {
+        let mut c = Command::new(BQ);
+        c.env("BUILDQ_DIR", root.join("q"))
+            .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+            .env("BUILDQ_CACHE", root.join("cache"))
+            .env("PATH", &w.path)
+            .env_remove("BUILDQ_HELD")
+            .env_remove("CARGO_TARGET_DIR");
+        c
+    };
+    let mut children = Children(Vec::new());
+    children.0.push(
+        command()
+            .args(["run", "--class", "run", "--", BQ, "__helper", "gate"])
+            .arg(root.join("holder-ready"))
+            .arg(root.join("holder-release"))
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn()
+            .unwrap(),
+    );
+    wait(|| root.join("holder-ready").exists());
+    children.0.push(
+        command()
+            .args(["cargo", "run", "--offline", "--"])
+            .arg(root.join("app-ready"))
+            .arg(root.join("app-release"))
+            .env("BUILDQ_GC", "1")
+            .current_dir(&ws)
+            .stdout(fs::File::create(root.join("app.out")).unwrap())
+            .stderr(fs::File::create(root.join("app.err")).unwrap())
+            .spawn()
+            .unwrap(),
+    );
+    wait(|| {
+        fs::read_to_string(root.join("app.err"))
+            .unwrap_or_default()
+            .contains("waiting for a run slot")
+    });
+    wait(|| root.join("cache/gc.stamp").exists());
+    let pool = fs::read_dir(root.join("cache/pools"))
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap()
+        .path();
+    assert!(
+        pool.join("m0").exists(),
+        "queued native dependencies must remain leased"
+    );
+    let gc = || {
+        let out = command().args(["gc", "--json"]).output().unwrap();
+        assert!(out.status.success());
+        serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()
+    };
+    assert_eq!(gc()["over_budget"], true);
+    fs::write(root.join("holder-release"), "").unwrap();
+    assert!(children.0[0].wait().unwrap().success());
+    wait(|| root.join("app-ready").exists() || children.0[1].try_wait().unwrap().is_some());
+    assert!(
+        root.join("app-ready").exists(),
+        "{}",
+        fs::read_to_string(root.join("app.err")).unwrap()
+    );
+    assert_eq!(gc()["over_budget"], true);
+    assert!(
+        pool.join("m0").exists(),
+        "active runtime dependencies must survive GC"
+    );
+    fs::write(root.join("app-release"), "").unwrap();
+    assert!(
+        children.0[1].wait().unwrap().success(),
+        "{}",
+        fs::read_to_string(root.join("app.err")).unwrap()
+    );
+    assert_eq!(
+        fs::read_to_string(root.join("app.out")).unwrap().trim(),
+        "answer=42 late=42"
+    );
+    wait(|| !pool.join("m0").exists() && !buildq::lock::is_held(&root.join("cache/gc.lock")));
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     fs::create_dir_all(to).unwrap();
     for e in fs::read_dir(from).unwrap().flatten() {

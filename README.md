@@ -57,7 +57,7 @@ flowchart LR
 - **Automatic disk budget & GC**
   - Prunes stale incremental sessions and unused artifacts in the background
   - Reclaims idle caches toward a configurable disk budget (default: `60 GB`)
-- **Lock-free `cargo run`**
+- **Staged `cargo run`**
   - Copies compiled binaries and DLLs to an isolated run directory before execution
   - Prevents running executables from locking the shared `target/` directory on Windows
 - **Remote execution over SSH**
@@ -182,7 +182,7 @@ flowchart TD
 2. **Content-Based Cache Invalidation**
    - Compares Git blobs and rebuilds changed packages
 3. **Two-Phase `cargo run`**
-   - Copies the executable and releases the pool before launching the application
+   - Stages the executable separately and releases compilation slots before launch
 
 ## Documentation
 

@@ -56,6 +56,12 @@ The separate `min_free` guard still refuses or stops pooled builds under disk
 pressure; increasing `budget` does not disable it. See
 [Disk Budget & Garbage Collection](architecture.md#4-disk-budget--garbage-collection) for details.
 
+`cargo run` reports when native runtime dependencies keep a target member
+leased while queued or running. GC protects that member and reports remaining
+overflow. A long-running native application can therefore reduce build capacity;
+allow enough `cache.max_members` for its retained member, or stop the application
+to release it. Compilations still release their build slots before execution.
+
 ## Live Monitoring
 
 `buildq top` refreshes running jobs, waiters and wait durations, remote queues,
