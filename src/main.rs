@@ -6,7 +6,7 @@ use clap::{Parser, Subcommand};
 
 use buildq::config::{self, Config};
 use buildq::job::{self, Opts};
-use buildq::queue::{ClassQueue, ClassStatus};
+use buildq::queue::ClassStatus;
 use buildq::util::{ago, duration_str, human_bytes, now_ms, parse_size};
 use buildq::{gc, history, remote, shim};
 
@@ -59,6 +59,18 @@ enum Cmd {
         /// Also ask every configured host (needs `buildq` set for the host).
         #[arg(long)]
         hosts: bool,
+    },
+    /// Live queue, remote-host, and target-pool usage (Ctrl+C to stop).
+    Top {
+        /// Refresh interval in seconds.
+        #[arg(long, default_value_t = 1, value_parser = clap::value_parser!(u64).range(1..=3600))]
+        interval: u64,
+        /// Print a single snapshot (also the default for redirected output).
+        #[arg(long)]
+        once: bool,
+        /// Skip remote status probes.
+        #[arg(long)]
+        no_hosts: bool,
     },
     /// Recent jobs.
     History {
@@ -173,6 +185,18 @@ fn main() -> ExitCode {
         }
         Cmd::Cargo { args } => finish(job::run_cargo(&cfg, &Opts::from_env(), &args)),
         Cmd::Status { json, hosts } => status(&cfg, json, hosts),
+        Cmd::Top {
+            interval,
+            once,
+            no_hosts,
+        } => match buildq::top::run(&cfg, Duration::from_secs(interval), once, !no_hosts) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(error) if error.kind() == std::io::ErrorKind::BrokenPipe => ExitCode::SUCCESS,
+            Err(error) => {
+                eprintln!("buildq: top: {error}");
+                ExitCode::from(1)
+            }
+        },
         Cmd::History { n, json } => {
             let entries = history::read(&cfg.queue_dir, n);
             if json {
@@ -305,20 +329,7 @@ fn finish(r: Result<i32, String>) -> ExitCode {
 }
 
 fn status(cfg: &Config, json: bool, hosts: bool) -> ExitCode {
-    let classes: Vec<ClassStatus> = cfg
-        .known_classes()
-        .iter()
-        .map(|c| {
-            ClassQueue::new(
-                &cfg.queue_dir,
-                c,
-                cfg.class_slots(c),
-                Duration::from_millis(cfg.poll_ms),
-            )
-            .with_max_per_worktree(cfg.max_per_worktree)
-            .status()
-        })
-        .collect();
+    let classes = buildq::status::classes(cfg);
     let remote = if hosts {
         remote::host_status(cfg)
     } else {
