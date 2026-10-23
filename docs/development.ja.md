@@ -52,7 +52,7 @@ cargo test
 - 2フェーズ `cargo run` のバイナリ / DLL 差分同期と JSON 成果物パース
 - リモートスナップショット作成・差分プッシュ・worktree チェックアウト・実行・`--fetch` の一連の動作
 
-GC のファイルシステムテストは、独立した integration-test バイナリで実行する。
+GC・キュー・プールのロック遷移テストは、独立した integration-test バイナリで実行する。
 Unix では別テストの fork が exec 前に一時的にロックを継承し、未使用の fixture が使用中に見える場合がある。
 分離によって、GC の非ブロッキングロックを弱めずに dry-run と実処理の比較を安定させる。
 

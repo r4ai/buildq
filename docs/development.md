@@ -52,7 +52,7 @@ Verified behaviors:
 - Two-phase `cargo run` binary/DLL syncing and JSON artifact parsing
 - Remote snapshot creation, incremental Git push, remote worktree checkout, execution, and `--fetch`
 
-GC filesystem tests use their own integration-test binary. On Unix, a fork in
+GC filesystem, queue, and pool lease-transition tests use separate integration-test binaries. On Unix, a fork in
 an unrelated process-spawning test can briefly inherit a lock before exec closes
 the descriptor, making an idle fixture appear busy. Separating these tests keeps
 deterministic dry-run/actual comparisons without weakening nonblocking GC locks.
