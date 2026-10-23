@@ -170,6 +170,7 @@ min_free = "25G"   # Free-space target for the volume
 
 See the [Usage Guide](docs/usage.md) for configuration options, monitoring, and SSH remote builds.
 
+
 ## How It Works
 
 ```mermaid

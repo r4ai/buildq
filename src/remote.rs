@@ -1,6 +1,6 @@
 //! Running queued jobs on other machines over ssh.
 //!
-//! Protocol (all plain ssh + git, nothing to install remotely except git and
+//! Default protocol (plain ssh + git, nothing to install remotely except git and
 //! the toolchain; a remote buildq is optional):
 //!
 //! 1. Take a local `host-<name>` slot (the host's `slots` bound how many jobs
@@ -19,6 +19,10 @@
 //!    `buildq` configured for the host it runs as `buildq run -- <cmd>` so the
 //!    host's own queue and pool apply.
 //! 6. Optionally copy `--fetch` paths back; return the remote exit code.
+//!
+//! `Rsync` replaces steps 2-4 with an rsync mirror and also uses rsync for
+//! fetching. It includes ignored sources except the protected `.git` and
+//! root `target/` paths, plus any configured excludes.
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -470,7 +474,10 @@ pub fn run(
     let ssh = transport(&host, &hc);
     let t: Box<dyn Transport> = match hc.transport {
         RemoteTransport::Git => Box::new(ssh),
-        RemoteTransport::Rsync => Box::new(Rsync { ssh }),
+        RemoteTransport::Rsync => Box::new(Rsync {
+            ssh,
+            exclude: hc.rsync_exclude.clone(),
+        }),
     };
     if hc.rustc_release.is_some() && host_arg != "auto" && !host_arg.contains(',') {
         check_rustc(t.as_ref(), &hc)?;

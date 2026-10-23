@@ -101,6 +101,8 @@ pub struct HostConfig {
     pub rustc_release: Option<String>,
     /// Installed rustup toolchain used for remote probes and jobs.
     pub rust_toolchain: Option<String>,
+    /// Additional rsync excludes relative to the worktree root.
+    pub rsync_exclude: Vec<String>,
     /// Environment for remote jobs.
     pub env: BTreeMap<String, String>,
 }

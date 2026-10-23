@@ -170,6 +170,7 @@ min_free = "25G"   # ボリュームに残す空き容量の基準
 
 設定項目・監視オプション・SSH リモートビルドは [Usage Guide](docs/usage.ja.md) を参照する。
 
+
 ## How It Works
 
 ```mermaid

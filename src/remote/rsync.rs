@@ -12,6 +12,7 @@ use crate::git::Worktree;
 /// is created on the host, so worktree identity and remote pooling still work.
 pub struct Rsync {
     pub ssh: Ssh,
+    pub exclude: Vec<String>,
 }
 
 impl Rsync {
@@ -23,6 +24,9 @@ impl Rsync {
             .collect::<Vec<_>>()
             .join(" ");
         cmd.args(["--archive", "--rsh", &shell]);
+        for pattern in &self.exclude {
+            cmd.arg(format!("--exclude={pattern}"));
+        }
         // We quote the remote path for its shell ourselves. Keep that same
         // behavior with both macOS's older rsync and newer rsync releases.
         cmd.env("RSYNC_OLD_ARGS", "1")

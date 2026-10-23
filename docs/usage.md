@@ -89,3 +89,11 @@ an error. SSH probes use batch mode and a five-second connection timeout.
 the command through it; buildq never installs toolchains. Explicit hosts also
 receive this check. Remote job `env` applies to probes too.
 
+Set `transport = "rsync"` in a host table to sync with rsync over SSH and use
+rsync for `--fetch`. Both machines need rsync; Git remains the default. Rsync
+includes gitignored generated sources, preserves unchanged mtimes, and removes
+source files deleted locally. `.git` and root `target/` are always excluded;
+remote `target/` survives synchronization. Use `rsync_exclude = ["/secrets/",
+"/cache/"]` for other private or remote build paths. Exclude sensitive ignored
+files explicitly before using this mode. SSH options also apply to rsync.
+
