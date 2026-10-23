@@ -91,11 +91,16 @@ fn cwd() -> PathBuf {
 }
 
 fn job_info(opts: &Opts, cmd: &str) -> JobInfo {
+    let cwd = cwd();
+    let worktree = crate::git::discover(&cwd)
+        .map(|wt| wt.key())
+        .unwrap_or_else(|| crate::util::norm_key(&crate::util::canonical(&cwd)));
     JobInfo {
         pid: std::process::id(),
         class: opts.class.clone(),
         cmd: cmd.to_string(),
-        cwd: cwd().display().to_string(),
+        cwd: cwd.display().to_string(),
+        worktree: Some(worktree),
         label: opts.label.clone(),
         priority: opts.priority,
         ..Default::default()
@@ -109,7 +114,8 @@ pub fn acquire(cfg: &Config, opts: &Opts, cmd: &str) -> Result<SlotGuard, String
         class,
         cfg.class_slots(class),
         Duration::from_millis(cfg.poll_ms),
-    );
+    )
+    .with_max_per_worktree(cfg.max_per_worktree);
     let mut printed = false;
     let g = q
         .acquire(job_info(opts, cmd), &mut |w: WaitState| {

@@ -18,6 +18,8 @@ use crate::util::parse_size;
 pub struct FileConfig {
     /// Concurrent build-class jobs on this machine (default 2).
     pub slots: Option<usize>,
+    /// Soft per-worktree cap within each class (default ceil(slots / 2), 0 disables).
+    pub max_per_worktree: Option<usize>,
     /// Concurrent app runs (the run phase of `cargo run`), default 2.
     pub run_slots: Option<usize>,
     /// Slots for other named classes, e.g. `[classes] gpu = 1`.
@@ -112,6 +114,7 @@ pub struct Config {
     pub config_path: PathBuf,
     pub cache_dir: PathBuf,
     pub slots: usize,
+    pub max_per_worktree: usize,
     pub run_slots: usize,
     pub classes: BTreeMap<String, usize>,
     pub poll_ms: u64,
@@ -219,6 +222,10 @@ impl Config {
             config_path,
             cache_dir,
             slots,
+            max_per_worktree: env_nonempty("BUILDQ_MAX_PER_WORKTREE")
+                .and_then(|s| s.parse().ok())
+                .or(f.max_per_worktree)
+                .unwrap_or(slots.div_ceil(2)),
             run_slots: f.run_slots.unwrap_or(2).max(1),
             classes: f.classes,
             poll_ms: f.poll_ms.unwrap_or(250).max(10),
@@ -296,6 +303,7 @@ pub fn describe(cfg: &Config) -> String {
         "slots",
         format!("build {} / run {}", cfg.slots, cfg.run_slots),
     );
+    p(&mut s, "max per worktree", cfg.max_per_worktree.to_string());
     p(&mut s, "jobs per build", cfg.jobs.to_string());
     p(
         &mut s,

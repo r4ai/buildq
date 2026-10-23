@@ -14,10 +14,11 @@
 //! disappears from the queue by itself: a ticket whose lock can be taken is
 //! dead and gets pruned; a slot whose lock can be taken is free.
 //!
-//! Waiters poll: under `queue.lock` each one lists the live tickets ordered by
-//! (priority desc, seq asc) and takes a free slot only if its rank is below the
-//! number of free slots. That gives strict FIFO within a priority, and a
-//! higher priority overtakes only jobs that have not started yet.
+//! Under `queue.lock`, waiters below the soft worktree cap precede those at
+//! the cap; each group keeps (priority desc, seq asc) order. Only the head
+//! takes a slot, then ranking is recomputed with the new holder. This keeps
+//! FIFO within equal standing even when multiple slots become free at once.
+//! If every waiter is at the cap, the head still runs: idle slots are usable.
 
 use std::fs;
 use std::io;
@@ -36,6 +37,12 @@ pub struct JobInfo {
     pub class: String,
     pub cmd: String,
     pub cwd: String,
+    /// Canonical Git worktree root, or canonical cwd outside Git.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub worktree: Option<String>,
+    /// Computed by status, never persisted in a ticket.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wait_reason: Option<String>,
     #[serde(default)]
     pub label: Option<String>,
     #[serde(default)]
@@ -88,6 +95,7 @@ pub struct ClassQueue {
     pub class: String,
     pub slots: usize,
     pub poll: Duration,
+    pub max_per_worktree: usize,
 }
 
 /// Holding this means holding a slot. Dropping it frees the slot.
@@ -136,6 +144,37 @@ impl ClassQueue {
             class: class.to_string(),
             slots: slots.max(1),
             poll,
+            max_per_worktree: slots.max(1).div_ceil(2),
+        }
+    }
+
+    pub fn with_max_per_worktree(mut self, cap: usize) -> Self {
+        self.max_per_worktree = cap;
+        self
+    }
+
+    /// Reorder using a snapshot of locked slots, never stale slot JSON alone.
+    fn rank_tickets(&self, tickets: &mut [(PathBuf, JobInfo)], holders: &[JobInfo]) {
+        let running = |job: &JobInfo| {
+            holders
+                .iter()
+                .filter(|h| worktree(h) == worktree(job))
+                .count()
+        };
+        let capped =
+            |job: &JobInfo| self.max_per_worktree != 0 && running(job) >= self.max_per_worktree;
+        tickets.sort_by_key(|(_, job)| (capped(job), std::cmp::Reverse(job.priority), job.seq));
+        // A capped ticket is deferred only if an uncapped competitor exists.
+        let preferred = tickets
+            .first()
+            .and_then(|(_, job)| (!capped(job)).then(|| worktree(job).to_string()));
+        for (_, job) in tickets {
+            job.wait_reason =
+                if capped(job) && preferred.as_deref().is_some_and(|w| w != worktree(job)) {
+                    Some("worktree cap".into())
+                } else {
+                    None
+                };
         }
     }
 
@@ -223,18 +262,22 @@ impl ClassQueue {
         loop {
             {
                 let _g = lock::lock(&queue_lock)?;
-                let tickets = self.live_tickets(true);
+                let mut tickets = self.live_tickets(true);
+                let mut free: Vec<(usize, LockFile)> = Vec::new();
+                let mut holders = Vec::new();
+                for i in 0..self.slots {
+                    if let Some(l) = lock::try_lock(&self.slot_lock(i))? {
+                        free.push((i, l));
+                    } else if let Some(job) = read_json::<JobInfo>(&self.slot_json(i)) {
+                        holders.push(job);
+                    }
+                }
+                self.rank_tickets(&mut tickets, &holders);
                 let position = tickets
                     .iter()
                     .position(|(p, _)| *p == ticket.json)
                     .unwrap_or(tickets.len());
-                let mut free: Vec<(usize, LockFile)> = Vec::new();
-                for i in 0..self.slots {
-                    if let Some(l) = lock::try_lock(&self.slot_lock(i))? {
-                        free.push((i, l));
-                    }
-                }
-                if position < free.len() {
+                if position == 0 && !free.is_empty() {
                     let (slot, l) = free.swap_remove(0);
                     drop(free);
                     info.started_ms = now_ms();
@@ -267,6 +310,8 @@ impl ClassQueue {
     }
 
     pub fn status(&self) -> ClassStatus {
+        // Use the same critical section and ranking as slot admission.
+        let _g = lock::lock(&self.dir.join("queue.lock")).ok();
         let mut holders = Vec::new();
         for i in 0..self.slots {
             let busy = lock::is_held(&self.slot_lock(i));
@@ -277,17 +322,20 @@ impl ClassQueue {
             };
             holders.push(SlotStatus { slot: i, busy, job });
         }
+        let running: Vec<_> = holders.iter().filter_map(|h| h.job.clone()).collect();
+        let mut tickets = self.live_tickets(false);
+        self.rank_tickets(&mut tickets, &running);
         ClassStatus {
             class: self.class.clone(),
             slots: self.slots,
             holders,
-            waiters: self
-                .live_tickets(false)
-                .into_iter()
-                .map(|(_, i)| i)
-                .collect(),
+            waiters: tickets.into_iter().map(|(_, i)| i).collect(),
         }
     }
+}
+
+fn worktree(job: &JobInfo) -> &str {
+    job.worktree.as_deref().unwrap_or(&job.cwd)
 }
 
 fn sanitize(s: &str) -> String {

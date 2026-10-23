@@ -467,7 +467,8 @@ pub fn pick_host(cfg: &Config, cands: &[String], wt_key: &str) -> String {
                 &class,
                 cfg.class_slots(&class),
                 std::time::Duration::from_millis(cfg.poll_ms),
-            );
+            )
+            .with_max_per_worktree(cfg.max_per_worktree);
             let st = q.status();
             HostLoad {
                 name: name.clone(),
