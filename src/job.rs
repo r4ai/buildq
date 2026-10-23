@@ -1067,6 +1067,8 @@ struct RunPackage<'a> {
 }
 
 /// The environment `cargo run` would give the program.
+// These inputs mirror Cargo metadata and the launch context; keep them explicit.
+#[allow(clippy::too_many_arguments)]
 fn run_env(
     cmd: &mut Command,
     real: &Path,
