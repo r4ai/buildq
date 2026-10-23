@@ -470,7 +470,7 @@ fn helper(args: &[String]) -> ExitCode {
                 .unwrap()
                 .flatten()
                 .filter_map(|e| e.file_name().to_str()?.strip_prefix("pid-")?.parse().ok())
-                .filter(|&pid: &i32| unsafe { libc::kill(pid, 0) } == 0)
+                .filter(|&pid: &i32| buildq::exec::process_alive(pid))
                 .count();
             exit(if alive == 0 { 0 } else { 3 })
         }
