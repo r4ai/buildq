@@ -610,8 +610,24 @@ fn after_job(cfg: &Config, ctx: &mut PoolCtx, lease: &mut Lease, started_ms: u64
     }
 }
 
-fn spawn_gc(cfg: &Config) {
-    if !cfg.gc_after_job {
+fn post_job_gc(cfg: &Config) {
+    if !cfg.gc_after_job || !crate::gc::auto_gc_needed(cfg) {
+        return;
+    }
+    if cfg.gc_mode == crate::config::CacheGcMode::Inline {
+        let report = crate::gc::gc(
+            cfg,
+            &crate::gc::Options {
+                auto: true,
+                ..Default::default()
+            },
+        );
+        for warning in report.warnings {
+            eprintln!("buildq: {warning}");
+        }
+        if report.failed_deletions > 0 {
+            eprintln!("buildq: automatic GC could not delete some artifacts; inspect `buildq gc`");
+        }
         return;
     }
     if let Ok(me) = env::current_exe() {
@@ -718,7 +734,7 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     drop(lease);
     drop(g);
     if ctx.is_some() {
-        spawn_gc(cfg);
+        post_job_gc(cfg);
     }
     trace("done");
     execution
@@ -1255,7 +1271,7 @@ fn cargo_run(
     drop(lease);
     drop(g);
     if ctx.is_some() {
-        spawn_gc(cfg);
+        post_job_gc(cfg);
     }
     execution?;
     let Some((dir, _run_lock, pkg_id, manifest, exe)) = run else {
@@ -1322,7 +1338,7 @@ impl Drop for RuntimeLease<'_> {
         if let Some(mut lease) = self.lease.take() {
             lease.finish();
             drop(lease);
-            spawn_gc(self.cfg);
+            post_job_gc(self.cfg);
         }
     }
 }

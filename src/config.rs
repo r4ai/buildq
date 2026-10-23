@@ -76,8 +76,18 @@ pub struct CacheFile {
     pub stale_unit_days: Option<u64>,
     /// Delete whole pools (workspace+toolchain) unused for this many days (default 21).
     pub pool_idle_days: Option<u64>,
-    /// Run `gc --auto` in the background after jobs (default true).
+    /// Run automatic GC after jobs (default true).
     pub gc_after_job: Option<bool>,
+    /// Background requires a reaping init; inline waits in the current process.
+    pub gc_mode: CacheGcMode,
+}
+
+#[derive(Debug, Default, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum CacheGcMode {
+    #[default]
+    Background,
+    Inline,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
@@ -160,6 +170,7 @@ pub struct Config {
     pub stale_unit_days: u64,
     pub pool_idle_days: u64,
     pub gc_after_job: bool,
+    pub gc_mode: CacheGcMode,
     pub real_cargo: Option<PathBuf>,
     pub wrapper: WrapperMode,
     pub jobs: usize,
@@ -286,6 +297,7 @@ impl Config {
             gc_after_job: env_bool("BUILDQ_GC")
                 .or(f.cache.gc_after_job)
                 .unwrap_or(true),
+            gc_mode: f.cache.gc_mode,
             real_cargo: env_nonempty("BUILDQ_REAL_CARGO")
                 .map(PathBuf::from)
                 .or(f.cargo.real),
@@ -372,6 +384,19 @@ pub fn describe(cfg: &Config) -> String {
         ),
     );
     p(&mut s, "cache accounting", cfg.accounting.name().into());
+    p(
+        &mut s,
+        "automatic GC",
+        if !cfg.gc_after_job {
+            "disabled"
+        } else {
+            match cfg.gc_mode {
+                CacheGcMode::Background => "background (Unix requires a reaping init)",
+                CacheGcMode::Inline => "inline (waits for collection)",
+            }
+        }
+        .into(),
+    );
     p(&mut s, "rustc wrapper", format!("{:?}", cfg.wrapper));
     p(
         &mut s,

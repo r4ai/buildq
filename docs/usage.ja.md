@@ -41,6 +41,31 @@ rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を�
 ボリュームに適した値を設定する。`min_free = "0"` で保護を無効化できる。
 対象範囲と制限は [Free-Space Guard](architecture.ja.md#free-space-guard) を参照する。
 
+## Automatic GC
+
+ジョブ終了後の GC は `[cache] gc_mode = "background"` がデフォルトである。
+Unix の切り離された GC 子プロセスには、引き取った子を回収する init が必要である。
+コンテナでは Docker の `--init`、または PID 1 として `tini` / `dumb-init` を使用する。
+子を回収しない PID 1 では終了済み GC がゾンビとして蓄積しうる。
+これらは実行中のコンパイラではなく、スロットも保持しない。
+`buildq config` は有効なモードと init の要件を表示する。
+
+子を回収する init がない環境では、ジョブのプロセス内で回収する設定を選べる。
+
+```toml
+[cache]
+gc_mode = "inline"
+```
+
+インライン GC はビルドスロットと解放可能なメンバーリースを解放した後に実行し、完了を待つ。
+回収時間が終了までの待ち時間に加わる。自動削除の警告はビルドの終了コードを変更しない。
+両モードとも、概算使用量が予算内なら10分以内の回収を省略する。
+バックグラウンドモードも子プロセス作成前に判定し、省略するだけの GC は起動しない。
+
+別の方法として、`BUILDQ_GC=0` を設定し、管理側から前景の `buildq gc` を呼んで終了を待てる。
+手動 GC と空き容量の開始前チェックは引き続き利用できる。
+[Container Process Lifecycle](development.ja.md#container-process-lifecycle) を参照する。
+
 ## Nested Cargo
 
 build script は、親のプール target を継承せずに別 Cargo ワークスペースの helper をビルドできる。

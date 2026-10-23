@@ -102,6 +102,21 @@ uv run --directory scripts --locked ruff format --check .
 依存を変更した場合は `uv lock --project scripts` を実行し、`pyproject.toml` と `uv.lock` を同時にコミットする。
 `.venv`・ツールキャッシュ・`__pycache__` はコミットしない。
 
+## Container Process Lifecycle
+
+バックグラウンドのジョブ終了後 GC を有効にする場合は、Docker の `--init`、
+`tini`、`dumb-init` など、子を回収する init を使用する。
+buildq はデーモンを持たない。GC は各回の処理後に終了するため、
+親が先に終了した場合は実行環境側で子を回収する必要がある。
+PID 1 の実行ファイル名だけでは回収動作を判定できないため、実際の管理設定を確認する。
+`buildq config` でモードを確認できる。
+
+この管理機構がない環境では `[cache] gc_mode = "inline"` を選ぶか、
+自動 GC を無効にして前景の `buildq gc` の終了を明示的に待つ。
+設定と待ち時間の違いは [Automatic GC](usage.ja.md#automatic-gc) を参照する。
+Linux の `tests/reaping.rs` は専用プロセスを subreaper とし、自身の子孫だけを回収する。
+実際の切り離された GC、インライン回収、直近の予算内ビルドで GC が起動しないことを検証する。
+
 ## Multi-Agent Sandbox Recipe
 
 同一マシン上で複数のコーディングエージェント（Codex CLI、Claude Code 等）を制限付きサンドボックス内で動かす場合、全エージェントが `$BUILDQ_DIR` と `$BUILDQ_CACHE` に読み書きできる必要がある。
@@ -166,7 +181,7 @@ buildq shim install cargo --into C:\bq\bin
 | `BUILDQ_BUDGET` | ディスク予算を上書き（例: `45G`） |
 | `BUILDQ_POOL` | `0` を指定するとターゲットプールを無効化（キューのみ使用） |
 | `BUILDQ_POOL_EXPLICIT` | `1` を指定すると worktree 内の明示 target ディレクトリもプールする<br>（`[cache] pool_explicit` と同じ） |
-| `BUILDQ_GC` | `0` を指定するとジョブ終了後の自動バックグラウンド GC を無効化 |
+| `BUILDQ_GC` | `0` を指定すると両モードのジョブ終了後の自動 GC を無効化 |
 | `BUILDQ_PRIORITY` | `cargo` shim 経由での実行時のデフォルト優先度 |
 | `BUILDQ_LABEL` | `status` や `history` に表示する任意のジョブラベル |
 | `BUILDQ_REAL_CARGO` | 本来の `cargo` バイナリのパスを明示指定 |
