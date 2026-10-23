@@ -69,6 +69,8 @@ impl World {
             .env("BUILDQ_GC", "0")
             .env_remove("BUILDQ_HELD")
             .env_remove("CARGO_TARGET_DIR")
+            // CI forces colour; `compiled` matches plain "Compiling" lines.
+            .env("CARGO_TERM_COLOR", "never")
             .output()
             .unwrap();
         let d = t.elapsed();
