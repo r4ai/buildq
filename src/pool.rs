@@ -21,7 +21,11 @@
 //! differing file, the package's fingerprints in the member are deleted, so
 //! cargo must rebuild that package (and, through it, its dependants) no matter
 //! which worktree builds next or how old its files are. The manifest is then
-//! updated to the current worktree. Invariant: for every package, either its
+//! updated to the current worktree. When the source root changes (or the
+//! previous root is unknown), all local packages are invalidated even if their
+//! content matches: compile-time paths such as CARGO_MANIFEST_DIR must refer
+//! to the current worktree. Registry and git dependencies remain cached.
+//! Invariant: for every package, either its
 //! fingerprints are absent or its artifacts were built from manifest content.
 //! Differing files outside any package (e.g. files pulled in with
 //! `include_str!("../../x")`) are touched in the current worktree instead.
@@ -67,6 +71,10 @@ pub struct MemberMeta {
     pub created_ms: u64,
     pub last_used_ms: u64,
     pub last_worktree: Option<String>,
+    /// Root for which all local fingerprints are valid (or absent).
+    /// Separate from last_worktree: older versions could record a new worktree
+    /// without rebuilding its compiled paths. Missing means invalidate once.
+    pub source_root: Option<String>,
     pub last_head: Option<String>,
     pub last_cmd: String,
     pub jobs: u64,
@@ -369,7 +377,18 @@ impl Pool {
                 let meta = read_json::<MemberMeta>(&self.meta_path(*id)).unwrap_or_default();
                 let manifest = read_manifest(&self.manifest_path(*id));
                 let prev = meta.last_worktree.clone();
-                let p = plan(&manifest, current, &mut |f| owners(f, prev.as_deref()));
+                let mut p = plan(&manifest, current, &mut |f| owners(f, prev.as_deref()));
+                // Cargo can reuse workspace artifacts across roots, including
+                // absolute paths baked into code and build-script outputs.
+                // Invalidate all local packages before recording the new root,
+                // including on upgrade from metadata without a known root.
+                if meta.source_root.as_deref() != Some(&wt.key()) {
+                    for f in current.keys().chain(manifest.keys()) {
+                        if let Some(pkg) = owners(f, prev.as_deref()) {
+                            p.packages.insert(pkg);
+                        }
+                    }
+                }
                 let built = self.dir.join(format!("m{id}")).exists() && !manifest.is_empty();
                 let score = Score {
                     empty: !built,
@@ -413,6 +432,7 @@ impl Pool {
                 meta.id = id;
                 meta.last_used_ms = now_ms();
                 meta.last_worktree = Some(wt.key());
+                meta.source_root = Some(wt.key());
                 meta.last_head = wt.head.clone();
                 meta.jobs += 1;
                 write_json(&meta_path, &meta)?;
@@ -650,6 +670,26 @@ mod tests {
         drop(l0);
         drop(l1);
 
+        // Metadata from before root invalidation cannot certify compiled
+        // paths, even when last_worktree already matches the current root.
+        let mut old_meta: MemberMeta = read_json(&pool.meta_path(id_b)).unwrap();
+        old_meta.source_root = None;
+        write_json(&pool.meta_path(id_b), &old_meta).unwrap();
+        let l = pool
+            .lease(
+                &wt("b"),
+                &b,
+                &mut owners,
+                3,
+                &mut |_| true,
+                poll,
+                &mut || {},
+            )
+            .unwrap();
+        assert_eq!(l.id, id_b);
+        assert_eq!(l.plan.packages.iter().collect::<Vec<_>>(), ["a", "b"]);
+        drop(l);
+
         // Worktree b again: picks the member whose manifest matches, no invalidation.
         let l = pool
             .lease(
@@ -666,7 +706,8 @@ mod tests {
         assert!(l.plan.packages.is_empty());
         drop(l);
 
-        // A third worktree that only differs from `a` in crate b goes to a's member.
+        // A third worktree goes to a's member, but both local crates must
+        // rebuild because their compiled paths refer to a different root.
         let c = m(&[("crates/a/src/lib.rs", "1"), ("crates/b/src/lib.rs", "3")]);
         let l = pool
             .lease(
@@ -680,7 +721,7 @@ mod tests {
             )
             .unwrap();
         assert_eq!(l.id, id_a);
-        assert_eq!(l.plan.packages.iter().collect::<Vec<_>>(), ["b"]);
+        assert_eq!(l.plan.packages.iter().collect::<Vec<_>>(), ["a", "b"]);
         assert!(!l.fresh_member);
         drop(l);
         assert_eq!(pool.member_ids().len(), 2);
