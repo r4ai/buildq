@@ -183,7 +183,10 @@ fn main() -> ExitCode {
                         duration_str(wait),
                         duration_str(run),
                         e.cmd,
-                        e.target.map(|t| format!("[{t}] ")).unwrap_or_default(),
+                        e.target
+                            .or(e.external.map(|x| format!("explicit {x}")))
+                            .map(|t| format!("[{t}] "))
+                            .unwrap_or_default(),
                         e.cwd
                     );
                 }
@@ -193,7 +196,7 @@ fn main() -> ExitCode {
         Cmd::Cache {
             cmd: CacheCmd::Ls { json, refresh },
         } => {
-            let u = gc::scan(&cfg, refresh);
+            let u = gc::scan_all(&cfg, refresh);
             if json {
                 println!("{}", serde_json::to_string_pretty(&u).unwrap());
             } else {
@@ -240,6 +243,15 @@ fn main() -> ExitCode {
                     human_bytes(r.after),
                     human_bytes(r.effective_budget)
                 );
+                if r.external > 0 {
+                    println!(
+                        "explicit target dirs outside the pool: {} (see `buildq cache ls`)",
+                        human_bytes(r.external)
+                    );
+                }
+                for w in &r.warnings {
+                    println!("warning: {w}");
+                }
             }
             ExitCode::SUCCESS
         }

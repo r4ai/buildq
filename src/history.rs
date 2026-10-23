@@ -21,6 +21,8 @@ pub struct Entry {
     pub exit: i32,
     /// Pool member (`<pool>/m<i>`) or host.
     pub target: Option<String>,
+    /// Explicit target dir the job used outside the pool.
+    pub external: Option<String>,
     /// Packages invalidated in the member before the job.
     pub invalidated: usize,
     pub fresh_member: bool,

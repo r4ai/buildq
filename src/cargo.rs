@@ -280,17 +280,22 @@ pub fn route(parsed: &Parsed, is_heavy: &dyn Fn(&str) -> bool) -> Route {
 pub enum TargetDirChoice {
     /// Nothing explicit: buildq may point it at a pool member.
     Default,
-    /// `--target-dir`, or `CARGO_TARGET_DIR` already set: respected, not pooled.
-    Explicit,
+    /// `--target-dir`, or `CARGO_TARGET_DIR` already set: respected, not pooled
+    /// unless `cache.pool_explicit` allows it.
+    Explicit {
+        /// The path as given (may be relative to the cwd; empty if missing).
+        value: String,
+        /// Args index holding the value (`--target-dir=X` or the `X` after
+        /// `--target-dir`); None when it comes from the environment.
+        arg: Option<usize>,
+    },
     /// `--config build.target-dir=X` at args index `usize`: re-rooted inside the member.
     Config(usize, String),
 }
 
+/// Follows cargo's precedence: `--target-dir` > `CARGO_TARGET_DIR` >
+/// `--config build.target-dir` > `CARGO_BUILD_TARGET_DIR`.
 pub fn target_dir_choice(parsed: &Parsed) -> TargetDirChoice {
-    if env::var_os("CARGO_TARGET_DIR").is_some() || env::var_os("CARGO_BUILD_TARGET_DIR").is_some()
-    {
-        return TargetDirChoice::Explicit;
-    }
     let end = parsed
         .args
         .iter()
@@ -298,9 +303,31 @@ pub fn target_dir_choice(parsed: &Parsed) -> TargetDirChoice {
         .unwrap_or(parsed.args.len());
     let args = &parsed.args[..end];
     for (i, a) in args.iter().enumerate() {
-        if a == "--target-dir" || a.starts_with("--target-dir=") {
-            return TargetDirChoice::Explicit;
+        if a == "--target-dir" {
+            return TargetDirChoice::Explicit {
+                value: args.get(i + 1).cloned().unwrap_or_default(),
+                arg: args.get(i + 1).map(|_| i + 1),
+            };
         }
+        if let Some(v) = a.strip_prefix("--target-dir=") {
+            return TargetDirChoice::Explicit {
+                value: v.to_string(),
+                arg: Some(i),
+            };
+        }
+    }
+    let from_env = |var: &str| {
+        env::var_os(var)
+            .filter(|v| !v.is_empty())
+            .map(|v| TargetDirChoice::Explicit {
+                value: v.to_string_lossy().to_string(),
+                arg: None,
+            })
+    };
+    if let Some(c) = from_env("CARGO_TARGET_DIR") {
+        return c;
+    }
+    for (i, a) in args.iter().enumerate() {
         let value = if a == "--config" {
             args.get(i + 1).map(|v| (i + 1, v.clone()))
         } else {
@@ -314,7 +341,7 @@ pub fn target_dir_choice(parsed: &Parsed) -> TargetDirChoice {
             return TargetDirChoice::Config(idx, val);
         }
     }
-    TargetDirChoice::Default
+    from_env("CARGO_BUILD_TARGET_DIR").unwrap_or(TargetDirChoice::Default)
 }
 
 /// `target/native` -> `<member>/native`; absolute paths stay.
@@ -450,7 +477,25 @@ mod tests {
             other => panic!("{other:?}"),
         }
         let p = parse(&v("build --target-dir x"), &aliases());
-        assert_eq!(target_dir_choice(&p), TargetDirChoice::Explicit);
+        assert_eq!(
+            target_dir_choice(&p),
+            TargetDirChoice::Explicit {
+                value: "x".into(),
+                arg: Some(2)
+            }
+        );
+        let p = parse(
+            &v("+nightly t --target-dir=../y -- --target-dir z"),
+            &aliases(),
+        );
+        assert_eq!(
+            target_dir_choice(&p),
+            TargetDirChoice::Explicit {
+                value: "../y".into(),
+                arg: Some(1)
+            }
+        );
+        assert_eq!(p.args[1], "--target-dir=../y");
     }
 
     #[test]

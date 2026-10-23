@@ -12,6 +12,8 @@
 //!
 //! The budget is `min(budget, used + free - min_free)`, so a disk that fills
 //! up for other reasons shrinks the pool too. Busy members are never touched.
+//! Explicit target dirs that jobs used outside the pool (`external.rs`) are
+//! reported next to the budget but never pruned.
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -20,6 +22,7 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 
 use crate::config::Config;
+use crate::external::{self, ExternalDir};
 use crate::lock::{self, LockFile};
 use crate::pool::{self, MemberMeta, PoolInfo};
 use crate::util::{
@@ -70,14 +73,40 @@ pub struct RunEntry {
 pub struct Usage {
     pub pools: Vec<PoolEntry>,
     pub runs: Vec<RunEntry>,
+    /// Pools and run dirs: what the budget governs.
     pub total: u64,
     pub budget: u64,
     pub effective_budget: u64,
     pub free_disk: Option<u64>,
+    /// Explicit target dirs jobs used outside the pool (filled by `scan_all`).
+    pub external: Vec<ExternalDir>,
+    pub external_total: u64,
 }
 
 pub fn runs_dir(cfg: &Config) -> PathBuf {
     cfg.cache_dir.join("runs")
+}
+
+/// `scan` plus the explicit target dirs outside the pool (slower: measures them).
+pub fn scan_all(cfg: &Config, refresh: bool) -> Usage {
+    let mut u = scan(cfg, refresh);
+    u.external = external::scan(cfg, refresh);
+    u.external_total = u.external.iter().map(|e| e.size_bytes).sum();
+    u
+}
+
+/// The warning shown when pool + explicit target dirs no longer fit the budget.
+pub fn external_warning(pool: u64, external: u64, budget: u64) -> Option<String> {
+    (external > 0 && pool + external > budget).then(|| {
+        format!(
+            "pool {} + explicit target dirs {} exceed the budget {}; \
+             gc cannot prune explicit target dirs: remove unused ones, \
+             or set [cache] pool_explicit = true",
+            human_bytes(pool),
+            human_bytes(external),
+            human_bytes(budget)
+        )
+    })
 }
 
 /// Sizes come from member metadata unless `refresh` (or never measured).
@@ -146,6 +175,8 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
         total,
         budget: cfg.budget,
         free_disk,
+        external: Vec::new(),
+        external_total: 0,
     }
 }
 
@@ -172,6 +203,9 @@ pub struct Report {
     pub after: u64,
     pub effective_budget: u64,
     pub skipped: Option<String>,
+    /// Explicit target dirs outside the pool: counted, never pruned.
+    pub external: u64,
+    pub warnings: Vec<String>,
 }
 
 impl Report {
@@ -328,6 +362,15 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         }
     }
     report.after = total;
+    if !opts.auto {
+        report.external = external::scan(&cfg, false)
+            .iter()
+            .map(|e| e.size_bytes)
+            .sum();
+        report
+            .warnings
+            .extend(external_warning(total, report.external, budget));
+    }
     if !dry {
         let _ = fs::write(&stamp, now_ms().to_string());
     }
@@ -539,6 +582,29 @@ pub fn render(u: &Usage) -> String {
         human_bytes(u.effective_budget),
         u.free_disk.map(human_bytes).unwrap_or_else(|| "?".into())
     ));
+    if !u.external.is_empty() {
+        s.push_str(&format!(
+            "explicit target dirs (not pooled, not pruned by gc): {}\n",
+            human_bytes(u.external_total)
+        ));
+        for e in &u.external {
+            s.push_str(&format!(
+                "  {:>10}  {:>3} jobs  used {:>4} ago  {}  (from {})\n",
+                human_bytes(e.size_bytes),
+                e.jobs,
+                util::ago(e.last_used_ms),
+                e.path.display(),
+                if e.last_cwd.is_empty() {
+                    "-"
+                } else {
+                    &e.last_cwd
+                },
+            ));
+        }
+    }
+    if let Some(w) = external_warning(u.total, u.external_total, u.effective_budget) {
+        s.push_str(&format!("warning: {w}\n"));
+    }
     s
 }
 

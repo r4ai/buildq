@@ -128,6 +128,44 @@ pub fn newest_mtime(path: &Path) -> u64 {
     newest
 }
 
+/// Absolute, `.`/`..`-free spelling of `path` (relative to `base`) whose
+/// longest existing prefix is canonicalized, so it compares with `canonical`
+/// paths even when the tail does not exist yet.
+pub fn resolve(base: &Path, path: &Path) -> PathBuf {
+    use std::path::Component;
+    let abs = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        base.join(path)
+    };
+    let mut norm = PathBuf::new();
+    for c in abs.components() {
+        match c {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                norm.pop();
+            }
+            c => norm.push(c),
+        }
+    }
+    let mut tail = Vec::new();
+    let mut head = norm.as_path();
+    while !head.exists() {
+        match (head.parent(), head.file_name()) {
+            (Some(p), Some(n)) => {
+                tail.push(n.to_os_string());
+                head = p;
+            }
+            _ => return norm,
+        }
+    }
+    let mut out = canonical(head);
+    for n in tail.iter().rev() {
+        out.push(n);
+    }
+    out
+}
+
 /// `fs::canonicalize` without the `\\?\` prefix on Windows, so the result is
 /// usable by tools that do not understand verbatim paths.
 pub fn canonical(path: &Path) -> PathBuf {

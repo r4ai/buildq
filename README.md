@@ -152,6 +152,7 @@ run_slots = 2            # Max concurrent app runs for `cargo run` (default: 2)
 max_members = 3          # Max target/ dirs per repo+toolchain (default: slots + 1)
 budget = "45G"           # Max disk usage under BUILDQ_CACHE (default: "60G")
 min_free = "25G"         # Minimum free disk space to preserve on volume (default: "20G")
+# pool_explicit = true   # Also pool explicit --target-dir / CARGO_TARGET_DIR inside the worktree (default: false)
 
 [cargo]
 rustc_wrapper = "none"   # Disable global sccache per job ("none" | "keep" | "/path")

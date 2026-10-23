@@ -24,6 +24,7 @@ src/
   exec.rs      # Process spawning, signal forwarding, and Windows Job Objects
   lock.rs      # Cross-platform OS file locks (LockFileEx / flock)
   history.rs   # Job execution history log
+  external.rs  # Registry of explicit target dirs used outside the pool
   util.rs      # Byte formatting, time helpers, and path canonicalization
 tests/
   cli.rs       # Integration tests (queue concurrency, priority, shim, GC, remote)
@@ -130,6 +131,7 @@ buildq shim install cargo --into C:\bq\bin
 | `BUILDQ_SLOTS` | Override `slots` (max concurrent `build` jobs) |
 | `BUILDQ_BUDGET` | Override disk budget (e.g., `45G`) |
 | `BUILDQ_POOL` | Set to `0` to disable target pooling (queue only) |
+| `BUILDQ_POOL_EXPLICIT` | Set to `1` to pool explicit target dirs inside the worktree<br>(same as `[cache] pool_explicit`) |
 | `BUILDQ_GC` | Set to `0` to disable automatic background GC after builds |
 | `BUILDQ_PRIORITY` | Default job priority when invoked via the `cargo` shim |
 | `BUILDQ_LABEL` | Free-form label attached to jobs in `status` and `history` |
