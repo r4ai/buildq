@@ -391,7 +391,7 @@ pub fn describe(cfg: &Config) -> String {
             "disabled"
         } else {
             match cfg.gc_mode {
-                CacheGcMode::Background => "background (requires a reaping init)",
+                CacheGcMode::Background => "background (Unix requires a reaping init)",
                 CacheGcMode::Inline => "inline (waits for collection)",
             }
         }

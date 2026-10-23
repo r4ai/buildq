@@ -63,8 +63,8 @@ fn inline_gc_and_recent_background_gc_leave_no_adopted_collectors() {
         unsafe { libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0) },
         0
     );
-    let reaper = Reaper;
     let temp = tempfile::tempdir().unwrap();
+    let reaper = Reaper;
     let root = temp.path();
     let ws = root.join("ws");
     fs::create_dir_all(ws.join("src")).unwrap();
