@@ -267,7 +267,9 @@ walking a warm target directory after every job.
 
 The effective budget adapts to available volume space:
 
-$$\text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})$$
+```math
+\text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})
+```
 
 ### Size Accounting
 

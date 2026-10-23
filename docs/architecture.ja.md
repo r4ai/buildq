@@ -255,7 +255,9 @@ GC は未使用になったメンバーを、唯一のメンバーでも回収�
 サイズ診断の概算は最大60秒再利用し、初回ビルド後と実際の GC では計測する。
 ウォーム状態の target をジョブごとに全走査することは避ける。
 
-$$\text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})$$
+```math
+\text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})
+```
 
 ### Size Accounting
 
