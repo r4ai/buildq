@@ -175,11 +175,13 @@ rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を�
 `config.toml` にホストを追記すると、SSH と Git 経由でリモートマシンへビルドを分散できる。
 
 ```toml
+auto_hosts = ["local", "box"]
+
 [hosts.box]
 ssh = "box"              # ~/.ssh/config のホスト名
 slots = 4                # このホストへ同時に送る最大ジョブ数
-
-auto_hosts = ["local", "box"]
+# buildq = "buildq"      # 自動選択前にリモートの待機列を確認
+# rustc_release = "1.99.0" # リモートの Rust リリースを検査（任意）
 ```
 
 ホスト名を指定するか、`auto` で空きホストを自動選択して実行する。
@@ -189,6 +191,16 @@ buildq run --host box -- cargo test
 buildq run --host auto -- cargo clippy --all-targets
 buildq run --host box --fetch target/debug/app -- cargo build --bin app
 ```
+
+自動選択では、候補ホストへ負荷を問い合わせてから選択する。
+`buildq` を指定したホストは `status --json` のビルドスロットと待機列を使用し、未指定の場合は Linux の `/proc/loadavg` と CPU 数を使用する。
+ローカルの送信スロット上限も適用する。
+問い合わせ失敗や Rust バージョン不一致のホストは候補から外す。
+`local` へのフォールバックは候補に含まれる場合のみ行う。
+各問い合わせの制限時間は5秒で、SSH パスワード入力は要求しない。
+`rustc_release` を指定すると、明示的なホスト指定時もリモートのデフォルト `rustc --version` のリリースを検査する。
+`hosts.<name>.env` は問い合わせにも適用する。
+Cargo の `+toolchain` 上書きやインストール済みコンパイルターゲットは、この検査の対象外である。
 
 ## How It Works
 
