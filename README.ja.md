@@ -56,9 +56,7 @@ flowchart LR
   - 変更されたパッケージのキャッシュのみをビルド前に無効化
 - **ディスク容量制限と自動 GC**
   - 不要なインクリメンタルキャッシュや古い成果物をバックグラウンドで自動削除
-  - プール全体のサイズを指定上限（デフォルト: `60 GB`）以下に維持
-  - 未使用メンバーのサイズ概算をビルド間で最大60秒再利用し、自動容量検査の削除判断は次の再計測まで延期される場合がある
-  - `cache ls --refresh` と実際の GC 処理では再計測してから削除を判断
+  - 容量予算（デフォルト: `60 GB`）に向けて未使用キャッシュを回収
 - **ファイルをロックしない `cargo run`**
   - ビルド完了後、実行ファイルと DLL を専用ディレクトリへコピーしてから起動
   - アプリ実行中の `target/` ロック（Windows 等）による後続ビルドの失敗を防止
@@ -143,7 +141,7 @@ buildq: target <pool>/m0 (...)
 | コマンド | 説明 |
 | :--- | :--- |
 | `buildq status [--hosts]` | クラスごとの実行中・待機中ジョブを表示 |
-| `buildq top [--interval N] [--once] [--no-hosts]` | ジョブ・待機時間・リモート状態・プール容量をライブ表示 |
+| `buildq top` | ジョブ・待機時間・リモート状態・プール容量をライブ表示 |
 | `buildq history [-n N]` | 直近のジョブ履歴を表示<br>（待機時間・実行時間・終了コード・使用プール） |
 | `buildq cache ls [--refresh]` | プール一覧・各メンバーの容量・空き容量を表示 |
 | `buildq gc [--dry-run]` | キャッシュを手動整理し、ディスク予算内に縮小 |
@@ -151,80 +149,20 @@ buildq: target <pool>/m0 (...)
 | `buildq run [-p PRIO] -- <cmd>...` | 任意のコマンドをキュー経由で実行（優先度指定可） |
 | `buildq run --host <H> -- <cmd>...` | SSH 経由でリモートホスト上でコマンドを実行 |
 
-### Live Monitoring
-
-`buildq top` は実行中ジョブ、待機列と待機時間、リモートの待機列、ターゲットプール容量を1秒ごとに更新する。
-`--interval N` で更新間隔（秒）、`--no-hosts` でローカルのみの表示を指定できる。
-リモート状態はバックグラウンドで取得するため、応答の遅いホストがあってもローカル表示を継続する。
-リモートの問い合わせは最短5秒間隔で行い、問い合わせごとに5秒の制限時間を設ける。
-終了は Ctrl+C、全行のスナップショット表示は `--once` を使用する。
-出力をリダイレクトした場合も、制御文字を含まない1回のスナップショットになる。
-プール容量は `cache ls` と同じ概算値である。
-
 ### Configuration (`config.toml`)
 
-設定はすべて任意。
-`$BUILDQ_DIR/config.toml` に配置する（標準パスは `buildq config` で確認可能）。
+設定はすべて任意である。`$BUILDQ_DIR/config.toml` に配置する。
+標準パスは `buildq config` で確認できる。
 
 ```toml
-slots = 2                # ビルドの最大同時実行数 (デフォルト: 2)
-run_slots = 2            # `cargo run` のアプリ最大同時実行数 (デフォルト: 2)
+slots = 2          # ビルドの最大同時実行数
 
 [cache]
-max_members = 3          # 最大 target/ 数 (最小: slots、デフォルト: slots + 1)
-budget = "45G"           # BUILDQ_CACHE 全体の最大ディスク使用量 (デフォルト: "60G")
-min_free = "25G"         # ドライブ上に最低限残す空き容量 (デフォルト: "20G")
-# pool_explicit = true   # worktree 内を指す --target-dir / CARGO_TARGET_DIR もプールする (デフォルト: false)
-
-[cargo]
-rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を無効化 ("none" | "keep" | "/path")
-# jobs = 8               # 1ビルドあたりの CARGO_BUILD_JOBS (デフォルト: コア数 / slots)
+budget = "45G"     # 共有キャッシュの容量予算
+min_free = "25G"   # ボリュームに残す空き容量の基準
 ```
 
-`cache.max_members` の最小値は、環境変数の上書きを含む有効な `slots` の値である。
-それより小さい値を指定した場合は `slots` まで引き上げ、指定値・実際の上限・修正方法を警告として表示する。
-プロジェクトごとの上限を `slots` より小さく保つ構成には、現時点では対応していない。
-
-### Remote Builds (SSH)
-
-`config.toml` にホストを追記すると、SSH と Git 経由でリモートマシンへビルドを分散できる。
-
-```toml
-auto_hosts = ["local", "box"]
-
-[hosts.box]
-# transport = "rsync"    # gitignore 対象の生成ファイルも同期（任意）
-ssh = "box"              # ~/.ssh/config のホスト名
-slots = 4                # このホストへ同時に送る最大ジョブ数
-# buildq = "buildq"      # 自動選択前にリモートの待機列を確認
-# rustc_release = "1.99.0" # リモートの Rust リリースを検査（任意）
-```
-
-ホスト名を指定するか、`auto` で空きホストを自動選択して実行する。
-
-```sh
-buildq run --host box -- cargo test
-buildq run --host auto -- cargo clippy --all-targets
-buildq run --host box --fetch target/debug/app -- cargo build --bin app
-```
-
-自動選択では、候補ホストへ負荷を問い合わせてから選択する。
-`buildq` を指定したホストは `status --json` のビルドスロットと待機列を使用し、未指定の場合は Linux の `/proc/loadavg` と CPU 数を使用する。
-ローカルの送信スロット上限も適用する。
-問い合わせ失敗や Rust バージョン不一致のホストは候補から外す。
-`local` へのフォールバックは候補に含まれる場合のみ行う。
-各問い合わせの制限時間は5秒で、SSH パスワード入力は要求しない。
-`rustc_release` を指定すると、明示的なホスト指定時もリモートのデフォルト `rustc --version` のリリースを検査する。
-`hosts.<name>.env` は問い合わせにも適用する。
-Cargo の `+toolchain` 上書きやインストール済みコンパイルターゲットは、この検査の対象外である。
-
-POSIX クライアント（Linux・macOS・WSL）で両側に `rsync` を導入すると、`transport = "rsync"` を選択できる。
-ルートの `.git` と `target/` を除く全ファイルを同期し、gitignore 対象の生成入力も転送する。
-削除されたソースはリモートからも削除するが、リモートの `target/` は次の同期でも保持する。
-サイズやタイムスタンプが一致する変更もチェックサムで検出する。
-生成入力を含めた Git スナップショットをリモート側で記録するため、リモート buildq の内容ベースの無効化も維持される。
-`--fetch` にも rsync を使用する。
-デフォルトの `git` 方式は Windows でも利用でき、rsync の導入は不要である。
+設定項目・監視オプション・SSH リモートビルドは [Usage Guide](docs/usage.ja.md) を参照する。
 
 ## How It Works
 
@@ -239,62 +177,18 @@ flowchart TD
     Invalidate --> Build["CARGO_TARGET_DIR=m0 でビルド"]
 ```
 
-1. **OS ファイルロックによるデーモンレスキュー**
-   - `$BUILDQ_DIR` 内のファイルを OS レベル（`flock` / `LockFileEx`）で排他ロック
-   - プロセス異常終了時も OS が自動でロックを解放し、デッドロックを防止
-   - 再帰的な `cargo` 呼び出しは環境変数 `BUILDQ_HELD` で検知してバイパス
-2. **Git Blob マニフェストによる安全なキャッシュ無効化**
-   - Cargo はワークスペース内クレートを相対パスでハッシュ化するため、別 worktree でも成果物を再利用可能
-   - 各メンバーに全ソースファイルの Git blob ID（`m0.manifest`）を記録
-   - ビルド前に現在の worktree と比較し、**変更パッケージの `.fingerprint/<pkg>-*` のみを削除**
-   - ソースルートが変わる場合は全ローカルパッケージを無効化し、`CARGO_MANIFEST_DIR` などの埋め込みパスを現在の worktree に更新
-   - registry／git 依存のキャッシュは共有し、同一ルートでは通常のインクリメンタルビルドを維持
-   - `mtime` に依存せず、安全かつ高速なインクリメンタルビルドを実現
+1. **OS ファイルロックによるキュー**
+   - 同時実行数を制限し、プロセス終了時はロックを自動解放
+2. **内容ベースのキャッシュ無効化**
+   - Git blob を比較し、変更パッケージを再ビルド
 3. **`cargo run` の2フェーズ分割**
-   - フェーズ1：`build` スロットでビルドし、実行ファイルと DLL を `runs/r0` に差分コピー
-   - フェーズ2：`build` スロットと `target/` メンバーを解放後、`run` スロットでアプリを起動
-   - アプリ実行中も `target/` がロックされず、他エージェントがビルドを継続可能
-   - ホーム・祖先ディレクトリ・`--config` の Cargo `[env]` を適用し、`force` と設定ファイル基準の相対パスに対応
+   - ビルド後に実行ファイルをコピーし、プールを解放してからアプリを起動
 
 ## Documentation
 
-- **[アーキテクチャと内部設計](docs/architecture.ja.md)**
-   - キューのロック設計・マニフェスト無効化の不変条件・メンバー選択アルゴリズム
-   - 5段階 GC・SSH リモートプロトコル・既知の制限事項
-- **[開発・セットアップガイド](docs/development.ja.md)**
-   - モジュール構成・単体 / E2E テストの実行手順
-   - マルチエージェント用サンドボックス設定・環境変数一覧
-
-## Releases
-
-Rust edition は 2024、MSRV は 1.89 である。CI とリリースには
-`rust-toolchain.toml` の Rust 1.99.0 を使用する。
-ツールチェーン更新時は両バージョンの CI 成功を確認する。
-CI は整形、厳格な Clippy、ドキュメント、依存関係、および Linux・macOS・Windows
-での実 Cargo E2E を検査する。Dependabot は週次・グループ単位で更新を提案し、
-7 日間のクールダウンを設ける。セキュリティ更新は速やかにレビューする。
-
-1. `Cargo.toml` の `package.version` を更新し、`cargo update` で `Cargo.lock` を更新する。
-   レビューと CI 成功後、`main` にマージする
-2. 対象コミットに `git tag -a v0.1.0 -m "Release v0.1.0"` でタグを付け、
-   `git push origin v0.1.0` でタグを送信する。バージョンは適宜置き換える
-3. タグ用ワークフローが CI、バージョン一致、`main` の履歴への所属を再検査する。
-   Linux・macOS の x86_64/aarch64 と Windows x86_64 向けバイナリをビルドし、
-   アーカイブ、ライセンス、`SHA256SUMS`、GitHub 自動生成のリリースノートを公開する
-
-`v0.2.0-rc.1` などのタグは `Cargo.toml` と同じバージョンを必要とし、プレリリースを作成する。
-各アーカイブの来歴は `gh attestation verify ARCHIVE --repo r4ai/buildq` で検証できる。
-ダウンロード後は `sha256sum -c SHA256SUMS`、macOS では
-`shasum -a 256 -c SHA256SUMS` でチェックサムを確認する。
-全アセットのアップロード後にドラフトを公開する。
-公開処理がドラフト作成後に失敗した場合、ドラフトを確認・削除してから失敗ジョブを再実行する。
-公開済みタグは移動しない。
-
-管理者は Actions と artifact attestations、Dependabot security updates、
-非公開の脆弱性報告を有効にし、`main` の ruleset で **CI passed** を必須にする。
-`v*` タグの作成・更新・削除はリリース担当者に制限する。
-公開リポジトリでは `GITHUB_TOKEN` と GitHub OIDC のみを使用し、PAT や署名用秘密鍵は不要である。
-[Security policy](SECURITY.md) も参照する。
+- [Usage Guide](docs/usage.ja.md)：設定・監視・SSH リモートビルド
+- [Architecture & Internals](docs/architecture.ja.md)：キュー・キャッシュ無効化・GC・リモートプロトコル
+- [Development & Setup Guide](docs/development.ja.md)：テスト・サンドボックス構築・環境変数・リリース手順
 
 ## License
 

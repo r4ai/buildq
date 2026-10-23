@@ -167,3 +167,33 @@ buildq shim install cargo --into C:\bq\bin
 | `BUILDQ_REAL_CARGO` | Explicit path to the underlying `cargo` binary |
 | `BUILDQ_QUIET` | Set to `1` to suppress `buildq:` informational status lines |
 | `BUILDQ_TRACE` | Set to `1` to print detailed phase timing diagnostics |
+
+## Releases
+
+Rust edition 2024, MSRV 1.89; CI and releases use Rust 1.99.0 from
+`rust-toolchain.toml`. Toolchain updates must keep both CI versions green.
+CI checks formatting, strict Clippy, docs, dependencies, and real Cargo E2E
+on Linux, macOS, and Windows. Dependencies use weekly grouped Dependabot
+updates with a seven-day cooldown; security updates should be reviewed promptly.
+
+1. Update `package.version` in `Cargo.toml` and refresh `Cargo.lock` with
+   `cargo update`; merge the reviewed change into `main` after CI passes
+2. Tag that commit (`git tag -a v0.1.0 -m "Release v0.1.0"`) and push the tag
+   (`git push origin v0.1.0`), replacing the example version as needed
+3. The tag workflow reruns CI, checks the version and `main` ancestry, builds
+   Linux/macOS x86_64 and aarch64 plus Windows x86_64 binaries, and publishes
+   archives, licenses, `SHA256SUMS`, and GitHub-generated release notes
+
+Prerelease tags such as `v0.2.0-rc.1` require the same version in `Cargo.toml`
+and create prereleases. Provenance is attached to every archive; verify it with
+`gh attestation verify ARCHIVE --repo r4ai/buildq`, and verify downloads with
+`sha256sum -c SHA256SUMS` (macOS: `shasum -a 256 -c SHA256SUMS`).
+Publication starts as a draft and becomes public only after all assets upload.
+If publication fails after draft creation, inspect/delete that draft before
+rerunning the failed job; never move a published tag.
+
+Maintainers must allow GitHub Actions and artifact attestations, enable Dependabot
+security updates and private vulnerability reporting, require **CI passed** in the
+`main` ruleset, and restrict `v*` tag creation/update/deletion to release maintainers.
+The public-repository workflow uses only `GITHUB_TOKEN` and GitHub OIDC; no personal
+access token or signing secret is needed. See [Security policy](../SECURITY.md).

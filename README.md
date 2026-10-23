@@ -56,9 +56,7 @@ flowchart LR
   - Invalidates only modified packages before each build
 - **Automatic disk budget & GC**
   - Prunes stale incremental sessions and unused artifacts in the background
-  - Keeps total cache size under a configurable disk budget (default: `60 GB`)
-  - Reuses idle member size estimates for up to 60 seconds across builds; automatic budget checks may defer enforcement until the next refresh
-  - `cache ls --refresh` and actual GC passes remeasure before eviction
+  - Reclaims idle caches toward a configurable disk budget (default: `60 GB`)
 - **Lock-free `cargo run`**
   - Copies compiled binaries and DLLs to an isolated run directory before execution
   - Prevents running executables from locking the shared `target/` directory on Windows
@@ -143,7 +141,7 @@ buildq: target <pool>/m0 (...)
 | Command | Description |
 | :--- | :--- |
 | `buildq status [--hosts]` | Show active slot holders and waiting jobs per class |
-| `buildq top [--interval N] [--once] [--no-hosts]` | Live jobs, wait durations, remote status, and target pool usage |
+| `buildq top` | Live jobs, wait durations, remote status, and target pool usage |
 | `buildq history [-n N]` | Show recent jobs<br>(wait time, run time, exit code, pool member) |
 | `buildq cache ls [--refresh]` | Show target pools, member sizes, budget, and free space |
 | `buildq gc [--dry-run]` | Manually prune caches to fit within the disk budget |
@@ -151,97 +149,20 @@ buildq: target <pool>/m0 (...)
 | `buildq run [-p PRIO] -- <cmd>...` | Queue any arbitrary command (with optional priority) |
 | `buildq run --host <H> -- <cmd>...` | Run a queued command on a remote SSH host |
 
-### Live Monitoring
-
-`buildq top` refreshes running jobs, waiters and wait durations, remote queues,
-and target pool usage every second. Use `--interval N` to change the interval
-in seconds, or `--no-hosts` to monitor locally. Remote status runs in the
-background so a slow host does not freeze local updates; probes start at most
-once every five seconds and each request has a five-second deadline.
-Press Ctrl+C to stop. Use `--once` for a full snapshot of all rows.
-Redirected output also prints one plain-text snapshot without terminal codes.
-Pool sizes use the same cached estimates as `cache ls`.
-
 ### Configuration (`config.toml`)
 
-All settings are optional.
-Place `config.toml` in `$BUILDQ_DIR/config.toml` (check `buildq config` for the default path on your OS):
+All settings are optional. Place `config.toml` in `$BUILDQ_DIR/config.toml`;
+use `buildq config` to find the default path.
 
 ```toml
-slots = 2                # Max concurrent build jobs (default: 2)
-# max_per_worktree = 1   # Soft cap per worktree in each class (default: ceil(slots / 2); 0 disables)
-run_slots = 2            # Max concurrent app runs for `cargo run` (default: 2)
+slots = 2          # Maximum concurrent builds
 
 [cache]
-max_members = 3          # Max target/ dirs per repo+toolchain (minimum: slots; default: slots + 1)
-budget = "45G"           # Max disk usage under BUILDQ_CACHE (default: "60G")
-min_free = "25G"         # Minimum free disk space to preserve on volume (default: "20G")
-# pool_explicit = true   # Also pool explicit --target-dir / CARGO_TARGET_DIR inside the worktree (default: false)
-
-[cargo]
-rustc_wrapper = "none"   # Disable global sccache per job ("none" | "keep" | "/path")
-# jobs = 8               # CARGO_BUILD_JOBS per build (default: cores / slots)
+budget = "45G"     # Shared cache disk budget
+min_free = "25G"   # Free-space target for the volume
 ```
 
-`cache.max_members` must be at least the effective `slots` value, including
-environment overrides. Smaller values are raised to `slots` with a warning that
-shows the requested value, effective cap, and how to correct the configuration.
-A per-project cap smaller than the global slot count is currently unsupported.
-
-| Setting | Environment override | Default |
-| :--- | :--- | :--- |
-| `max_per_worktree` | `BUILDQ_MAX_PER_WORKTREE` | `ceil(slots / 2)`; `0` disables |
-
-The cap applies separately within each job class, using the Git worktree root
-(or the current directory outside Git) as identity.
-When another worktree is queued below its cap, its tickets precede tickets
-from worktrees already at their cap.
-Within each group, higher priority runs first, then strict FIFO.
-When all waiting worktrees are at their cap, jobs can still use idle slots.
-`buildq status` marks deferred tickets with `waiting: worktree cap`.
-Nested calls using `BUILDQ_HELD` remain exempt.
-
-### Remote Builds (SSH)
-
-Add remote hosts to `config.toml` to offload builds over SSH and Git:
-
-```toml
-auto_hosts = ["local", "box"]
-
-[hosts.box]
-# transport = "rsync"    # Optional: sync ignored generated files too
-ssh = "box"              # Host alias from ~/.ssh/config
-slots = 4                # Max concurrent jobs sent to this host
-# buildq = "buildq"      # Probe remote queue load before automatic selection
-# rustc_release = "1.99.0" # Optional required remote rustc release
-```
-
-Run commands on a specific host or let `buildq` pick one automatically:
-
-```sh
-buildq run --host box -- cargo test
-buildq run --host auto -- cargo clippy --all-targets
-buildq run --host box --fetch target/debug/app -- cargo build --bin app
-```
-
-Automatic selection probes each candidate before choosing it. With `buildq` set,
-it reads the host's build slots and queue via `status --json`; otherwise it uses
-Linux `/proc/loadavg` and the CPU count. Local dispatch limits still apply.
-Failed probes and Rust version mismatches exclude that host. `local` is used as a
-fallback only when listed among the candidates. Each probe has a five-second
-deadline and does not prompt for SSH passwords. Set `rustc_release` to require the
-remote default `rustc --version` release (including for explicitly selected hosts);
-`hosts.<name>.env` also applies to probes. This checks the configured default
-compiler, not every Cargo `+toolchain` override or installed compilation target.
-
-Set `transport = "rsync"` for a POSIX client (Linux, macOS, or WSL) with `rsync`
-installed on both ends. This mirrors all files, including gitignored generated
-inputs, except the root `.git` entry and `target/`. Deleted source files are
-removed remotely; remote `target/` artifacts survive subsequent syncs. Checksums
-catch source changes even when size and timestamps match. Remote Git snapshots
-are recorded on the host, including generated inputs, so remote buildq pooling
-retains content invalidation. `--fetch` also uses rsync. The default `git`
-transport remains available on Windows and requires no rsync installation.
+See the [Usage Guide](docs/usage.md) for configuration options, monitoring, and SSH remote builds.
 
 ## How It Works
 
@@ -257,60 +178,17 @@ flowchart TD
 ```
 
 1. **OS File-Locked Queue**
-   - Exclusive OS file locks (`flock` / `LockFileEx`) in `$BUILDQ_DIR`
-   - Automatic lock release on process crash or kill—no stale locks
-   - Deadlock-free nested `cargo` calls via `BUILDQ_HELD` detection
-2. **Content-Addressed Manifest Invalidation**
-   - Cross-worktree artifact reuse via Cargo's workspace-relative path hashing
-   - Per-file Git blob tracking in `m0.manifest`
-   - Targeted `.fingerprint/<pkg>-*` deletion for modified packages before each build
-   - On source-root changes, invalidate every local package so `CARGO_MANIFEST_DIR` and other compiled paths refer to the current worktree
-   - Registry/git dependencies stay shared; same-root builds keep normal incremental reuse
-   - Fast, accurate incremental rebuilds independent of file `mtime`
+   - Caps concurrency and automatically releases locks when a process exits
+2. **Content-Based Cache Invalidation**
+   - Compares Git blobs and rebuilds changed packages
 3. **Two-Phase `cargo run`**
-   - Phase 1: Compile under a `build` slot and copy the binary + DLLs to `runs/r0`
-   - Phase 2: Release the `build` slot and `target/` member, then launch the binary under a `run` slot
-   - Zero `target/` locking while applications are running
-   - Applies Cargo `[env]` from home/ancestor configs and `--config`, including `force` and config-relative paths ([Cargo rules](https://doc.rust-lang.org/cargo/reference/config.html#env))
+   - Copies the executable and releases the pool before launching the application
 
 ## Documentation
 
-- **[Architecture & Internals](docs/architecture.md)**
-  - Queue lock design, manifest invalidation invariant, and member selection scoring
-  - 5-stage GC, remote SSH protocol, design alternatives, and limitations
-- **[Development & Setup Guide](docs/development.md)**
-  - Codebase layout and running unit / E2E tests
-  - Multi-agent sandbox setup and environment variables
-
-## Releases
-
-Rust edition 2024, MSRV 1.89; CI and releases use Rust 1.99.0 from
-`rust-toolchain.toml`. Toolchain updates must keep both CI versions green.
-CI checks formatting, strict Clippy, docs, dependencies, and real Cargo E2E
-on Linux, macOS, and Windows. Dependencies use weekly grouped Dependabot
-updates with a seven-day cooldown; security updates should be reviewed promptly.
-
-1. Update `package.version` in `Cargo.toml` and refresh `Cargo.lock` with
-   `cargo update`; merge the reviewed change into `main` after CI passes
-2. Tag that commit (`git tag -a v0.1.0 -m "Release v0.1.0"`) and push the tag
-   (`git push origin v0.1.0`), replacing the example version as needed
-3. The tag workflow reruns CI, checks the version and `main` ancestry, builds
-   Linux/macOS x86_64 and aarch64 plus Windows x86_64 binaries, and publishes
-   archives, licenses, `SHA256SUMS`, and GitHub-generated release notes
-
-Prerelease tags such as `v0.2.0-rc.1` require the same version in `Cargo.toml`
-and create prereleases. Provenance is attached to every archive; verify it with
-`gh attestation verify ARCHIVE --repo r4ai/buildq`, and verify downloads with
-`sha256sum -c SHA256SUMS` (macOS: `shasum -a 256 -c SHA256SUMS`).
-Publication starts as a draft and becomes public only after all assets upload.
-If publication fails after draft creation, inspect/delete that draft before
-rerunning the failed job; never move a published tag.
-
-Maintainers must allow GitHub Actions and artifact attestations, enable Dependabot
-security updates and private vulnerability reporting, require **CI passed** in the
-`main` ruleset, and restrict `v*` tag creation/update/deletion to release maintainers.
-The public-repository workflow uses only `GITHUB_TOKEN` and GitHub OIDC; no personal
-access token or signing secret is needed. See [Security policy](SECURITY.md).
+- [Usage Guide](docs/usage.md): configuration, monitoring, and SSH remote builds
+- [Architecture & Internals](docs/architecture.md): queue, cache invalidation, GC, and remote protocol
+- [Development & Setup Guide](docs/development.md): tests, sandbox setup, environment variables, and releases
 
 ## License
 

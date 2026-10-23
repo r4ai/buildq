@@ -167,3 +167,34 @@ buildq shim install cargo --into C:\bq\bin
 | `BUILDQ_REAL_CARGO` | 本来の `cargo` バイナリのパスを明示指定 |
 | `BUILDQ_QUIET` | `1` を指定すると `buildq:` のステータス出力を抑制 |
 | `BUILDQ_TRACE` | `1` を指定すると各フェーズの所要時間を詳細出力 |
+
+## Releases
+
+Rust edition は 2024、MSRV は 1.89 である。CI とリリースには
+`rust-toolchain.toml` の Rust 1.99.0 を使用する。
+ツールチェーン更新時は両バージョンの CI 成功を確認する。
+CI は整形、厳格な Clippy、ドキュメント、依存関係、および Linux・macOS・Windows
+での実 Cargo E2E を検査する。Dependabot は週次・グループ単位で更新を提案し、
+7 日間のクールダウンを設ける。セキュリティ更新は速やかにレビューする。
+
+1. `Cargo.toml` の `package.version` を更新し、`cargo update` で `Cargo.lock` を更新する。
+   レビューと CI 成功後、`main` にマージする
+2. 対象コミットに `git tag -a v0.1.0 -m "Release v0.1.0"` でタグを付け、
+   `git push origin v0.1.0` でタグを送信する。バージョンは適宜置き換える
+3. タグ用ワークフローが CI、バージョン一致、`main` の履歴への所属を再検査する。
+   Linux・macOS の x86_64/aarch64 と Windows x86_64 向けバイナリをビルドし、
+   アーカイブ、ライセンス、`SHA256SUMS`、GitHub 自動生成のリリースノートを公開する
+
+`v0.2.0-rc.1` などのタグは `Cargo.toml` と同じバージョンを必要とし、プレリリースを作成する。
+各アーカイブの来歴は `gh attestation verify ARCHIVE --repo r4ai/buildq` で検証できる。
+ダウンロード後は `sha256sum -c SHA256SUMS`、macOS では
+`shasum -a 256 -c SHA256SUMS` でチェックサムを確認する。
+全アセットのアップロード後にドラフトを公開する。
+公開処理がドラフト作成後に失敗した場合、ドラフトを確認・削除してから失敗ジョブを再実行する。
+公開済みタグは移動しない。
+
+管理者は Actions と artifact attestations、Dependabot security updates、
+非公開の脆弱性報告を有効にし、`main` の ruleset で **CI passed** を必須にする。
+`v*` タグの作成・更新・削除はリリース担当者に制限する。
+公開リポジトリでは `GITHUB_TOKEN` と GitHub OIDC のみを使用し、PAT や署名用秘密鍵は不要である。
+[Security policy](../SECURITY.md) も参照する。
