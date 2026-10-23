@@ -47,10 +47,19 @@ $BUILDQ_DIR/<class>/
 ### Scheduling & Priority
 
 - Waiters poll every `250 ms` (configurable via `poll_ms`)
-- Under `queue.lock`, a waiter lists live tickets sorted by `(priority DESC, seq ASC)`
+- Under `queue.lock`, a waiter lists live tickets grouped by the worktree cap, then sorted by `(priority DESC, seq ASC)`
 - Waiter claims a free slot only when its rank is below the number of free slots
-- Strict FIFO ordering within the same priority
+- Strict FIFO ordering within the same group and priority
 - Higher-priority jobs overtake waiting jobs, without preempting running jobs
+
+The cap applies separately within each job class, using the Git worktree root
+(or the current directory outside Git) as identity.
+When another worktree is queued below its cap, its tickets precede tickets
+from worktrees already at their cap.
+Within each group, higher priority runs first, then strict FIFO.
+When all waiting worktrees are at their cap, jobs can still use idle slots.
+`buildq status` marks deferred tickets with `waiting: worktree cap`.
+Nested calls using `BUILDQ_HELD` remain exempt.
 
 ### Job Classes & Nesting
 
@@ -149,6 +158,10 @@ Before starting a build on member `m<i>`:
 For every package in `m<i>`, either its fingerprints are absent, or its artifacts reflect the exact content in `m<i>.manifest`.
 Because invalidation happens *before* Cargo runs, this holds across partial builds (`-p foo`), failed builds, and killed builds.
 
+A source-root change invalidates every local package so embedded paths such as
+`CARGO_MANIFEST_DIR` refer to the current worktree. Registry/git dependencies
+stay shared; same-root builds retain normal incremental reuse.
+
 ### Member Selection Algorithm
 
 Under `pool.lock`, `buildq` scores every free member by the tuple:
@@ -184,6 +197,9 @@ Running a binary directly inside `m0/debug/app.exe` would cause subsequent build
    - Executes the copied binary from `runs/r<j>` in the caller's working directory
    - Sets `PATH` / `LD_LIBRARY_PATH`, `CARGO_MANIFEST_DIR`, and `CARGO_PKG_*` so asset paths (e.g., Bevy's `assets/`) resolve normally
 
+The application receives Cargo `[env]` from home/ancestor configs and `--config`,
+including `force` and config-relative paths ([Cargo rules](https://doc.rust-lang.org/cargo/reference/config.html#env)).
+
 ## 4. Disk Budget & Garbage Collection
 
 `buildq gc` runs automatically in the background after pooled builds (throttled to every 10 minutes unless over budget).
@@ -209,6 +225,10 @@ nonzero. Only reclaimed bytes count as freed. Pending trash is included in
 If permissions prevent measuring failed trash, the last known remaining size
 is retained as an estimate. GC does not change permissions automatically: repair
 the reported path's permissions or file locks and rerun GC.
+
+Idle member size estimates are reused across builds for up to 60 seconds.
+Automatic budget checks may defer enforcement until the next refresh.
+`cache ls --refresh` and actual GC passes remeasure before eviction.
 
 ### Explicit Target Dirs
 
@@ -243,6 +263,27 @@ The remote host only needs `git`, a POSIX shell, and the Rust toolchain.
    - Wraps the command in `buildq run` if `buildq` is configured on the host
 6. **Artifact fetch**
    - Copies `--fetch <path>` artifacts back via `scp` into `target/buildq-remote/<host>/`
+
+### Host Selection & Transports
+
+Automatic selection probes each candidate before choosing it. With `buildq` set,
+it reads the host's build slots and queue via `status --json`; otherwise it uses
+Linux `/proc/loadavg` and the CPU count. Local dispatch limits still apply.
+Failed probes and Rust version mismatches exclude that host. `local` is used as a
+fallback only when listed among the candidates. Each probe has a five-second
+deadline and does not prompt for SSH passwords. Set `rustc_release` to require the
+remote default `rustc --version` release (including for explicitly selected hosts);
+`hosts.<name>.env` also applies to probes. This checks the configured default
+compiler, not every Cargo `+toolchain` override or installed compilation target.
+
+Set `transport = "rsync"` for a POSIX client (Linux, macOS, or WSL) with `rsync`
+installed on both ends. This mirrors all files, including gitignored generated
+inputs, except the root `.git` entry and `target/`. Deleted source files are
+removed remotely; remote `target/` artifacts survive subsequent syncs. Checksums
+catch source changes even when size and timestamps match. Remote Git snapshots
+are recorded on the host, including generated inputs, so remote buildq pooling
+retains content invalidation. `--fetch` also uses rsync. The default `git`
+transport remains available on Windows and requires no rsync installation.
 
 ## 6. Design Alternatives Considered
 
