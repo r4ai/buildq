@@ -178,6 +178,7 @@ rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を�
 auto_hosts = ["local", "box"]
 
 [hosts.box]
+# transport = "rsync"    # gitignore 対象の生成ファイルも同期（任意）
 ssh = "box"              # ~/.ssh/config のホスト名
 slots = 4                # このホストへ同時に送る最大ジョブ数
 # buildq = "buildq"      # 自動選択前にリモートの待機列を確認
@@ -201,6 +202,14 @@ buildq run --host box --fetch target/debug/app -- cargo build --bin app
 `rustc_release` を指定すると、明示的なホスト指定時もリモートのデフォルト `rustc --version` のリリースを検査する。
 `hosts.<name>.env` は問い合わせにも適用する。
 Cargo の `+toolchain` 上書きやインストール済みコンパイルターゲットは、この検査の対象外である。
+
+POSIX クライアント（Linux・macOS・WSL）で両側に `rsync` を導入すると、`transport = "rsync"` を選択できる。
+ルートの `.git` と `target/` を除く全ファイルを同期し、gitignore 対象の生成入力も転送する。
+削除されたソースはリモートからも削除するが、リモートの `target/` は次の同期でも保持する。
+サイズやタイムスタンプが一致する変更もチェックサムで検出する。
+生成入力を含めた Git スナップショットをリモート側で記録するため、リモート buildq の内容ベースの無効化も維持される。
+`--fetch` にも rsync を使用する。
+デフォルトの `git` 方式は Windows でも利用でき、rsync の導入は不要である。
 
 ## How It Works
 

@@ -57,6 +57,9 @@ jobs:
         run: cargo fetch --locked --manifest-path tests/fixtures/sample-ws/Cargo.toml
       - name: Real Cargo E2E (including Windows DLL handling)
         run: cargo test --locked --all-features --test e2e -- --ignored --nocapture --test-threads=1
+      - name: Real rsync transport E2E
+        if: runner.os != 'Windows'
+        run: cargo test --locked --all-features --test rsync -- --ignored --nocapture
 
   msrv:
     runs-on: ubuntu-24.04
