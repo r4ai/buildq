@@ -59,6 +59,27 @@ cargo test
 cargo test --test e2e -- --ignored --nocapture
 ```
 
+### Real SSH Integration Tests
+
+
+Linux の SSH 実機テストには、パスワードなしで接続できる既存ホストを使う。
+非対話シェルの PATH に Git、Cargo/Rust、scp、buildq があり、ホスト鍵が信頼済みであることが前提である。
+テスト専用の一時リポジトリだけを送り、リモートの `/tmp` 配下に専用ディレクトリを作成・削除する。
+ビルドにはホストの通常の buildq キューとプールを使う。SSH 設定は変更しない。
+
+```sh
+ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=5 localhost true
+BUILDQ_SSH_TEST_HOST=localhost cargo test --test remote_ssh -- --nocapture
+```
+
+localhost での実行は、最初のコマンドが既存の設定で成功する場合に限る。
+リモートの buildq に絶対パスが必要なら `BUILDQ_SSH_TEST_BUILDQ` を設定する。
+`BUILDQ_SSH_TEST_HOST` 未設定時はスキップを報告し、接続しない。
+未コミットのソース同期、2回の増分 Cargo ビルド、成果物取得、終了コード、
+`status --hosts`、実際の PTY 経由の Ctrl+C を検証する。
+依存のない fixture をオフラインでビルドするため、既定の Rust toolchain が導入済みである必要がある。
+
+
 ## Python Benchmark Tools
 
 `scripts/` は uv で管理する独立した Python プロジェクトである。
