@@ -4,8 +4,6 @@ English | [日本語](development.ja.md)
 
 This guide covers building and testing `buildq`, codebase organization, and configuring multi-agent sandboxes.
 
----
-
 ## Repository Structure
 
 ```text
@@ -31,8 +29,6 @@ tests/
   e2e.rs       # End-to-end multi-worktree Cargo build & invalidation benchmark
   fixtures/    # Sample workspace used by E2E tests
 ```
-
----
 
 ## Running Tests
 
@@ -62,8 +58,6 @@ Runs real `cargo` builds across two Git worktrees on `tests/fixtures/sample-ws` 
 ```sh
 cargo test --test e2e -- --ignored --nocapture
 ```
-
----
 
 ## Python Benchmark Tools
 
@@ -101,8 +95,6 @@ uv run --directory scripts --locked ruff format --check .
 
 After changing dependencies, run `uv lock --project scripts` and commit `pyproject.toml` and `uv.lock` together.
 Do not commit `.venv`, tool caches, or `__pycache__`.
-
----
 
 ## Multi-Agent Sandbox Recipe
 
@@ -157,8 +149,6 @@ buildq shim install cargo --into C:\bq\bin
   - Re-run `buildq shim install` after upgrading `buildq`
 - **Unix**
   - Writes a two-line shell script (`--sh` writes it on Windows too)
-
----
 
 ## Environment Variables Reference
 

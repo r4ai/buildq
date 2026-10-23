@@ -21,8 +21,6 @@ flowchart TD
     ReleaseBuild --> RunSlot["Acquire run slot & execute binary"]
 ```
 
----
-
 ## 1. Daemonless Queue
 
 `buildq` uses plain files and OS-level file locks instead of a background daemon.
@@ -75,8 +73,6 @@ $BUILDQ_DIR/<class>/
   - A freed slot never hides a lingering background build
 - **Unix**
   - Forwards `SIGTERM` and `SIGHUP` directly to the child process
-
----
 
 ## 2. Shared `target/` Pool
 
@@ -164,8 +160,6 @@ The lowest score wins:
 2. Otherwise picks the member whose sources are closest to the current worktree
 3. Creates a new member only when all members are busy, count is below `max_members`, and the disk budget has room
 
----
-
 ## 3. Two-Phase `cargo run`
 
 On Windows, the OS locks running `.exe` files.
@@ -180,8 +174,6 @@ Running a binary directly inside `m0/debug/app.exe` would cause subsequent build
 2. **Run Phase** (holds `run` slot; `build` slot and `m<i>` released)
    - Executes the copied binary from `runs/r<j>` in the caller's working directory
    - Sets `PATH` / `LD_LIBRARY_PATH`, `CARGO_MANIFEST_DIR`, and `CARGO_PKG_*` so asset paths (e.g., Bevy's `assets/`) resolve normally
-
----
 
 ## 4. Disk Budget & Garbage Collection
 
@@ -214,8 +206,6 @@ A job that sets `--target-dir` or `CARGO_TARGET_DIR` itself (e.g. an agent build
   - Re-rooted into the member as `m<i>/sub/<relative path>` and counted in the budget
   - Fresh top-level binaries are copied back to the requested dir
 
----
-
 ## 5. Remote Execution Protocol (SSH)
 
 `buildq run --host <host>` offloads builds over standard SSH and Git.
@@ -238,8 +228,6 @@ The remote host only needs `git`, a POSIX shell, and the Rust toolchain.
 6. **Artifact fetch**
    - Copies `--fetch <path>` artifacts back via `scp` into `target/buildq-remote/<host>/`
 
----
-
 ## 6. Design Alternatives Considered
 
 | Approach | Why rejected or superseded |
@@ -249,8 +237,6 @@ The remote host only needs `git`, a POSIX shell, and the Rust toolchain.
 | **Mirror checkout<br>(`rsync` to fixed path)** | Breaks `CARGO_MANIFEST_DIR`, relative test fixtures,<br>snapshot tests, and asset directories |
 | **`--remap-path-prefix`** | Only rewrites paths inside debug info / panics;<br>Cargo already hashes workspace paths relatively |
 | **`sccache`** | Cannot share incremental (`dev`) workspace crates;<br>sandbox-started server often cannot write other sandboxes |
-
----
 
 ## 7. Known Limitations
 

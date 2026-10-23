@@ -4,8 +4,6 @@ English | [日本語](README.ja.md)
 
 **A daemonless job queue and shared `target/` directory pool<br>for running parallel `cargo` builds across Git worktrees**
 
----
-
 ## Why buildq?
 
 When multiple coding agents run `cargo` simultaneously across separate Git worktrees, three problems occur:
@@ -92,8 +90,6 @@ Shared-cache reuse reduces build time and resource usage.
 
 [Methodology, additional results, and caveats](docs/benchmarks/bevy-2026-10-23.md)
 
----
-
 ## Installation
 
 ### 1. Install the binary
@@ -121,8 +117,6 @@ $env:PATH = "C:\bq\bin;$env:PATH"
 > [!TIP]
 > Running multiple sandboxed agents? Set `BUILDQ_DIR` and `BUILDQ_CACHE` to a shared writable directory.
 > See the [Multi-Agent Sandbox Recipe](docs/development.md#multi-agent-sandbox-recipe) for details.
-
----
 
 ## Usage
 
@@ -194,8 +188,6 @@ buildq run --host auto -- cargo clippy --all-targets
 buildq run --host box --fetch target/debug/app -- cargo build --bin app
 ```
 
----
-
 ## How It Works
 
 ```mermaid
@@ -222,8 +214,6 @@ flowchart TD
    - Phase 1: Compile under a `build` slot and copy the binary + DLLs to `runs/r0`
    - Phase 2: Release the `build` slot and `target/` member, then launch the binary under a `run` slot
    - Zero `target/` locking while applications are running
-
----
 
 ## Documentation
 
