@@ -208,7 +208,7 @@ pub struct Toolchain {
     pub host: String,
 }
 
-fn rustc_cmd(real: &Path, toolchain: Option<&str>) -> Command {
+pub(crate) fn rustc_cmd(real: &Path, toolchain: Option<&str>) -> Command {
     let rustc = env::var_os("RUSTC").map(PathBuf::from).unwrap_or_else(|| {
         let sib = real.with_file_name(if cfg!(windows) { "rustc.exe" } else { "rustc" });
         if sib.is_file() {
@@ -933,6 +933,7 @@ fn cargo_run(
     args: &[String],
     parsed: &Parsed,
 ) -> Result<i32, String> {
+    let runner = crate::cargo_config::runner(real, &cwd(), parsed)?;
     let sub = parsed.sub_index.unwrap();
     let bin = pick_bin(real, parsed);
     let mut build: Vec<String> = parsed.args[..sub].to_vec();
@@ -1083,7 +1084,13 @@ fn cargo_run(
             &format!("{} {}", exe_name.to_string_lossy(), display_cmd(&trailing)),
         )?)
     };
-    let mut cmd = Command::new(&local);
+    let mut cmd = if let Some(runner) = &runner {
+        let mut command = Command::new(&runner[0]);
+        command.args(&runner[1..]).arg(&local);
+        command
+    } else {
+        Command::new(&local)
+    };
     cmd.args(&trailing);
     crate::cargo_config::apply_env(&mut cmd, &cwd(), parsed)?;
     run_env(

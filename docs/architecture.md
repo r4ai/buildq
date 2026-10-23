@@ -200,6 +200,13 @@ Running a binary directly inside `m0/debug/app.exe` would cause subsequent build
 The application receives Cargo `[env]` from home/ancestor configs and `--config`,
 including `force` and config-relative paths ([Cargo rules](https://doc.rust-lang.org/cargo/reference/config.html#env)).
 
+The run phase honors Cargo target runners for the selected build target.
+Exact target-triple entries take precedence over matching `cfg(...)` entries;
+multiple matching cfg runners are rejected. Runner strings, argument arrays,
+config-relative executable paths, environment overrides, and `--config` are
+resolved before building. The runner receives the staged executable followed by
+the application arguments and executes under the run slot.
+
 ## 4. Disk Budget & Garbage Collection
 
 `buildq gc` runs automatically in the background after pooled builds (throttled to every 10 minutes unless over budget).
