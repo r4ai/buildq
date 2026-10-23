@@ -8,7 +8,7 @@
 //!    `stale_unit_days` (cargo-sweep style);
 //! 3. whole pools unused for `pool_idle_days` (old toolchains, dead repos);
 //! 4. idle run dirs older than two days;
-//! 5. while over budget: whole members, least recently used first.
+//! 5. while over budget: idle run copies, then whole members, each LRU first.
 //!
 //! The budget is `min(budget, used + free - min_free)`, so a disk that fills
 //! up for other reasons shrinks the pool too. Busy members are never touched.
@@ -300,6 +300,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     }
 
     // 4. idle run dirs
+    let mut removed_runs = Vec::new();
     for r in &usage.runs {
         if r.busy || now.saturating_sub(r.last_used_ms) < 2 * DAY_MS {
             continue;
@@ -308,13 +309,16 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             continue;
         };
         if !dry {
-            let _ = remove_tree(&r.dir, &trash);
+            if remove_tree(&r.dir, &trash).is_err() {
+                continue;
+            }
             let _ = fs::remove_file(r.dir.with_extension("json"));
         }
         report.act(format!("remove run dir {}", r.dir.display()), r.size);
+        removed_runs.push(r.dir.clone());
     }
 
-    // 5. budget: LRU members
+    // 5. budget: discard run copies before reusable build artifacts.
     if !dry {
         usage = scan(&cfg, false);
     }
@@ -323,6 +327,32 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         .saturating_sub(if dry { report.freed } else { 0 });
     let budget = usage.effective_budget;
     report.effective_budget = budget;
+    let mut runs: Vec<_> = usage
+        .runs
+        .iter()
+        .filter(|r| !r.busy && !removed_runs.contains(&r.dir))
+        .collect();
+    runs.sort_by_key(|r| r.last_used_ms);
+    for r in runs {
+        if total <= budget {
+            break;
+        }
+        let Ok(Some(_lock)) = lock::try_lock(&r.dir.with_extension("lock")) else {
+            continue;
+        };
+        if !dry {
+            if remove_tree(&r.dir, &trash).is_err() {
+                continue;
+            }
+            let _ = fs::remove_file(r.dir.with_extension("json"));
+        }
+        // Keep the lock file: unlinking it could create two independent locks.
+        total = total.saturating_sub(r.size);
+        report.act(
+            format!("evict run dir {} (over budget)", r.dir.display()),
+            r.size,
+        );
+    }
     if total > budget {
         let mut members: Vec<(&PoolEntry, &MemberEntry)> = usage
             .pools
@@ -727,6 +757,83 @@ mod tests {
         assert!(busy.exists(), "busy member must survive");
         assert!(recent.exists());
         assert!(r.after <= 9000);
+    }
+
+    #[test]
+    fn budget_evicts_recent_idle_runs_lru_before_members() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut c = cfg(dir.path());
+        c.budget = 9000;
+        let md = member(&c.cache_dir, "p", 0, now_ms(), 1000);
+        let runs = runs_dir(&c);
+        for (id, age) in [(0, 1), (1, 0), (2, 3)] {
+            file(&runs.join(format!("r{id}/app")), 4000, 0);
+            file(&runs.join(format!("r{id}.json")), 0, age);
+        }
+        let _busy = lock::try_lock(&runs.join("r2.lock")).unwrap().unwrap();
+        let dry = gc(
+            &c,
+            &Options {
+                dry_run: true,
+                ..Default::default()
+            },
+        );
+        assert_eq!((dry.before, dry.freed, dry.after), (13000, 4000, 9000));
+        assert!(runs.join("r0/app").exists());
+        let report = gc(&c, &Options::default());
+        assert_eq!(
+            (report.before, report.freed, report.after),
+            (13000, 4000, 9000)
+        );
+        assert!(!runs.join("r0").exists());
+        assert!(!runs.join("r0.json").exists());
+        assert!(runs.join("r0.lock").exists());
+        assert!(runs.join("r1/app").exists());
+        assert!(runs.join("r2/app").exists());
+        assert!(md.exists());
+        assert_eq!(scan(&c, true).total, report.after);
+    }
+
+    #[test]
+    fn budget_cannot_evict_busy_runs() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut c = cfg(dir.path());
+        c.budget = 1;
+        let runs = runs_dir(&c);
+        file(&runs.join("r0/app"), 4000, 0);
+        file(&runs.join("r0.json"), 0, 0);
+        let busy = lock::try_lock(&runs.join("r0.lock")).unwrap().unwrap();
+        let report = gc(&c, &Options::default());
+        assert_eq!(report.after, 4000);
+        assert_eq!(report.freed, 0);
+        assert!(runs.join("r0/app").exists());
+        drop(busy);
+        let report = gc(&c, &Options::default());
+        assert_eq!(report.after, 0);
+        assert!(!runs.join("r0").exists());
+    }
+
+    #[test]
+    fn dry_run_does_not_count_age_evicted_runs_twice() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut c = cfg(dir.path());
+        c.budget = 1;
+        let runs = runs_dir(&c);
+        file(&runs.join("r0/app"), 4000, 0);
+        file(&runs.join("r0.json"), 0, 3);
+        file(&runs.join("r1/app"), 4000, 0);
+        file(&runs.join("r1.json"), 0, 0);
+        let report = gc(
+            &c,
+            &Options {
+                dry_run: true,
+                ..Default::default()
+            },
+        );
+        assert_eq!((report.freed, report.after), (8000, 0));
+        assert_eq!(report.actions.len(), 2);
+        assert!(runs.join("r0/app").exists());
+        assert!(runs.join("r1/app").exists());
     }
 
     #[test]

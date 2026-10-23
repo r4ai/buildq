@@ -176,7 +176,10 @@ pub fn plan(
             Some(pkg) => {
                 plan.packages.insert(pkg);
             }
-            None => plan.outside.push(p.clone()),
+            // Without a previous manifest Cargo must build everything anyway.
+            // Keep package invalidation, but do not wake checkout file watchers.
+            None if !member.is_empty() => plan.outside.push(p.clone()),
+            None => {}
         }
     }
     plan.changed = changed;
@@ -518,6 +521,23 @@ mod tests {
         assert_eq!(p.packages.into_iter().collect::<Vec<_>>(), ["b", "c"]);
         assert_eq!(p.outside, ["README.md"]);
         assert_eq!(p.changed.len(), 4);
+    }
+
+    #[test]
+    fn empty_manifest_needs_no_outside_touches() {
+        let current = m(&[("crates/a/src/lib.rs", "1"), ("content/data", "2")]);
+        let p = plan(&Manifest::new(), &current, &mut owner);
+        assert!(p.outside.is_empty());
+        assert!(p.packages.contains("a"));
+    }
+
+    #[test]
+    fn outside_touches_only_include_manifest_differences() {
+        let previous = m(&[("same", "1"), ("changed", "2"), ("removed", "3")]);
+        let current = m(&[("same", "1"), ("changed", "4"), ("added", "5")]);
+        let p = plan(&previous, &current, &mut |_| None);
+        assert_eq!(p.outside, ["added", "changed", "removed"]);
+        assert!(plan(&current, &current, &mut |_| None).outside.is_empty());
     }
 
     #[test]

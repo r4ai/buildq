@@ -509,6 +509,102 @@ fn stderr(out: &Output) -> String {
 }
 
 #[test]
+fn shim_touches_only_changed_outside_files_in_built_members() {
+    let s = shim_setup();
+    let same = s.repo.join("unchanged.txt");
+    let changed = s.repo.join("changed.txt");
+    fs::write(&same, "same").unwrap();
+    fs::write(&changed, "before").unwrap();
+    git(&s.repo, &["add", "-A"]);
+    git(&s.repo, &["commit", "-q", "-m", "outside files"]);
+    let old = std::time::SystemTime::now() - Duration::from_secs(86400);
+    let set_old = |p: &Path| {
+        fs::File::options()
+            .write(true)
+            .open(p)
+            .unwrap()
+            .set_modified(old)
+            .unwrap();
+        fs::metadata(p).unwrap().modified().unwrap()
+    };
+    let same_mtime = set_old(&same);
+    let changed_mtime = set_old(&changed);
+    let first = s.cargo(&["build"], 0);
+    assert!(first.status.success(), "{}", stderr(&first));
+    assert!(!stderr(&first).contains("outside packages touched"));
+    assert_eq!(fs::metadata(&same).unwrap().modified().unwrap(), same_mtime);
+    assert_eq!(
+        fs::metadata(&changed).unwrap().modified().unwrap(),
+        changed_mtime
+    );
+
+    fs::write(&changed, "after").unwrap();
+    let changed_mtime = set_old(&changed);
+    let warm = s.cargo(&["build"], 0);
+    assert!(warm.status.success(), "{}", stderr(&warm));
+    assert!(
+        stderr(&warm).contains("1 file(s) outside packages touched"),
+        "{}",
+        stderr(&warm)
+    );
+    assert_eq!(fs::metadata(&same).unwrap().modified().unwrap(), same_mtime);
+    assert!(fs::metadata(&changed).unwrap().modified().unwrap() > changed_mtime);
+
+    let unchanged = s.cargo(&["build"], 0);
+    assert!(unchanged.status.success(), "{}", stderr(&unchanged));
+    assert!(!stderr(&unchanged).contains("outside packages touched"));
+
+    // A member directory may survive without a manifest (e.g. interrupted setup).
+    let target = PathBuf::from(line(&first, "TARGET="));
+    let manifest = target.with_extension("manifest");
+    fs::remove_file(&manifest).unwrap();
+    let changed_mtime = set_old(&changed);
+    let no_manifest = s.cargo(&["build"], 0);
+    assert!(no_manifest.status.success(), "{}", stderr(&no_manifest));
+    assert!(!stderr(&no_manifest).contains("outside packages touched"));
+    assert_eq!(
+        fs::metadata(&changed).unwrap().modified().unwrap(),
+        changed_mtime
+    );
+    assert!(manifest.exists());
+}
+
+#[test]
+fn gc_budget_removes_recent_run_copies_but_preserves_locked_runs() {
+    let e = Env::new();
+    let runs = e.root.join("cache/runs");
+    for id in 0..2 {
+        fs::create_dir_all(runs.join(format!("r{id}"))).unwrap();
+        fs::write(runs.join(format!("r{id}/app")), vec![0u8; 2 * 1024 * 1024]).unwrap();
+        fs::write(runs.join(format!("r{id}.json")), "{}").unwrap();
+    }
+    let busy = buildq::lock::try_lock(&runs.join("r1.lock"))
+        .unwrap()
+        .unwrap();
+    let gc = |dry: bool| {
+        let mut cmd = e.cmd(1);
+        cmd.args(["gc", "--budget", "1M", "--json"]);
+        if dry {
+            cmd.arg("--dry-run");
+        }
+        let out = cmd.output().unwrap();
+        assert!(out.status.success(), "{}", stderr(&out));
+        serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()
+    };
+    let dry = gc(true);
+    assert_eq!(dry["after"], 2 * 1024 * 1024);
+    assert!(runs.join("r0/app").exists());
+    let report = gc(false);
+    assert_eq!(report["after"], 2 * 1024 * 1024);
+    assert!(!runs.join("r0").exists());
+    assert!(runs.join("r1/app").exists());
+    drop(busy);
+    let report = gc(false);
+    assert_eq!(report["after"], 0);
+    assert!(!runs.join("r1").exists());
+}
+
+#[test]
 fn explicit_target_dir_is_announced_and_counted() {
     let s = shim_setup();
     let base = s.repo.join("target-base");
