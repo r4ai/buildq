@@ -54,6 +54,7 @@ flowchart LR
   - Shares a small pool of `target/` directories across all worktrees of a repository
   - Tracks file content via Git blob hashes
   - Invalidates only modified packages before each build
+  - Chooses free members by estimated rebuilds, including transitive workspace dependents
 - **Automatic disk budget & GC**
   - Prunes stale incremental sessions and unused artifacts in the background
   - Keeps total cache size under a configurable disk budget (default: `60 GB`)

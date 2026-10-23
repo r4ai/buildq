@@ -365,6 +365,7 @@ struct PoolCtx {
     pool: Pool,
     name: String,
     manifest: pool::Manifest,
+    rebuild_graph: pool::RebuildGraph,
     /// An explicit target dir inside the worktree pooled under
     /// `cache.pool_explicit`: (requested dir, its path relative to the worktree).
     explicit: Option<(PathBuf, String)>,
@@ -455,12 +456,36 @@ fn pool_ctx(
     )
     .ok()?;
     Some(PoolCtx {
+        rebuild_graph: rebuild_graph(real, parsed),
         manifest: git::manifest(&wt)?,
         wt,
         pool,
         name,
         explicit,
     })
+}
+
+/// No dependency resolution or downloads: metadata expands workspace and
+/// renamed path dependencies without involving the registry or Cargo.lock.
+fn rebuild_graph(real: &Path, parsed: &Parsed) -> pool::RebuildGraph {
+    let mut args = vec![
+        "metadata".into(),
+        "--no-deps".into(),
+        "--format-version".into(),
+        "1".into(),
+    ];
+    if let Some(manifest) = parsed.opt(&["--manifest-path"]) {
+        args.extend(["--manifest-path".into(), manifest]);
+    }
+    Command::new(real)
+        .args(with_toolchain(parsed, args))
+        .stdin(Stdio::null())
+        .stderr(Stdio::null())
+        .output()
+        .ok()
+        .filter(|output| output.status.success())
+        .and_then(|output| pool::RebuildGraph::from_metadata(&output.stdout))
+        .unwrap_or_default()
 }
 
 fn lease_member(cfg: &Config, ctx: &mut PoolCtx) -> Result<Lease, String> {
@@ -494,6 +519,7 @@ fn lease_member(cfg: &Config, ctx: &mut PoolCtx) -> Result<Lease, String> {
         .lease(
             &ctx.wt,
             &ctx.manifest,
+            &ctx.rebuild_graph,
             &mut owners,
             cfg.max_members,
             &mut may_grow,

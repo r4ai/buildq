@@ -154,8 +154,16 @@ Because invalidation happens *before* Cargo runs, this holds across partial buil
 Under `pool.lock`, `buildq` scores every free member by the tuple:
 
 ```text
-(never_built, packages_to_invalidate, differing_files, last_used_by_other_worktree, least_recent)
+(never_built, estimated_workspace_rebuilds, differing_files, last_used_by_other_worktree, least_recent)
 ```
+
+The rebuild estimate counts the union of invalidated packages and their transitive
+workspace dependents, counting each package once. `cargo metadata --no-deps`
+provides workspace path edges, including renamed, optional, target, build and dev
+dependencies. This is a conservative estimate independent of selected features or
+`-p`; registry/git dependencies do not contribute. Unknown or deleted packages
+count as one. If metadata is unavailable, selection falls back to raw package
+counts. The graph is loaded once per job, before taking `pool.lock`.
 
 The lowest score wins:
 1. Re-leases the exact member the worktree used last (`0` packages to invalidate)

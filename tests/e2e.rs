@@ -426,3 +426,29 @@ fn reads_own_data() {
         assert!(String::from_utf8_lossy(&out.stderr).contains("/m0 ("));
     }
 }
+
+#[test]
+fn rebuild_graph_reads_real_cargo_workspace_metadata() {
+    let out = Command::new("cargo")
+        .args([
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline",
+            "--manifest-path",
+        ])
+        .arg(Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/sample-ws/Cargo.toml"))
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let graph = buildq::pool::RebuildGraph::from_metadata(&out.stdout).unwrap();
+    let set = |name: &str| std::collections::BTreeSet::from([name.to_string()]);
+    assert_eq!(graph.cost(&set("sample-core")), 3);
+    assert_eq!(graph.cost(&set("sample-util")), 2);
+    assert_eq!(graph.cost(&set("sample-app")), 1);
+}
