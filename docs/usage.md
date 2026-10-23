@@ -42,6 +42,31 @@ stop if the reserve is breached. Use `buildq cache ls --refresh` and
 for the volume; `min_free = "0"` disables this guard. See the
 [free-space guard](architecture.md#free-space-guard) for scope and limitations.
 
+## Automatic GC
+
+Post-job GC defaults to `[cache] gc_mode = "background"`. On Unix, detached
+collectors require an init that reaps adopted children. In containers, use Docker
+`--init`, or run `tini` / `dumb-init` as PID 1. A non-reaping PID 1 can accumulate
+terminated collectors; these zombies are not running compilers or held slots.
+`buildq config` displays the effective mode and its init requirement.
+
+Without a reaping init, collect within the job process instead:
+
+```toml
+[cache]
+gc_mode = "inline"
+```
+
+Inline GC runs after releasing build slots and eligible member leases, and waits
+for collection before returning. It can add cleanup latency; automatic deletion
+warnings do not replace the build's exit status. Both modes skip collection within
+10 minutes while estimated usage is within budget. Background mode checks this
+before creating a process, rather than spawning a collector only to skip it.
+
+Alternatively set `BUILDQ_GC=0` and have an orchestrator invoke foreground
+`buildq gc` and wait for it. Manual GC and free-space admission checks remain
+available. See [Container Process Lifecycle](development.md#container-process-lifecycle).
+
 ## Nested Cargo
 
 Build scripts can build helpers in separate Cargo workspaces without inheriting

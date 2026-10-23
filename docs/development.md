@@ -102,6 +102,21 @@ uv run --directory scripts --locked ruff format --check .
 After changing dependencies, run `uv lock --project scripts` and commit `pyproject.toml` and `uv.lock` together.
 Do not commit `.venv`, tool caches, or `__pycache__`.
 
+## Container Process Lifecycle
+
+Use a reaping init such as Docker `--init`, `tini`, or `dumb-init` when enabling
+background post-job GC. buildq is daemonless: collectors exit after each pass,
+and the operating environment must reap them if their parent has already exited.
+PID 1's executable name does not reliably establish whether it reaps children;
+check the container's actual supervision policy. `buildq config` exposes the mode.
+
+For environments without that supervision, choose `[cache] gc_mode = "inline"`,
+or disable automatic GC and explicitly wait for foreground `buildq gc`.
+See [Automatic GC](usage.md#automatic-gc) for configuration and latency tradeoffs.
+The Linux `tests/reaping.rs` binary acts as its own subreaper and waits only for
+its descendants. It verifies an actual detached collector, inline collection,
+and the absence of collector processes on recent under-budget builds.
+
 ## Multi-Agent Sandbox Recipe
 
 When running multiple coding agents (e.g., Codex CLI, Claude Code) in restricted sandboxes on the same machine, every agent must share access to `$BUILDQ_DIR` and `$BUILDQ_CACHE`.
@@ -167,7 +182,7 @@ buildq shim install cargo --into C:\bq\bin
 | `BUILDQ_BUDGET` | Override disk budget (e.g., `45G`) |
 | `BUILDQ_POOL` | Set to `0` to disable target pooling (queue only) |
 | `BUILDQ_POOL_EXPLICIT` | Set to `1` to pool explicit target dirs inside the worktree<br>(same as `[cache] pool_explicit`) |
-| `BUILDQ_GC` | Set to `0` to disable automatic background GC after builds |
+| `BUILDQ_GC` | Set to `0` to disable automatic post-job GC in either mode |
 | `BUILDQ_PRIORITY` | Default job priority when invoked via the `cargo` shim |
 | `BUILDQ_LABEL` | Free-form label attached to jobs in `status` and `history` |
 | `BUILDQ_REAL_CARGO` | Explicit path to the underlying `cargo` binary |

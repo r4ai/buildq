@@ -242,7 +242,13 @@ the application arguments and executes under the run slot.
 
 ## 4. Disk Budget & Garbage Collection
 
-`buildq gc` runs automatically in the background after pooled builds (throttled to every 10 minutes unless over budget).
+Automatic GC runs after pooled builds, in the background by default or in the
+current process with `[cache] gc_mode = "inline"`. A parent-side preflight avoids
+creating a collector for recent, under-budget usage; the collector rechecks under
+the GC lock. Both modes throttle to 10 minutes unless over budget. Background
+mode requires a reaping init on Unix; inline mode trades return latency for a
+bounded collector lifecycle. Neither mode adds a persistent daemon. See
+[Automatic GC](usage.md#automatic-gc).
 
 The cache budget is a soft retention limit. Busy members and run copies are
 protected, so active builds may temporarily exceed it. `cache ls --json` and

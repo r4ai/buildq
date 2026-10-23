@@ -29,6 +29,34 @@ fn cfg(root: &Path) -> Config {
     c
 }
 
+#[test]
+fn automatic_gc_preflight_skips_recent_usage_but_never_budget_pressure() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut c = cfg(temp.path());
+    member(&c.cache_dir, "p", 0, now_ms(), 100);
+    assert!(auto_gc_needed(&c));
+    fs::write(c.cache_dir.join("gc.stamp"), now_ms().to_string()).unwrap();
+    assert!(!auto_gc_needed(&c));
+    c.budget = 1;
+    assert!(auto_gc_needed(&c));
+    let report = gc(
+        &c,
+        &Options {
+            auto: true,
+            ..Default::default()
+        },
+    );
+    assert!(report.skipped.is_none());
+    assert!(!c.cache_dir.join("pools/p/m0").exists());
+    // A wall-clock correction must not underflow elapsed-time arithmetic.
+    fs::write(
+        c.cache_dir.join("gc.stamp"),
+        (now_ms() + 60_000).to_string(),
+    )
+    .unwrap();
+    assert!(!auto_gc_needed(&c));
+}
+
 fn file(p: &Path, bytes: usize, age_days: u64) {
     fs::create_dir_all(p.parent().unwrap()).unwrap();
     fs::write(p, vec![0u8; bytes]).unwrap();

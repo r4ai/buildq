@@ -317,7 +317,7 @@ pub fn effective_budget(budget: u64, min_free: u64, used: u64, free: Option<u64>
 pub struct Options {
     pub dry_run: bool,
     pub budget: Option<u64>,
-    /// Background run after a job: throttled, quiet.
+    /// Automatic run after a job: throttled, quiet.
     pub auto: bool,
 }
 
@@ -425,6 +425,24 @@ fn reclaim(
     freed
 }
 
+fn recent_auto_usage(cfg: &Config) -> Option<Usage> {
+    let last = fs::read_to_string(cfg.cache_dir.join("gc.stamp"))
+        .ok()
+        .and_then(|s| s.trim().parse::<u64>().ok())
+        .unwrap_or(0);
+    if now_ms().saturating_sub(last) >= 10 * 60_000 {
+        return None;
+    }
+    let usage = scan(cfg, false);
+    (usage.total <= usage.effective_budget).then_some(usage)
+}
+
+/// Advisory preflight before creating a collector process. The collector checks
+/// again under gc.lock; cached measurements have the same bounded freshness.
+pub fn auto_gc_needed(cfg: &Config) -> bool {
+    recent_auto_usage(cfg).is_none()
+}
+
 pub fn gc(cfg: &Config, opts: &Options) -> Report {
     let mut report = Report {
         accounting: cfg.accounting,
@@ -442,18 +460,13 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         return report;
     };
     let stamp = cfg.cache_dir.join("gc.stamp");
-    if opts.auto {
-        let last = fs::read_to_string(&stamp)
-            .ok()
-            .and_then(|s| s.trim().parse::<u64>().ok())
-            .unwrap_or(0);
-        let usage = scan(&cfg, false);
-        if now_ms() - last < 10 * 60_000 && usage.total <= usage.effective_budget {
-            report.skipped = Some("ran recently and within budget".into());
-            report.observe(&usage);
-            report.before = report.after;
-            return report;
-        }
+    if opts.auto
+        && let Some(usage) = recent_auto_usage(&cfg)
+    {
+        report.skipped = Some("ran recently and within budget".into());
+        report.observe(&usage);
+        report.before = report.after;
+        return report;
     }
     let dry = opts.dry_run;
     let now = now_ms();
