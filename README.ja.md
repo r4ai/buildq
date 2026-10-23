@@ -67,15 +67,30 @@ flowchart LR
 
 ### パフォーマンス比較
 
-| 指標 | Worktree ごとに<br>`target/` | 単純な<br>`CARGO_TARGET_DIR` 共有 | `buildq` |
-| :--- | :--- | :--- | :--- |
-| **CPU / メモリ負荷** | 無制限<br>（マシンがフリーズ） | 完全直列<br>（常に1並列のみ） | **最大 `N` 並列に制御** |
-| **別 Worktree での<br>初回ビルド** | `11.2 秒`<br>（8 クレート再ビルド） | `1.4 秒`<br>（0 クレート再ビルド） | **`1.4 秒`<br>（0 クレート再ビルド）** |
-| **古い `mtime` の<br>ファイルを編集** | 安全：`4.3 秒`<br>（3 クレート再ビルド） | **バグ発生**<br>（古いコードが動作） | **安全：`4.3 秒`<br>（3 クレート再ビルド）** |
-| **ディスク消費<br>（`W` Worktrees）** | `W × 110 MiB`<br>（線形に肥大化） | `1 × 113 MiB` | **`≤ slots × 113 MiB`<br>（上限内で維持）** |
+Bevy を使う **3 つの worktree の同時ビルド**で実測。
+共有キャッシュの再利用により、ビルド時間とリソース消費を削減。
 
-> Windows 11 上で2つの Git worktree（`regex` + ワークスペース内3クレート）を用いて実測。
-> `buildq` のオーバーヘッドは1ジョブあたり約 0.4〜0.6 秒
+![通常 Cargo と buildq の比較：ビルド時間 165.14 秒 → 120.80 秒、ピーク RSS 4.37 → 2.89 GiB、ディスク 3.21 → 2.14 GiB](docs/benchmarks/assets/bevy-performance.ja.svg)
+
+<details>
+<summary>測定値・実行環境</summary>
+
+| 指標 | 通常 Cargo<br>独立 target | buildq<br>共有プール |
+| :--- | ---: | ---: |
+| ビルド時間 | 165.14 秒 | 120.80 秒 |
+| ピーク RSS | 4.37 GiB | 2.89 GiB |
+| target ディスク割当量 | 3.21 GiB | 2.14 GiB |
+
+- Bevy 0.16.1：PBR・PNG・マルチスレッド
+- Linux x86_64、Rust 1.89.0
+- CPU quota 4・メモリ 16 GiB、Cargo ごとに 2 jobs
+- buildq：2 slots・最大 2 members
+- 全キャッシュが空の状態から測定
+- 測定日：2026-10-23
+
+</details>
+
+[測定方法・補足結果・注意点は詳細レポートへ](docs/benchmarks/bevy-2026-10-23.ja.md)
 
 ---
 

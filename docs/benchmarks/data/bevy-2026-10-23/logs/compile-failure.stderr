@@ -1,0 +1,17 @@
+buildq: [     0 ms] start
+buildq: [     0 ms] parsed
+buildq: [     0 ms] slot acquired
+buildq: [     4 ms] pool opened (git + toolchain + manifest)
+buildq: target wt1-126410f7/m0 (1 package(s) invalidated: bevy-heavy-probe)
+buildq: [     5 ms] member leased
+   Compiling bevy-heavy-probe v0.1.0 (/workspace/buildq-bench/wt2)
+error: expected one of `!` or `::`, found `is`
+  --> src/main.rs:14:6
+   |
+14 | this is deliberately invalid Rust
+   |      ^^ expected one of `!` or `::`
+
+error: could not compile `bevy-heavy-probe` (bin "bevy-heavy-probe") due to 1 previous error
+buildq: [   202 ms] cargo finished
+buildq: [   205 ms] after-job check
+buildq: [   205 ms] done

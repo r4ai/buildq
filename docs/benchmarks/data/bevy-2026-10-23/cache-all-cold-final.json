@@ -1,0 +1,57 @@
+{
+  "pools": [
+    {
+      "name": "wt1-126410f7",
+      "dir": "/workspace/buildq-bench/cache-all-cold/pools/wt1-126410f7",
+      "info": {
+        "repo": "wt1",
+        "repo_key": "/workspace/buildq-bench/wt1/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792719619385,
+        "last_used_ms": 1792719851913
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/buildq-bench/cache-all-cold/pools/wt1-126410f7/m0",
+          "busy": false,
+          "size": 1165136173,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792719619388,
+            "last_used_ms": 1792719852124,
+            "last_worktree": "/workspace/buildq-bench/wt1",
+            "last_head": "88a3b516417be734bf7335c37c00e97c3c50bfcf",
+            "last_cmd": "",
+            "jobs": 12,
+            "size_bytes": 1165136173,
+            "size_ms": 1792719852131
+          }
+        },
+        {
+          "id": 1,
+          "dir": "/workspace/buildq-bench/cache-all-cold/pools/wt1-126410f7/m1",
+          "busy": false,
+          "size": 1165136162,
+          "meta": {
+            "id": 1,
+            "created_ms": 1792719619418,
+            "last_used_ms": 1792719739474,
+            "last_worktree": "/workspace/buildq-bench/wt4",
+            "last_head": "88a3b516417be734bf7335c37c00e97c3c50bfcf",
+            "last_cmd": "",
+            "jobs": 2,
+            "size_bytes": 1165136162,
+            "size_ms": 1792719852136
+          }
+        }
+      ]
+    }
+  ],
+  "runs": [],
+  "total": 2330272335,
+  "budget": 12884901888,
+  "effective_budget": 12884901888,
+  "free_disk": 24340819968
+}

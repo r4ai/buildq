@@ -67,15 +67,30 @@ flowchart LR
 
 ### Performance & Impact
 
-| Metric | Per-worktree<br>`target/` | Naive shared<br>`CARGO_TARGET_DIR` | `buildq` |
-| :--- | :--- | :--- | :--- |
-| **CPU / RAM usage** | Unbounded<br>(machine freezes) | Serialized<br>(1 build at a time) | **Bounded to `N` builds** |
-| **2nd worktree<br>1st build** | `11.2 s`<br>(8 crates compiled) | `1.4 s`<br>(0 crates compiled) | **`1.4 s`<br>(0 crates compiled)** |
-| **Edit file with<br>older `mtime`** | Safe: `4.3 s`<br>(3 crates compiled) | **Broken**<br>(runs stale code) | **Safe: `4.3 s`<br>(3 crates compiled)** |
-| **Disk usage<br>(`W` worktrees)** | `W × 110 MiB`<br>(grows linearly) | `1 × 113 MiB` | **`≤ slots × 113 MiB`<br>(capped by budget)** |
+Measured with **three Bevy worktrees building at once**.
+Shared-cache reuse reduces build time and resource usage.
 
-> Measured on a sample workspace (`regex` + 3 workspace crates) across two Git worktrees on Windows 11.
-> `buildq` adds ~0.4–0.6 s of overhead per queued build.
+![Plain Cargo versus buildq: build time 165.14 s to 120.80 s, peak RSS 4.37 to 2.89 GiB, target disk space 3.21 to 2.14 GiB](docs/benchmarks/assets/bevy-performance.svg)
+
+<details>
+<summary>Measurements and environment</summary>
+
+| Metric | Plain Cargo<br>Independent targets | buildq<br>Shared pool |
+| :--- | ---: | ---: |
+| Build time | 165.14 s | 120.80 s |
+| Peak RSS | 4.37 GiB | 2.89 GiB |
+| Allocated target disk space | 3.21 GiB | 2.14 GiB |
+
+- Bevy 0.16.1: PBR, PNG, multithreading
+- Linux x86_64, Rust 1.89.0
+- 4-CPU quota, 16 GiB RAM, 2 Cargo jobs per build
+- buildq: 2 slots, at most 2 pool members
+- All caches initially empty
+- Measured on 2026-10-23
+
+</details>
+
+[Methodology, additional results, and caveats](docs/benchmarks/bevy-2026-10-23.md)
 
 ---
 

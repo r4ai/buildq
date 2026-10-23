@@ -1,0 +1,58 @@
+{
+  "wall_s": 120.80398288800006,
+  "peak_tree_rss_bytes": 3106574336,
+  "peak_rustc_processes": 4,
+  "jobs": [
+    {
+      "name": "pooled-all-cold-2",
+      "command": [
+        "/workspace/buildq/target/release/buildq",
+        "cargo",
+        "build",
+        "--offline",
+        "--locked"
+      ],
+      "cwd": "/workspace/buildq-bench/wt2",
+      "wall_s": 120.75864348799996,
+      "exit": 0,
+      "peak_tree_rss_bytes": 1632997376,
+      "sampled_cpu_s": 192.01,
+      "peak_processes": 10,
+      "compiling_lines": 210
+    },
+    {
+      "name": "pooled-all-cold-3",
+      "command": [
+        "/workspace/buildq/target/release/buildq",
+        "cargo",
+        "build",
+        "--offline",
+        "--locked"
+      ],
+      "cwd": "/workspace/buildq-bench/wt3",
+      "wall_s": 119.82970957700002,
+      "exit": 0,
+      "peak_tree_rss_bytes": 1630314496,
+      "sampled_cpu_s": 190.99,
+      "peak_processes": 10,
+      "compiling_lines": 210
+    },
+    {
+      "name": "pooled-all-cold-4",
+      "command": [
+        "/workspace/buildq/target/release/buildq",
+        "cargo",
+        "build",
+        "--offline",
+        "--locked"
+      ],
+      "cwd": "/workspace/buildq-bench/wt4",
+      "wall_s": 120.04449172199998,
+      "exit": 0,
+      "peak_tree_rss_bytes": 92745728,
+      "sampled_cpu_s": 0.38,
+      "peak_processes": 3,
+      "compiling_lines": 0
+    }
+  ]
+}

@@ -1,0 +1,285 @@
+{
+  "revision": "7eb2280",
+  "platform": "Linux x86_64",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "cpu_quota": 4,
+  "nproc": 5,
+  "memory_limit_bytes": 17179869184,
+  "rustc": "1.89.0",
+  "fixture_lock_sha256": "493e8ac1f37d172148ffd509eef870cce9f90115ff4723be0e0fb0b662cfb616",
+  "notes": [
+    "RSS is aggregate sampled process-tree RSS, not PSS.",
+    "Initial samples may overstate wall by up to 50 ms; final warm samples use a blocking wait with a separate sampler.",
+    "bevy-dynamic-linking (exit 101) is an excluded preflight: optional bevy_dylib had not been downloaded. The subsequent fixed-lock-named run succeeded; the name is historical and Cargo.lock remained unchanged."
+  ],
+  "warm": {
+    "direct": {
+      "n": 10,
+      "median_s": 0.20281993399993326,
+      "min_s": 0.19564938899998197,
+      "max_s": 0.2328618369999731
+    },
+    "buildq": {
+      "n": 10,
+      "median_s": 0.21967694599999277,
+      "min_s": 0.20555772500006242,
+      "max_s": 0.3385723680000865
+    },
+    "shim": {
+      "n": 10,
+      "median_s": 0.2351218719999224,
+      "min_s": 0.21878575900018404,
+      "max_s": 0.27882201100010207
+    }
+  },
+  "waves": {
+    "pooled-concurrent-wave": {
+      "wall_s": 116.62288450799997,
+      "peak_tree_rss_bytes": 1607307264,
+      "peak_rustc_processes": 3,
+      "jobs": [
+        {
+          "name": "pooled-concurrent-2",
+          "command": [
+            "/workspace/buildq/target/release/buildq",
+            "cargo",
+            "build",
+            "--offline",
+            "--locked"
+          ],
+          "cwd": "/workspace/buildq-bench/wt2",
+          "wall_s": 0.304645727000036,
+          "exit": 0,
+          "peak_tree_rss_bytes": 75067392,
+          "sampled_cpu_s": 0.11,
+          "peak_processes": 3,
+          "compiling_lines": 0
+        },
+        {
+          "name": "pooled-concurrent-3",
+          "command": [
+            "/workspace/buildq/target/release/buildq",
+            "cargo",
+            "build",
+            "--offline",
+            "--locked"
+          ],
+          "cwd": "/workspace/buildq-bench/wt3",
+          "wall_s": 116.58958121800003,
+          "exit": 0,
+          "peak_tree_rss_bytes": 1607217152,
+          "sampled_cpu_s": 186.03,
+          "peak_processes": 10,
+          "compiling_lines": 210
+        },
+        {
+          "name": "pooled-concurrent-4",
+          "command": [
+            "/workspace/buildq/target/release/buildq",
+            "cargo",
+            "build",
+            "--offline",
+            "--locked"
+          ],
+          "cwd": "/workspace/buildq-bench/wt4",
+          "wall_s": 0.46214302100003124,
+          "exit": 0,
+          "peak_tree_rss_bytes": 70209536,
+          "sampled_cpu_s": 0.1,
+          "peak_processes": 3,
+          "compiling_lines": 0
+        }
+      ]
+    },
+    "direct-concurrent-wave": {
+      "wall_s": 165.14083165899996,
+      "peak_tree_rss_bytes": 4694212608,
+      "peak_rustc_processes": 7,
+      "jobs": [
+        {
+          "name": "direct-concurrent-2",
+          "command": [
+            "cargo",
+            "build",
+            "--offline",
+            "--locked",
+            "--target-dir",
+            "/workspace/buildq-bench/direct-2"
+          ],
+          "cwd": "/workspace/buildq-bench/wt2",
+          "wall_s": 165.13988341099997,
+          "exit": 0,
+          "peak_tree_rss_bytes": 1625559040,
+          "sampled_cpu_s": 198.03,
+          "peak_processes": 9,
+          "compiling_lines": 210
+        },
+        {
+          "name": "direct-concurrent-3",
+          "command": [
+            "cargo",
+            "build",
+            "--offline",
+            "--locked",
+            "--target-dir",
+            "/workspace/buildq-bench/direct-3"
+          ],
+          "cwd": "/workspace/buildq-bench/wt3",
+          "wall_s": 162.01511919899997,
+          "exit": 0,
+          "peak_tree_rss_bytes": 1666445312,
+          "sampled_cpu_s": 196.89,
+          "peak_processes": 9,
+          "compiling_lines": 210
+        },
+        {
+          "name": "direct-concurrent-4",
+          "command": [
+            "cargo",
+            "build",
+            "--offline",
+            "--locked",
+            "--target-dir",
+            "/workspace/buildq-bench/direct-4"
+          ],
+          "cwd": "/workspace/buildq-bench/wt4",
+          "wall_s": 162.03429598399998,
+          "exit": 0,
+          "peak_tree_rss_bytes": 1635282944,
+          "sampled_cpu_s": 197.6,
+          "peak_processes": 9,
+          "compiling_lines": 210
+        }
+      ]
+    },
+    "pooled-all-cold-wave": {
+      "wall_s": 120.80398288800006,
+      "peak_tree_rss_bytes": 3106574336,
+      "peak_rustc_processes": 4,
+      "jobs": [
+        {
+          "name": "pooled-all-cold-2",
+          "command": [
+            "/workspace/buildq/target/release/buildq",
+            "cargo",
+            "build",
+            "--offline",
+            "--locked"
+          ],
+          "cwd": "/workspace/buildq-bench/wt2",
+          "wall_s": 120.75864348799996,
+          "exit": 0,
+          "peak_tree_rss_bytes": 1632997376,
+          "sampled_cpu_s": 192.01,
+          "peak_processes": 10,
+          "compiling_lines": 210
+        },
+        {
+          "name": "pooled-all-cold-3",
+          "command": [
+            "/workspace/buildq/target/release/buildq",
+            "cargo",
+            "build",
+            "--offline",
+            "--locked"
+          ],
+          "cwd": "/workspace/buildq-bench/wt3",
+          "wall_s": 119.82970957700002,
+          "exit": 0,
+          "peak_tree_rss_bytes": 1630314496,
+          "sampled_cpu_s": 190.99,
+          "peak_processes": 10,
+          "compiling_lines": 210
+        },
+        {
+          "name": "pooled-all-cold-4",
+          "command": [
+            "/workspace/buildq/target/release/buildq",
+            "cargo",
+            "build",
+            "--offline",
+            "--locked"
+          ],
+          "cwd": "/workspace/buildq-bench/wt4",
+          "wall_s": 120.04449172199998,
+          "exit": 0,
+          "peak_tree_rss_bytes": 92745728,
+          "sampled_cpu_s": 0.38,
+          "peak_processes": 3,
+          "compiling_lines": 0
+        }
+      ]
+    },
+    "pooled-warm-concurrent-wave": {
+      "wall_s": 0.7547645569999872,
+      "peak_tree_rss_bytes": 149282816,
+      "peak_rustc_processes": 1,
+      "jobs": [
+        {
+          "name": "pooled-warm-concurrent-2",
+          "command": [
+            "/workspace/buildq/target/release/buildq",
+            "cargo",
+            "build",
+            "--offline",
+            "--locked"
+          ],
+          "cwd": "/workspace/buildq-bench/wt2",
+          "wall_s": 0.5077295639999875,
+          "exit": 0,
+          "peak_tree_rss_bytes": 75059200,
+          "sampled_cpu_s": 0.11000000000000001,
+          "peak_processes": 3,
+          "compiling_lines": 0
+        },
+        {
+          "name": "pooled-warm-concurrent-3",
+          "command": [
+            "/workspace/buildq/target/release/buildq",
+            "cargo",
+            "build",
+            "--offline",
+            "--locked"
+          ],
+          "cwd": "/workspace/buildq-bench/wt3",
+          "wall_s": 0.5084408350000444,
+          "exit": 0,
+          "peak_tree_rss_bytes": 68907008,
+          "sampled_cpu_s": 0.13,
+          "peak_processes": 3,
+          "compiling_lines": 0
+        },
+        {
+          "name": "pooled-warm-concurrent-4",
+          "command": [
+            "/workspace/buildq/target/release/buildq",
+            "cargo",
+            "build",
+            "--offline",
+            "--locked"
+          ],
+          "cwd": "/workspace/buildq-bench/wt4",
+          "wall_s": 0.657540737999966,
+          "exit": 0,
+          "peak_tree_rss_bytes": 77258752,
+          "sampled_cpu_s": 0.1,
+          "peak_processes": 3,
+          "compiling_lines": 0
+        }
+      ]
+    }
+  },
+  "disk_allocated_bytes": {
+    "direct-2": 1147473920,
+    "direct-3": 1147469824,
+    "direct-4": 1147469824,
+    "baseline": 1147469824,
+    "cache-all-cold": 2294968320
+  },
+  "tests": {
+    "normal_passed": 34,
+    "normal_ignored": 2,
+    "explicit_e2e_passed": 2,
+    "failed": 0
+  }
+}

@@ -65,6 +65,46 @@ cargo test --test e2e -- --ignored --nocapture
 
 ---
 
+## Python ベンチマークツール
+
+`scripts/` は uv で管理する独立した Python プロジェクトである。
+Python 3.12.14 を `.python-version`、依存バージョンと配布物のハッシュを `uv.lock` で固定する。
+以下はリポジトリルートで実行する。
+
+```sh
+uv sync --project scripts --locked
+uv run --project scripts --locked python scripts/stress-bevy.py \
+  --root /tmp/buildq-bevy-new \
+  --buildq "$PWD/target/release/buildq"
+uv run --project scripts --locked python scripts/plot-bevy-benchmark.py
+```
+
+- 測定前に Rust 環境を有効化し、`cargo build --release` で buildq を作成
+- 測定先は新規ディレクトリ
+- Linux で約 12 GiB 以上の空き容量が必要
+- 日本語の図はシステムの Noto Sans CJK を使用
+  - 別の配置先は `--font /path/to/NotoSansCJK-Regular.ttc` で指定
+- PNG プレビューは `--preview-dir /tmp/buildq-figures` で任意に出力
+
+各 CLI は引数処理のみを持ち、実装は通常の import で共有する。
+
+| モジュール | 役割 |
+| :--- | :--- |
+| `buildq_bench/measurement.py` | サブプロセスの測定、リソース集計、JSONL 出力 |
+| `buildq_bench/scenarios.py` | worktree・キャッシュ・並行実行の検証シナリオ |
+| `buildq_bench/plotting.py` | 集計データから日英の比較図を生成 |
+
+```sh
+uv run --directory scripts --locked pytest
+uv run --directory scripts --locked ruff check .
+uv run --directory scripts --locked ruff format --check .
+```
+
+依存を変更した場合は `uv lock --project scripts` を実行し、`pyproject.toml` と `uv.lock` を同時にコミットする。
+`.venv`・ツールキャッシュ・`__pycache__` はコミットしない。
+
+---
+
 ## マルチエージェント・サンドボックス設定レシピ
 
 同一マシン上で複数のコーディングエージェント（Codex CLI、Claude Code 等）を制限付きサンドボックス内で動かす場合、全エージェントが `$BUILDQ_DIR` と `$BUILDQ_CACHE` に読み書きできる必要がある。
