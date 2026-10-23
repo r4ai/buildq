@@ -228,6 +228,9 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
                     meta,
                 });
             }
+            if members.is_empty() {
+                continue;
+            }
             pools.push(PoolEntry {
                 name: e.file_name().to_string_lossy().to_string(),
                 dir,
@@ -490,30 +493,62 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         if now.saturating_sub(p.last_used()) < cfg.pool_idle_days * DAY_MS {
             continue;
         }
-        let Some(locks) = lock_all(p) else { continue };
-        let already_pruned = if dry {
-            p.members
-                .iter()
-                .map(|m| pruned.get(&m.dir).copied().unwrap_or(0))
-                .sum()
-        } else {
-            0
+        // Never rename/remove the coordination directory. A waiter may have
+        // opened one of its locks before acquiring it; replacing that pathname
+        // would allow independent owners of the same logical member.
+        let Ok(Some(_pool_lock)) = lock::try_lock(&p.dir.join("pool.lock")) else {
+            continue;
         };
-        let size = p.size().saturating_sub(already_pruned);
-        reclaim(
-            &p.dir,
-            size,
-            dry,
-            &trash,
-            true,
-            &mut report,
-            format!(
-                "remove idle pool {} (unused {})",
-                p.name,
-                util::ago(p.last_used())
-            ),
-        );
-        drop(locks);
+        let Some((ids, _member_locks)) = lock_all(p) else {
+            continue;
+        };
+        let last_used = ids
+            .iter()
+            .filter_map(|id| read_json::<MemberMeta>(&p.dir.join(format!("m{id}.json"))))
+            .map(|m| m.last_used_ms)
+            .chain(read_json::<PoolInfo>(&p.dir.join("pool.json")).map(|p| p.last_used_ms))
+            .max()
+            .unwrap_or(0);
+        if now.saturating_sub(last_used) < cfg.pool_idle_days * DAY_MS {
+            continue;
+        }
+        for id in ids {
+            let dir = p.dir.join(format!("m{id}"));
+            if !dir.is_dir() {
+                continue;
+            }
+            let size = util::path_size(&dir)
+                .unwrap_or_else(|_| {
+                    p.members
+                        .iter()
+                        .find(|m| m.id == id)
+                        .map(|m| m.size)
+                        .unwrap_or(0)
+                })
+                .saturating_sub(if dry {
+                    pruned.get(&dir).copied().unwrap_or(0)
+                } else {
+                    0
+                });
+            reclaim(
+                &dir,
+                size,
+                dry,
+                &trash,
+                true,
+                &mut report,
+                format!(
+                    "remove idle pool {}/m{} (unused {})",
+                    p.name,
+                    id,
+                    util::ago(last_used)
+                ),
+            );
+            if !dry && !dir.exists() {
+                let _ = fs::remove_file(p.dir.join(format!("m{id}.json")));
+                let _ = fs::remove_file(p.dir.join(format!("m{id}.manifest")));
+            }
+        }
         removed_pools.push(p.dir.clone());
     }
 
@@ -650,12 +685,14 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     report
 }
 
-fn lock_all(p: &PoolEntry) -> Option<Vec<LockFile>> {
-    let mut v = Vec::new();
-    for m in &p.members {
-        v.push(lock::try_lock(&p.dir.join(format!("m{}.lock", m.id))).ok()??);
+fn lock_all(p: &PoolEntry) -> Option<(Vec<usize>, Vec<LockFile>)> {
+    // Called while holding pool.lock: include members created since the scan.
+    let ids = pool::member_ids(&p.dir);
+    let mut locks = Vec::new();
+    for id in &ids {
+        locks.push(lock::try_lock(&p.dir.join(format!("m{id}.lock"))).ok()??);
     }
-    Some(v)
+    Some((ids, locks))
 }
 
 /// Prunes incremental sessions and stale unit variants inside one member.
@@ -969,6 +1006,62 @@ mod tests {
         )
         .unwrap();
         md
+    }
+
+    #[test]
+    fn eviction_preserves_open_member_and_pool_lock_identities() {
+        for whole_pool in [false, true] {
+            let temp = tempfile::tempdir().unwrap();
+            let mut c = cfg(temp.path());
+            c.pool_idle_days = if whole_pool { 0 } else { 21 };
+            c.budget = if whole_pool { u64::MAX } else { 1 };
+            let dir = member(&c.cache_dir, "p", 0, now_ms(), 4000);
+            let pool_lock = dir.parent().unwrap().join("pool.lock");
+            let member_lock = dir.with_extension("lock");
+            drop(lock::lock(&pool_lock).unwrap());
+            drop(lock::lock(&member_lock).unwrap());
+            // Open before eviction, lock after it: deterministic stale-handle
+            // interleaving that catches replacement inodes without timing.
+            let handles: Vec<_> = [&pool_lock, &member_lock]
+                .iter()
+                .map(|p| {
+                    fs::OpenOptions::new()
+                        .read(true)
+                        .write(true)
+                        .open(p)
+                        .unwrap()
+                })
+                .collect();
+            let report = gc(&c, &Options::default());
+            assert_eq!(report.failed_deletions, 0, "{report:?}");
+            assert!(!dir.exists());
+            for (path, handle) in [&pool_lock, &member_lock].into_iter().zip(handles) {
+                handle.lock().unwrap();
+                let barrier = std::sync::Arc::new(std::sync::Barrier::new(2));
+                let ready = barrier.clone();
+                let path = path.clone();
+                let probe = std::thread::spawn(move || {
+                    ready.wait();
+                    lock::try_lock(&path).unwrap().is_none()
+                });
+                barrier.wait();
+                assert!(probe.join().unwrap(), "GC replaced a live lock identity");
+            }
+        }
+    }
+
+    #[test]
+    fn idle_pool_retirement_defers_to_an_active_leasing_section() {
+        let temp = tempfile::tempdir().unwrap();
+        let mut c = cfg(temp.path());
+        c.pool_idle_days = 0;
+        let dir = member(&c.cache_dir, "p", 0, now_ms(), 4000);
+        let leasing = lock::lock(&dir.parent().unwrap().join("pool.lock")).unwrap();
+        let report = gc(&c, &Options::default());
+        assert!(dir.exists(), "{report:?}");
+        drop(leasing);
+        gc(&c, &Options::default());
+        assert!(!dir.exists());
     }
 
     #[test]
