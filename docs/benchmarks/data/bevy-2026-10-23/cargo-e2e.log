@@ -16,4 +16,3 @@ naive shared CARGO_TARGET_DIR after the same edit prints: "greeting v1 (3 words)
 test two_worktrees_share_a_pool_member ... ok
 
 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.31s
-
