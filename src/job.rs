@@ -1026,9 +1026,11 @@ fn cargo_run(
         parsed,
         &dir,
         &art.linked,
-        &exe,
-        &pkg_id,
-        &manifest,
+        RunPackage {
+            exe: &exe,
+            id: &pkg_id,
+            manifest: &manifest,
+        },
     );
     cmd.env("BUILDQ_HELD", held_with("run"));
     let code =
@@ -1058,6 +1060,12 @@ fn build_dirs(exe: &Path) -> Vec<PathBuf> {
     vec![profile.join("deps"), profile.to_path_buf()]
 }
 
+struct RunPackage<'a> {
+    exe: &'a Path,
+    id: &'a str,
+    manifest: &'a str,
+}
+
 /// The environment `cargo run` would give the program.
 fn run_env(
     cmd: &mut Command,
@@ -1065,13 +1073,11 @@ fn run_env(
     parsed: &Parsed,
     dir: &Path,
     linked: &[PathBuf],
-    exe: &Path,
-    pkg_id: &str,
-    manifest: &str,
+    package: RunPackage<'_>,
 ) {
     let mut paths: Vec<PathBuf> = vec![dir.to_path_buf()];
     paths.extend(linked.iter().cloned());
-    paths.extend(build_dirs(exe));
+    paths.extend(build_dirs(package.exe));
     if let (Some(sr), Some(tc)) = (
         sysroot(real, parsed.toolchain.as_deref()),
         probe_toolchain(real, parsed.toolchain.as_deref()),
@@ -1094,13 +1100,13 @@ fn run_env(
     if let Ok(joined) = env::join_paths(paths) {
         cmd.env(var, joined);
     }
-    let manifest = PathBuf::from(manifest);
+    let manifest = PathBuf::from(package.manifest);
     if let Some(d) = manifest.parent() {
         cmd.env("CARGO_MANIFEST_DIR", d);
     }
     cmd.env("CARGO_MANIFEST_PATH", &manifest);
     cmd.env("CARGO", real);
-    let (name, version) = parse_package_id(pkg_id, &manifest);
+    let (name, version) = parse_package_id(package.id, &manifest);
     cmd.env("CARGO_PKG_NAME", name);
     cmd.env("CARGO_PKG_VERSION", &version);
     let mut parts = version.split(['.', '-']);
