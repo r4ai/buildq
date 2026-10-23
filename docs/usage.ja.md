@@ -41,6 +41,24 @@ rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を�
 ボリュームに適した値を設定する。`min_free = "0"` で保護を無効化できる。
 対象範囲と制限は [Free-Space Guard](architecture.ja.md#free-space-guard) を参照する。
 
+## Nested Cargo
+
+build script は、親のプール target を継承せずに別 Cargo ワークスペースの helper をビルドできる。
+通常の helper target はプール外に残る。
+見つかった既定ディレクトリは `cache ls` の外部容量として表示し、GC の対象にはしない。
+親の予算とリースで管理したい場合は、`OUT_DIR` 配下を明示する。
+
+```rust
+let target = std::path::PathBuf::from(std::env::var_os("OUT_DIR").unwrap())
+    .join("helper-target");
+let status = std::process::Command::new(std::env::var_os("CARGO").unwrap())
+    .args(["build", "--manifest-path", "helper/Cargo.toml", "--target-dir"])
+    .arg(target)
+    .status()
+    .unwrap();
+assert!(status.success());
+```
+
 ## Cache Budget
 
 `[cache] budget` はキャッシュの保持容量を制御する。実行中ビルドの最大サイズではない。

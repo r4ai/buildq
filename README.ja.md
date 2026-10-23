@@ -174,7 +174,7 @@ flowchart TD
     Lock --> Lease["差分が最小の target/ (m0) をリース"]
     Lease --> Diff["Git blob と m0.manifest を比較"]
     Diff --> Invalidate["変更クレートの .fingerprint/ を削除"]
-    Invalidate --> Build["CARGO_TARGET_DIR=m0 でビルド"]
+    Invalidate --> Build["割り当てた target/ でビルド"]
 ```
 
 1. **OS ファイルロックによるキュー**

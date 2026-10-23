@@ -165,12 +165,12 @@ pub fn scan_all(cfg: &Config, refresh: bool) -> Usage {
     u
 }
 
-/// The warning shown when pool + explicit target dirs no longer fit the budget.
+/// The warning shown when pool + external target dirs no longer fit the budget.
 pub fn external_warning(pool: u64, external: u64, budget: u64) -> Option<String> {
     (external > 0 && pool + external > budget).then(|| {
         format!(
-            "pool {} + explicit target dirs {} exceed the budget {}; \
-             gc cannot prune explicit target dirs: remove unused ones, \
+            "pool {} + external target dirs {} exceed the budget {}; \
+             gc cannot prune external target dirs: remove unused ones, \
              or set [cache] pool_explicit = true",
             human_bytes(pool),
             human_bytes(external),
@@ -935,7 +935,7 @@ pub fn render(u: &Usage) -> String {
     }
     if !u.external.is_empty() {
         s.push_str(&format!(
-            "explicit target dirs (not pooled, not pruned by gc): {}\n",
+            "external target dirs (not pooled, not pruned by gc): {}\n",
             human_bytes(u.external_total)
         ));
         for e in &u.external {

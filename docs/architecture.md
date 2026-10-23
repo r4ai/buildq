@@ -71,7 +71,26 @@ Nested calls using `BUILDQ_HELD` remain exempt.
 - **Deadlock prevention**
   - Active jobs export `BUILDQ_HELD=<classes held>` to child processes
   - Nested `buildq` or `cargo` shim calls seeing their class in `BUILDQ_HELD` bypass the queue
-  - Build scripts calling `cargo metadata` or tests invoking `cargo build` never deadlock
+  - Nested calls avoid re-entering a queue slot held by their ancestor
+
+### Nested Cargo
+
+Built-in compilation commands and clippy receive the pool target through
+`--target-dir`. buildq does not introduce an inherited `CARGO_TARGET_DIR` that
+would force a helper onto its parent's locked target. Separate helper workspaces
+use their normal targets, including further nested helpers. Explicit caller
+environment overrides retain their usual behavior.
+
+Existing default targets beside other Cargo.toml files in the source manifest
+are recorded as external storage. They remain outside the pool budget and GC
+never deletes them; arbitrary custom target paths from Cargo configuration are
+not inferred by this discovery. A helper can instead pass `--target-dir` under
+its parent's `OUT_DIR` to keep storage and lifetime inside the leased member.
+
+Custom Cargo plugins retain environment-based target scoping to preserve their
+CLI contracts. Helpers in those plugins must explicitly select an independent
+target. Recursively building the same workspace still has Cargo's own locking
+constraints; `BUILDQ_HELD` prevents queue reentry only.
 
 ### Process Tree & Signal Handling
 
@@ -94,7 +113,7 @@ $BUILDQ_CACHE/
   pools/<repo>-<hash(repo, toolchain)>/
     pool.json                 # Repository common git dir & toolchain (rustc -vV)
     pool.lock                 # Short critical section for leasing a member
-    m<i>/                     # Plain cargo target directory (CARGO_TARGET_DIR)
+    m<i>/                     # Plain cargo target directory (--target-dir)
     m<i>.lock                 # Exclusive lock held by the job using member i
     m<i>.json                 # Metadata: last use, last worktree, byte size, job count
     m<i>.manifest             # Map of relative file path -> git blob ID
@@ -136,7 +155,7 @@ sequenceDiagram
     BQ->>BQ: Map changed files to packages (Cargo.toml)
     BQ->>Mem: Delete .fingerprint/ for affected packages
     BQ->>Mem: Write new m0.manifest
-    BQ->>Cargo: Run cargo (CARGO_TARGET_DIR=m0)
+    BQ->>Cargo: Run cargo (--target-dir=m0)
 ```
 
 Before starting a build on member `m<i>`:

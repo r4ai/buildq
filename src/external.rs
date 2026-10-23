@@ -1,8 +1,8 @@
-//! Explicit target dirs that jobs used outside the pool (`--target-dir`,
-//! `CARGO_TARGET_DIR`). They are not pooled, so the disk budget cannot
+//! Target dirs observed outside the pool: explicit (`--target-dir`,
+//! `CARGO_TARGET_DIR`) and discovered helper-workspace defaults. The budget cannot
 //! cover them; buildq records them in `<cache dir>/external.json` so that
 //! `cache ls` and `gc` can show how much disk they hold. They are never
-//! deleted: the job chose the path.
+//! deleted: these paths belong to the project or caller.
 
 use std::collections::BTreeMap;
 use std::fs;

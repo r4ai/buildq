@@ -174,7 +174,7 @@ flowchart TD
     Lock --> Lease["Lease warm target/ member (m0)"]
     Lease --> Diff["Diff Git blobs vs m0.manifest"]
     Diff --> Invalidate["Delete .fingerprint/ of changed crates"]
-    Invalidate --> Build["Run cargo (CARGO_TARGET_DIR=m0)"]
+    Invalidate --> Build["Run cargo in the leased target/"]
 ```
 
 1. **OS File-Locked Queue**

@@ -275,7 +275,7 @@ fn main() -> ExitCode {
                 );
                 if r.external > 0 {
                     println!(
-                        "explicit target dirs outside the pool: {} (see `buildq cache ls`)",
+                        "external target dirs outside the pool: {} (see `buildq cache ls`)",
                         human_bytes(r.external)
                     );
                 }

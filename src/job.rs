@@ -331,7 +331,9 @@ fn with_toolchain(parsed: &Parsed, args: Vec<String>) -> Vec<String> {
 
 /// Environment every queued cargo job gets.
 fn cargo_env(cmd: &mut Command, cfg: &Config, parsed: &Parsed, target: Option<&Path>) {
-    if let Some(t) = target {
+    if let Some(t) = target
+        && !target_argument_supported(parsed)
+    {
         cmd.env("CARGO_TARGET_DIR", t);
     }
     let has_jobs = parsed
@@ -580,6 +582,32 @@ fn after_job(cfg: &Config, ctx: &mut PoolCtx, lease: &mut Lease, started_ms: u64
         eprintln!("buildq: warning: {warning}");
     }
     lease.finish();
+    // Separate helper workspaces use their normal targets. Surface discovered
+    // defaults as external storage; never silently delete a project's files.
+    let mut discovered = 0;
+    for manifest in ctx
+        .manifest
+        .keys()
+        .filter(|p| Path::new(p).file_name().is_some_and(|n| n == "Cargo.toml"))
+    {
+        let parent = Path::new(manifest).parent().unwrap_or(Path::new(""));
+        if parent.as_os_str().is_empty() || parent.components().any(|p| p.as_os_str() == "target") {
+            continue;
+        }
+        let target = ctx.wt.root.join(parent).join("target");
+        if target.is_dir() {
+            let target = crate::util::canonical(&target);
+            if !target.starts_with(&cfg.cache_dir) {
+                crate::external::record(cfg, &target, &ctx.wt.key());
+                discovered += 1;
+            }
+        }
+    }
+    if discovered > 0 {
+        note(&format!(
+            "observed {discovered} external default target dirs; outside the pool budget and GC (see `buildq cache ls`)"
+        ));
+    }
 }
 
 fn spawn_gc(cfg: &Config) {
@@ -672,12 +700,63 @@ fn opt_absent(p: &Parsed, name: &str) -> bool {
         .any(|a| a == name || a.starts_with(&format!("{name}=")))
 }
 
-/// Arguments for the real cargo plus the CARGO_TARGET_DIR to set.
-/// A `build.target-dir` from `--config`, or an explicit target dir pooled
-/// under `cache.pool_explicit`, is re-rooted into `<member>/sub/`.
-/// CARGO_TARGET_DIR outranks `--config` in cargo, so it carries the
-/// re-rooted dir too.
+fn target_argument_supported(parsed: &Parsed) -> bool {
+    matches!(
+        parsed.sub(),
+        Some(
+            "build"
+                | "check"
+                | "test"
+                | "run"
+                | "clippy"
+                | "bench"
+                | "doc"
+                | "rustc"
+                | "rustdoc"
+                | "fix"
+                | "install"
+        )
+    )
+}
+
+/// Scope a pooled target to this Cargo invocation. An inherited environment
+/// override would force separate helper workspaces onto the parent's locked dir.
 fn cargo_args(
+    args: &[String],
+    parsed: &Parsed,
+    lease: Option<&Lease>,
+    ctx: Option<&PoolCtx>,
+) -> (Vec<String>, Option<PathBuf>) {
+    let (args, target) = pooled_args(args, parsed, lease, ctx);
+    let Some(target) = target
+        .as_ref()
+        .filter(|_| target_argument_supported(parsed))
+    else {
+        return (args, target);
+    };
+    let mut scoped = Vec::new();
+    let mut iter = args.into_iter();
+    let mut trailing = Vec::new();
+    while let Some(arg) = iter.next() {
+        if arg == "--" {
+            trailing.push(arg);
+            trailing.extend(iter);
+            break;
+        }
+        if arg == "--target-dir" {
+            iter.next();
+        } else if !arg.starts_with("--target-dir=") {
+            scoped.push(arg);
+        }
+    }
+    scoped.push(format!("--target-dir={}", target.display()));
+    scoped.extend(trailing);
+    (scoped, Some(target.clone()))
+}
+
+/// Re-root explicit/configured targets into a leased member. Custom Cargo
+/// plugins retain the environment override because their CLI syntax varies.
+fn pooled_args(
     args: &[String],
     parsed: &Parsed,
     lease: Option<&Lease>,
