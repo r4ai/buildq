@@ -723,6 +723,163 @@ fn a_real_cargo_target_fitting_the_disk_budget_stays_warm_after_gc() {
     );
 }
 
+#[test]
+fn project_cache_clean_is_explicit_scoped_and_respects_live_leases() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(temp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='clean-app'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            ("src/main.rs", "fn main(){}"),
+            (".gitignore", "target/\n"),
+        ],
+    );
+    let ws = root.join("ws");
+    assert!(
+        Command::new(&w.real_cargo)
+            .args(["generate-lockfile", "--offline"])
+            .current_dir(&ws)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "."]);
+    git(&ws, &["commit", "-qm", "fixture"]);
+    w.cargo(&ws, &["build", "--offline"]);
+    let pool = fs::read_dir(root.join("cache/pools"))
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap()
+        .path();
+    let (local_clean, _) = w.cargo(&ws, &["clean", "--offline"]);
+    assert!(String::from_utf8_lossy(&local_clean.stderr).contains("pooled caches are unchanged"));
+    assert!(pool.join("m0").exists());
+    assert_eq!(
+        compiled(&w.cargo(&ws, &["build", "--offline", "--verbose"]).0),
+        0
+    );
+    let command = || {
+        let mut c = Command::new(BQ);
+        c.current_dir(&ws)
+            .env("BUILDQ_DIR", root.join("q"))
+            .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+            .env("BUILDQ_CACHE", root.join("cache"))
+            .env("BUILDQ_GC", "0")
+            .env("PATH", &w.path)
+            .env_remove("BUILDQ_HELD")
+            .env_remove("CARGO_TARGET_DIR");
+        c
+    };
+    let other = root.join("other");
+    fs::create_dir_all(other.join("src")).unwrap();
+    fs::write(
+        other.join("Cargo.toml"),
+        "[package]\nname='other-app'\nversion='0.1.0'\nedition='2021'\n",
+    )
+    .unwrap();
+    fs::write(other.join("src/main.rs"), "fn main(){}").unwrap();
+    git(&other, &["init", "-q"]);
+    git(&other, &["add", "."]);
+    git(&other, &["commit", "-qm", "fixture"]);
+    assert!(
+        command()
+            .current_dir(&other)
+            .args(["cargo", "build", "--offline"])
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    let other_pool = fs::read_dir(root.join("cache/pools"))
+        .unwrap()
+        .map(|e| e.unwrap().path())
+        .find(|p| p != &pool)
+        .unwrap();
+    fs::create_dir_all(root.join("cache/runs/r9")).unwrap();
+    fs::write(root.join("cache/runs/r9/copied-app"), "keep").unwrap();
+    let held = buildq::lock::lock(&pool.join("m0.lock")).unwrap();
+    let busy = command()
+        .args(["cache", "clean", "--json"])
+        .output()
+        .unwrap();
+    assert_eq!(busy.status.code(), Some(1));
+    assert!(pool.join("m0").exists());
+    let unsafe_direct = command()
+        .args(["cargo", "clean", "--target-dir"])
+        .arg(pool.join("m0"))
+        .output()
+        .unwrap();
+    assert_eq!(unsafe_direct.status.code(), Some(125));
+    assert!(pool.join("m0").exists());
+    fs::create_dir_all(ws.join(".cargo")).unwrap();
+    fs::write(
+        ws.join(".cargo/config.toml"),
+        format!(
+            "[build]\ntarget-dir={}\n",
+            serde_json::to_string(&pool.join("m0").to_string_lossy()).unwrap()
+        ),
+    )
+    .unwrap();
+    assert_eq!(
+        command()
+            .args(["cargo", "clean"])
+            .output()
+            .unwrap()
+            .status
+            .code(),
+        Some(125)
+    );
+    let explicit_local = command()
+        .args(["cargo", "clean", "--target-dir"])
+        .arg(root.join("local-only"))
+        .output()
+        .unwrap();
+    assert!(
+        explicit_local.status.success(),
+        "{}",
+        String::from_utf8_lossy(&explicit_local.stderr)
+    );
+    assert!(pool.join("m0").exists());
+    fs::remove_file(ws.join(".cargo/config.toml")).unwrap();
+    drop(held);
+    let preview = command()
+        .args(["cache", "clean", "--dry-run", "--json"])
+        .output()
+        .unwrap();
+    assert!(
+        preview.status.success(),
+        "{}",
+        String::from_utf8_lossy(&preview.stderr)
+    );
+    let preview: serde_json::Value = serde_json::from_slice(&preview.stdout).unwrap();
+    assert!(preview["freed"].as_u64().unwrap() > 0);
+    assert!(pool.join("m0").exists());
+    let actual = command()
+        .args(["cache", "clean", "--json"])
+        .output()
+        .unwrap();
+    assert!(
+        actual.status.success(),
+        "{}",
+        String::from_utf8_lossy(&actual.stderr)
+    );
+    let actual: serde_json::Value = serde_json::from_slice(&actual.stdout).unwrap();
+    assert_eq!(actual["freed"], preview["freed"]);
+    assert!(!pool.join("m0").exists());
+    assert!(pool.join("m0.lock").exists());
+    assert!(pool.join("pool.lock").exists());
+    assert!(other_pool.join("m0").exists());
+    assert!(root.join("cache/runs/r9/copied-app").exists());
+    assert!(compiled(&w.cargo(&ws, &["build", "--offline", "--verbose"]).0) > 0);
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     fs::create_dir_all(to).unwrap();
     for e in fs::read_dir(from).unwrap().flatten() {

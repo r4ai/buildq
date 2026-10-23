@@ -118,6 +118,13 @@ enum Cmd {
 
 #[derive(Subcommand)]
 enum CacheCmd {
+    /// Remove idle pooled targets for this Git repository (all worktrees/toolchains).
+    Clean {
+        #[arg(long)]
+        dry_run: bool,
+        #[arg(long)]
+        json: bool,
+    },
     /// Pools, members and sizes.
     Ls {
         #[arg(long)]
@@ -234,6 +241,28 @@ fn main() -> ExitCode {
             }
             ExitCode::SUCCESS
         }
+        Cmd::Cache {
+            cmd: CacheCmd::Clean { dry_run, json },
+        } => {
+            let directory = match std::env::current_dir() {
+                Ok(dir) => dir,
+                Err(error) => {
+                    eprintln!("buildq: {error}");
+                    return ExitCode::from(125);
+                }
+            };
+            let Some(repo) = buildq::git::discover(&directory) else {
+                eprintln!("buildq: cache clean requires a Git repository");
+                return ExitCode::from(125);
+            };
+            let report = gc::clean_repo(&cfg, &repo.repo_key(), dry_run);
+            let status = print_gc_report(&report, dry_run, json, false);
+            if report.skipped.is_some() {
+                ExitCode::from(1)
+            } else {
+                status
+            }
+        }
         Cmd::Gc {
             dry_run,
             budget,
@@ -256,39 +285,7 @@ fn main() -> ExitCode {
                     auto,
                 },
             );
-            if json {
-                println!("{}", serde_json::to_string_pretty(&r).unwrap());
-            } else if !auto {
-                println!("accounting: {}", r.accounting.name());
-                if let Some(s) = &r.skipped {
-                    println!("skipped: {s}");
-                }
-                for a in &r.actions {
-                    println!("{}{a}", if dry_run { "would " } else { "" });
-                }
-                println!(
-                    "{} {}; cache {} -> {} (budget {})",
-                    if dry_run { "would free" } else { "freed" },
-                    human_bytes(r.freed),
-                    human_bytes(r.before),
-                    human_bytes(r.after),
-                    human_bytes(r.effective_budget)
-                );
-                if r.external > 0 {
-                    println!(
-                        "external target dirs outside the pool: {} (see `buildq cache ls`)",
-                        human_bytes(r.external)
-                    );
-                }
-                for w in &r.warnings {
-                    println!("warning: {w}");
-                }
-            }
-            if r.failed_deletions > 0 {
-                ExitCode::from(1)
-            } else {
-                ExitCode::SUCCESS
-            }
+            print_gc_report(&r, dry_run, json, auto)
         }
         Cmd::Shim {
             cmd: ShimCmd::Install { tool, into, sh },
@@ -320,6 +317,42 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Cmd::Helper { args } => helper(&args),
+    }
+}
+
+fn print_gc_report(r: &gc::Report, dry_run: bool, json: bool, auto: bool) -> ExitCode {
+    if json {
+        println!("{}", serde_json::to_string_pretty(r).unwrap());
+    } else if !auto {
+        println!("accounting: {}", r.accounting.name());
+        if let Some(s) = &r.skipped {
+            println!("skipped: {s}");
+        }
+        for a in &r.actions {
+            println!("{}{a}", if dry_run { "would " } else { "" });
+        }
+        println!(
+            "{} {}; cache {} -> {} (budget {})",
+            if dry_run { "would free" } else { "freed" },
+            human_bytes(r.freed),
+            human_bytes(r.before),
+            human_bytes(r.after),
+            human_bytes(r.effective_budget)
+        );
+        if r.external > 0 {
+            println!(
+                "external target dirs outside the pool: {} (see `buildq cache ls`)",
+                human_bytes(r.external)
+            );
+        }
+        for w in &r.warnings {
+            println!("warning: {w}");
+        }
+    }
+    if r.failed_deletions > 0 {
+        ExitCode::from(1)
+    } else {
+        ExitCode::SUCCESS
     }
 }
 

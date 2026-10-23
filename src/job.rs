@@ -636,6 +636,36 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     let here = cwd();
     let aliases = cargo::load_aliases(&here);
     let parsed = cargo::parse(args, &aliases);
+    if parsed.sub() == Some("clean") && !parsed.wants_help() {
+        let directory = parsed
+            .opt(&["--manifest-path"])
+            .and_then(|p| {
+                Path::new(&p)
+                    .parent()
+                    .map(|p| crate::util::resolve(&here, p))
+            })
+            .unwrap_or_else(|| here.clone());
+        let configured = crate::cargo_config::target_directory(&here, &parsed)?;
+        let candidates = configured.map(|path| vec![path]).unwrap_or_else(|| {
+            directory
+                .ancestors()
+                .filter(|dir| dir.join("Cargo.toml").is_file())
+                .map(|dir| crate::util::canonical(&dir.join("target")))
+                .collect()
+        });
+        let cache = crate::util::canonical(&cfg.cache_dir);
+        if candidates
+            .iter()
+            .any(|target| target.starts_with(&cache) || cache.starts_with(target))
+        {
+            return Err("refusing cargo clean on a path overlapping managed cache storage; use `buildq cache clean` to respect live leases".into());
+        }
+        if cfg.pool && git::discover(&directory).is_some() {
+            note(
+                "cargo clean affects only Cargo's selected local/explicit target; pooled caches are unchanged. Use `buildq cache clean` from the intended Git repository to remove its idle pooled targets",
+            );
+        }
+    }
     if cargo::route(&parsed, &|s| cfg.is_heavy(s)) == Route::Passthrough {
         return passthrough(args);
     }
