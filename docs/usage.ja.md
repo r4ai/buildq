@@ -61,6 +61,12 @@ assert!(status.success());
 
 ## Cache Budget
 
+デフォルトの `accounting = "allocated"` は、ファイルの割り当て量を使う。
+メンバー・実行用コピー・ゴミ箱の各項目内でハードリンクの重複を除き、スパース領域は含めない。
+重複を除いたファイル長で制限したい場合は `[cache] accounting = "logical"` を指定する。
+`cache ls`・`gc`・`top`・`config` で集計基準を確認でき、JSON には `accounting` を含める。
+ディレクトリのメタデータは含めず、別項目にまたがる共有領域は保守的に計上する。
+
 `[cache] budget` はキャッシュの保持容量を制御する。実行中ビルドの最大サイズではない。
 使用中の成果物は保護する。
 残っている超過量と理由は `buildq cache ls --refresh` または `buildq gc --json` で確認できる。

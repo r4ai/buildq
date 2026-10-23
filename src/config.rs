@@ -35,6 +35,23 @@ pub struct FileConfig {
     pub auto_hosts: Option<Vec<String>>,
 }
 
+#[derive(Debug, Default, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum CacheAccounting {
+    #[default]
+    Allocated,
+    Logical,
+}
+
+impl CacheAccounting {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Allocated => "allocated",
+            Self::Logical => "logical",
+        }
+    }
+}
+
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 #[serde(default, deny_unknown_fields)]
 pub struct CacheFile {
@@ -49,6 +66,8 @@ pub struct CacheFile {
     pub max_members: Option<usize>,
     /// Upper bound for everything under the pool root, e.g. "60G".
     pub budget: Option<String>,
+    /// Deduplicated file allocation (default) or logical lengths.
+    pub accounting: CacheAccounting,
     /// Keep at least this much free on the volume, e.g. "25G".
     pub min_free: Option<String>,
     /// Delete incremental crate dirs not touched for this many days (default 3).
@@ -135,6 +154,7 @@ pub struct Config {
     pub pool_explicit: bool,
     pub max_members: usize,
     pub budget: u64,
+    pub accounting: CacheAccounting,
     pub min_free: u64,
     pub incremental_days: u64,
     pub stale_unit_days: u64,
@@ -258,6 +278,7 @@ impl Config {
                 .unwrap_or(false),
             max_members: f.cache.max_members.unwrap_or(slots + 1).max(slots),
             budget,
+            accounting: f.cache.accounting,
             min_free,
             incremental_days: f.cache.incremental_days.unwrap_or(3),
             stale_unit_days: f.cache.stale_unit_days.unwrap_or(14),
@@ -350,6 +371,7 @@ pub fn describe(cfg: &Config) -> String {
             crate::util::human_bytes(cfg.min_free)
         ),
     );
+    p(&mut s, "cache accounting", cfg.accounting.name().into());
     p(&mut s, "rustc wrapper", format!("{:?}", cfg.wrapper));
     p(
         &mut s,

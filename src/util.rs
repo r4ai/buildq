@@ -87,31 +87,136 @@ pub fn parse_size(s: &str) -> Option<u64> {
     Some((v * mult as f64) as u64)
 }
 
-/// Total size of regular files below `path` (symlinks are not followed).
+/// Logical lengths, deduplicated by file identity within the tree.
 pub fn dir_size(path: &Path) -> u64 {
-    let mut total = 0;
-    walk(path, &mut |_, md| total += md.len());
-    total
+    dir_size_for(path, crate::config::CacheAccounting::Logical)
 }
 
-/// Strict size measurement for reclamation accounting; symlinks are not followed.
+pub fn dir_size_for(path: &Path, mode: crate::config::CacheAccounting) -> u64 {
+    measure(
+        path,
+        mode,
+        &Default::default(),
+        false,
+        &mut Default::default(),
+    )
+    .unwrap_or(0)
+}
+
+/// Strict logical measurement; symlinks are not followed.
 pub fn path_size(path: &Path) -> io::Result<u64> {
+    size_for(path, crate::config::CacheAccounting::Logical)
+}
+
+pub fn size_for(path: &Path, mode: crate::config::CacheAccounting) -> io::Result<u64> {
+    size_excluding(path, mode, &Default::default())
+}
+
+pub fn size_excluding(
+    path: &Path,
+    mode: crate::config::CacheAccounting,
+    excluded: &std::collections::BTreeSet<PathBuf>,
+) -> io::Result<u64> {
+    measure(path, mode, excluded, true, &mut Default::default())
+}
+
+fn measure(
+    path: &Path,
+    mode: crate::config::CacheAccounting,
+    excluded: &std::collections::BTreeSet<PathBuf>,
+    strict: bool,
+    seen: &mut std::collections::BTreeSet<(u64, u64)>,
+) -> io::Result<u64> {
+    if excluded.contains(path) {
+        return Ok(0);
+    }
     let md = match fs::symlink_metadata(path) {
         Ok(md) => md,
-        Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(0),
+        Err(e) if !strict || e.kind() == io::ErrorKind::NotFound => return Ok(0),
         Err(e) => return Err(e),
     };
     if md.is_file() {
-        return Ok(md.len());
+        return match file_footprint(path, &md, mode) {
+            Ok((id, bytes)) => Ok(if seen.insert(id) { bytes } else { 0 }),
+            Err(_) if !strict => Ok(md.len()),
+            Err(e) => Err(e),
+        };
     }
     if !md.is_dir() {
         return Ok(0);
     }
-    let mut size: u64 = 0;
-    for entry in fs::read_dir(path)? {
-        size = size.saturating_add(path_size(&entry?.path())?);
+    let entries = match fs::read_dir(path) {
+        Ok(entries) => entries,
+        Err(_) if !strict => return Ok(0),
+        Err(e) => return Err(e),
+    };
+    let mut total = 0u64;
+    for entry in entries {
+        match entry {
+            Ok(entry) => {
+                total = total.saturating_add(measure(&entry.path(), mode, excluded, strict, seen)?)
+            }
+            Err(e) if strict => return Err(e),
+            Err(_) => {}
+        }
     }
-    Ok(size)
+    Ok(total)
+}
+
+#[cfg(unix)]
+fn file_footprint(
+    _path: &Path,
+    md: &fs::Metadata,
+    mode: crate::config::CacheAccounting,
+) -> io::Result<((u64, u64), u64)> {
+    use std::os::unix::fs::MetadataExt;
+    let bytes = match mode {
+        crate::config::CacheAccounting::Logical => md.len(),
+        crate::config::CacheAccounting::Allocated => md.blocks().saturating_mul(512),
+    };
+    Ok(((md.dev(), md.ino()), bytes))
+}
+
+#[cfg(windows)]
+fn file_footprint(
+    path: &Path,
+    md: &fs::Metadata,
+    mode: crate::config::CacheAccounting,
+) -> io::Result<((u64, u64), u64)> {
+    use std::os::windows::io::AsRawHandle;
+    use windows_sys::Win32::Storage::FileSystem::{
+        BY_HANDLE_FILE_INFORMATION, FILE_STANDARD_INFO, FileStandardInfo,
+        GetFileInformationByHandle, GetFileInformationByHandleEx,
+    };
+    let file = fs::File::open(path)?;
+    let mut info: BY_HANDLE_FILE_INFORMATION = unsafe { std::mem::zeroed() };
+    if unsafe { GetFileInformationByHandle(file.as_raw_handle(), &mut info) } == 0 {
+        return Err(io::Error::last_os_error());
+    }
+    let id = (
+        u64::from(info.dwVolumeSerialNumber),
+        (u64::from(info.nFileIndexHigh) << 32) | u64::from(info.nFileIndexLow),
+    );
+    let bytes = match mode {
+        crate::config::CacheAccounting::Logical => md.len(),
+        crate::config::CacheAccounting::Allocated => {
+            let mut standard: FILE_STANDARD_INFO = unsafe { std::mem::zeroed() };
+            if unsafe {
+                GetFileInformationByHandleEx(
+                    file.as_raw_handle(),
+                    FileStandardInfo,
+                    (&mut standard as *mut FILE_STANDARD_INFO).cast(),
+                    u32::try_from(std::mem::size_of::<FILE_STANDARD_INFO>()).unwrap(),
+                )
+            } == 0
+            {
+                return Err(io::Error::last_os_error());
+            }
+            u64::try_from(standard.AllocationSize)
+                .map_err(|_| io::Error::other("negative file allocation size"))?
+        }
+    };
+    Ok((id, bytes))
 }
 
 /// Calls `f` for every regular file below `path`, without following symlinks.
@@ -344,6 +449,34 @@ fn platform_free(path: &Path) -> Option<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn hardlinks_are_counted_once_per_tree() {
+        let temp = tempfile::tempdir().unwrap();
+        let dir = temp.path();
+        fs::create_dir(dir.join("deps")).unwrap();
+        let original = dir.join("deps/artifact");
+        fs::write(&original, vec![0u8; 4096]).unwrap();
+        fs::hard_link(&original, dir.join("app")).unwrap();
+        assert_eq!(path_size(dir).unwrap(), 4096);
+        assert_eq!(dir_size(dir), 4096);
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn sparse_file_allocation_is_distinct_from_logical_length() {
+        let temp = tempfile::tempdir().unwrap();
+        let path = temp.path().join("sparse");
+        fs::File::create(&path)
+            .unwrap()
+            .set_len(64 * 1024 * 1024)
+            .unwrap();
+        assert_eq!(path_size(&path).unwrap(), 64 * 1024 * 1024);
+        assert!(
+            size_for(&path, crate::config::CacheAccounting::Allocated).unwrap()
+                < path_size(&path).unwrap()
+        );
+    }
 
     #[test]
     fn sizes_parse() {

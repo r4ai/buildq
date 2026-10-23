@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
 use crate::lock;
-use crate::util::{dir_size, norm_key, now_ms, read_json, write_json};
+use crate::util::{norm_key, now_ms, read_json, write_json};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
@@ -24,6 +24,7 @@ pub struct ExternalDir {
     pub jobs: u64,
     pub size_bytes: u64,
     pub size_ms: u64,
+    pub size_accounting: Option<crate::config::CacheAccounting>,
 }
 
 type Registry = BTreeMap<String, ExternalDir>;
@@ -63,7 +64,12 @@ pub fn scan(cfg: &Config, refresh: bool) -> Vec<ExternalDir> {
     let stale: Vec<ExternalDir> = with_registry(cfg, |reg| {
         reg.retain(|_, e| e.path.is_dir());
         reg.values()
-            .filter(|e| refresh || e.size_ms == 0 || e.size_ms < e.last_used_ms)
+            .filter(|e| {
+                refresh
+                    || e.size_accounting != Some(cfg.accounting)
+                    || e.size_ms == 0
+                    || e.size_ms < e.last_used_ms
+            })
             .cloned()
             .collect()
     })
@@ -71,13 +77,20 @@ pub fn scan(cfg: &Config, refresh: bool) -> Vec<ExternalDir> {
     // Measured without the lock: a big dir takes a while, and jobs record meanwhile.
     let measured: Vec<(String, u64, u64)> = stale
         .iter()
-        .map(|e| (norm_key(&e.path), now_ms(), dir_size(&e.path)))
+        .map(|e| {
+            (
+                norm_key(&e.path),
+                now_ms(),
+                crate::util::dir_size_for(&e.path, cfg.accounting),
+            )
+        })
         .collect();
     let mut out = with_registry(cfg, |reg| {
         for (k, at, size) in measured {
             if let Some(e) = reg.get_mut(&k) {
                 e.size_bytes = size;
                 e.size_ms = at;
+                e.size_accounting = Some(cfg.accounting);
             }
         }
         reg.values().cloned().collect::<Vec<_>>()

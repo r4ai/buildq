@@ -650,6 +650,79 @@ fn nested_helper_workspaces_do_not_inherit_the_parent_pool_target() {
     assert_eq!(usage["external"].as_array().unwrap().len(), 2, "{usage}");
 }
 
+#[test]
+#[cfg(unix)]
+fn a_real_cargo_target_fitting_the_disk_budget_stays_warm_after_gc() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(temp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='hardlink-app'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            ("src/main.rs", "fn main(){println!(\"ok\")}"),
+            (".gitignore", "target/\n"),
+        ],
+    );
+    let ws = root.join("ws");
+    assert!(
+        Command::new(&w.real_cargo)
+            .args(["generate-lockfile", "--offline"])
+            .current_dir(&ws)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "."]);
+    git(&ws, &["commit", "-qm", "fixture"]);
+    w.cargo(&ws, &["build", "--offline"]);
+    let pool = fs::read_dir(root.join("cache/pools"))
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap()
+        .path();
+    let member = pool.join("m0");
+    let du = Command::new("du").arg("-sk").arg(&member).output().unwrap();
+    assert!(du.status.success());
+    let allocated = String::from_utf8(du.stdout)
+        .unwrap()
+        .split_whitespace()
+        .next()
+        .unwrap()
+        .parse::<u64>()
+        .unwrap()
+        * 1024;
+    // du includes directory metadata; leave a small margin without allowing
+    // the old double-counted executable footprint to fit.
+    let budget = allocated + 1024 * 1024;
+    let gc = Command::new(BQ)
+        .args(["gc", "--json", "--budget"])
+        .arg(budget.to_string())
+        .env("BUILDQ_DIR", root.join("q"))
+        .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+        .env("BUILDQ_CACHE", root.join("cache"))
+        .output()
+        .unwrap();
+    assert!(gc.status.success());
+    let report: serde_json::Value = serde_json::from_slice(&gc.stdout).unwrap();
+    assert_eq!(report["accounting"], "allocated");
+    assert!(report["before"].as_u64().unwrap() <= allocated, "{report}");
+    assert_eq!(report["freed"], 0, "{report}");
+    assert!(member.exists());
+    let (warm, _) = w.cargo(&ws, &["build", "--offline", "--verbose"]);
+    assert_eq!(
+        compiled(&warm),
+        0,
+        "{}",
+        String::from_utf8_lossy(&warm.stderr)
+    );
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     fs::create_dir_all(to).unwrap();
     for e in fs::read_dir(from).unwrap().flatten() {

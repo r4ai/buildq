@@ -146,6 +146,8 @@ pub struct MemberMeta {
     pub size_bytes: u64,
     /// Measurement time, independent of last_used_ms (a build need not rescan).
     pub size_ms: u64,
+    /// Basis of the cached estimate; missing legacy estimates are refreshed.
+    pub size_accounting: Option<crate::config::CacheAccounting>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]

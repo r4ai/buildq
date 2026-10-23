@@ -19,7 +19,11 @@ impl Env {
         let dir = tempfile::tempdir().unwrap();
         let root = buildq::util::canonical(dir.path());
         fs::create_dir_all(root.join("q")).unwrap();
-        fs::write(root.join("q/config.toml"), "[cache]\nmin_free='0'\n").unwrap();
+        fs::write(
+            root.join("q/config.toml"),
+            "[cache]\nmin_free='0'\naccounting='logical'\n",
+        )
+        .unwrap();
         Env { _dir: dir, root }
     }
 
@@ -264,7 +268,7 @@ fn failed_gc_deletions_stay_counted_and_do_not_claim_reclamation() {
     fs::create_dir_all(e.root.join("q")).unwrap();
     fs::write(
         e.root.join("q/config.toml"),
-        "[cache]\nbudget='1M'\nmin_free='0'\n",
+        "[cache]\nbudget='1M'\nmin_free='0'\naccounting='logical'\n",
     )
     .unwrap();
     let member = e.root.join("cache/pools/p/m0");
