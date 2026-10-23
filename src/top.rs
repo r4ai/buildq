@@ -162,6 +162,9 @@ fn render(
             .map(human_bytes)
             .unwrap_or_else(|| "?".into())
     );
+    if let Some(warning) = usage.budget_warning() {
+        let _ = writeln!(out, "Warning: {warning}");
+    }
     if show_hosts {
         let _ = writeln!(out, "\nRemote hosts:");
         match hosts {

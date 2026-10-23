@@ -41,6 +41,20 @@ rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を�
 ボリュームに適した値を設定する。`min_free = "0"` で保護を無効化できる。
 対象範囲と制限は [Free-Space Guard](architecture.ja.md#free-space-guard) を参照する。
 
+## Cache Budget
+
+`[cache] budget` はキャッシュの保持容量を制御する。実行中ビルドの最大サイズではない。
+使用中の成果物は保護する。
+残っている超過量と理由は `buildq cache ls --refresh` または `buildq gc --json` で確認できる。
+使用中の成果物を回収できない場合、GC は予算超過のまま成功終了する場合がある。
+
+完了メンバーが予算全体より大きい場合は、GC で回収されて次回もコールドビルドになる可能性を警告する。
+作業に必要なキャッシュを保持できるよう `budget` を増やすか、成果物を削減する。
+大きすぎる未使用メンバーにも保持の例外は設けない。
+別の `min_free` ガードはディスク圧迫時の開始拒否・停止を引き続き行う。
+`budget` を増やしても無効にはならない。
+詳細は [Disk Budget & Garbage Collection](architecture.ja.md#4-disk-budget--garbage-collection) を参照する。
+
 ## Live Monitoring
 
 `buildq top` は実行中ジョブ、待機列と待機時間、リモートの待機列、ターゲットプール容量を1秒ごとに更新する。

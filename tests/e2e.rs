@@ -89,6 +89,59 @@ fn pooled_builds_refuse_an_unavailable_reserve_and_retry_cleanly() {
     }
 }
 
+#[test]
+fn oversized_builds_warn_before_gc_discards_their_reusable_artifacts() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(temp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='oversized-app'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            ("src/main.rs", "fn main() { println!(\"oversized-ok\"); }\n"),
+            (
+                "build.rs",
+                r#"fn main() {
+            std::fs::write(std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("large"), vec![0u8; 2*1024*1024]).unwrap();
+            println!("cargo:rerun-if-changed=build.rs");
+        }"#,
+            ),
+        ],
+    );
+    let ws = root.join("ws");
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "."]);
+    git(&ws, &["commit", "-qm", "fixture"]);
+    fs::create_dir_all(root.join("q")).unwrap();
+    fs::write(
+        root.join("q/config.toml"),
+        "slots=1\n[cargo]\nmirror_bins=false\n[cache]\nbudget='1M'\nmin_free='0'\n",
+    )
+    .unwrap();
+    for sub in ["build", "run"] {
+        let (out, _) = w.cargo(&ws, &[sub, "--offline"]);
+        let err = String::from_utf8_lossy(&out.stderr);
+        assert!(err.contains("exceeds the entire cache budget"), "{err}");
+        assert!(err.contains("next build will be cold"), "{err}");
+        if sub == "run" {
+            assert_eq!(stdout(&out), "oversized-ok");
+        }
+        let gc = Command::new(BQ)
+            .args(["gc", "--auto", "--json"])
+            .env("BUILDQ_DIR", root.join("q"))
+            .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+            .env("BUILDQ_CACHE", root.join("cache"))
+            .output()
+            .unwrap();
+        assert!(gc.status.success());
+        let report: serde_json::Value = serde_json::from_slice(&gc.stdout).unwrap();
+        assert_eq!(report["after"], 0, "{report}");
+        assert_eq!(report["over_budget"], false);
+    }
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     fs::create_dir_all(to).unwrap();
     for e in fs::read_dir(from).unwrap().flatten() {
