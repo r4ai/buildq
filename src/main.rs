@@ -10,6 +10,27 @@ use buildq::queue::ClassStatus;
 use buildq::util::{ago, duration_str, human_bytes, now_ms, parse_size};
 use buildq::{gc, history, remote, shim};
 
+// Unlike std's print macros, CLI output treats a closed consumer as success.
+macro_rules! print {
+    ($($arg:tt)*) => { write_stdout(format_args!($($arg)*)) };
+}
+
+macro_rules! println {
+    ($($arg:tt)*) => { write_stdout(format_args!("{}\n", format_args!($($arg)*))) };
+}
+
+fn write_stdout(args: std::fmt::Arguments<'_>) {
+    use std::io::Write;
+    let mut out = std::io::stdout().lock();
+    if let Err(error) = out.write_fmt(args).and_then(|()| out.flush()) {
+        if error.kind() == std::io::ErrorKind::BrokenPipe {
+            std::process::exit(0);
+        }
+        eprintln!("buildq: stdout: {error}");
+        std::process::exit(1);
+    }
+}
+
 #[derive(Parser)]
 #[command(
     name = "buildq",

@@ -1257,3 +1257,47 @@ fn top_refreshes_and_validates_options() {
         assert_eq!(e.cmd(1).args(args).output().unwrap().status.code(), Some(2));
     }
 }
+
+#[cfg(unix)]
+#[test]
+fn output_commands_exit_quietly_when_stdout_pipe_is_closed() {
+    use std::os::fd::{FromRawFd, OwnedFd};
+    let e = Env::new();
+    for args in [
+        vec!["status"],
+        vec!["status", "--json"],
+        vec!["history"],
+        vec!["history", "--json"],
+        vec!["cache", "ls"],
+        vec!["cache", "ls", "--json"],
+        vec!["gc", "--dry-run"],
+        vec!["gc", "--dry-run", "--json"],
+        vec!["config"],
+        vec!["top", "--once", "--no-hosts"],
+        vec!["--help"],
+        vec!["--version"],
+        vec![
+            "shim",
+            "install",
+            "cargo",
+            "--into",
+            e.root.to_str().unwrap(),
+        ],
+    ] {
+        let mut fds = [-1; 2];
+        // SAFETY: pipe initializes two owned descriptors on success.
+        assert_eq!(unsafe { libc::pipe(fds.as_mut_ptr()) }, 0);
+        // SAFETY: each descriptor is transferred exactly once.
+        let (reader, writer) =
+            unsafe { (OwnedFd::from_raw_fd(fds[0]), OwnedFd::from_raw_fd(fds[1])) };
+        drop(reader);
+        let out = e
+            .cmd(1)
+            .args(&args)
+            .stdout(Stdio::from(writer))
+            .output()
+            .unwrap();
+        assert!(out.status.success(), "{args:?}: {}", stderr(&out));
+        assert!(out.stderr.is_empty(), "{args:?}: {}", stderr(&out));
+    }
+}
