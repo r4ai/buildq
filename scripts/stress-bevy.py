@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os, pathlib, subprocess, json, runpy, time, concurrent.futures, psutil
 import argparse, shutil
-parser=argparse.ArgumentParser(description="Isolated Bevy 0.16.1 worktree, cache, concurrency and GC benchmark (Linux; psutil required).")
+parser=argparse.ArgumentParser(description="Isolated Bevy 0.16.1 worktree, cache and concurrency benchmark (Linux; psutil required).")
 parser.add_argument('--root',type=pathlib.Path,required=True,help='New output directory; needs roughly 12 GiB free')
 parser.add_argument('--buildq',type=pathlib.Path,required=True,help='Release buildq executable')
 options=parser.parse_args()
@@ -114,6 +114,6 @@ for i in range(10):
     run(f'shim-warm-{i}','wt4',['build','--offline','--locked'],False,shim_env)
 run('actual-shim-run','wt4',['run','--offline','--locked'],False,shim_env)
 assert (R/'logs/actual-shim-run.stdout').read_text().strip()=='version-A:entities=1'
-for command,name in [(['cache','ls','--refresh','--json'],'cache-before-gc'),(['history','-n','200','--json'],'history'),(['gc','--budget','1M','--dry-run','--json'],'gc-dry-run'),(['gc','--budget','1M','--json'],'gc-real'),(['cache','ls','--refresh','--json'],'cache-after-gc')]:
+for command,name in [(['cache','ls','--refresh','--json'],'cache-inventory'),(['history','-n','200','--json'],'history')]:
     (R/f'{name}.json').write_bytes(subprocess.check_output([BQ,*command],env=env))
 print(f'Results: {R}',flush=True)

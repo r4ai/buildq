@@ -1,6 +1,0 @@
-buildq: target wt1-126410f7/m0 (new member (full build))
-   Compiling proc-macro2 v1.0.107
-   Compiling unicode-ident v1.0.27
-   Compiling quote v1.0.47
-   Compiling cfg-if v1.0.5
-   Compiling serde_core v1.0.229

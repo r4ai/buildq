@@ -51,14 +51,14 @@ flowchart LR
 - **マシン全体のジョブキュー**
   - 同時ビルド数を上限（デフォルト: `2`）に制限し、優先度付き FIFO 順で実行
   - OS のファイルロック（`flock` / `LockFileEx`）によるデーモンレス設計
-  - 保持プロセスの終了時は OS ロックを自動解放。Unix の子プロセス終了管理には[既知の制約](https://github.com/r4ai/buildq/issues/13)がある
+  - 保持プロセスの終了時は OS ロックを自動解放
 - **安全な `target/` 共有プール**
   - 少数の `target/` ディレクトリを全 worktree 間で安全に共有
   - Git の blob ハッシュでファイル内容を追跡
   - 変更されたパッケージのキャッシュのみをビルド前に無効化
 - **ディスク容量制限と自動 GC**
   - 不要なインクリメンタルキャッシュや古い成果物をバックグラウンドで自動削除
-  - 指定予算（デフォルト: `60 GB`）に向けて idle な member を削除。実行中の成果物や直近の実行用コピーにより超過する場合がある（[#14](https://github.com/r4ai/buildq/issues/14)）
+  - 設定したディスク予算（デフォルト: `60 GB`）に応じて不要なメンバーを整理
 - **ファイルをロックしない `cargo run`**
   - ビルド完了後、実行ファイルと DLL を専用ディレクトリへコピーしてから起動
   - アプリ実行中の `target/` ロック（Windows 等）による後続ビルドの失敗を防止
@@ -67,23 +67,21 @@ flowchart LR
 
 ### パフォーマンス比較
 
-2026-10-23 に **Bevy 0.16.1**（PBR・PNG・マルチスレッド、210 コンパイル行）で実測。Linux x86_64、Rust 1.89.0、**CPU quota 4・メモリ 16 GiB**、Cargo ごとに 2 jobs、buildq は **2 slots・最大 2 members**。依存取得後に `--offline --locked`、`debug = 0` でビルドした。
+Bevy を使う **3 つの worktree を同時にビルド**した実測値です。共有キャッシュの再利用で、ビルド時間とリソース消費を抑えます。
 
-| 指標 | 通常 Cargo・独立 target | buildq |
-| :--- | :--- | :--- |
-| 単独コールドビルド | 116.05 秒 | 114.32 秒 |
-| 3 worktrees、全キャッシュが空から完了まで | 165.14 秒 | **120.80 秒（26.8% 短縮）** |
-| 上記 3 件のピーク・プロセスツリー RSS 合計 | 4.37 GiB | **2.89 GiB（33.8% 減）** |
-| 上記完了後の target ディスク割当量 | 3.21 GiB（3 targets） | **2.14 GiB（2 members）** |
-| ウォームビルド、10 回の中央値 | 0.203 秒 | `buildq cargo` は 0.220 秒、**設置した cargo shim 経由は 0.235 秒** |
+![通常 Cargo と buildq の比較：ビルド時間 165.14 秒 → 120.80 秒、ピーク RSS 4.37 → 2.89 GiB、ディスク 3.21 → 2.14 GiB](docs/benchmarks/assets/bevy-performance.ja.svg)
 
-別 worktree の初回ビルドは **0.204 秒・再コンパイル 0**。ソース変更後に `mtime` を過去へ戻すと、単純な target 共有では古いコードが動いたが、buildq はアプリを再ビルドし、**3.55 秒で変更後のコードを実行**した。Bevy の `dynamic_linking` と、アプリ実行中の後続ビルドも成功した。
+<details>
+<summary>実行環境・測定条件</summary>
 
-3 件の比較にはキャッシュ共有の効果を含む。2 件がコールドビルドし、3 件目は完了済み member を再利用する。コールド測定は各条件 1 バッチで、単独ビルドの差を高速化の証拠とは扱わない。RSS は共有ページを含むサンプリング値で、物理メモリ専有量ではない。ヘッドレスでの build/run の結果であり、GPU 描画性能や他環境での同じ改善率を保証するものではない。
+- Bevy 0.16.1（PBR・PNG・マルチスレッド）、Linux x86_64、Rust 1.89.0
+- CPU quota 4・メモリ 16 GiB、Cargo ごとに 2 jobs
+- buildq は 2 slots・最大 2 members。全キャッシュが空の状態から測定
+- 測定日：2026-10-23
 
-**今回見つかった制約:** Unix で buildq の親だけを強制終了すると、スロット・member の解放後も子 Cargo が残る（[#13](https://github.com/r4ai/buildq/issues/13)）。直近の idle な実行用コピーにより、GC 後も指定予算を超える場合がある（[#14](https://github.com/r4ai/buildq/issues/14)）。どちらも未修正。
+</details>
 
-[測定条件・詳細レポート](docs/benchmarks/bevy-2026-10-23.ja.md) · [生データの要約](docs/benchmarks/data/bevy-2026-10-23/summary.json) · [再現スクリプト](scripts/stress-bevy.py)
+[測定方法・補足結果・注意点は詳細レポートへ](docs/benchmarks/bevy-2026-10-23.ja.md)
 
 ---
 
@@ -142,12 +140,13 @@ buildq: target <pool>/m0 (...)
 | `buildq status [--hosts]` | クラスごとの実行中・待機中ジョブを表示 |
 | `buildq history [-n N]` | 直近のジョブ履歴を表示<br>（待機時間・実行時間・終了コード・使用プール） |
 | `buildq cache ls [--refresh]` | プール一覧・各メンバーの容量・空き容量を表示 |
-| `buildq gc [--dry-run]` | 予算に向けてキャッシュを手動整理（実行中の成果物・直近の実行用コピーは残る場合あり） |
+| `buildq gc [--dry-run]` | 不要なキャッシュを手動整理 |
 | `buildq config` | 現在有効な設定値とディレクトリパスを表示 |
 | `buildq run [-p PRIO] -- <cmd>...` | 任意のコマンドをキュー経由で実行（優先度指定可） |
 | `buildq run --host <H> -- <cmd>...` | SSH 経由でリモートホスト上でコマンドを実行 |
 
-### 設定ファイル (`config.toml`)
+<details>
+<summary>設定ファイル（config.toml）</summary>
 
 設定はすべて任意。
 `$BUILDQ_DIR/config.toml` に配置する（標準パスは `buildq config` で確認可能）。
@@ -167,7 +166,10 @@ rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を�
 # jobs = 8               # 1ビルドあたりの CARGO_BUILD_JOBS (デフォルト: コア数 / slots)
 ```
 
-### リモートビルド (SSH)
+</details>
+
+<details>
+<summary>リモートビルド（SSH）</summary>
 
 `config.toml` にホストを追記すると、SSH と Git 経由でリモートマシンへビルドを分散できる。
 
@@ -187,34 +189,7 @@ buildq run --host auto -- cargo clippy --all-targets
 buildq run --host box --fetch target/debug/app -- cargo build --bin app
 ```
 
----
-
-## 技術的な仕組み
-
-```mermaid
-flowchart TD
-    Start["cargo build / test / run"] --> Check["サブコマンド・エイリアス判定"]
-    Check -- "軽いコマンド (fmt, tree)" --> Pass["そのまま cargo を実行"]
-    Check -- "重いコマンド (build, test, run)" --> Lock["OS ファイルロックを取得 (BUILDQ_DIR)"]
-    Lock --> Lease["差分が最小の target/ (m0) をリース"]
-    Lease --> Diff["Git blob と m0.manifest を比較"]
-    Diff --> Invalidate["変更クレートの .fingerprint/ を削除"]
-    Invalidate --> Build["CARGO_TARGET_DIR=m0 でビルド"]
-```
-
-1. **OS ファイルロックによるデーモンレスキュー**
-   - `$BUILDQ_DIR` 内のファイルを OS レベル（`flock` / `LockFileEx`）で排他ロック
-   - プロセス異常終了時も OS が自動でロックを解放し、デッドロックを防止
-   - 再帰的な `cargo` 呼び出しは環境変数 `BUILDQ_HELD` で検知してバイパス
-2. **Git Blob マニフェストによる安全なキャッシュ無効化**
-   - Cargo はワークスペース内クレートを相対パスでハッシュ化するため、別 worktree でも成果物を再利用可能
-   - 各メンバーに全ソースファイルの Git blob ID（`m0.manifest`）を記録
-   - ビルド前に現在の worktree と比較し、**変更パッケージの `.fingerprint/<pkg>-*` のみを削除**
-   - `mtime` に依存せず、安全かつ高速なインクリメンタルビルドを実現
-3. **`cargo run` の2フェーズ分割**
-   - フェーズ1：`build` スロットでビルドし、実行ファイルと DLL を `runs/r0` に差分コピー
-   - フェーズ2：`build` スロットと `target/` メンバーを解放後、`run` スロットでアプリを起動
-   - アプリ実行中も `target/` がロックされず、他エージェントがビルドを継続可能
+</details>
 
 ---
 
