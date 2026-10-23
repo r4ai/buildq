@@ -852,3 +852,59 @@ fn pool_explicit_reroots_target_dirs_inside_the_worktree() {
     assert_eq!(line(&out, "TARGET="), "");
     assert!(stderr(&out).contains("not pooled"), "{}", stderr(&out));
 }
+
+#[test]
+fn cached_member_sizes_refresh_before_gc_budget_decisions() {
+    let e = Env::new();
+    let member = e.root.join("cache/pools/p/m0");
+    fs::create_dir_all(member.join("debug/deps")).unwrap();
+    let artifact = member.join("debug/deps/artifact");
+    fs::write(&artifact, vec![0; 1024]).unwrap();
+    buildq::util::write_json(
+        &member.with_extension("json"),
+        &buildq::pool::MemberMeta {
+            last_used_ms: buildq::util::now_ms(),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let usage = |refresh: bool| {
+        let mut cmd = e.cmd(1);
+        cmd.args(["cache", "ls", "--json"]);
+        if refresh {
+            cmd.arg("--refresh");
+        }
+        let out = cmd.output().unwrap();
+        assert!(out.status.success(), "{}", stderr(&out));
+        serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()["total"]
+            .as_u64()
+            .unwrap()
+    };
+    assert_eq!(usage(false), 1024);
+    fs::write(&artifact, vec![0; 2 * 1024 * 1024]).unwrap();
+    assert_eq!(usage(false), 1024);
+    assert_eq!(usage(true), 2 * 1024 * 1024);
+    fs::write(&artifact, vec![0; 1024]).unwrap();
+    // A cached overestimate must not evict a member that now fits the budget.
+    let out = e
+        .cmd(1)
+        .args(["gc", "--budget", "1M", "--json"])
+        .output()
+        .unwrap();
+    assert!(out.status.success(), "{}", stderr(&out));
+    let report: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(report["before"], 1024);
+    assert_eq!(report["after"], 1024);
+    assert!(member.exists());
+    // Conversely, an underestimate must not hide growth from eviction.
+    fs::write(&artifact, vec![0; 2 * 1024 * 1024]).unwrap();
+    let out = e
+        .cmd(1)
+        .args(["gc", "--budget", "1M", "--json"])
+        .output()
+        .unwrap();
+    assert!(out.status.success(), "{}", stderr(&out));
+    let report: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(report["after"], 0);
+    assert!(!member.exists());
+}

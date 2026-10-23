@@ -195,29 +195,7 @@ pub fn parse(args: &[String], aliases: &BTreeMap<String, Vec<String>>) -> Parsed
 /// precedence first: $CARGO_HOME/config.toml, then ancestors down to `cwd`.
 /// `CARGO_ALIAS_<NAME>` environment variables win.
 pub fn load_aliases(cwd: &Path) -> BTreeMap<String, Vec<String>> {
-    let mut files: Vec<PathBuf> = Vec::new();
-    let mut dir = Some(cwd);
-    while let Some(d) = dir {
-        for name in ["config.toml", "config"] {
-            let p = d.join(".cargo").join(name);
-            if p.is_file() {
-                files.push(p);
-                break;
-            }
-        }
-        dir = d.parent();
-    }
-    if let Some(home) = cargo_home() {
-        for name in ["config.toml", "config"] {
-            let p = home.join(name);
-            if p.is_file() {
-                if !files.iter().any(|f| crate::util::same_path(f, &p)) {
-                    files.push(p);
-                }
-                break;
-            }
-        }
-    }
+    let files = config_files(cwd);
     let mut out = BTreeMap::new();
     // `files` is deepest first; apply in reverse so deeper wins.
     for f in files.iter().rev() {
@@ -242,6 +220,34 @@ pub fn load_aliases(cwd: &Path) -> BTreeMap<String, Vec<String>> {
         }
     }
     out
+}
+
+/// Config discovery, deepest first; Cargo prefers the extensionless legacy file.
+pub(crate) fn config_files(cwd: &Path) -> Vec<PathBuf> {
+    let mut files: Vec<PathBuf> = Vec::new();
+    let mut dir = Some(cwd);
+    while let Some(d) = dir {
+        for name in ["config", "config.toml"] {
+            let p = d.join(".cargo").join(name);
+            if p.is_file() {
+                files.push(p);
+                break;
+            }
+        }
+        dir = d.parent();
+    }
+    if let Some(home) = cargo_home() {
+        for name in ["config", "config.toml"] {
+            let p = home.join(name);
+            if p.is_file() {
+                if !files.iter().any(|f| crate::util::same_path(f, &p)) {
+                    files.push(p);
+                }
+                break;
+            }
+        }
+    }
+    files
 }
 
 fn alias_words(v: &toml::Value) -> Option<Vec<String>> {

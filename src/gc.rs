@@ -30,6 +30,9 @@ use crate::util::{
 };
 
 const DAY_MS: u64 = 86_400_000;
+/// Estimates are shared by jobs and inspection processes, not process-local.
+/// A bounded lifetime also catches in-place writes (directory mtimes do not).
+const SIZE_CACHE_MS: u64 = 60_000;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct MemberEntry {
@@ -109,7 +112,8 @@ pub fn external_warning(pool: u64, external: u64, budget: u64) -> Option<String>
     })
 }
 
-/// Sizes come from member metadata unless `refresh` (or never measured).
+/// Reuse member size estimates for up to a minute, even across builds.
+/// `refresh` bypasses this cache; real GC passes always refresh before pruning.
 pub fn scan(cfg: &Config, refresh: bool) -> Usage {
     let mut pools = Vec::new();
     if let Ok(rd) = fs::read_dir(cfg.cache_dir.join("pools")) {
@@ -123,15 +127,25 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
             for id in pool::member_ids(&dir) {
                 let mdir = dir.join(format!("m{id}"));
                 let meta_path = dir.join(format!("m{id}.json"));
+                // Keep the lock through measurement and metadata publication:
+                // otherwise a finishing build can overwrite a refreshed size,
+                // or this scan can overwrite the build's newer job metadata.
+                let _member_lock = lock::try_lock(&dir.join(format!("m{id}.lock")))
+                    .ok()
+                    .flatten();
+                let busy = _member_lock.is_none();
                 let mut meta = read_json::<MemberMeta>(&meta_path).unwrap_or_default();
-                let busy = lock::is_held(&dir.join(format!("m{id}.lock")));
                 if refresh
-                    || (meta.size_ms == 0 && mdir.exists())
-                    || meta.size_ms < meta.last_used_ms && !busy
+                    || meta.size_ms == 0
+                    || (!busy && now_ms().saturating_sub(meta.size_ms) >= SIZE_CACHE_MS)
                 {
                     meta.size_bytes = dir_size(&mdir);
                     meta.size_ms = now_ms();
-                    let _ = write_json(&meta_path, &meta);
+                    // Busy sizes are transient estimates; never replace the
+                    // lease holder's metadata while it is updating the member.
+                    if !busy {
+                        let _ = write_json(&meta_path, &meta);
+                    }
                 }
                 members.push(MemberEntry {
                     id,
@@ -257,7 +271,9 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         }
     }
 
-    let usage = scan(&cfg, !opts.auto);
+    // The cheap auto-GC throttle above may use estimates. Once GC actually
+    // runs, refresh even in auto mode so eviction never uses stale sizes.
+    let usage = scan(&cfg, true);
     report.before = usage.total;
 
     // 2. inside idle members
@@ -685,6 +701,106 @@ mod tests {
         )
         .unwrap();
         md
+    }
+
+    #[test]
+    fn size_estimates_survive_builds_and_expire() {
+        let dir = tempfile::tempdir().unwrap();
+        let c = cfg(dir.path());
+        let md = member(&c.cache_dir, "p", 0, now_ms(), 100);
+        assert_eq!(scan(&c, false).total, 100);
+        let mp = md.with_extension("json");
+        let mut meta = read_json::<MemberMeta>(&mp).unwrap();
+        let measured = meta.size_ms;
+        // A completed build updates usage but should not force another walk.
+        meta.last_used_ms = measured + 1;
+        meta.jobs += 1;
+        write_json(&mp, &meta).unwrap();
+        file(&md.join("debug/new/nested/artifact"), 200, 0);
+        assert_eq!(scan(&c, false).total, 100);
+        assert_eq!(read_json::<MemberMeta>(&mp).unwrap().size_ms, measured);
+        meta.size_ms = now_ms() - SIZE_CACHE_MS - 1;
+        write_json(&mp, &meta).unwrap();
+        assert_eq!(scan(&c, false).total, 300);
+        // In-place growth and removal need no parent directory mtime change.
+        file(&md.join("debug/new/nested/artifact"), 400, 0);
+        assert_eq!(scan(&c, true).total, 500);
+        fs::remove_dir_all(md.join("debug/new")).unwrap();
+        assert_eq!(scan(&c, true).total, 100);
+    }
+
+    #[test]
+    fn scans_never_publish_metadata_for_a_busy_member() {
+        let dir = tempfile::tempdir().unwrap();
+        let c = cfg(dir.path());
+        let md = member(&c.cache_dir, "p", 0, now_ms(), 100);
+        let mp = md.with_extension("json");
+        let before = fs::read(&mp).unwrap();
+        let _lease = lock::try_lock(&md.with_extension("lock")).unwrap().unwrap();
+        for refresh in [false, true] {
+            let usage = scan(&c, refresh);
+            assert!(usage.pools[0].members[0].busy);
+            assert_eq!(usage.total, 100);
+            assert_eq!(fs::read(&mp).unwrap(), before);
+        }
+        drop(_lease);
+        scan(&c, false);
+        assert!(read_json::<MemberMeta>(&mp).unwrap().size_ms > 0);
+    }
+
+    #[test]
+    fn actual_auto_gc_refreshes_both_under_and_overestimates() {
+        for (cached, actual) in [(100, 4000), (4000, 100)] {
+            let dir = tempfile::tempdir().unwrap();
+            let mut c = cfg(dir.path());
+            c.budget = 1000;
+            let md = member(&c.cache_dir, "p", 0, now_ms(), cached);
+            assert_eq!(scan(&c, false).total, cached as u64);
+            file(
+                &md.join("debug/deps/libbig-0000000000000001.rlib"),
+                actual,
+                0,
+            );
+            assert_eq!(scan(&c, false).total, cached as u64);
+            let report = gc(
+                &c,
+                &Options {
+                    auto: true,
+                    ..Default::default()
+                },
+            );
+            assert!(report.skipped.is_none());
+            assert_eq!(report.before, actual as u64);
+            assert_eq!(md.exists(), actual <= 1000);
+            assert_eq!(report.after, if actual <= 1000 { actual as u64 } else { 0 });
+        }
+    }
+
+    #[test]
+    fn auto_gc_detects_growth_when_estimate_expires_despite_recent_gc() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut c = cfg(dir.path());
+        c.budget = 1000;
+        let md = member(&c.cache_dir, "p", 0, now_ms(), 100);
+        scan(&c, false);
+        fs::write(c.cache_dir.join("gc.stamp"), now_ms().to_string()).unwrap();
+        file(&md.join("debug/new-artifact"), 4000, 0);
+        let opts = Options {
+            auto: true,
+            ..Default::default()
+        };
+        // Auto-GC's cheap throttle may briefly defer enforcement while the
+        // estimate is young, but expiration must discover even nested growth.
+        assert!(gc(&c, &opts).skipped.is_some());
+        let mp = md.with_extension("json");
+        let mut meta = read_json::<MemberMeta>(&mp).unwrap();
+        meta.size_ms = now_ms() - SIZE_CACHE_MS - 1;
+        write_json(&mp, &meta).unwrap();
+        let report = gc(&c, &opts);
+        assert!(report.skipped.is_none());
+        assert_eq!(report.before, 4100);
+        assert_eq!(report.after, 0);
+        assert!(!md.exists());
     }
 
     #[test]

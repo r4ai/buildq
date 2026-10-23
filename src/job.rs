@@ -1054,6 +1054,7 @@ fn cargo_run(
     };
     let mut cmd = Command::new(&local);
     cmd.args(&trailing);
+    crate::cargo_config::apply_env(&mut cmd, &cwd(), parsed)?;
     run_env(
         &mut cmd,
         real,
@@ -1130,7 +1131,11 @@ fn run_env(
     } else {
         "LD_LIBRARY_PATH"
     };
-    if let Some(old) = env::var_os(var) {
+    let configured = cmd
+        .get_envs()
+        .find(|(key, _)| *key == var)
+        .and_then(|(_, value)| value.map(|v| v.to_os_string()));
+    if let Some(old) = configured.or_else(|| env::var_os(var)) {
         paths.extend(env::split_paths(&old));
     }
     if let Ok(joined) = env::join_paths(paths) {
