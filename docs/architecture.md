@@ -184,6 +184,12 @@ The lowest score wins:
 
 ## 3. Two-Phase `cargo run`
 
+Before compiling, Cargo metadata selects exactly one runnable package and
+target, respecting the invocation's default members, manifest, package, bin,
+example, and default-run settings. Ambiguous selections exit with code `101`
+before acquiring a build slot or launching an application. Artifact messages
+are accepted only for that package, target name, and target kind.
+
 On Windows, the OS locks running `.exe` files.
 Running a binary directly inside `m0/debug/app.exe` would cause subsequent builds in `m0` to fail.
 

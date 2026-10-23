@@ -782,7 +782,14 @@ struct Artifacts {
     linked: Vec<PathBuf>,
 }
 
-fn collect(line: &str, want: Option<&str>, art: &mut Artifacts) -> bool {
+#[derive(Debug, Clone)]
+struct RunTarget {
+    package: String,
+    name: String,
+    kind: &'static str,
+}
+
+fn collect(line: &str, want: Option<&RunTarget>, art: &mut Artifacts) -> bool {
     let Ok(v) = serde_json::from_str::<Value>(line) else {
         return false;
     };
@@ -814,7 +821,13 @@ fn collect(line: &str, want: Option<&str>, art: &mut Artifacts) -> bool {
                 let kinds = strs(&v["target"]["kind"]);
                 let name = v["target"]["name"].as_str().unwrap_or("");
                 let runnable = kinds.iter().any(|k| k == "bin" || k == "example");
-                if runnable && want.is_none_or(|w| w == name) {
+                if runnable
+                    && want.is_none_or(|w| {
+                        w.name == name
+                            && v["package_id"].as_str() == Some(w.package.as_str())
+                            && kinds.iter().any(|k| k == w.kind)
+                    })
+                {
                     art.exe = Some((
                         v["package_id"].as_str().unwrap_or("").to_string(),
                         v["manifest_path"].as_str().unwrap_or("").to_string(),
@@ -840,26 +853,30 @@ fn collect(line: &str, want: Option<&str>, art: &mut Artifacts) -> bool {
     true
 }
 
-/// Picks `--bin` the way `cargo run` would, so the build does not compile
-/// every binary of the package.
-fn pick_bin(real: &Path, parsed: &Parsed) -> Option<String> {
-    if parsed.opt(&["--bin"]).is_some() || parsed.opt(&["--example"]).is_some() {
-        return None;
-    }
-    let meta = workspace_metadata(real, parsed)?;
-    pick_bin_from_metadata(&meta, parsed)
+/// Resolve one package/target before building, never from artifact arrival order.
+fn pick_target(real: &Path, parsed: &Parsed) -> Result<RunTarget, String> {
+    let meta = metadata(real, parsed, false).ok_or("cannot resolve runnable Cargo target")?;
+    pick_target_from_metadata(&meta, parsed)
 }
 
 /// Offline, dependency-free workspace inspection; failure only loses a hint.
 fn workspace_metadata(real: &Path, parsed: &Parsed) -> Option<Value> {
+    metadata(real, parsed, true)
+}
+
+fn metadata(real: &Path, parsed: &Parsed, offline_hint: bool) -> Option<Value> {
     let mut c = Command::new(real);
     let mut args = vec![
         "metadata".to_string(),
         "--no-deps".into(),
         "--format-version".into(),
         "1".into(),
-        "--offline".into(),
     ];
+    for flag in ["--offline", "--locked", "--frozen"] {
+        if (flag == "--offline" && offline_hint) || parsed.has_flag(flag) {
+            args.push(flag.into());
+        }
+    }
     if let Some(m) = parsed.opt(&["--manifest-path"]) {
         args.push("--manifest-path".into());
         args.push(m);
@@ -876,7 +893,11 @@ fn workspace_metadata(real: &Path, parsed: &Parsed) -> Option<Value> {
     c.args(with_toolchain(parsed, args))
         .env("BUILDQ_HELD", held_with("build"))
         .stdin(Stdio::null())
-        .stderr(Stdio::null());
+        .stderr(if offline_hint {
+            Stdio::null()
+        } else {
+            Stdio::inherit()
+        });
     let out = c.output().ok()?;
     if !out.status.success() {
         return None;
@@ -884,51 +905,88 @@ fn workspace_metadata(real: &Path, parsed: &Parsed) -> Option<Value> {
     serde_json::from_slice(&out.stdout).ok()
 }
 
-fn pick_bin_from_metadata(meta: &Value, parsed: &Parsed) -> Option<String> {
-    let packages = meta["packages"].as_array()?;
-    let want_pkg = parsed
-        .opt(&["-p", "--package"])
-        .map(|p| p.split('@').next().unwrap_or("").to_string());
-    let here = parsed
-        .opt(&["--manifest-path"])
-        .map(|manifest| crate::util::resolve(&cwd(), Path::new(&manifest)))
-        .and_then(|manifest| manifest.parent().map(Path::to_path_buf))
-        .unwrap_or_else(cwd);
-    let here = crate::util::canonical(&here);
-    let pkg = match want_pkg {
-        Some(name) => packages
+fn pick_target_from_metadata(meta: &Value, parsed: &Parsed) -> Result<RunTarget, String> {
+    for names in [
+        ["-p", "--package"].as_slice(),
+        ["--bin"].as_slice(),
+        ["--example"].as_slice(),
+    ] {
+        let count = parsed
+            .sub_args()
             .iter()
-            .find(|p| p["name"].as_str() == Some(&name))?,
-        None => packages
-            .iter()
-            .filter(|p| {
-                let dir = Path::new(p["manifest_path"].as_str().unwrap_or(""))
-                    .parent()
-                    .map(crate::util::canonical);
-                dir.is_some_and(|d| here.starts_with(&d))
+            .filter(|arg| {
+                names.iter().any(|name| {
+                    arg.as_str() == *name
+                        || arg.starts_with(&format!("{name}="))
+                        || (*name == "-p" && arg.starts_with("-p") && !arg.starts_with("--"))
+                })
             })
-            .max_by_key(|p| p["manifest_path"].as_str().map(str::len).unwrap_or(0))
-            .or_else(|| {
-                let defaults = meta["workspace_default_members"].as_array()?;
-                (defaults.len() == 1)
-                    .then(|| packages.iter().find(|p| p["id"] == defaults[0]))
-                    .flatten()
-            })?,
-    };
-    if let Some(d) = pkg["default_run"].as_str() {
-        return Some(d.to_string());
+            .count();
+        if count > 1 {
+            return Err("cargo run requires one package and one runnable target".into());
+        }
     }
-    let bins: Vec<&str> = pkg["targets"]
-        .as_array()?
+    let bin = parsed.opt(&["--bin"]);
+    let example = parsed.opt(&["--example"]);
+    if bin.is_some() && example.is_some() {
+        return Err("choose either --bin or --example".into());
+    }
+    let kind = if example.is_some() { "example" } else { "bin" };
+    let explicit = example.or(bin);
+    let packages = meta["packages"]
+        .as_array()
+        .ok_or("Cargo metadata has no packages")?;
+    let defaults = meta["workspace_default_members"].as_array();
+    let package = parsed.opt(&["-p", "--package"]);
+    let selected: Vec<_> = packages
         .iter()
-        .filter(|t| {
-            t["kind"]
-                .as_array()
-                .is_some_and(|k| k.iter().any(|x| x == "bin"))
+        .filter(|pkg| {
+            if let Some(spec) = &package {
+                if pkg["id"].as_str() == Some(spec) {
+                    return true;
+                }
+                let (name, version) = spec
+                    .split_once('@')
+                    .map_or((spec.as_str(), None), |(n, v)| (n, Some(v)));
+                pkg["name"].as_str() == Some(name)
+                    && version.is_none_or(|v| {
+                        pkg["version"].as_str().is_some_and(|actual| {
+                            actual == v || actual.starts_with(&format!("{v}."))
+                        })
+                    })
+            } else {
+                defaults.is_some_and(|ids| ids.contains(&pkg["id"]))
+            }
         })
-        .filter_map(|t| t["name"].as_str())
         .collect();
-    (bins.len() == 1).then(|| bins[0].to_string())
+    let mut candidates = Vec::new();
+    for pkg in selected {
+        let wanted = explicit.as_deref().or_else(|| {
+            (kind == "bin")
+                .then(|| pkg["default_run"].as_str())
+                .flatten()
+        });
+        for target in pkg["targets"].as_array().into_iter().flatten() {
+            let Some(name) = target["name"].as_str() else {
+                continue;
+            };
+            if target["kind"]
+                .as_array()
+                .is_some_and(|k| k.iter().any(|v| v == kind))
+                && wanted.is_none_or(|wanted| wanted == name)
+            {
+                candidates.push(RunTarget {
+                    package: pkg["id"].as_str().unwrap_or("").into(),
+                    name: name.into(),
+                    kind,
+                });
+            }
+        }
+    }
+    if candidates.len() != 1 {
+        return Err("could not determine which binary to run; specify a unique -p, --bin, or --example target".into());
+    }
+    Ok(candidates.remove(0))
 }
 
 fn cargo_run(
@@ -940,24 +998,28 @@ fn cargo_run(
 ) -> Result<i32, String> {
     let runner = crate::cargo_config::runner(real, &cwd(), parsed)?;
     let sub = parsed.sub_index.unwrap();
-    let bin = pick_bin(real, parsed);
+    let selected = match pick_target(real, parsed) {
+        Ok(target) => target,
+        Err(error) => {
+            eprintln!("buildq: {error}");
+            return Ok(101);
+        }
+    };
     let mut build: Vec<String> = parsed.args[..sub].to_vec();
     build.push("build".into());
     build.extend(parsed.sub_args().iter().cloned());
     build.push("--message-format=json-render-diagnostics".into());
-    if let Some(b) = &bin {
-        build.push("--bin".into());
-        build.push(b.clone());
+    if parsed.opt(&["-p", "--package"]).is_none() {
+        build.extend(["--package".into(), selected.package.clone()]);
+    }
+    if parsed.opt(&["--bin", "--example"]).is_none() {
+        build.extend([format!("--{}", selected.kind), selected.name.clone()]);
     }
     let build_parsed = Parsed {
         args: build.clone(),
         sub_index: Some(sub),
         ..parsed.clone()
     };
-    let want = bin
-        .clone()
-        .or_else(|| parsed.opt(&["--bin"]))
-        .or_else(|| parsed.opt(&["--example"]));
 
     let mut g = acquire(cfg, opts, &format!("cargo {}", display_cmd(args)))?;
     let (mut ctx, external) = open_pool(cfg, real, &build_parsed);
@@ -992,7 +1054,7 @@ fn cargo_run(
         if let Some(out) = output {
             let stdout = io::stdout();
             for line in BufReader::new(out).lines().map_while(Result::ok) {
-                if !collect(&line, want.as_deref(), &mut art) {
+                if !collect(&line, Some(&selected), &mut art) {
                     let _ = writeln!(stdout.lock(), "{line}");
                 }
             }
@@ -1355,8 +1417,19 @@ mod tests {
             r#"{"reason":"compiler-artifact","package_id":"p#app@1.0.0","manifest_path":"/w/app/Cargo.toml","target":{"name":"other","kind":["bin"]},"filenames":["/t/debug/other.exe"],"executable":"/t/debug/other.exe","fresh":false}"#,
             r#"{"reason":"build-finished","success":true}"#,
         ];
+        let target = RunTarget {
+            package: "p#app@1.0.0".into(),
+            name: "app".into(),
+            kind: "bin",
+        };
         for l in lines {
-            assert!(collect(l, Some("app"), &mut a));
+            assert!(collect(l, Some(&target), &mut a));
+        }
+        for line in [
+            r#"{"reason":"compiler-artifact","package_id":"p#foreign@1.0.0","target":{"name":"app","kind":["bin"]},"executable":"/wrong/foreign"}"#,
+            r#"{"reason":"compiler-artifact","package_id":"p#app@1.0.0","target":{"name":"app","kind":["example"]},"executable":"/wrong/example"}"#,
+        ] {
+            assert!(collect(line, Some(&target), &mut a));
         }
         assert!(!collect("plain text", None, &mut a));
         let (_, _, exe, files) = a.exe.unwrap();

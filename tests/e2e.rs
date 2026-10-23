@@ -302,6 +302,113 @@ fn run_manifest_path_selects_the_requested_member_instead_of_the_cwd_package() {
     assert_eq!(stdout(&w.cargo(&ws, &["run", "--offline"]).0), "parent-app");
 }
 
+#[test]
+fn ambiguous_runs_do_not_build_or_launch_an_arbitrary_workspace_binary() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(temp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[workspace]\nmembers=['a','b']\nresolver='2'\n",
+            ),
+            (
+                "a/Cargo.toml",
+                "[package]\nname='child-a'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            (
+                "b/Cargo.toml",
+                "[package]\nname='child-b'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            (
+                "a/src/main.rs",
+                "fn main(){std::fs::write(\"launched-a\",\"yes\").unwrap();println!(\"child-a\");}",
+            ),
+            (
+                "b/src/main.rs",
+                "fn main(){std::fs::write(\"launched-b\",\"yes\").unwrap();println!(\"child-b\");}",
+            ),
+            ("a/examples/demo.rs", "fn main(){println!(\"demo\");}"),
+            (".gitignore", "target/\nlaunched-*\n"),
+        ],
+    );
+    let ws = root.join("ws");
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "."]);
+    git(&ws, &["commit", "-qm", "fixture"]);
+    fs::create_dir_all(root.join("q")).unwrap();
+    fs::write(root.join("q/config.toml"), "[cache]\nmin_free='0'\n").unwrap();
+    let run = |args: &[&str]| {
+        Command::new(&w.shim_cargo)
+            .args(args)
+            .current_dir(&ws)
+            .env("PATH", &w.path)
+            .env("BUILDQ_DIR", root.join("q"))
+            .env("BUILDQ_CACHE", root.join("cache"))
+            .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+            .env("BUILDQ_GC", "0")
+            .env_remove("BUILDQ_HELD")
+            .env_remove("CARGO_TARGET_DIR")
+            .output()
+            .unwrap()
+    };
+    let plain = Command::new(&w.real_cargo)
+        .args(["run", "--offline"])
+        .current_dir(&ws)
+        .output()
+        .unwrap();
+    assert_eq!(plain.status.code(), Some(101));
+    let out = run(&["run", "--offline"]);
+    assert_eq!(
+        out.status.code(),
+        Some(101),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert!(!ws.join("launched-a").exists() && !ws.join("launched-b").exists());
+    assert!(
+        !root.join("cache/pools").exists(),
+        "ambiguous runs must be rejected before building"
+    );
+    for (args, expected) in [
+        (vec!["run", "--offline", "--bin", "child-a"], "child-a"),
+        (vec!["run", "--offline", "-p", "child-b"], "child-b"),
+        (vec!["run", "--offline", "--example", "demo"], "demo"),
+    ] {
+        let (control, _) = w.plain(&ws, &root.join("control"), &args);
+        let out = run(&args);
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        assert_eq!(stdout(&out), expected);
+        assert_eq!(stdout(&out), stdout(&control));
+    }
+    fs::write(
+        ws.join("Cargo.toml"),
+        "[workspace]\nmembers=['a','b']\ndefault-members=['b']\nresolver='2'\n",
+    )
+    .unwrap();
+    assert_eq!(stdout(&w.cargo(&ws, &["run", "--offline"]).0), "child-b");
+    fs::create_dir_all(ws.join("a/src/bin")).unwrap();
+    fs::write(
+        ws.join("a/src/bin/alternate.rs"),
+        "fn main(){println!(\"alternate\");}",
+    )
+    .unwrap();
+    fs::write(
+        ws.join("a/Cargo.toml"),
+        "[package]\nname='child-a'\nversion='0.1.0'\nedition='2021'\ndefault-run='child-a'\n",
+    )
+    .unwrap();
+    assert_eq!(
+        stdout(&w.cargo(&ws, &["run", "--offline", "-p", "child-a"]).0),
+        "child-a"
+    );
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     fs::create_dir_all(to).unwrap();
     for e in fs::read_dir(from).unwrap().flatten() {
