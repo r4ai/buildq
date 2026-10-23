@@ -68,6 +68,9 @@ enum Cmd {
         /// Print a single snapshot (also the default for redirected output).
         #[arg(long)]
         once: bool,
+        /// Stop after this many snapshots.
+        #[arg(long, value_parser = clap::value_parser!(u64).range(1..))]
+        iterations: Option<u64>,
         /// Skip remote status probes.
         #[arg(long)]
         no_hosts: bool,
@@ -188,8 +191,15 @@ fn main() -> ExitCode {
         Cmd::Top {
             interval,
             once,
+            iterations,
             no_hosts,
-        } => match buildq::top::run(&cfg, Duration::from_secs(interval), once, !no_hosts) {
+        } => match buildq::top::run(
+            &cfg,
+            Duration::from_secs(interval),
+            once,
+            !no_hosts,
+            iterations,
+        ) {
             Ok(()) => ExitCode::SUCCESS,
             Err(error) if error.kind() == std::io::ErrorKind::BrokenPipe => ExitCode::SUCCESS,
             Err(error) => {
@@ -351,6 +361,13 @@ fn status(cfg: &Config, json: bool, hosts: bool) -> ExitCode {
     for st in &classes {
         print_class(st, "");
     }
+    print_hosts(remote);
+    ExitCode::SUCCESS
+}
+
+type HostStatus = Vec<(String, Result<serde_json::Value, String>)>;
+
+fn print_hosts(remote: HostStatus) {
     for (h, r) in remote {
         println!("== host {h}");
         match r {
@@ -364,7 +381,6 @@ fn status(cfg: &Config, json: bool, hosts: bool) -> ExitCode {
             Err(e) => println!("  {e}"),
         }
     }
-    ExitCode::SUCCESS
 }
 
 fn print_class(st: &ClassStatus, indent: &str) {

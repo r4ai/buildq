@@ -15,14 +15,25 @@ type Hosts = Vec<(String, Result<serde_json::Value, String>)>;
 
 /// Redirected output is a single plain-text snapshot. Interactive monitoring
 /// never changes input mode or hides the cursor; ordinary Ctrl+C stops it.
-pub fn run(cfg: &Config, interval: Duration, once: bool, hosts: bool) -> io::Result<()> {
+pub fn run(
+    cfg: &Config,
+    interval: Duration,
+    once: bool,
+    hosts: bool,
+    iterations: Option<u64>,
+) -> io::Result<()> {
     let mut out = io::stdout().lock();
-    let terminal = out.is_terminal();
-    let once = once || !terminal;
+    let terminal = out.is_terminal() && std::env::var("TERM").as_deref() != Ok("dumb");
+    let limit = if once {
+        Some(1)
+    } else {
+        iterations.or(if terminal { None } else { Some(1) })
+    };
+    let once = limit == Some(1);
     let mut remote: Option<Hosts> = None;
     let mut worker: Option<JoinHandle<Hosts>> = None;
     let mut last_probe: Option<Instant> = None;
-    loop {
+    for frame_number in 1u64.. {
         if hosts && !cfg.hosts.is_empty() {
             if once {
                 remote = Some(remote::host_status(cfg));
@@ -53,7 +64,7 @@ pub fn run(cfg: &Config, interval: Duration, once: bool, hosts: bool) -> io::Res
         if terminal && !once {
             write!(out, "\x1b[H\x1b[2J")?;
             let frame = format!(
-                "buildq top | refresh {}s | Ctrl+C to stop\n{frame}",
+                "buildq top — update {frame_number} | refresh {}s | Ctrl+C to stop\n{frame}",
                 interval.as_secs()
             );
             let (columns, rows) = terminal_size().unwrap_or((80, 24));
@@ -81,15 +92,16 @@ pub fn run(cfg: &Config, interval: Duration, once: bool, hosts: bool) -> io::Res
                 )?;
             }
         } else {
-            writeln!(out, "buildq top")?;
+            writeln!(out, "buildq top — update {frame_number}")?;
             out.write_all(frame.as_bytes())?;
         }
         out.flush()?;
-        if once {
+        if limit == Some(frame_number) {
             return Ok(());
         }
         thread::sleep(interval);
     }
+    Ok(())
 }
 
 fn clip(line: &str, columns: usize) -> String {

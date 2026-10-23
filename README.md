@@ -149,6 +149,11 @@ buildq: target <pool>/m0 (...)
 | `buildq run [-p PRIO] -- <cmd>...` | Queue any arbitrary command (with optional priority) |
 | `buildq run --host <H> -- <cmd>...` | Run a queued command on a remote SSH host |
 
+`buildq top` refreshes every second on a terminal; press Ctrl+C to quit.
+Redirected output prints one snapshot. Use `--iterations N` for a finite number
+of updates. Remote host checks run in the background during live updates.
+Pool sizes use the same cached measurements as `buildq cache ls`.
+
 ### Configuration (`config.toml`)
 
 All settings are optional. Place `config.toml` in `$BUILDQ_DIR/config.toml`;

@@ -1177,3 +1177,83 @@ fn cached_member_sizes_refresh_before_gc_budget_decisions() {
     assert_eq!(report["after"], 0);
     assert!(!member.exists());
 }
+
+#[test]
+fn top_reports_queue_hosts_and_pool_without_terminal_escapes() {
+    use buildq::queue::{ClassQueue, JobInfo};
+    let e = Env::new();
+    fs::create_dir_all(e.root.join("q")).unwrap();
+    fs::write(
+        e.root.join("q/config.toml"),
+        "[hosts.box]\nssh = 'unused'\nslots = 1\n",
+    )
+    .unwrap();
+    let q = ClassQueue::new(&e.root.join("q"), "build", 1, Duration::from_millis(10));
+    let _held = q
+        .acquire(
+            JobInfo {
+                cmd: "held-build".into(),
+                ..Default::default()
+            },
+            &mut |_| {},
+        )
+        .unwrap();
+    let mut waiter = e
+        .cmd(1)
+        .args(["run", "--", BQ, "__helper", "gate"])
+        .arg(e.root.join("top-waiter.started"))
+        .arg(e.root.join("top-waiter.release"))
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    wait_until("top waiter", || q.status().waiters.len() == 1);
+    let pool = e.root.join("cache/pools/example");
+    fs::create_dir_all(pool.join("m0")).unwrap();
+    buildq::util::write_json(
+        &pool.join("m0.json"),
+        &buildq::pool::MemberMeta {
+            size_bytes: 4096,
+            size_ms: buildq::util::now_ms(),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let out = e.cmd(1).arg("top").output().unwrap();
+    assert!(out.status.success(), "{}", stderr(&out));
+    let text = String::from_utf8(out.stdout).unwrap();
+    for expected in [
+        "update 1",
+        "1/1 busy, 1 waiting",
+        "held-build",
+        "waiting",
+        "box: unavailable",
+        "no remote buildq configured",
+        "example",
+        "4.0 KiB",
+        "budget",
+    ] {
+        assert!(text.contains(expected), "missing {expected}: {text}");
+    }
+    assert!(!text.contains('\x1b'));
+    assert!(!text.contains("update 2"));
+    waiter.kill().unwrap();
+    waiter.wait().unwrap();
+}
+
+#[test]
+fn top_refreshes_and_validates_options() {
+    let e = Env::new();
+    let start = Instant::now();
+    let out = e
+        .cmd(1)
+        .args(["top", "--interval", "1", "--iterations", "2"])
+        .output()
+        .unwrap();
+    assert!(out.status.success());
+    let text = String::from_utf8(out.stdout).unwrap();
+    assert_eq!(text.matches("buildq top — update").count(), 2);
+    assert!(start.elapsed() >= Duration::from_secs(1));
+    for args in [["top", "--interval", "0"], ["top", "--iterations", "0"]] {
+        assert_eq!(e.cmd(1).args(args).output().unwrap().status.code(), Some(2));
+    }
+}

@@ -149,6 +149,11 @@ buildq: target <pool>/m0 (...)
 | `buildq run [-p PRIO] -- <cmd>...` | 任意のコマンドをキュー経由で実行（優先度指定可） |
 | `buildq run --host <H> -- <cmd>...` | SSH 経由でリモートホスト上でコマンドを実行 |
 
+`buildq top` は端末上で1秒ごとに更新する。終了は Ctrl+C。
+リダイレクト時は1回だけ表示する。`--iterations N` で更新回数を指定できる。
+継続表示中のリモート照会はバックグラウンドで行う。
+プール容量は `buildq cache ls` と同じキャッシュ済み計測値を使用する。
+
 ### Configuration (`config.toml`)
 
 設定はすべて任意である。`$BUILDQ_DIR/config.toml` に配置する。
