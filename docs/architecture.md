@@ -262,6 +262,12 @@ This is a best-effort reserve, not a filesystem quota: concurrent writers can
 consume space between checks. Set `[cache] min_free = "0"` to disable the guard.
 Commands outside the target pool are not guarded.
 
+Idle-pool retirement holds `pool.lock`, rechecks member activity, and acquires
+all current member locks before deleting artifacts. Coordination directories and
+lock files remain in place, including after complete eviction. This preserves
+lock identity for waiters that opened a file before GC; empty retired pools are
+omitted from cache listings.
+
 ### Explicit Target Dirs
 
 A job that sets `--target-dir` or `CARGO_TARGET_DIR` itself (e.g. an agent building an A/B baseline) bypasses the pool by default:
