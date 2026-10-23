@@ -45,7 +45,7 @@ pub struct CacheFile {
     /// Also pool jobs whose explicit `--target-dir`/`CARGO_TARGET_DIR` lies
     /// inside the worktree (default false: such jobs build there, outside the budget).
     pub pool_explicit: Option<bool>,
-    /// Members per pool (default = slots + 1).
+    /// Members per pool (default = slots + 1; minimum = slots).
     pub max_members: Option<usize>,
     /// Upper bound for everything under the pool root, e.g. "60G".
     pub budget: Option<String>,
@@ -194,7 +194,17 @@ impl Config {
                 .map_err(|e| format!("{}: {e}", config_path.display()))?,
             Err(_) => FileConfig::default(),
         };
-        Ok(Self::from_parts(queue_dir, config_path, file))
+        let requested = file.cache.max_members;
+        let cfg = Self::from_parts(queue_dir, config_path, file);
+        if let Some(requested) = requested
+            && requested < cfg.slots
+        {
+            eprintln!(
+                "buildq: config: cache.max_members={requested} is below slots={}; effective cap {}. Set cache.max_members >= {} or lower slots",
+                cfg.slots, cfg.max_members, cfg.slots
+            );
+        }
+        Ok(cfg)
     }
 
     pub fn from_parts(queue_dir: PathBuf, config_path: PathBuf, f: FileConfig) -> Config {

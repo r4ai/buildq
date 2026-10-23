@@ -211,6 +211,30 @@ fn top_snapshot_shows_a_running_job_and_a_waiter_without_terminal_codes() {
 }
 
 #[test]
+fn a_member_cap_below_effective_slots_is_reported() {
+    let e = Env::new();
+    fs::create_dir_all(e.root.join("q")).unwrap();
+    fs::write(
+        e.root.join("q/config.toml"),
+        "slots=1\n[cache]\nmax_members=1\n",
+    )
+    .unwrap();
+    let out = e.cmd(2).arg("config").output().unwrap();
+    assert!(out.status.success());
+    assert!(String::from_utf8_lossy(&out.stdout).contains("max 2 members"));
+    let warning = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        warning.contains("cache.max_members=1")
+            && warning.contains("slots=2")
+            && warning.contains("effective cap 2"),
+        "{warning}"
+    );
+    let valid = e.cmd(1).arg("config").output().unwrap();
+    assert!(valid.status.success());
+    assert!(!String::from_utf8_lossy(&valid.stderr).contains("cache.max_members"));
+}
+
+#[test]
 fn exit_code_passes_through() {
     let e = Env::new();
     let st = e

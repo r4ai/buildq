@@ -173,7 +173,7 @@ slots = 2                # Max concurrent build jobs (default: 2)
 run_slots = 2            # Max concurrent app runs for `cargo run` (default: 2)
 
 [cache]
-max_members = 3          # Max target/ dirs per repo+toolchain (default: slots + 1)
+max_members = 3          # Max target/ dirs per repo+toolchain (minimum: slots; default: slots + 1)
 budget = "45G"           # Max disk usage under BUILDQ_CACHE (default: "60G")
 min_free = "25G"         # Minimum free disk space to preserve on volume (default: "20G")
 # pool_explicit = true   # Also pool explicit --target-dir / CARGO_TARGET_DIR inside the worktree (default: false)
@@ -182,6 +182,11 @@ min_free = "25G"         # Minimum free disk space to preserve on volume (defaul
 rustc_wrapper = "none"   # Disable global sccache per job ("none" | "keep" | "/path")
 # jobs = 8               # CARGO_BUILD_JOBS per build (default: cores / slots)
 ```
+
+`cache.max_members` must be at least the effective `slots` value, including
+environment overrides. Smaller values are raised to `slots` with a warning that
+shows the requested value, effective cap, and how to correct the configuration.
+A per-project cap smaller than the global slot count is currently unsupported.
 
 | Setting | Environment override | Default |
 | :--- | :--- | :--- |
