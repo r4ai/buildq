@@ -135,7 +135,7 @@ fn automatic_host_selection_uses_live_remote_load() {
     .unwrap();
     let out = e
         .cmd(1)
-        .env("PATH", path)
+        .env("PATH", &path)
         .args(["run", "--host", "auto", "--", BQ, "__helper", "exit", "0"])
         .output()
         .unwrap();
@@ -145,6 +145,69 @@ fn automatic_host_selection_uses_live_remote_load() {
         String::from_utf8_lossy(&out.stderr)
     );
     assert!(String::from_utf8_lossy(&out.stderr).contains("picked host local"));
+    let top = e
+        .cmd(1)
+        .env("PATH", &path)
+        .args(["top", "--once"])
+        .output()
+        .unwrap();
+    assert!(top.status.success());
+    assert!(String::from_utf8_lossy(&top.stdout).contains("box / build: 1/1 busy"));
+}
+
+#[test]
+fn top_snapshot_shows_a_running_job_and_a_waiter_without_terminal_codes() {
+    let e = Env::new();
+    let mut holder = e
+        .cmd(1)
+        .args([
+            "run",
+            "--label",
+            "active build",
+            "--",
+            BQ,
+            "__helper",
+            "sleep",
+            "10000",
+        ])
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    wait_until("top holder", || busy(&e.status(), "build") == 1);
+    let mut waiter = e
+        .cmd(1)
+        .args(["run", "--", BQ, "__helper", "exit", "0"])
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    wait_until("top waiter", || {
+        e.status()["classes"][0]["waiters"]
+            .as_array()
+            .unwrap()
+            .len()
+            == 1
+    });
+    // A redirected top defaults to one snapshot and terminates on its own.
+    let out = e.cmd(1).args(["top", "--no-hosts"]).output().unwrap();
+    holder.kill().unwrap();
+    holder.wait().unwrap();
+    assert!(waiter.wait().unwrap().success());
+    assert!(out.status.success());
+    let text = String::from_utf8_lossy(&out.stdout);
+    for expected in [
+        "Cache:",
+        "effective budget",
+        "build: 1/1 busy, 1 waiting",
+        "RUN",
+        "WAIT",
+        "active build",
+        "prio 0",
+    ] {
+        assert!(text.contains(expected), "missing {expected}: {text}");
+    }
+    assert!(!text.contains('\x1b'));
+    let invalid = e.cmd(1).args(["top", "--interval", "0"]).output().unwrap();
+    assert_eq!(invalid.status.code(), Some(2));
 }
 
 #[test]

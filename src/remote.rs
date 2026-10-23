@@ -699,11 +699,12 @@ pub fn host_status(cfg: &Config) -> Vec<(String, Result<serde_json::Value, Strin
                 None => Err("no remote buildq configured (local accounting only)".to_string()),
                 Some(bq) => {
                     let t = transport(name, h);
-                    match t.exec(
-                        None,
-                        &[],
+                    match t.probe(
+                        &h.env
+                            .iter()
+                            .map(|(k, v)| (k.clone(), v.clone()))
+                            .collect::<Vec<_>>(),
                         &[bq.clone(), "status".into(), "--json".into()],
-                        true,
                     ) {
                         Ok((0, out)) => serde_json::from_str(&out).map_err(|e| e.to_string()),
                         Ok((c, _)) => Err(format!("exit {c}")),
