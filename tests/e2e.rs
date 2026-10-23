@@ -142,6 +142,131 @@ fn oversized_builds_warn_before_gc_discards_their_reusable_artifacts() {
     }
 }
 
+#[test]
+fn copied_runs_honor_cargo_runner_config_environment_and_cli() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(temp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='runner-app'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            (
+                "src/bin/app.rs",
+                r#"fn main() {
+            println!("{}|{}", std::env::var("BQ_RUNNER_TAG").unwrap_or_default(), std::env::args().skip(1).collect::<Vec<_>>().join("|"));
+        }"#,
+            ),
+            (
+                "src/bin/runner.rs",
+                r#"fn main() {
+            let mut args = std::env::args_os().skip(1);
+            let tag = args.next().unwrap();
+            let exe = args.next().unwrap();
+            let status = std::process::Command::new(exe).args(args).env("BQ_RUNNER_TAG", tag).status().unwrap();
+            std::process::exit(status.code().unwrap_or(125));
+        }"#,
+            ),
+            (".gitignore", "target/\n"),
+        ],
+    );
+    let ws = root.join("ws");
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "."]);
+    git(&ws, &["commit", "-qm", "fixture"]);
+    let own = root.join("runner-target");
+    w.plain(&ws, &own, &["build", "--offline", "--bin", "runner"]);
+    let runner = own.join("debug").join(if cfg!(windows) {
+        "runner.exe"
+    } else {
+        "runner"
+    });
+    let triple = buildq::job::probe_toolchain(&w.real_cargo, None)
+        .unwrap()
+        .host;
+    fs::create_dir_all(ws.join(".cargo")).unwrap();
+    fs::create_dir_all(root.join("q")).unwrap();
+    fs::write(root.join("q/config.toml"), "[cache]\nmin_free='0'\n").unwrap();
+    let run = |extra: &[String], env_runner: Option<String>| {
+        let mut cmd = Command::new(&w.shim_cargo);
+        cmd.args(["run", "--offline", "--bin", "app"])
+            .args(extra)
+            .args(["--", "space arg", "tail"])
+            .current_dir(&ws)
+            .env("PATH", &w.path)
+            .env("BUILDQ_DIR", root.join("q"))
+            .env("BUILDQ_CACHE", root.join("cache"))
+            .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+            .env("BUILDQ_GC", "0")
+            .env_remove("BUILDQ_HELD")
+            .env_remove("CARGO_TARGET_DIR");
+        let key = format!(
+            "CARGO_TARGET_{}_RUNNER",
+            triple.to_uppercase().replace('-', "_")
+        );
+        if let Some(value) = env_runner {
+            cmd.env(key, value);
+        } else {
+            cmd.env_remove(key);
+        }
+        let out = cmd.output().unwrap();
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        stdout(&out)
+    };
+    for key in [
+        &triple,
+        "cfg(all(not(target_os = \"none\"), any(unix, windows)))",
+    ] {
+        fs::write(
+            ws.join(".cargo/config.toml"),
+            format!(
+                "[target.{}]\nrunner={}\n",
+                serde_json::to_string(key).unwrap(),
+                serde_json::json!([runner, "config tag"])
+            ),
+        )
+        .unwrap();
+        let (control, _) = w.plain(
+            &ws,
+            &own,
+            &[
+                "run",
+                "--offline",
+                "--bin",
+                "app",
+                "--",
+                "space arg",
+                "tail",
+            ],
+        );
+        assert_eq!(stdout(&control), "config tag|space arg|tail");
+        assert_eq!(run(&[], None), stdout(&control));
+    }
+    fs::write(ws.join(".cargo/config.toml"), "").unwrap();
+    assert_eq!(
+        run(&[], Some(format!("{} env-tag", runner.display()))),
+        "env-tag|space arg|tail"
+    );
+    let cli = format!(
+        "target.{}.runner={}",
+        triple,
+        serde_json::json!([runner, "cli tag"])
+    );
+    assert_eq!(
+        run(
+            &["--config".into(), cli],
+            Some(format!("{} env-tag", runner.display()))
+        ),
+        "cli tag|space arg|tail"
+    );
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     fs::create_dir_all(to).unwrap();
     for e in fs::read_dir(from).unwrap().flatten() {
