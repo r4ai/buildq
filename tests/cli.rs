@@ -18,6 +18,8 @@ impl Env {
     fn new() -> Env {
         let dir = tempfile::tempdir().unwrap();
         let root = buildq::util::canonical(dir.path());
+        fs::create_dir_all(root.join("q")).unwrap();
+        fs::write(root.join("q/config.toml"), "[cache]\nmin_free='0'\n").unwrap();
         Env { _dir: dir, root }
     }
 
@@ -313,6 +315,65 @@ fn failed_gc_deletions_stay_counted_and_do_not_claim_reclamation() {
     let report: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
     assert_eq!(report["freed"], 2 * 1024 * 1024);
     assert_eq!(report["after"], 0);
+}
+
+#[test]
+fn a_guarded_process_tree_stops_before_pressure_failure_returns() {
+    fn active(pid: u32) -> bool {
+        #[cfg(unix)]
+        {
+            buildq::exec::process_alive(i32::try_from(pid).unwrap())
+        }
+        #[cfg(windows)]
+        unsafe {
+            use windows_sys::Win32::System::Threading::{
+                GetExitCodeProcess, OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION,
+            };
+            let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
+            if handle.is_null() {
+                return false;
+            }
+            let mut code = 0;
+            let ok = GetExitCodeProcess(handle, &mut code);
+            windows_sys::Win32::Foundation::CloseHandle(handle);
+            assert_ne!(ok, 0);
+            code == 259 // STILL_ACTIVE
+        }
+    }
+    let e = Env::new();
+    let pids = e.root.join("pids");
+    fs::create_dir_all(&pids).unwrap();
+    let mut cmd = e.cmd(1);
+    cmd.args(["__helper", "tree"])
+        .arg(&pids)
+        .arg("1")
+        .stderr(Stdio::null());
+    let started = Instant::now();
+    let result = buildq::exec::run_guarded(&mut cmd, &mut || {
+        if fs::read_dir(&pids).unwrap().count() == 2 {
+            Err(std::io::Error::other("simulated min_free breach"))
+        } else {
+            Ok(())
+        }
+    });
+    assert!(result.unwrap_err().to_string().contains("min_free"));
+    let ids: Vec<u32> = fs::read_dir(&pids)
+        .unwrap()
+        .map(|e| {
+            e.unwrap()
+                .file_name()
+                .to_string_lossy()
+                .strip_prefix("pid-")
+                .unwrap()
+                .parse()
+                .unwrap()
+        })
+        .collect();
+    assert_eq!(ids.len(), 2);
+    wait_until("guarded children to stop", || {
+        ids.iter().all(|pid| !active(*pid))
+    });
+    assert!(started.elapsed() < Duration::from_secs(3));
 }
 
 #[test]

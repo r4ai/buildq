@@ -16,6 +16,79 @@ use std::time::{Duration, Instant, SystemTime};
 
 const BQ: &str = env!("CARGO_BIN_EXE_buildq");
 
+#[test]
+fn pooled_builds_refuse_an_unavailable_reserve_and_retry_cleanly() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(temp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='reserve-app'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            ("src/main.rs", "fn main() { println!(\"reserve-ok\"); }\n"),
+        ],
+    );
+    git(&root.join("ws"), &["init", "-q"]);
+    git(&root.join("ws"), &["add", "."]);
+    git(&root.join("ws"), &["commit", "-qm", "fixture"]);
+    fs::create_dir_all(root.join("q")).unwrap();
+    let config = root.join("q/config.toml");
+    let reserve = buildq::util::free_disk_bytes(&root).unwrap() + (1 << 30);
+    fs::write(&config, format!("[cache]\nmin_free='{reserve}'\n")).unwrap();
+    let run = |sub: &str| {
+        Command::new(&w.shim_cargo)
+            .args([sub, "--offline"])
+            .current_dir(root.join("ws"))
+            .env("PATH", &w.path)
+            .env("BUILDQ_DIR", root.join("q"))
+            .env("BUILDQ_CACHE", root.join("cache"))
+            .env("BUILDQ_CONFIG", &config)
+            .env("BUILDQ_GC", "0")
+            .env("BUILDQ_REAL_CARGO", &w.real_cargo)
+            .env_remove("BUILDQ_HELD")
+            .env_remove("CARGO_TARGET_DIR")
+            .output()
+            .unwrap()
+    };
+    for sub in ["build", "run"] {
+        let out = run(sub);
+        assert_eq!(
+            out.status.code(),
+            Some(125),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        assert!(String::from_utf8_lossy(&out.stderr).contains("min_free"));
+    }
+    fs::write(&config, "[cache]\nmin_free='0'\n").unwrap();
+    let out = run("run");
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert_eq!(stdout(&out), "reserve-ok");
+    let status = Command::new(BQ)
+        .args(["status", "--json"])
+        .env("BUILDQ_DIR", root.join("q"))
+        .env("BUILDQ_CONFIG", &config)
+        .output()
+        .unwrap();
+    let status: serde_json::Value = serde_json::from_slice(&status.stdout).unwrap();
+    for class in status["classes"].as_array().unwrap() {
+        assert!(class["waiters"].as_array().unwrap().is_empty());
+        assert!(
+            class["holders"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|h| h["busy"] == false)
+        );
+    }
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     fs::create_dir_all(to).unwrap();
     for e in fs::read_dir(from).unwrap().flatten() {
@@ -59,12 +132,18 @@ struct World {
 
 impl World {
     fn cargo(&self, dir: &Path, args: &[&str]) -> (Output, Duration) {
+        let config = self.root.join("q/config.toml");
+        if !config.exists() {
+            fs::create_dir_all(config.parent().unwrap()).unwrap();
+            fs::write(&config, "[cache]\nmin_free='0'\n").unwrap();
+        }
         let t = Instant::now();
         let out = Command::new(&self.shim_cargo)
             .args(args)
             .current_dir(dir)
             .env("PATH", &self.path)
             .env("BUILDQ_DIR", self.root.join("q"))
+            .env("BUILDQ_CONFIG", &config)
             .env("BUILDQ_CACHE", self.root.join("cache"))
             .env("BUILDQ_GC", "0")
             .env_remove("BUILDQ_HELD")

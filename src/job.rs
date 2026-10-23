@@ -469,6 +469,7 @@ fn pool_ctx(
 }
 
 fn lease_member(cfg: &Config, ctx: &mut PoolCtx) -> Result<Lease, String> {
+    crate::storage::admit(cfg)?;
     let mut owners_here = PackageOwners::new(vec![PathBuf::from(&ctx.wt.root)]);
     let mut owners_prev: BTreeMap<String, PackageOwners> = BTreeMap::new();
     let mut owners = |f: &str, prev: Option<&str>| {
@@ -626,8 +627,13 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     let mut cmd = Command::new(&real);
     cmd.args(&cmd_args);
     cargo_env(&mut cmd, cfg, &parsed, target.as_deref());
-    let code =
-        exec::run(&mut cmd, cfg.kill_tree).map_err(|e| format!("{}: {e}", real.display()))?;
+    let execution = if lease.is_some() && cfg.min_free > 0 {
+        exec::run_guarded(&mut cmd, &mut || crate::storage::check(cfg))
+    } else {
+        exec::run(&mut cmd, cfg.kill_tree)
+    }
+    .map_err(|e| format!("{}: {e}", real.display()));
+    let code = execution.as_ref().copied().unwrap_or(125);
     trace("cargo finished");
     if let (Some(c), Some(l)) = (ctx.as_mut(), lease.as_mut()) {
         after_job(c, l, started);
@@ -652,7 +658,7 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
         spawn_gc(cfg);
     }
     trace("done");
-    Ok(code)
+    execution
 }
 
 fn opt_absent(p: &Parsed, name: &str) -> bool {
@@ -961,21 +967,40 @@ fn cargo_run(
     let mut cmd = Command::new(real);
     cmd.args(&cmd_args).stdout(Stdio::piped());
     cargo_env(&mut cmd, cfg, &build_parsed, target.as_deref());
+    let enforce_reserve = lease.is_some() && cfg.min_free > 0;
+    if enforce_reserve {
+        crate::storage::check(cfg).map_err(|e| e.to_string())?;
+    }
     let mut child = cmd
         .spawn()
         .map_err(|e| format!("{}: {e}", real.display()))?;
-    let guard = exec::ChildGuard::attach(&child, cfg.kill_tree);
-    let mut art = Artifacts::default();
-    if let Some(out) = child.stdout.take() {
-        let stdout = io::stdout();
-        for line in BufReader::new(out).lines().map_while(Result::ok) {
-            if !collect(&line, want.as_deref(), &mut art) {
-                let _ = writeln!(stdout.lock(), "{line}");
+    let guard = exec::ChildGuard::attach(&child, cfg.kill_tree || enforce_reserve);
+    let output = child.stdout.take();
+    let reader = std::thread::spawn(move || {
+        let mut art = Artifacts::default();
+        if let Some(out) = output {
+            let stdout = io::stdout();
+            for line in BufReader::new(out).lines().map_while(Result::ok) {
+                if !collect(&line, want.as_deref(), &mut art) {
+                    let _ = writeln!(stdout.lock(), "{line}");
+                }
             }
         }
+        art
+    });
+    let mut execution = if enforce_reserve {
+        exec::wait_guarded(&mut child, guard, &mut || crate::storage::check(cfg))
+    } else {
+        let result = child.wait().map(exec::exit_code);
+        drop(guard);
+        result
     }
-    let code = exec::exit_code(child.wait().map_err(|e| e.to_string())?);
-    drop(guard);
+    .map_err(|e| e.to_string());
+    let art = reader.join().unwrap_or_else(|_| {
+        execution = Err("Cargo artifact reader failed".into());
+        Artifacts::default()
+    });
+    let code = execution.as_ref().copied().unwrap_or(125);
 
     let mut run = None;
     if code == 0 {
@@ -1031,6 +1056,7 @@ fn cargo_run(
     if ctx.is_some() {
         spawn_gc(cfg);
     }
+    execution?;
     let Some((dir, _run_lock, pkg_id, manifest, exe)) = run else {
         return Ok(code);
     };

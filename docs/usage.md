@@ -35,6 +35,13 @@ A per-project cap smaller than the global slot count is currently unsupported.
 | :--- | :--- | :--- |
 | `max_per_worktree` | `BUILDQ_MAX_PER_WORKTREE` | `ceil(slots / 2)`; `0` disables |
 
+If a pooled build fails with a `min_free` diagnostic (exit `125`), free space on
+the cache volume and retry. Admission first attempts GC once; active builds also
+stop if the reserve is breached. Use `buildq cache ls --refresh` and
+`buildq gc` to inspect and reclaim idle caches. Configure a reserve appropriate
+for the volume; `min_free = "0"` disables this guard. See the
+[free-space guard](architecture.md#free-space-guard) for scope and limitations.
+
 ## Live Monitoring
 
 `buildq top` refreshes running jobs, waiters and wait durations, remote queues,
