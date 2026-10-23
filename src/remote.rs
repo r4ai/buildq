@@ -1,6 +1,6 @@
 //! Running queued jobs on other machines over ssh.
 //!
-//! Protocol (all plain ssh + git, nothing to install remotely except git and
+//! Default protocol (plain ssh + git, nothing to install remotely except git and
 //! the toolchain; a remote buildq is optional):
 //!
 //! 1. Take a local `host-<name>` slot (the host's `slots` bound how many jobs
@@ -19,6 +19,10 @@
 //!    `buildq` configured for the host it runs as `buildq run -- <cmd>` so the
 //!    host's own queue and pool apply.
 //! 6. Optionally copy `--fetch` paths back; return the remote exit code.
+//!
+//! `Rsync` replaces steps 2-4 with an rsync mirror and also uses rsync for
+//! fetching. It includes ignored sources except the protected `.git` and
+//! root `target/` paths, plus any configured excludes.
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -26,12 +30,23 @@ use std::io::{self, IsTerminal};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-use crate::config::{Config, HostConfig};
+use crate::config::{Config, HostConfig, SyncTransport};
 use crate::git::{self, Worktree};
 use crate::job::{self, Opts};
 use crate::util::{display_cmd, read_json, short_hash, write_json};
 
 pub trait Transport {
+    /// Synchronize sources. The default is the Git snapshot protocol.
+    fn sync(
+        &self,
+        host: &str,
+        wt: &Worktree,
+        l: &Layout,
+        scratch: &Path,
+    ) -> Result<String, String> {
+        sync(self, host, wt, l, scratch)
+    }
+
     /// Runs `argv` on the host in `cwd` (relative to the remote home unless
     /// absolute). Streams output unless `capture`; returns (exit code, stdout).
     fn exec(
@@ -158,6 +173,89 @@ impl Transport for Ssh {
     }
 }
 
+/// SSH execution with rsync source synchronization and artifact retrieval.
+pub struct Rsync {
+    pub ssh: Ssh,
+    pub exclude: Vec<String>,
+}
+
+impl Rsync {
+    fn command(&self) -> Command {
+        let mut cmd = Command::new("rsync");
+        let shell = std::iter::once("ssh".to_string())
+            .chain(self.ssh.args.iter().map(|s| sh_quote(s)))
+            .collect::<Vec<_>>()
+            .join(" ");
+        cmd.args(["-a", "--protect-args", "-e", &shell]);
+        cmd
+    }
+
+    fn sync_command(&self, source: &Path, dest: &str) -> Command {
+        let mut cmd = self.command();
+        // Excludes protect remote build state from --delete as well as upload.
+        cmd.args(["--delete", "--exclude=/.git", "--exclude=/target/"]);
+        for pattern in &self.exclude {
+            cmd.arg(format!("--exclude={pattern}"));
+        }
+        cmd.arg("--")
+            .arg(format!("{}/", source.display()))
+            .arg(dest);
+        cmd
+    }
+}
+
+impl Transport for Rsync {
+    fn exec(
+        &self,
+        cwd: Option<&str>,
+        env: &[(String, String)],
+        argv: &[String],
+        capture: bool,
+    ) -> io::Result<(i32, String)> {
+        self.ssh.exec(cwd, env, argv, capture)
+    }
+    fn git_url(&self, path: &str) -> String {
+        self.ssh.git_url(path)
+    }
+    fn git_env(&self) -> Vec<(String, String)> {
+        self.ssh.git_env()
+    }
+    fn sync(&self, _: &str, wt: &Worktree, l: &Layout, _: &Path) -> Result<String, String> {
+        ok(
+            self.exec(None, &[], &s(&["mkdir", "-p", &l.wt_dir]), true),
+            "remote mkdir",
+        )?;
+        let status = self
+            .sync_command(&wt.root, &self.ssh.git_url(&l.wt_dir))
+            .status()
+            .map_err(|e| format!("rsync: {e}"))?;
+        if !status.success() {
+            return Err(format!(
+                "rsync source sync: exit {}",
+                crate::exec::exit_code(status)
+            ));
+        }
+        Ok("rsync".into())
+    }
+    fn fetch(&self, remote: &str, into: &Path) -> io::Result<()> {
+        fs::create_dir_all(into)?;
+        let status = self
+            .command()
+            .arg("--")
+            .arg(self.ssh.git_url(remote))
+            .arg(into)
+            .status()?;
+        if status.success() {
+            Ok(())
+        } else {
+            Err(io::Error::other(format!(
+                "rsync fetch {remote}: exit {}",
+                crate::exec::exit_code(status)
+            )))
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Layout {
     pub repo_dir: String,
@@ -197,7 +295,7 @@ fn s(v: &[&str]) -> Vec<String> {
 
 /// Steps 2-4. Returns the snapshot commit.
 pub fn sync(
-    t: &dyn Transport,
+    t: &(impl Transport + ?Sized),
     host: &str,
     wt: &Worktree,
     l: &Layout,
@@ -298,7 +396,7 @@ pub fn run_on(
     let root = job.cfg.root.clone().unwrap_or_else(|| ".buildq".into());
     let l = layout(&root, wt);
     check_toolchain(t, job.cfg)?;
-    let sha = sync(t, job.host, wt, &l, scratch)?;
+    let sha = t.sync(job.host, wt, &l, scratch)?;
     job::note(&format!(
         "{}: synced {} to {}",
         job.host,
@@ -412,7 +510,14 @@ pub fn run(
         fetch_into: fetch_into
             .unwrap_or_else(|| wt.root.join("target").join("buildq-remote").join(&host)),
     };
-    let code = run_on(&t, &rj, &wt, &here, &cfg.queue_dir.join("scratch"))?;
+    let t: Box<dyn Transport> = match hc.transport {
+        SyncTransport::Git => Box::new(t),
+        SyncTransport::Rsync => Box::new(Rsync {
+            ssh: t,
+            exclude: hc.rsync_exclude.clone(),
+        }),
+    };
+    let code = run_on(t.as_ref(), &rj, &wt, &here, &cfg.queue_dir.join("scratch"))?;
     crate::history::append(
         &cfg.queue_dir,
         &crate::history::Entry {
@@ -739,6 +844,66 @@ mod tests {
             )
             .is_err()
         );
+    }
+
+    #[test]
+    fn rsync_incremental_generated_sources_and_excludes() {
+        if Command::new("rsync").arg("--version").output().is_err() {
+            eprintln!("skipping: rsync is not installed");
+            return;
+        }
+        let tmp = tempfile::tempdir().unwrap();
+        let src = tmp.path().join("source with spaces");
+        let dst = tmp.path().join("remote with spaces");
+        fs::create_dir_all(src.join(".git")).unwrap();
+        fs::create_dir_all(&dst).unwrap();
+        fs::write(src.join(".git/config"), "private").unwrap();
+        fs::write(src.join(".gitignore"), "generated\n").unwrap();
+        fs::write(src.join("generated"), "dirty generated data").unwrap();
+        fs::write(src.join("unchanged"), "keep mtime").unwrap();
+        fs::write(src.join("secret"), "excluded").unwrap();
+        let t = Rsync {
+            ssh: Ssh {
+                dest: "unused".into(),
+                args: vec!["-p".into(), "2222".into()],
+            },
+            exclude: vec!["/secret".into()],
+        };
+        let dest = dst.to_str().unwrap();
+        assert!(t.sync_command(&src, dest).status().unwrap().success());
+        assert_eq!(
+            fs::read_to_string(dst.join("generated")).unwrap(),
+            "dirty generated data"
+        );
+        assert!(!dst.join(".git").exists());
+        assert!(!dst.join("secret").exists());
+        let mtime = fs::metadata(dst.join("unchanged"))
+            .unwrap()
+            .modified()
+            .unwrap();
+        fs::create_dir_all(dst.join("target")).unwrap();
+        fs::write(dst.join("target/artifact"), "cached").unwrap();
+        fs::remove_file(src.join("generated")).unwrap();
+        assert!(t.sync_command(&src, dest).status().unwrap().success());
+        assert!(!dst.join("generated").exists());
+        assert!(dst.join("target/artifact").is_file());
+        assert_eq!(
+            fs::metadata(dst.join("unchanged"))
+                .unwrap()
+                .modified()
+                .unwrap(),
+            mtime
+        );
+        let args: Vec<_> = t
+            .command()
+            .get_args()
+            .map(|a| a.to_string_lossy().into_owned())
+            .collect();
+        assert!(args.contains(&"ssh -p 2222".to_string()));
+        let file: HostConfig =
+            toml::from_str("transport = 'rsync'\nrsync_exclude = ['secrets/']").unwrap();
+        assert_eq!(file.transport, SyncTransport::Rsync);
+        assert!(toml::from_str::<HostConfig>("transport = 'typo'").is_err());
     }
 
     #[test]

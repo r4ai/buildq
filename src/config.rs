@@ -82,6 +82,14 @@ pub struct CargoFile {
     pub copy_pdb: Option<bool>,
 }
 
+#[derive(Debug, Default, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum SyncTransport {
+    #[default]
+    Git,
+    Rsync,
+}
+
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 #[serde(default, deny_unknown_fields)]
 pub struct HostConfig {
@@ -95,6 +103,10 @@ pub struct HostConfig {
     pub root: Option<String>,
     /// Remote buildq binary; when set, jobs also queue (and pool) on the remote side.
     pub buildq: Option<String>,
+    /// Source synchronization and artifact fetch backend (default git/scp).
+    pub transport: SyncTransport,
+    /// Additional rsync excludes, relative to the worktree root.
+    pub rsync_exclude: Vec<String>,
     /// Optional rustup toolchain, checked before dispatch and used for the job.
     pub rust_toolchain: Option<String>,
     /// Environment for remote jobs.
