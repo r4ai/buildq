@@ -266,7 +266,7 @@ fn main() -> ExitCode {
                     println!("{}{a}", if dry_run { "would " } else { "" });
                 }
                 println!(
-                    "{} {}; pool {} -> {} (budget {})",
+                    "{} {}; cache {} -> {} (budget {})",
                     if dry_run { "would free" } else { "freed" },
                     human_bytes(r.freed),
                     human_bytes(r.before),
@@ -283,7 +283,11 @@ fn main() -> ExitCode {
                     println!("warning: {w}");
                 }
             }
-            ExitCode::SUCCESS
+            if r.failed_deletions > 0 {
+                ExitCode::from(1)
+            } else {
+                ExitCode::SUCCESS
+            }
         }
         Cmd::Shim {
             cmd: ShimCmd::Install { tool, into, sh },

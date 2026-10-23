@@ -235,6 +235,87 @@ fn a_member_cap_below_effective_slots_is_reported() {
 }
 
 #[test]
+#[cfg(unix)]
+fn failed_gc_deletions_stay_counted_and_do_not_claim_reclamation() {
+    use std::os::unix::fs::PermissionsExt;
+    if unsafe { libc::geteuid() } == 0 {
+        return;
+    }
+    fn writable(path: &Path) {
+        let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o755));
+        if let Ok(entries) = fs::read_dir(path) {
+            for entry in entries.flatten() {
+                if entry.file_type().is_ok_and(|t| t.is_dir()) {
+                    writable(&entry.path());
+                }
+            }
+        }
+    }
+    struct Restore(PathBuf);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            writable(&self.0);
+        }
+    }
+    let e = Env::new();
+    let _restore = Restore(e.root.clone());
+    fs::create_dir_all(e.root.join("q")).unwrap();
+    fs::write(
+        e.root.join("q/config.toml"),
+        "[cache]\nbudget='1M'\nmin_free='0'\n",
+    )
+    .unwrap();
+    let member = e.root.join("cache/pools/p/m0");
+    fs::create_dir_all(member.join("locked")).unwrap();
+    fs::write(member.join("locked/artifact"), vec![0; 2 * 1024 * 1024]).unwrap();
+    buildq::util::write_json(
+        &member.with_extension("json"),
+        &buildq::pool::MemberMeta {
+            last_used_ms: buildq::util::now_ms(),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    fs::set_permissions(member.join("locked"), fs::Permissions::from_mode(0o555)).unwrap();
+    for attempt in 0..3 {
+        let out = e.cmd(1).args(["gc", "--json"]).output().unwrap();
+        let report: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert_eq!(out.status.code(), Some(1), "{report}");
+        assert_eq!(report["freed"], 0);
+        assert!(report["failed_deletions"].as_u64().unwrap() > 0);
+        assert!(report["after"].as_u64().unwrap() >= 2 * 1024 * 1024);
+        assert!(!report["warnings"].as_array().unwrap().is_empty());
+        let usage = e
+            .cmd(1)
+            .args(["cache", "ls", "--refresh", "--json"])
+            .output()
+            .unwrap();
+        let usage: serde_json::Value = serde_json::from_slice(&usage.stdout).unwrap();
+        assert!(usage["trash_bytes"].as_u64().unwrap() >= 2 * 1024 * 1024);
+        assert!(usage["total"].as_u64().unwrap() >= 2 * 1024 * 1024);
+        let retained = fs::read_dir(e.root.join("cache/trash"))
+            .unwrap()
+            .next()
+            .unwrap()
+            .unwrap()
+            .path()
+            .join("locked");
+        if attempt == 0 {
+            // The next retry also cannot measure the remaining files.
+            fs::set_permissions(&retained, fs::Permissions::from_mode(0o000)).unwrap();
+        } else if attempt == 1 {
+            fs::set_permissions(&retained, fs::Permissions::from_mode(0o555)).unwrap();
+        }
+    }
+    writable(&e.root);
+    let out = e.cmd(1).args(["gc", "--json"]).output().unwrap();
+    assert!(out.status.success());
+    let report: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(report["freed"], 2 * 1024 * 1024);
+    assert_eq!(report["after"], 0);
+}
+
+#[test]
 fn exit_code_passes_through() {
     let e = Env::new();
     let st = e
