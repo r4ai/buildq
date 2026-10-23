@@ -226,6 +226,39 @@ pub fn watch(pid: i32, kill_tree: bool) {
     }
 }
 
+/// A process that can still execute. Linux zombies have already terminated,
+/// even when container PID 1 has not yet reaped them.
+#[cfg(unix)]
+pub fn process_alive(pid: i32) -> bool {
+    nix::alive(pid)
+}
+
+#[cfg(all(test, target_os = "linux"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_terminated_unreaped_child_is_not_running() {
+        assert!(process_alive(std::process::id() as i32));
+        let mut child = Command::new(std::env::current_exe().unwrap())
+            .args(["--exact", "util::tests::hash_is_stable"])
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn()
+            .unwrap();
+        let pid = i32::try_from(child.id()).unwrap();
+        let started = std::time::Instant::now();
+        while process_alive(pid) {
+            assert!(started.elapsed() < std::time::Duration::from_secs(10));
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
+        // No wait has happened: kill(0) still sees the child's zombie entry.
+        assert_eq!(unsafe { libc::kill(pid, 0) }, 0);
+        assert!(child.wait().unwrap().success());
+        assert!(!process_alive(pid));
+    }
+}
+
 impl ChildGuard {
     pub fn attach(child: &Child, kill_tree: bool) -> ChildGuard {
         #[cfg(windows)]
