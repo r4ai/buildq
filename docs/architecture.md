@@ -230,6 +230,24 @@ Idle member size estimates are reused across builds for up to 60 seconds.
 Automatic budget checks may defer enforcement until the next refresh.
 `cache ls --refresh` and actual GC passes remeasure before eviction.
 
+### Free-Space Guard
+
+Before leasing a pooled member, a Cargo build checks free space on the cache
+volume. At or below `min_free`, it runs GC once and refuses the build with exit
+code `125` if space is still insufficient. It does not hold a slot waiting for
+space to become available.
+
+During pooled compilation, free space is checked every 100 ms and at completion.
+A failed check stops the build process tree before releasing its slot and member;
+`cargo run` does not launch the application. This also applies with
+`kill_tree = false`. History records the failed build, and a later invocation
+can retry after space is recovered. Failure to measure free space also refuses
+the build.
+
+This is a best-effort reserve, not a filesystem quota: concurrent writers can
+consume space between checks. Set `[cache] min_free = "0"` to disable the guard.
+Commands outside the target pool are not guarded.
+
 ### Explicit Target Dirs
 
 A job that sets `--target-dir` or `CARGO_TARGET_DIR` itself (e.g. an agent building an A/B baseline) bypasses the pool by default:

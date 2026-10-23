@@ -34,6 +34,13 @@ rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を�
 | :--- | :--- | :--- |
 | `max_per_worktree` | `BUILDQ_MAX_PER_WORKTREE` | `ceil(slots / 2)`、`0` で無効 |
 
+プール内のビルドが `min_free` の診断（終了コード `125`）で失敗した場合は、
+キャッシュのボリュームの空き容量を回復して再試行する。
+開始前には GC を1回試み、実行中も空き容量の基準を下回れば停止する。
+`buildq cache ls --refresh` と `buildq gc` で未使用キャッシュを確認・回収できる。
+ボリュームに適した値を設定する。`min_free = "0"` で保護を無効化できる。
+対象範囲と制限は [Free-Space Guard](architecture.ja.md#free-space-guard) を参照する。
+
 ## Live Monitoring
 
 `buildq top` は実行中ジョブ、待機列と待機時間、リモートの待機列、ターゲットプール容量を1秒ごとに更新する。

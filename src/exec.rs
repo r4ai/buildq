@@ -35,6 +35,53 @@ pub fn run(cmd: &mut Command, kill_tree: bool) -> io::Result<i32> {
     Ok(exit_code(st))
 }
 
+/// Spawn and monitor a guarded build. Pressure aborts always stop its entire
+/// owned process tree, including when normal kill-on-parent-exit is disabled.
+pub fn run_guarded(
+    cmd: &mut Command,
+    check: &mut dyn FnMut() -> io::Result<()>,
+) -> io::Result<i32> {
+    check()?;
+    let mut child = cmd.spawn()?;
+    let guard = ChildGuard::attach(&child, true);
+    wait_guarded(&mut child, guard, check)
+}
+
+pub fn wait_guarded(
+    child: &mut Child,
+    guard: ChildGuard,
+    check: &mut dyn FnMut() -> io::Result<()>,
+) -> io::Result<i32> {
+    loop {
+        let status = child.try_wait()?;
+        if let Err(error) = check() {
+            if status.is_none() {
+                #[cfg(unix)]
+                nix::kill_tree(child.id() as i32);
+                #[cfg(windows)]
+                if guard.job.is_none() {
+                    // Nested sandbox jobs can prevent assignment to our job.
+                    let _ = Command::new("taskkill")
+                        .args(["/F", "/T", "/PID", &child.id().to_string()])
+                        .stdout(std::process::Stdio::null())
+                        .stderr(std::process::Stdio::null())
+                        .status();
+                }
+            }
+            drop(guard);
+            if status.is_none() {
+                let _ = child.kill();
+                let _ = child.wait();
+            }
+            return Err(error);
+        }
+        if let Some(status) = status {
+            return Ok(exit_code(status));
+        }
+        std::thread::sleep(std::time::Duration::from_millis(100));
+    }
+}
+
 /// Spawns a process that outlives us (background gc).
 pub fn spawn_detached(cmd: &mut Command) -> io::Result<()> {
     #[cfg(windows)]
