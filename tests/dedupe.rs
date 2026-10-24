@@ -382,14 +382,24 @@ fn cross_pool_sharing_is_charged_once_and_survives_retiring_a_pool() {
 /// m0 holds a stale unit (hash `a…`, superseded by `b…`) whose rlib it shares
 /// with m1, where it is still the only unit and so is not pruned.
 #[cfg(unix)]
-fn stale_shared_unit(c: &Config) -> Option<()> {
-    put(
+fn stale_shared_unit(c: &Config, uplift: bool) -> Option<()> {
+    let stale = put(
         c,
         "p",
         0,
         "debug/deps/libdep-aaaaaaaaaaaaaaaa.rlib",
         &[1; 10_000],
     );
+    if uplift {
+        // Cargo's uplifted name keeps the stale inode alive after pruning.
+        let uplifted = stale
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .join("libdep.rlib");
+        fs::hard_link(&stale, uplifted).unwrap();
+    }
     put(
         c,
         "p",
@@ -431,7 +441,7 @@ fn pruning_a_copy_another_member_shares_frees_only_its_own_bytes() {
         for id in [0, 1] {
             used(&c, id, buildq::util::now_ms());
         }
-        if stale_shared_unit(&c).is_none() {
+        if stale_shared_unit(&c, false).is_none() {
             return;
         }
         let before = buildq::gc::scan(&c, true).total;
@@ -459,7 +469,7 @@ fn dry_run_projects_eviction_after_pruning_like_a_real_run() {
         let mut c = cfg(temp.path());
         used(&c, 0, buildq::util::now_ms());
         used(&c, 1, buildq::util::now_ms() - 60_000);
-        if stale_shared_unit(&c).is_none() {
+        if stale_shared_unit(&c, false).is_none() {
             return;
         }
         // After pruning: the new unit (5010) in m0, the old one (10010) in m1.
@@ -524,4 +534,33 @@ fn a_failed_eviction_keeps_its_shared_blocks_charged() {
     // The trash copy still holds the shared blocks: evicting m1 frees only
     // its own file.
     assert_eq!(r.freed, 1000, "{r:?}");
+}
+
+#[cfg(unix)]
+#[test]
+fn a_surviving_hard_link_keeps_a_pruned_copy_shared() {
+    for dry_run in [true, false] {
+        let temp = tempfile::tempdir().unwrap();
+        let c = cfg(temp.path());
+        for id in [0, 1] {
+            used(&c, id, buildq::util::now_ms());
+        }
+        if stale_shared_unit(&c, true).is_none() {
+            return;
+        }
+        let r = buildq::gc::gc(
+            &c,
+            &buildq::gc::Options {
+                dry_run,
+                ..Default::default()
+            },
+        );
+        // The inode survives through its alias: only the fingerprint goes.
+        assert_eq!(r.freed, 10, "dry_run={dry_run} {r:?}");
+        if !dry_run {
+            assert!(c.cache_dir.join("pools/p/m0/debug/libdep.rlib").exists());
+            let usage = buildq::gc::scan(&c, true);
+            assert_eq!(usage.pools[0].shared, 10_000, "{usage:?}");
+        }
+    }
 }

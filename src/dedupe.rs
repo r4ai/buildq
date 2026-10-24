@@ -100,6 +100,10 @@ pub struct Entry {
     pub pool: String,
     pub member: usize,
     pub rel: String,
+    /// Other names of the inode in the member, such as Cargo's uplifted
+    /// hard links: the blocks stay held while any name survives.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub aliases: Vec<String>,
     pub dev: u64,
     pub ino: u64,
     pub len: u64,
@@ -120,12 +124,17 @@ pub struct Ledger {
 type Key = (String, usize, String);
 
 impl Entry {
-    fn of(pool: &str, member: usize, rel: &Path, md: &fs::Metadata) -> Option<Entry> {
+    fn of(c: &Candidate, md: &fs::Metadata) -> Option<Entry> {
         let (dev, ino) = file_id(md)?;
         Some(Entry {
-            pool: pool.to_string(),
-            member,
-            rel: rel.to_string_lossy().into_owned(),
+            pool: c.pool.clone(),
+            member: c.member,
+            rel: c.rel.to_string_lossy().into_owned(),
+            aliases: c
+                .aliases
+                .iter()
+                .map(|a| a.to_string_lossy().into_owned())
+                .collect(),
             dev,
             ino,
             len: md.len(),
@@ -137,12 +146,16 @@ impl Entry {
         (self.pool.clone(), self.member, self.rel.clone())
     }
 
-    fn path(&self, cache_dir: &Path) -> PathBuf {
-        cache_dir
+    /// The recorded path first, then its aliases.
+    fn paths(&self, cache_dir: &Path) -> Vec<PathBuf> {
+        let member = cache_dir
             .join("pools")
             .join(&self.pool)
-            .join(format!("m{}", self.member))
-            .join(&self.rel)
+            .join(format!("m{}", self.member));
+        std::iter::once(&self.rel)
+            .chain(&self.aliases)
+            .map(|rel| member.join(rel))
+            .collect()
     }
 
     fn matches(&self, md: &fs::Metadata) -> bool {
@@ -152,11 +165,20 @@ impl Entry {
             && mtime_ns(md) == self.mtime_ns
     }
 
-    /// The current metadata when the path still holds the recorded file.
+    /// The current metadata when any recorded name still holds the file.
     fn current(&self, cache_dir: &Path) -> Option<fs::Metadata> {
-        fs::symlink_metadata(self.path(cache_dir))
-            .ok()
-            .filter(|md| self.matches(md))
+        self.current_excluding(cache_dir, &|_| false)
+    }
+
+    fn current_excluding(
+        &self,
+        cache_dir: &Path,
+        excluded: &dyn Fn(&Path) -> bool,
+    ) -> Option<fs::Metadata> {
+        self.paths(cache_dir)
+            .iter()
+            .filter(|p| !excluded(p))
+            .find_map(|p| fs::symlink_metadata(p).ok().filter(|md| self.matches(md)))
     }
 }
 
@@ -236,7 +258,8 @@ struct Shared {
 struct Holder {
     pool: String,
     member: usize,
-    path: PathBuf,
+    /// Every recorded name of the holder's inode; the first is its key.
+    paths: Vec<PathBuf>,
 }
 
 impl Holder {
@@ -266,11 +289,7 @@ impl Sharing {
             let mut bytes = 0;
             let mut holders: Vec<Holder> = Vec::new();
             for e in &group.entries {
-                let path = e.path(&cfg.cache_dir);
-                if excluded(&path) {
-                    continue;
-                }
-                let Some(md) = e.current(&cfg.cache_dir) else {
+                let Some(md) = e.current_excluding(&cfg.cache_dir, excluded) else {
                     continue;
                 };
                 if !seen.insert((e.dev, e.ino)) || holders.iter().any(|h| h.is(&e.pool, e.member)) {
@@ -280,7 +299,7 @@ impl Sharing {
                 holders.push(Holder {
                     pool: e.pool.clone(),
                     member: e.member,
-                    path,
+                    paths: e.paths(&cfg.cache_dir),
                 });
             }
             if holders.len() > 1 {
@@ -325,8 +344,10 @@ impl Sharing {
     }
 
     /// Bytes that pruning `removed` paths of one member did not free, because
-    /// another holder keeps the blocks. `gone` collects pruned holder paths
-    /// across members, so the last holder's removal is credited in full.
+    /// another holder keeps the blocks. A holder is pruned only when all its
+    /// names are; a surviving alias keeps its blocks, which the member's own
+    /// measurement already excludes. `gone` collects pruned holders across
+    /// members, so the last holder's removal is credited in full.
     pub fn pruned_discount(
         &self,
         pool: &str,
@@ -339,11 +360,11 @@ impl Sharing {
             let Some(mine) = g.holders.iter().find(|h| h.is(pool, id)) else {
                 continue;
             };
-            if !removed(&mine.path) {
+            if !mine.paths.iter().all(|p| removed(p)) {
                 continue;
             }
-            gone.insert(mine.path.clone());
-            if g.holders.iter().any(|h| !gone.contains(&h.path)) {
+            gone.insert(mine.paths[0].clone());
+            if g.holders.iter().any(|h| !gone.contains(&h.paths[0])) {
                 kept += g.bytes;
             }
         }
@@ -358,6 +379,8 @@ struct Candidate {
     member: usize,
     member_dir: PathBuf,
     rel: PathBuf,
+    /// Other names of the same inode in the member.
+    aliases: Vec<PathBuf>,
     path: PathBuf,
     md: fs::Metadata,
 }
@@ -527,13 +550,35 @@ fn index(cfg: &Config, opts: &Options, report: &mut Report) -> BTreeMap<GroupKey
                         member: id,
                         member_dir: dir.clone(),
                         rel: rel.to_path_buf(),
+                        aliases: Vec::new(),
                         path: path.to_path_buf(),
                         md: md.clone(),
                     });
             });
         }
     }
+    link_aliases(&mut groups);
     groups
+}
+
+/// Fills in the other names each hard-linked candidate has in its member.
+fn link_aliases(groups: &mut BTreeMap<GroupKey, Vec<Candidate>>) {
+    let mut names: BTreeMap<(String, usize, (u64, u64)), Vec<PathBuf>> = BTreeMap::new();
+    for c in groups.values().flatten() {
+        if let Some(id) = file_id(&c.md).filter(|_| nlink(&c.md) > 1) {
+            names
+                .entry((c.pool.clone(), c.member, id))
+                .or_default()
+                .push(c.rel.clone());
+        }
+    }
+    for c in groups.values_mut().flatten() {
+        if let Some(id) = file_id(&c.md).filter(|_| nlink(&c.md) > 1)
+            && let Some(all) = names.get(&(c.pool.clone(), c.member, id))
+        {
+            c.aliases = all.iter().filter(|r| **r != c.rel).cloned().collect();
+        }
+    }
 }
 
 /// Temporary clones of an interrupted pass. Called under the member lock.
@@ -642,7 +687,7 @@ fn share_pair(work: &[Work], opts: &Options, ledger: &mut Ledger, report: &mut R
                 let entry = |c: &Candidate| {
                     fs::symlink_metadata(&c.path)
                         .ok()
-                        .and_then(|md| Entry::of(&c.pool, c.member, &c.rel, &md))
+                        .and_then(|md| Entry::of(c, &md))
                 };
                 if let (Some(canonical), Some(other)) = (entry(w.canonical), entry(w.other)) {
                     ledger.record(canonical, other);
