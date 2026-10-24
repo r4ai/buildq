@@ -3,6 +3,6 @@ name = "bevy-heavy-probe"
 version = "0.1.0"
 edition = "2024"
 [dependencies]
-bevy = { version = "=0.16.1", default-features = false, features = ["bevy_pbr", "png", "multi_threaded"] }
+bevy = { version = "=0.20.0", default-features = false, features = ["bevy_pbr", "png", "multi_threaded"] }
 [profile.dev]
 debug = 0
