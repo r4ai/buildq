@@ -105,11 +105,35 @@ pub enum DedupeMode {
     Off,
 }
 
+/// What runs queued cargo jobs.
+#[derive(Debug, Default, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum CargoBackend {
+    /// The real cargo itself.
+    #[default]
+    Cargo,
+    /// mr-boxington wrapping the real cargo; buildq keeps owning targets.
+    Mbx,
+}
+
+impl CargoBackend {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Cargo => "cargo",
+            Self::Mbx => "mbx",
+        }
+    }
+}
+
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 #[serde(default, deny_unknown_fields)]
 pub struct CargoFile {
     /// Path of the real cargo (default: next `cargo` on PATH after the shim).
     pub real: Option<PathBuf>,
+    /// Launcher for queued jobs (default "cargo").
+    pub backend: CargoBackend,
+    /// Path of mbx for `backend = "mbx"` (default: `mbx` on PATH).
+    pub mbx: Option<PathBuf>,
     /// "none" (default: disable sccache etc. per job), "keep", or a wrapper path.
     pub rustc_wrapper: Option<String>,
     /// `CARGO_BUILD_JOBS` per job (default: cores / slots).
@@ -190,6 +214,8 @@ pub struct Config {
     pub dedupe_min_size: u64,
     pub dedupe_max_read: u64,
     pub real_cargo: Option<PathBuf>,
+    pub backend: CargoBackend,
+    pub mbx: Option<PathBuf>,
     pub wrapper: WrapperMode,
     pub jobs: usize,
     pub limit_test_threads: bool,
@@ -332,6 +358,8 @@ impl Config {
             real_cargo: env_nonempty("BUILDQ_REAL_CARGO")
                 .map(PathBuf::from)
                 .or(f.cargo.real),
+            backend: f.cargo.backend,
+            mbx: f.cargo.mbx,
             wrapper,
             jobs: f.cargo.jobs.unwrap_or((cores / slots).max(1)),
             limit_test_threads: f.cargo.limit_test_threads.unwrap_or(true),
@@ -438,6 +466,20 @@ pub fn describe(cfg: &Config) -> String {
                 crate::util::human_bytes(cfg.dedupe_max_read)
             ),
             DedupeMode::Off => "off".into(),
+        },
+    );
+    p(
+        &mut s,
+        "cargo backend",
+        match cfg.backend {
+            CargoBackend::Cargo => "cargo".into(),
+            CargoBackend::Mbx => format!(
+                "mbx ({}; buildq owns targets and lanes)",
+                cfg.mbx
+                    .as_deref()
+                    .map(show)
+                    .unwrap_or_else(|| "`mbx` on PATH".into())
+            ),
         },
     );
     p(&mut s, "rustc wrapper", format!("{:?}", cfg.wrapper));

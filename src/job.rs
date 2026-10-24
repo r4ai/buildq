@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::cargo::{self, Parsed, Route, TargetDirChoice};
-use crate::config::{Config, WrapperMode};
+use crate::config::{CargoBackend, Config, WrapperMode};
 use crate::exec;
 use crate::git::{self, Worktree};
 use crate::history;
@@ -200,6 +200,157 @@ fn real_cargo(cfg: &Config) -> Result<PathBuf, String> {
         crate::shim::shim_dir().as_deref(),
     )
     .ok_or_else(|| "cannot find the real cargo on PATH (set BUILDQ_REAL_CARGO)".to_string())
+}
+
+/// What a queued cargo job runs. Passthrough commands, nested cargo and
+/// buildq's own probes always use the real cargo directly.
+#[derive(Debug, PartialEq, Eq)]
+enum Launcher {
+    Cargo,
+    /// mbx wraps the real cargo (`CARGO`) and its compilers. buildq keeps
+    /// owning target placement, so mbx's views and check lanes stay off.
+    Mbx(PathBuf),
+}
+
+impl Launcher {
+    fn resolve(cfg: &Config, real: &Path) -> Result<Launcher, String> {
+        if cfg.backend == CargoBackend::Cargo {
+            return Ok(Launcher::Cargo);
+        }
+        let shim = crate::shim::shim_dir();
+        let mbx = match &cfg.mbx {
+            Some(p) if !p.is_file() => {
+                return Err(format!("cargo.mbx {} does not exist", p.display()));
+            }
+            Some(p) => p.clone(),
+            None => cargo::find_on_path(
+                if cfg!(windows) {
+                    &["mbx.exe", "mbx.cmd"]
+                } else {
+                    &["mbx"]
+                },
+                shim.as_deref(),
+            )
+            .ok_or("cargo.backend = \"mbx\": cannot find mbx on PATH (set cargo.mbx)")?,
+        };
+        mbx_launcher(mbx, real, &cfg.wrapper)
+    }
+
+    /// The job's command with `args`, whose aliases are expanded.
+    fn command(&self, real: &Path, args: &[String]) -> Command {
+        let Launcher::Mbx(mbx) = self else {
+            let mut c = Command::new(real);
+            c.args(args);
+            return c;
+        };
+        let Some(args) = mbx_args(args) else {
+            note(
+                "cargo.backend = \"mbx\": mbx cannot forward this command line to Cargo; running cargo without mbx",
+            );
+            let mut c = Command::new(real);
+            c.args(args);
+            return c;
+        };
+        let mut c = Command::new(mbx);
+        c.args(args)
+            .env("CARGO", real)
+            .env("MBX_TARGET_VIEWS", "0")
+            .env("MBX_TARGET_LANES", "0");
+        c
+    }
+}
+
+/// Subcommands that read Cargo's global options after their name too.
+const GLOBALS_AFTER: &[&str] = &[
+    "build", "check", "test", "run", "bench", "doc", "rustc", "rustdoc", "fix", "install", "clippy",
+];
+
+/// mbx's own commands, which it never forwards to Cargo.
+const MBX_COMMANDS: &[&str] = &[
+    "completion",
+    "doctor",
+    "explain",
+    "analyze",
+    "edit",
+    "setup",
+    "settings",
+    "gc",
+    "cache",
+    "clean",
+    "adopt",
+    "tui",
+    "stats",
+    "prefetch",
+    "exec",
+    "reserve",
+    "cargo",
+    "help",
+];
+
+/// mbx accepts only `+toolchain` before the subcommand, while Cargo also takes
+/// its global options there. Moves them after a subcommand that reads them
+/// the same way; None when they cannot move: an external subcommand would get
+/// them as its own arguments, and `-C` must precede the subcommand.
+/// `args` must have aliases expanded: an alias such as `gc = "check"` would
+/// otherwise name one of mbx's own commands.
+fn mbx_args(args: &[String]) -> Option<Vec<String>> {
+    let start = args.iter().take_while(|a| a.starts_with('+')).count();
+    let mut i = start;
+    while let Some(a) = args.get(i).filter(|a| a.starts_with('-')) {
+        if a.starts_with("-C") {
+            return None;
+        }
+        i += if matches!(a.as_str(), "--config" | "--color" | "-Z") {
+            2
+        } else {
+            1
+        };
+    }
+    let sub = args.get(i)?.as_str();
+    if MBX_COMMANDS.contains(&sub) {
+        return None;
+    }
+    if i == start {
+        return Some(args.to_vec());
+    }
+    if !GLOBALS_AFTER.contains(&sub) {
+        return None;
+    }
+    let mut out = args[..start].to_vec();
+    out.push(args[i].clone());
+    out.extend_from_slice(&args[start..i]);
+    out.extend_from_slice(&args[i + 1..]);
+    Some(out)
+}
+
+/// Refuses chains that would loop (mbx -> buildq, cargo -> mbx) or silently
+/// stop caching (an explicit rustc wrapper, which mbx defers to).
+fn mbx_launcher(mbx: PathBuf, real: &Path, wrapper: &WrapperMode) -> Result<Launcher, String> {
+    if let WrapperMode::Path(p) = wrapper {
+        return Err(format!(
+            "cargo.rustc_wrapper = {p:?} conflicts with cargo.backend = \"mbx\": mbx sets RUSTC_WRAPPER itself and would not cache; use \"none\" or \"keep\""
+        ));
+    }
+    let is_buildq = env::current_exe().is_ok_and(|me| crate::util::same_path(&me, &mbx));
+    let in_shim_dir = mbx
+        .parent()
+        .is_some_and(|d| d.join(crate::shim::MARKER).exists());
+    if is_buildq || in_shim_dir {
+        return Err(format!(
+            "cargo.mbx {} is buildq itself; point cargo.mbx at the mbx binary",
+            mbx.display()
+        ));
+    }
+    // Only the resolved name: multiplexing shims (mise) canonicalize both
+    // cargo and mbx to the same binary without forming a loop.
+    let resolved = crate::util::canonical(real);
+    if crate::util::file_stem_lower(&resolved.to_string_lossy()) == "mbx" {
+        return Err(format!(
+            "the real cargo {} resolves to mbx; set cargo.real or BUILDQ_REAL_CARGO to the toolchain's cargo",
+            real.display()
+        ));
+    }
+    Ok(Launcher::Mbx(mbx))
 }
 
 pub struct Toolchain {
@@ -727,8 +878,9 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     if cargo::route(&parsed, &|s| cfg.is_heavy(s)) == Route::Passthrough {
         return passthrough(args);
     }
+    let launcher = Launcher::resolve(cfg, &real)?;
     if parsed.sub() == Some("run") && opt_absent(&parsed, "--message-format") {
-        return cargo_run(cfg, opts, &real, args, &parsed);
+        return cargo_run(cfg, opts, &real, &launcher, args, &parsed);
     }
     trace("parsed");
     // Lease the member before taking a slot: waiting for a busy member must
@@ -749,20 +901,25 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
         (Some(c), Some(l)) => refresh_after_wait(c, l, snapshot, &g),
         _ => snapshot,
     };
-    let (cmd_args, target) = cargo_args(args, &parsed, lease.as_ref(), ctx.as_ref());
+    // mbx parses the subcommand itself, so it gets the expanded alias.
+    let source = match launcher {
+        Launcher::Cargo => args.to_vec(),
+        Launcher::Mbx(_) => with_toolchain(&parsed, parsed.args.clone()),
+    };
+    let (cmd_args, target) = cargo_args(&source, &parsed, lease.as_ref(), ctx.as_ref());
     if let (Some(l), Some(c)) = (&lease, &ctx) {
         g.set_target(&format!("{}/{}", c.name, l.name()));
     }
     let started = now_ms();
-    let mut cmd = Command::new(&real);
-    cmd.args(&cmd_args);
+    let mut cmd = launcher.command(&real, &cmd_args);
+    let program = PathBuf::from(cmd.get_program());
     cargo_env(&mut cmd, cfg, &parsed, target.as_deref());
     let execution = if lease.is_some() && cfg.min_free > 0 {
         exec::run_guarded(&mut cmd, &mut || crate::storage::check(cfg))
     } else {
         exec::run(&mut cmd, cfg.kill_tree)
     }
-    .map_err(|e| format!("{}: {e}", real.display()));
+    .map_err(|e| format!("{}: {e}", program.display()));
     let code = execution.as_ref().copied().unwrap_or(125);
     trace("cargo finished");
     if let (Some(c), Some(l)) = (ctx.as_mut(), lease.as_mut()) {
@@ -1173,6 +1330,7 @@ fn cargo_run(
     cfg: &Config,
     opts: &Opts,
     real: &Path,
+    launcher: &Launcher,
     args: &[String],
     parsed: &Parsed,
 ) -> Result<i32, String> {
@@ -1224,8 +1382,9 @@ fn cargo_run(
     if let (Some(l), Some(c)) = (&lease, &ctx) {
         g.set_target(&format!("{}/{}", c.name, l.name()));
     }
-    let mut cmd = Command::new(real);
-    cmd.args(&cmd_args).stdout(Stdio::piped());
+    let mut cmd = launcher.command(real, &cmd_args);
+    let program = PathBuf::from(cmd.get_program());
+    cmd.stdout(Stdio::piped());
     cargo_env(&mut cmd, cfg, &build_parsed, target.as_deref());
     let enforce_reserve = lease.is_some() && cfg.min_free > 0;
     if enforce_reserve {
@@ -1233,7 +1392,7 @@ fn cargo_run(
     }
     let mut child = cmd
         .spawn()
-        .map_err(|e| format!("{}: {e}", real.display()))?;
+        .map_err(|e| format!("{}: {e}", program.display()))?;
     let guard = exec::ChildGuard::attach(&child, cfg.kill_tree || enforce_reserve);
     let output = child.stdout.take();
     let reader = std::thread::spawn(move || {
@@ -1654,6 +1813,67 @@ fn sync_into(dir: &Path, files: &[PathBuf]) -> io::Result<u64> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn mbx_args_move_cargo_globals_after_the_subcommand() {
+        let v = |s: &str| s.split_whitespace().map(str::to_string).collect::<Vec<_>>();
+        let moved = |s: &str| super::mbx_args(&v(s)).map(|a| a.join(" "));
+        assert_eq!(moved("build -p a").unwrap(), "build -p a");
+        assert_eq!(
+            moved("+nightly --color always -v --config x=1 -Z flag clippy -- -D w").unwrap(),
+            "+nightly clippy --color always -v --config x=1 -Z flag -- -D w"
+        );
+        assert_eq!(
+            moved("--config=x=1 --offline test --target-dir=t").unwrap(),
+            "test --config=x=1 --offline --target-dir=t"
+        );
+        // Plain external subcommands keep working; globals cannot move into them.
+        assert_eq!(moved("nextest run").unwrap(), "nextest run");
+        assert_eq!(moved("--locked nextest run"), None);
+        assert_eq!(moved("-C dir build"), None);
+        assert_eq!(moved("-Cdir build"), None);
+        // mbx would run its own command instead of forwarding to Cargo.
+        assert_eq!(moved("gc"), None);
+        assert_eq!(moved("+nightly --locked cache"), None);
+    }
+
+    #[test]
+    fn mbx_launcher_refuses_loops_and_explicit_wrappers() {
+        use super::{Launcher, WrapperMode, mbx_launcher};
+        let t = tempfile::tempdir().unwrap();
+        let bin = t.path().join("bin");
+        std::fs::create_dir_all(&bin).unwrap();
+        let mbx = bin.join("mbx");
+        let cargo = bin.join("cargo");
+        std::fs::write(&mbx, "").unwrap();
+        std::fs::write(&cargo, "").unwrap();
+        assert_eq!(
+            mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Disable),
+            Ok(Launcher::Mbx(mbx.clone()))
+        );
+        assert!(mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Keep).is_ok());
+        let err = mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Path("sccache".into()));
+        assert!(err.unwrap_err().contains("rustc_wrapper"));
+        // A real cargo that is mbx (or mbx's Cargo shim linked to it) loops.
+        assert!(
+            mbx_launcher(mbx.clone(), &mbx, &WrapperMode::Disable)
+                .unwrap_err()
+                .contains("BUILDQ_REAL_CARGO")
+        );
+        #[cfg(unix)]
+        {
+            let linked = t.path().join("cargo");
+            std::os::unix::fs::symlink(&mbx, &linked).unwrap();
+            assert!(mbx_launcher(mbx.clone(), &linked, &WrapperMode::Disable).is_err());
+        }
+        // mbx inside a buildq shim dir would re-enter buildq.
+        std::fs::write(bin.join(crate::shim::MARKER), "").unwrap();
+        assert!(
+            mbx_launcher(mbx, &cargo, &WrapperMode::Disable)
+                .unwrap_err()
+                .contains("buildq itself")
+        );
+    }
+
     #[test]
     fn build_dirs_cover_deps_for_bins_and_examples() {
         let t = tempfile::tempdir().unwrap();
