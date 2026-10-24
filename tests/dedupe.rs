@@ -313,6 +313,8 @@ fn passes_stopped_by_the_read_limit_resume_at_the_next_pair() {
 }
 
 /// Identical copies that differ from the group's first copy still share.
+/// Unix only: a pass remembers differing copies by file identity.
+#[cfg(unix)]
 #[test]
 fn copies_that_differ_from_the_first_are_compared_with_each_other() {
     let temp = tempfile::tempdir().unwrap();
