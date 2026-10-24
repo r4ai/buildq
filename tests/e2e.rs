@@ -1395,3 +1395,127 @@ fn run_applies_effective_cargo_config_environment() {
     assert!(expected.contains("BQ_FORCE=forced"));
     assert_eq!(run(&w.shim_cargo, true), expected);
 }
+
+/// A path dependency in a Git submodule (with a nested submodule) follows each
+/// worktree's own submodule contents: dirty edits, new submodule commits and
+/// nested edits, with normal timestamps and one shared pool member.
+#[test]
+fn pooled_builds_follow_each_worktrees_submodule_sources() {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(tmp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname = \"qa-submodule-app\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\nqa-subdep = { path = \"dep\" }\n\n[workspace]\nmembers = [\"dep\"]\n",
+            ),
+            (
+                "src/main.rs",
+                "fn main() { println!(\"{}-{}\", qa_subdep::value(), qa_subdep::nested()); }\n",
+            ),
+        ],
+    );
+    let lib = |v: &str| {
+        format!(
+            "pub fn value() -> &'static str {{ \"{v}\" }}\npub fn nested() -> &'static str {{ qa_nested::value() }}\n"
+        )
+    };
+    let commit = |dir: &Path| {
+        git(dir, &["add", "-A"]);
+        git(dir, &["commit", "-q", "-m", "c"]);
+    };
+    let sub = |dir: &Path, args: &[&str]| {
+        let mut all = vec!["-c", "protocol.file.allow=always"];
+        all.extend_from_slice(args);
+        git(dir, &all);
+    };
+    let nested = root.join("nested-origin");
+    fs::create_dir_all(nested.join("src")).unwrap();
+    fs::write(
+        nested.join("Cargo.toml"),
+        "[package]\nname = \"qa-nested\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+    )
+    .unwrap();
+    fs::write(
+        nested.join("src/lib.rs"),
+        "pub fn value() -> &'static str { \"N1\" }\n",
+    )
+    .unwrap();
+    git(&nested, &["init", "-q"]);
+    commit(&nested);
+    let dep = root.join("dep-origin");
+    fs::create_dir_all(dep.join("src")).unwrap();
+    fs::write(
+        dep.join("Cargo.toml"),
+        "[package]\nname = \"qa-subdep\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\nqa-nested = { path = \"nested\" }\n",
+    )
+    .unwrap();
+    fs::write(dep.join("src/lib.rs"), lib("A")).unwrap();
+    git(&dep, &["init", "-q"]);
+    sub(
+        &dep,
+        &["submodule", "add", "-q", nested.to_str().unwrap(), "nested"],
+    );
+    commit(&dep);
+
+    let a = root.join("ws");
+    let b = root.join("other");
+    git(&a, &["init", "-q"]);
+    sub(
+        &a,
+        &["submodule", "add", "-q", dep.to_str().unwrap(), "dep"],
+    );
+    sub(&a, &["submodule", "update", "-q", "--init", "--recursive"]);
+    w.plain(
+        &a,
+        &root.join("lock-target"),
+        &["generate-lockfile", "--offline"],
+    );
+    commit(&a);
+    git(
+        &a,
+        &["worktree", "add", "-q", "--detach", b.to_str().unwrap()],
+    );
+    sub(&b, &["submodule", "update", "-q", "--init", "--recursive"]);
+    // B is edited before A builds, so Cargo's mtime check cannot help.
+    fs::write(b.join("dep/src/lib.rs"), lib("B")).unwrap();
+    std::thread::sleep(Duration::from_secs(1));
+
+    let run = |dir: &Path, expected: &str| {
+        let (out, _) = w.cargo(dir, &["run", "--offline", "-p", "qa-submodule-app"]);
+        assert_eq!(
+            stdout(&out),
+            expected,
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        assert!(String::from_utf8_lossy(&out.stderr).contains("/m0 ("));
+    };
+    run(&a, "A-N1");
+    run(&b, "B-N1");
+    run(&a, "A-N1");
+    // Successive dirty edits, in the submodule and in the nested one.
+    fs::write(b.join("dep/src/lib.rs"), lib("B2")).unwrap();
+    run(&b, "B2-N1");
+    fs::write(
+        b.join("dep/nested/src/lib.rs"),
+        "pub fn value() -> &'static str { \"N2\" }\n",
+    )
+    .unwrap();
+    run(&b, "B2-N2");
+    run(&a, "A-N1");
+    // A new submodule commit, with a clean checkout.
+    fs::write(a.join("dep/src/lib.rs"), lib("C")).unwrap();
+    commit(&a.join("dep"));
+    commit(&a);
+    run(&a, "C-N1");
+    run(&b, "B2-N2");
+    // Control: plain Cargo with an independent target dir agrees.
+    let (out, _) = w.plain(
+        &b,
+        &root.join("plain-target"),
+        &["run", "--offline", "-p", "qa-submodule-app"],
+    );
+    assert_eq!(stdout(&out), "B2-N2");
+}

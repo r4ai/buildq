@@ -163,6 +163,7 @@ Before starting a build on member `m<i>`:
 1. **Snapshot worktree state**
    - Computes the worktree manifest via `git ls-files -s` and `git status`
    - Hashes modified and untracked files with `git hash-object` (ignoring gitignored files)
+   - Replaces each initialized submodule's gitlink with the submodule's own manifest, recursively, so path dependencies inside submodules are compared by content
 2. **Diff against member**
    - Compares the worktree manifest against `m<i>.manifest`
    - Maps each changed file to its owning Cargo package (nearest ancestor `Cargo.toml` with `[package]`)
