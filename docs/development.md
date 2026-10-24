@@ -232,7 +232,7 @@ buildq shim install cargo --into C:\bq\bin
 
 ## Releases
 
-Rust edition 2024, MSRV 1.89; CI and releases use Rust 1.99.0 from
+Rust edition 2024, MSRV 1.89; CI and releases use Rust 1.99.1 from
 `rust-toolchain.toml`. Toolchain updates must keep both CI versions green.
 CI checks formatting, strict Clippy, docs, dependencies, and real Cargo E2E
 on Linux, macOS, and Windows. Dependencies use weekly grouped Dependabot

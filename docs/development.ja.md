@@ -232,7 +232,7 @@ buildq shim install cargo --into C:\bq\bin
 ## Releases
 
 Rust edition は 2024、MSRV は 1.89 である。CI とリリースには
-`rust-toolchain.toml` の Rust 1.99.0 を使用する。
+`rust-toolchain.toml` の Rust 1.99.1 を使用する。
 ツールチェーン更新時は両バージョンの CI 成功を確認する。
 CI は整形、厳格な Clippy、ドキュメント、依存関係、および Linux・macOS・Windows
 での実 Cargo E2E を検査する。Dependabot は週次・グループ単位で更新を提案し、
