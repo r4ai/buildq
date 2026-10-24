@@ -443,6 +443,6 @@ POSIX クライアント（Linux・macOS・WSL）で両側に `rsync` を導入�
   - `kill_tree = true`（デフォルト）により、ビルド中に起動された常駐プロセスはジョブ終了時に終了する
 - **reflink の対応状況**
   - 重複排除は Linux（btrfs、`reflink=1` の XFS、bcachefs）と macOS（APFS）のみで動作する
-  - macOS では、uplift されたバイナリなどのハードリンクされたコピーは対象外とする（片方の置き換えでリンクが分かれるため）
+  - macOS では、uplift されたバイナリなどのハードリンクされたコピーは、すべての名前を clone に張り替える。索引に含まれない名前（`incremental/` 配下など）を持つコピーは、置き換えるとリンクが分かれるため対象外とする
 - **リモートホストのシェル要件**
   - リモートホストのデフォルトシェルは POSIX 互換である必要がある（Windows OpenSSH ホストの場合は Git Bash を設定）

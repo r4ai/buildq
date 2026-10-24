@@ -81,7 +81,8 @@ pub struct Report {
     pub skipped_busy: usize,
     /// Files whose size or identity changed between indexing and comparison.
     pub skipped_changed: usize,
-    /// Hard-linked copies that replacing would split (macOS).
+    /// Hard-linked copies with names outside the index, which replacing
+    /// would split (macOS).
     pub skipped_hardlinked: usize,
     /// Copies an earlier pass found different, with both files unchanged since.
     pub skipped_known_different: usize,
@@ -700,7 +701,9 @@ fn plan<'a>(
                 }
                 continue;
             }
-            if !KEEPS_INODE && nlink(&other.md) > 1 {
+            // Replacing the inode re-links every indexed name; a name the
+            // index does not know would be split off.
+            if !KEEPS_INODE && nlink(&other.md) > 1 + other.aliases.len() as u64 {
                 report.skipped_hardlinked += usize::from(first_time);
                 continue;
             }
@@ -932,7 +935,13 @@ fn share_pair(work: &[Work], opts: &Options, ledger: &mut Ledger, report: &mut R
             .other
             .member_dir
             .join(format!("{TMP_PREFIX}{}-{n}", std::process::id()));
-        match platform::share(&w.canonical.path, &w.other.path, &tmp) {
+        let aliases: Vec<PathBuf> = w
+            .other
+            .aliases
+            .iter()
+            .map(|a| w.other.member_dir.join(a))
+            .collect();
+        match platform::share(&w.canonical.path, &w.other.path, &aliases, &tmp) {
             Ok(Outcome::Shared) => {
                 report.identical += 1;
                 report.identical_bytes += bytes;
@@ -1100,7 +1109,7 @@ mod platform {
     use std::fs::{File, OpenOptions};
     use std::io;
     use std::os::fd::AsRawFd;
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     use super::{Failure, Outcome};
 
@@ -1138,7 +1147,13 @@ mod platform {
         }
     }
 
-    pub(super) fn share(src: &Path, dst: &Path, _tmp: &Path) -> Result<Outcome, Failure> {
+    /// Shares in place, so `dst`'s other names keep pointing at it.
+    pub(super) fn share(
+        src: &Path,
+        dst: &Path,
+        _aliases: &[PathBuf],
+        _tmp: &Path,
+    ) -> Result<Outcome, Failure> {
         let s = File::open(src).map_err(Failure::Io)?;
         // Owners may dedupe into a read-only descriptor; avoid write opens,
         // which a still-running test executable would refuse.
@@ -1208,7 +1223,7 @@ mod platform {
     use std::fs::{self, File, FileTimes};
     use std::io;
     use std::os::unix::ffi::OsStrExt;
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     use super::{Failure, Outcome};
 
@@ -1219,9 +1234,21 @@ mod platform {
         CString::new(p.as_os_str().as_bytes()).map_err(|e| Failure::Io(io::Error::other(e)))
     }
 
-    /// The caller compared both files and holds both member locks.
-    pub(super) fn share(src: &Path, dst: &Path, tmp: &Path) -> Result<Outcome, Failure> {
+    /// The caller compared both files and holds both member locks. `aliases`
+    /// are `dst`'s other names; each is re-linked to the clone so the
+    /// hard-link set stays together.
+    pub(super) fn share(
+        src: &Path,
+        dst: &Path,
+        aliases: &[PathBuf],
+        tmp: &Path,
+    ) -> Result<Outcome, Failure> {
         let md = fs::symlink_metadata(dst).map_err(Failure::Io)?;
+        if aliases.iter().any(|a| !same_inode(a, &md)) {
+            return Err(Failure::Io(io::Error::other(
+                "hard links changed since indexing",
+            )));
+        }
         let (src_c, tmp_c) = (c_path(src)?, c_path(tmp)?);
         let flags = CLONE_NOFOLLOW | CLONE_NOOWNERCOPY;
         if unsafe { libc::clonefile(src_c.as_ptr(), tmp_c.as_ptr(), flags) } != 0 {
@@ -1240,6 +1267,15 @@ mod platform {
                 .set_accessed(md.accessed()?)
                 .set_modified(md.modified()?);
             File::open(tmp)?.set_times(times)?;
+            // Aliases first: until `dst` moves, the clone has a known name.
+            for (i, alias) in aliases.iter().enumerate() {
+                let link = tmp.with_extension(format!("alias{i}"));
+                fs::hard_link(tmp, &link)?;
+                if let Err(e) = fs::rename(&link, alias) {
+                    let _ = fs::remove_file(&link);
+                    return Err(e);
+                }
+            }
             fs::rename(tmp, dst)
         };
         place().map_err(|e| {
@@ -1248,15 +1284,20 @@ mod platform {
         })?;
         Ok(Outcome::Shared)
     }
+
+    fn same_inode(path: &Path, md: &fs::Metadata) -> bool {
+        use std::os::unix::fs::MetadataExt;
+        fs::symlink_metadata(path).is_ok_and(|a| (a.dev(), a.ino()) == (md.dev(), md.ino()))
+    }
 }
 
 #[cfg(not(any(target_os = "linux", target_os = "macos")))]
 mod platform {
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     use super::{Failure, Outcome};
 
-    pub(super) fn share(_: &Path, _: &Path, _: &Path) -> Result<Outcome, Failure> {
+    pub(super) fn share(_: &Path, _: &Path, _: &[PathBuf], _: &Path) -> Result<Outcome, Failure> {
         Err(Failure::Unsupported(
             "buildq shares files only on Linux and macOS".into(),
         ))
