@@ -386,6 +386,29 @@ fn hard_linked_names_count_once() {
     }
 }
 
+/// An alias may pair with another counterpart than its first name did.
+#[cfg(unix)]
+#[test]
+fn an_alias_still_matches_a_different_counterpart() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    let up = |p: &Path| p.parent().unwrap().parent().unwrap().join("libdep.rlib");
+    let a = put(&c, "p", 0, RLIB, &[b'A'; 8192]);
+    fs::write(up(&a), [b'B'; 8192]).unwrap();
+    let b = put(&c, "p", 1, RLIB, &[b'B'; 8192]);
+    fs::hard_link(&b, up(&b)).unwrap();
+    let dry = dedupe::run(&c, &opts(&c, true));
+    if cfg!(target_os = "linux") {
+        assert_eq!(
+            (dry.compared, dry.identical, dry.differing),
+            (2, 1, 1),
+            "{dry:?}"
+        );
+    } else {
+        assert_eq!((dry.compared, dry.skipped_hardlinked), (0, 1), "{dry:?}");
+    }
+}
+
 #[cfg(unix)]
 #[test]
 fn hard_links_are_kept_together() {

@@ -292,12 +292,24 @@ impl Ledger {
         }
     }
 
-    /// Known-different pairs by both paths, the latest record winning.
+    /// Known-different pairs by both paths (aliases included), the latest
+    /// record winning.
     fn differing_index(&self) -> BTreeMap<(Key, Key), &[Entry; 2]> {
-        self.differing
-            .iter()
-            .map(|pair| ((pair[0].key(), pair[1].key()), pair))
-            .collect()
+        let names = |e: &Entry| -> Vec<Key> {
+            std::iter::once(&e.rel)
+                .chain(&e.aliases)
+                .map(|rel| (e.pool.clone(), e.member, rel.clone()))
+                .collect()
+        };
+        let mut map = BTreeMap::new();
+        for pair in &self.differing {
+            for a in names(&pair[0]) {
+                for b in names(&pair[1]) {
+                    map.insert((a.clone(), b), pair);
+                }
+            }
+        }
+        map
     }
 }
 
@@ -501,6 +513,17 @@ impl Candidate {
     }
 }
 
+/// Pairs a pass already planned, by paths and by file identities: a
+/// hard-linked name must not bring the same two inodes back.
+#[derive(Default)]
+struct Planned {
+    paths: BTreeSet<(Key, Key)>,
+    inodes: BTreeSet<(Inode, Inode)>,
+}
+
+/// A member's file identity.
+type Inode = (String, usize, (u64, u64));
+
 /// A copy to share with the group's first (canonical) copy.
 struct Work<'a> {
     canonical: &'a Candidate,
@@ -538,7 +561,7 @@ pub fn run(cfg: &Config, opts: &Options) -> Report {
     // Copies that differ from a group's first copy may still match each
     // other: plan again with what this pass learned until nothing is new.
     // Later rounds only add comparisons; their plan counts repeat the first.
-    let mut planned = BTreeSet::new();
+    let mut planned = Planned::default();
     let mut first = true;
     while !report.stopped() {
         let mut scratch = Report::default();
@@ -584,7 +607,7 @@ pub fn run(cfg: &Config, opts: &Options) -> Report {
 fn plan<'a>(
     groups: &'a BTreeMap<GroupKey, Vec<Candidate>>,
     ledger: &Ledger,
-    planned: &mut BTreeSet<(Key, Key)>,
+    planned: &mut Planned,
     report: &mut Report,
 ) -> Vec<Work<'a>> {
     let recorded = ledger.index();
@@ -605,7 +628,13 @@ fn plan<'a>(
             .map(|(g, _)| *g)
     };
     let mut work: Vec<Work> = Vec::new();
-    let mut inodes = BTreeSet::new();
+    // Hard-linked names of one inode are one copy: count each inode once,
+    // and compare each pair of inodes once, through whichever names come
+    // first. Another name may still pair with a different counterpart.
+    let mut counted = BTreeSet::new();
+    let inode = |c: &Candidate| -> Option<Inode> {
+        file_id(&c.md).map(|id| (c.pool.clone(), c.member, id))
+    };
     for copies in groups.values().filter(|c| c.len() > 1) {
         // Keep sharing with the copy an earlier pass chose, if still intact.
         let canonical = copies
@@ -618,30 +647,30 @@ fn plan<'a>(
             .iter()
             .filter(|c| c.member_key() != canonical.member_key())
         {
-            // Hard-linked names of one inode are one copy: plan and count it
-            // once, through whichever name comes first.
-            if let Some(id) = file_id(&other.md)
-                && !inodes.insert((other.pool.clone(), other.member, id))
-            {
-                continue;
-            }
+            let first_time = inode(other).is_none_or(|id| counted.insert(id));
             let group = group_of(other);
             if group.is_some() && firsts.iter().any(|f| group_of(f) == group) {
-                report.already_shared += 1;
-                report.already_shared_bytes += footprint(&other.md, report.accounting);
+                if first_time {
+                    report.already_shared += 1;
+                    report.already_shared_bytes += footprint(&other.md, report.accounting);
+                }
                 continue;
             }
             if !KEEPS_INODE && nlink(&other.md) > 1 {
-                report.skipped_hardlinked += 1;
+                report.skipped_hardlinked += usize::from(first_time);
                 continue;
             }
             match firsts.iter().find(|f| !known_different(f, other)) {
                 None => {
-                    report.skipped_known_different += 1;
+                    report.skipped_known_different += usize::from(first_time);
                     firsts.push(other);
                 }
                 Some(first) => {
-                    if planned.insert((first.key(), other.key())) {
+                    let new_pair = match (inode(first), inode(other)) {
+                        (Some(a), Some(b)) => planned.inodes.insert((a, b)),
+                        _ => true,
+                    };
+                    if new_pair && planned.paths.insert((first.key(), other.key())) {
                         work.push(Work {
                             canonical: first,
                             other,
