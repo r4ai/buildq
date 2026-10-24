@@ -354,7 +354,11 @@ impl Sharing {
     /// already count such an inode once. Dropping a repeat only overstates
     /// usage, never understates it.
     pub fn load_excluding(cfg: &Config, excluded: &dyn Fn(&Path) -> bool) -> Sharing {
-        let ledger = Ledger::load(&cfg.cache_dir);
+        Self::from_ledger(cfg, &Ledger::load(&cfg.cache_dir), excluded)
+    }
+
+    /// Like `load_excluding` for a given ledger, such as a dry run's projection.
+    pub fn from_ledger(cfg: &Config, ledger: &Ledger, excluded: &dyn Fn(&Path) -> bool) -> Sharing {
         let mut seen = BTreeSet::new();
         let mut groups = Vec::new();
         for group in &ledger.groups {
@@ -393,6 +397,14 @@ impl Sharing {
             }
         }
         Sharing { groups }
+    }
+
+    /// Bytes subtracted from all pools together.
+    pub fn discount(&self) -> u64 {
+        self.groups
+            .iter()
+            .map(|g| g.bytes * (g.holders.len() as u64 - 1))
+            .sum()
     }
 
     /// Bytes to subtract from a pool's member sizes: every copy beyond a
@@ -542,6 +554,12 @@ impl Work<'_> {
 type GroupKey = (String, u64, PathBuf, u64);
 
 pub fn run(cfg: &Config, opts: &Options) -> Report {
+    run_projected(cfg, opts).0
+}
+
+/// Like `run`, also returning the ledger as the pass leaves it; a dry run's
+/// includes the sharing it would have done.
+pub fn run_projected(cfg: &Config, opts: &Options) -> (Report, Ledger) {
     let mut report = Report {
         dry_run: opts.dry_run,
         accounting: cfg.accounting,
@@ -550,11 +568,11 @@ pub fn run(cfg: &Config, opts: &Options) -> Report {
     let _ = fs::create_dir_all(&cfg.cache_dir);
     let Ok(Some(_lock)) = lock::try_lock(&cfg.cache_dir.join("dedupe.lock")) else {
         report.skipped = Some("another deduplication pass is running".into());
-        return report;
+        return (report, Ledger::load(&cfg.cache_dir));
     };
     if !opts.dry_run && !SUPPORTED {
         report.unsupported = Some("buildq shares files only on Linux and macOS".into());
-        return report;
+        return (report, Ledger::load(&cfg.cache_dir));
     }
     let mut ledger = Ledger::load(&cfg.cache_dir);
     let groups = index(cfg, opts, &mut report);
@@ -595,7 +613,7 @@ pub fn run(cfg: &Config, opts: &Options) -> Report {
             report.errors.push(format!("write ledger: {e}"));
         }
     }
-    report
+    (report, ledger)
 }
 
 /// Picks each group's canonical copy and the copies still to share with it,
@@ -867,6 +885,13 @@ fn share_pair(work: &[Work], opts: &Options, ledger: &mut Ledger, report: &mut R
             if opts.dry_run {
                 report.identical += 1;
                 report.identical_bytes += bytes;
+                // Unsaved: the projection callers read from `run_projected`.
+                if let (Some(canonical), Some(other)) = (
+                    Entry::of(w.canonical, &w.canonical.md),
+                    Entry::of(w.other, &w.other.md),
+                ) {
+                    ledger.record(canonical, other);
+                }
                 continue;
             }
         }

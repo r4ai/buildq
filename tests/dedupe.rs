@@ -474,9 +474,13 @@ fn gc_shares_before_budget_eviction_and_throttles_automatic_passes() {
         ..Default::default()
     };
 
+    // A dry run projects the same sharing without changing anything.
     let dry = gc(&c, &pass(true, false));
-    assert!(dry.dedupe.is_none());
+    assert_eq!(dry.dedupe.as_ref().map(|d| d.identical), Some(1), "{dry:?}");
+    assert_eq!((dry.freed, dry.after), (0, 30_000), "{dry:?}");
+    assert!(dry.actions.is_empty(), "{dry:?}");
     assert!(!c.cache_dir.join("dedupe.json").exists());
+    assert!(!c.cache_dir.join("dedupe.stamp").exists());
 
     let r = gc(&c, &pass(false, false));
     let Some(d) = &r.dedupe else { panic!("{r:?}") };

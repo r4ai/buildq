@@ -154,7 +154,9 @@ to release it. Compilations still release their build slots before execution.
 GC shares byte-identical build outputs between idle members, including members
 of other repositories on the same toolchain. Shared files keep their content,
 mode, and mtime, so Cargo still treats them as fresh. `cache ls` shows the
-shared bytes per pool, and the budget counts them once.
+shared bytes per pool, and the budget counts them once. `buildq gc --dry-run`
+compares files the same way (within `dedupe_max_read`) and projects evictions
+from the deduplicated usage.
 
 ```sh
 buildq cache dedupe --dry-run   # Measure duplication without changing files
