@@ -236,16 +236,16 @@ impl Launcher {
         mbx_launcher(mbx, real, &cfg.wrapper)
     }
 
-    /// The job's command with `args`; `sub` is the resolved subcommand.
-    fn command(&self, real: &Path, args: &[String], sub: Option<&str>) -> Command {
+    /// The job's command with `args`, whose aliases are expanded.
+    fn command(&self, real: &Path, args: &[String]) -> Command {
         let Launcher::Mbx(mbx) = self else {
             let mut c = Command::new(real);
             c.args(args);
             return c;
         };
-        let Some(args) = mbx_args(args, sub) else {
+        let Some(args) = mbx_args(args) else {
             note(
-                "cargo.backend = \"mbx\": these Cargo options cannot follow this subcommand, which mbx requires; running cargo without mbx",
+                "cargo.backend = \"mbx\": mbx cannot forward this command line to Cargo; running cargo without mbx",
             );
             let mut c = Command::new(real);
             c.args(args);
@@ -265,11 +265,35 @@ const GLOBALS_AFTER: &[&str] = &[
     "build", "check", "test", "run", "bench", "doc", "rustc", "rustdoc", "fix", "install", "clippy",
 ];
 
+/// mbx's own commands, which it never forwards to Cargo.
+const MBX_COMMANDS: &[&str] = &[
+    "completion",
+    "doctor",
+    "explain",
+    "analyze",
+    "edit",
+    "setup",
+    "settings",
+    "gc",
+    "cache",
+    "clean",
+    "adopt",
+    "tui",
+    "stats",
+    "prefetch",
+    "exec",
+    "reserve",
+    "cargo",
+    "help",
+];
+
 /// mbx accepts only `+toolchain` before the subcommand, while Cargo also takes
 /// its global options there. Moves them after a subcommand that reads them
 /// the same way; None when they cannot move: an external subcommand would get
 /// them as its own arguments, and `-C` must precede the subcommand.
-fn mbx_args(args: &[String], sub: Option<&str>) -> Option<Vec<String>> {
+/// `args` must have aliases expanded: an alias such as `gc = "check"` would
+/// otherwise name one of mbx's own commands.
+fn mbx_args(args: &[String]) -> Option<Vec<String>> {
     let start = args.iter().take_while(|a| a.starts_with('+')).count();
     let mut i = start;
     while let Some(a) = args.get(i).filter(|a| a.starts_with('-')) {
@@ -282,10 +306,14 @@ fn mbx_args(args: &[String], sub: Option<&str>) -> Option<Vec<String>> {
             1
         };
     }
+    let sub = args.get(i)?.as_str();
+    if MBX_COMMANDS.contains(&sub) {
+        return None;
+    }
     if i == start {
         return Some(args.to_vec());
     }
-    if i >= args.len() || !GLOBALS_AFTER.contains(&sub?) {
+    if !GLOBALS_AFTER.contains(&sub) {
         return None;
     }
     let mut out = args[..start].to_vec();
@@ -873,12 +901,17 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
         (Some(c), Some(l)) => refresh_after_wait(c, l, snapshot, &g),
         _ => snapshot,
     };
-    let (cmd_args, target) = cargo_args(args, &parsed, lease.as_ref(), ctx.as_ref());
+    // mbx parses the subcommand itself, so it gets the expanded alias.
+    let source = match launcher {
+        Launcher::Cargo => args.to_vec(),
+        Launcher::Mbx(_) => with_toolchain(&parsed, parsed.args.clone()),
+    };
+    let (cmd_args, target) = cargo_args(&source, &parsed, lease.as_ref(), ctx.as_ref());
     if let (Some(l), Some(c)) = (&lease, &ctx) {
         g.set_target(&format!("{}/{}", c.name, l.name()));
     }
     let started = now_ms();
-    let mut cmd = launcher.command(&real, &cmd_args, parsed.sub());
+    let mut cmd = launcher.command(&real, &cmd_args);
     let program = PathBuf::from(cmd.get_program());
     cargo_env(&mut cmd, cfg, &parsed, target.as_deref());
     let execution = if lease.is_some() && cfg.min_free > 0 {
@@ -1349,7 +1382,7 @@ fn cargo_run(
     if let (Some(l), Some(c)) = (&lease, &ctx) {
         g.set_target(&format!("{}/{}", c.name, l.name()));
     }
-    let mut cmd = launcher.command(real, &cmd_args, build_parsed.sub());
+    let mut cmd = launcher.command(real, &cmd_args);
     let program = PathBuf::from(cmd.get_program());
     cmd.stdout(Stdio::piped());
     cargo_env(&mut cmd, cfg, &build_parsed, target.as_deref());
@@ -1783,25 +1816,24 @@ mod tests {
     #[test]
     fn mbx_args_move_cargo_globals_after_the_subcommand() {
         let v = |s: &str| s.split_whitespace().map(str::to_string).collect::<Vec<_>>();
-        let moved = |s: &str, sub| super::mbx_args(&v(s), Some(sub)).map(|a| a.join(" "));
-        assert_eq!(moved("build -p a", "build").unwrap(), "build -p a");
+        let moved = |s: &str| super::mbx_args(&v(s)).map(|a| a.join(" "));
+        assert_eq!(moved("build -p a").unwrap(), "build -p a");
         assert_eq!(
-            moved(
-                "+nightly --color always -v --config x=1 -Z flag lint -- -D w",
-                "clippy"
-            )
-            .unwrap(),
-            "+nightly lint --color always -v --config x=1 -Z flag -- -D w"
+            moved("+nightly --color always -v --config x=1 -Z flag clippy -- -D w").unwrap(),
+            "+nightly clippy --color always -v --config x=1 -Z flag -- -D w"
         );
         assert_eq!(
-            moved("--config=x=1 --offline test --target-dir=t", "test").unwrap(),
+            moved("--config=x=1 --offline test --target-dir=t").unwrap(),
             "test --config=x=1 --offline --target-dir=t"
         );
         // Plain external subcommands keep working; globals cannot move into them.
-        assert_eq!(moved("nextest run", "nextest").unwrap(), "nextest run");
-        assert_eq!(moved("--locked nextest run", "nextest"), None);
-        assert_eq!(moved("-C dir build", "build"), None);
-        assert_eq!(moved("-Cdir build", "build"), None);
+        assert_eq!(moved("nextest run").unwrap(), "nextest run");
+        assert_eq!(moved("--locked nextest run"), None);
+        assert_eq!(moved("-C dir build"), None);
+        assert_eq!(moved("-Cdir build"), None);
+        // mbx would run its own command instead of forwarding to Cargo.
+        assert_eq!(moved("gc"), None);
+        assert_eq!(moved("+nightly --locked cache"), None);
     }
 
     #[test]

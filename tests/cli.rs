@@ -998,6 +998,16 @@ fn mbx_backend_wraps_queued_jobs_and_keeps_target_ownership() {
     let out = s.cargo(&["--color", "never", "-v", "check"], 0);
     assert!(out.status.success(), "{}", stderr(&out));
     assert!(line(&out, "MBX").starts_with("check --color never -v "));
+    // An alias reaches mbx expanded, even one named like an mbx command.
+    fs::write(
+        s.repo.join(".cargo/config.toml"),
+        "[alias]\ngc = \"check --all-targets\"\n",
+    )
+    .unwrap();
+    let out = s.cargo(&["--offline", "gc"], 0);
+    assert!(out.status.success(), "{}", stderr(&out));
+    assert!(line(&out, "MBX").starts_with("check --offline --all-targets "));
+
     // They cannot move into an external subcommand: cargo runs without mbx.
     let out = s.cargo(&["--locked", "nextest", "run"], 0);
     assert!(out.status.success(), "{}", stderr(&out));
@@ -1022,7 +1032,7 @@ fn mbx_backend_wraps_queued_jobs_and_keeps_target_ownership() {
     let out = s.cargo(&["build"], 0);
     assert!(!out.status.success());
     assert!(stderr(&out).contains("rustc_wrapper"), "{}", stderr(&out));
-    assert_eq!(s.history_len(), 3);
+    assert_eq!(s.history_len(), 4);
 
     // A missing mbx fails before queueing.
     fs::write(
@@ -1037,7 +1047,7 @@ fn mbx_backend_wraps_queued_jobs_and_keeps_target_ownership() {
         "{}",
         stderr(&out)
     );
-    assert_eq!(s.history_len(), 3);
+    assert_eq!(s.history_len(), 4);
 }
 
 fn stderr(out: &Output) -> String {

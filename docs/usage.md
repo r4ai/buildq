@@ -148,7 +148,8 @@ Responsibilities stay split:
   subcommand, so buildq moves Cargo's global options (`--config`, `--color`,
   `-v`, `--locked`, ...) after a built-in subcommand or `clippy`. Before an
   external subcommand, or with `-C`, they cannot move; that job runs the real
-  Cargo without mbx and says so.
+  Cargo without mbx and says so. Cargo aliases reach mbx expanded, so an alias
+  named like an mbx command (`gc`, `cache`, `doctor`, ...) still runs Cargo.
 - Only queued jobs use mbx. Light commands, nested Cargo inside a job, and
   buildq's own `cargo metadata` probes run the real Cargo directly.
 
