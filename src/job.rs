@@ -544,15 +544,15 @@ fn lease_member(cfg: &Config, ctx: &mut PoolCtx) -> Result<Lease, String> {
 
 /// After the job: a file edited while cargo ran may have been compiled in
 /// its old or new form, so its package is invalidated for the next worktree.
-/// Only uncommitted files touched since the job started can be affected,
+/// Only uncommitted files touched since the manifest snapshot can be affected,
 /// which keeps this to one `git status`.
-fn after_job(cfg: &Config, ctx: &mut PoolCtx, lease: &mut Lease, started_ms: u64) {
+fn after_job(cfg: &Config, ctx: &mut PoolCtx, lease: &mut Lease, snapshot_ms: u64) {
     let changed: Vec<String> = git::dirty(&ctx.wt)
         .into_iter()
         .filter(|p| {
             fs::metadata(ctx.wt.root.join(p))
                 .and_then(|m| m.modified())
-                .map(|t| system_time_ms(t) + 1000 >= started_ms)
+                .map(|t| system_time_ms(t) + 1000 >= snapshot_ms)
                 .unwrap_or(ctx.manifest.contains_key(p))
         })
         .collect();
@@ -692,6 +692,9 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     // Lease the member before taking a slot: waiting for a busy member must
     // not hold machine-wide build capacity. Slot holders never wait on a
     // member, so this order cannot deadlock.
+    // Edits after the manifest snapshot, even while waiting for a slot, must
+    // reach the after-job check.
+    let snapshot = now_ms();
     let (mut ctx, external) = open_pool(cfg, &real, &parsed);
     trace("pool opened (git + toolchain + manifest)");
     let mut lease = match ctx.as_mut() {
@@ -718,7 +721,7 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     let code = execution.as_ref().copied().unwrap_or(125);
     trace("cargo finished");
     if let (Some(c), Some(l)) = (ctx.as_mut(), lease.as_mut()) {
-        after_job(cfg, c, l, started);
+        after_job(cfg, c, l, snapshot);
         trace("after-job check");
         if code == 0
             && let Some(dest) = mirror_dest(cfg, c, &parsed)
@@ -1154,6 +1157,7 @@ fn cargo_run(
     };
 
     // Member first, then slot (see `cargo_cached`).
+    let snapshot = now_ms();
     let (mut ctx, external) = open_pool(cfg, real, &build_parsed);
     let mut lease = match ctx.as_mut() {
         Some(c) => Some(lease_member(cfg, c)?),
@@ -1169,7 +1173,6 @@ fn cargo_run(
     if let (Some(l), Some(c)) = (&lease, &ctx) {
         g.set_target(&format!("{}/{}", c.name, l.name()));
     }
-    let started = now_ms();
     let mut cmd = Command::new(real);
     cmd.args(&cmd_args).stdout(Stdio::piped());
     cargo_env(&mut cmd, cfg, &build_parsed, target.as_deref());
@@ -1247,7 +1250,7 @@ fn cargo_run(
         }
     }
     if let (Some(c), Some(l)) = (ctx.as_mut(), lease.as_mut()) {
-        after_job(cfg, c, l, started);
+        after_job(cfg, c, l, snapshot);
     }
     record(
         cfg,
