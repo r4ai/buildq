@@ -942,15 +942,15 @@ struct World {
 }
 
 impl World {
-    fn cargo(&self, dir: &Path, args: &[&str]) -> (Output, Duration) {
+    /// The shim invocation in the isolated queue/cache environment.
+    fn command(&self, dir: &Path, args: &[&str]) -> Command {
         let config = self.root.join("q/config.toml");
         if !config.exists() {
             fs::create_dir_all(config.parent().unwrap()).unwrap();
             fs::write(&config, "[cache]\nmin_free='0'\n").unwrap();
         }
-        let t = Instant::now();
-        let out = Command::new(&self.shim_cargo)
-            .args(args)
+        let mut cmd = Command::new(&self.shim_cargo);
+        cmd.args(args)
             .current_dir(dir)
             .env("PATH", &self.path)
             .env("BUILDQ_DIR", self.root.join("q"))
@@ -960,9 +960,13 @@ impl World {
             .env_remove("BUILDQ_HELD")
             .env_remove("CARGO_TARGET_DIR")
             // CI forces colour; `compiled` matches plain "Compiling" lines.
-            .env("CARGO_TERM_COLOR", "never")
-            .output()
-            .unwrap();
+            .env("CARGO_TERM_COLOR", "never");
+        cmd
+    }
+
+    fn cargo(&self, dir: &Path, args: &[&str]) -> (Output, Duration) {
+        let t = Instant::now();
+        let out = self.command(dir, args).output().unwrap();
         let d = t.elapsed();
         assert!(
             out.status.success(),
@@ -1518,4 +1522,160 @@ fn pooled_builds_follow_each_worktrees_submodule_sources() {
         &["run", "--offline", "-p", "qa-submodule-app"],
     );
     assert_eq!(stdout(&out), "B2-N2");
+}
+
+/// Kills still-running children when a test fails before releasing them.
+struct Children(Vec<std::process::Child>);
+
+impl Drop for Children {
+    fn drop(&mut self) {
+        for c in &mut self.0 {
+            let _ = c.kill();
+            let _ = c.wait();
+        }
+    }
+}
+
+fn wait_until(what: &str, mut ready: impl FnMut() -> bool) {
+    let deadline = Instant::now() + Duration::from_secs(120);
+    while !ready() {
+        assert!(Instant::now() < deadline, "timed out waiting for {what}");
+        std::thread::sleep(Duration::from_millis(50));
+    }
+}
+
+/// A build that waits for its repository's busy member must not hold a build
+/// slot: an independent repository builds meanwhile, and the waiters resume
+/// once the native applications that retain the members exit.
+#[cfg(unix)]
+fn member_wait_frees_slots(slots: usize) {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(tmp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='qa'\nversion='0.1.0'\nedition='2021'\nbuild='build.rs'\n",
+            ),
+            (
+                "native.rs",
+                "#[no_mangle]\npub extern \"C\" fn native_answer() -> u32 { 42 }\n",
+            ),
+            (
+                "build.rs",
+                r#"use std::{env, path::PathBuf, process::Command};
+fn main() {
+    let out = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let src = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join("native.rs");
+    let ext = if cfg!(target_os = "macos") { "dylib" } else { "so" };
+    let st = Command::new(env::var("RUSTC").unwrap())
+        .args(["--crate-type", "cdylib", "--crate-name", "qa_native", "--edition", "2021"])
+        .arg("-o").arg(out.join(format!("libqa_native.{ext}"))).arg(&src)
+        .status().unwrap();
+    assert!(st.success());
+    println!("cargo:rustc-link-search=native={}", out.display());
+    println!("cargo:rustc-link-lib=dylib=qa_native");
+    println!("cargo:rerun-if-changed=native.rs");
+}
+"#,
+            ),
+            (
+                "src/main.rs",
+                r#"extern "C" { fn native_answer() -> u32; }
+fn main() {
+    let a: Vec<String> = std::env::args().collect();
+    std::fs::write(&a[1], unsafe { native_answer() }.to_string()).unwrap();
+    while !std::path::Path::new(&a[2]).exists() {
+        std::thread::sleep(std::time::Duration::from_millis(50));
+    }
+}
+"#,
+            ),
+        ],
+    );
+    let a = root.join("ws");
+    let b = root.join("other");
+    fs::create_dir_all(b.join("src")).unwrap();
+    fs::write(
+        b.join("Cargo.toml"),
+        "[package]\nname='indep'\nversion='0.1.0'\nedition='2021'\n",
+    )
+    .unwrap();
+    fs::write(b.join("src/main.rs"), "fn main() {}\n").unwrap();
+    for dir in [&a, &b] {
+        git(dir, &["init", "-q"]);
+        git(dir, &["add", "-A"]);
+        git(dir, &["commit", "-q", "-m", "init"]);
+    }
+    fs::create_dir_all(root.join("q")).unwrap();
+    fs::write(
+        root.join("q/config.toml"),
+        format!(
+            "slots = {slots}\nrun_slots = 4\npoll_ms = 20\n[cache]\nmin_free='0'\nmax_members = {slots}\n"
+        ),
+    )
+    .unwrap();
+    let release = root.join("release");
+    let mut kids = Children(Vec::new());
+    // One native application per allowed member keeps the whole pool leased.
+    for i in 0..slots {
+        let marker = root.join(format!("ready{i}"));
+        let app = w
+            .command(&a, &["run", "--offline", "--"])
+            .args([&marker, &release])
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap();
+        kids.0.push(app);
+        wait_until("native app", || marker.exists());
+    }
+    // As many builds as slots now wait for a member.
+    let mut logs = Vec::new();
+    for i in 0..slots {
+        let log = root.join(format!("wait{i}.log"));
+        let build = w
+            .command(&a, &["build", "--offline"])
+            .stderr(fs::File::create(&log).unwrap())
+            .spawn()
+            .unwrap();
+        kids.0.push(build);
+        logs.push(log);
+    }
+    for log in &logs {
+        wait_until("member wait", || {
+            fs::read_to_string(log).is_ok_and(|s| s.contains("waiting for one"))
+        });
+    }
+    let mut other = w
+        .command(&b, &["build", "--offline"])
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    wait_until("independent repository build", || {
+        other.try_wait().unwrap().is_some()
+    });
+    assert!(other.wait().unwrap().success());
+    for waiter in &mut kids.0[slots..] {
+        assert!(
+            waiter.try_wait().unwrap().is_none(),
+            "waiter finished early"
+        );
+    }
+    fs::write(&release, "").unwrap();
+    for kid in &mut kids.0 {
+        assert!(kid.wait().unwrap().success());
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn member_wait_does_not_hold_the_only_build_slot() {
+    member_wait_frees_slots(1);
+}
+
+#[cfg(unix)]
+#[test]
+fn member_waits_do_not_hold_any_build_slot() {
+    member_wait_frees_slots(2);
 }

@@ -689,8 +689,9 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
         return cargo_run(cfg, opts, &real, args, &parsed);
     }
     trace("parsed");
-    let mut g = acquire(cfg, opts, &format!("cargo {}", display_cmd(args)))?;
-    trace("slot acquired");
+    // Lease the member before taking a slot: waiting for a busy member must
+    // not hold machine-wide build capacity. Slot holders never wait on a
+    // member, so this order cannot deadlock.
     let (mut ctx, external) = open_pool(cfg, &real, &parsed);
     trace("pool opened (git + toolchain + manifest)");
     let mut lease = match ctx.as_mut() {
@@ -698,6 +699,8 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
         None => None,
     };
     trace("member leased");
+    let mut g = acquire(cfg, opts, &format!("cargo {}", display_cmd(args)))?;
+    trace("slot acquired");
     let (cmd_args, target) = cargo_args(args, &parsed, lease.as_ref(), ctx.as_ref());
     if let (Some(l), Some(c)) = (&lease, &ctx) {
         g.set_target(&format!("{}/{}", c.name, l.name()));
@@ -1150,12 +1153,13 @@ fn cargo_run(
         ..parsed.clone()
     };
 
-    let mut g = acquire(cfg, opts, &format!("cargo {}", display_cmd(args)))?;
+    // Member first, then slot (see `cargo_cached`).
     let (mut ctx, external) = open_pool(cfg, real, &build_parsed);
     let mut lease = match ctx.as_mut() {
         Some(c) => Some(lease_member(cfg, c)?),
         None => None,
     };
+    let mut g = acquire(cfg, opts, &format!("cargo {}", display_cmd(args)))?;
     let (cmd_args, target) = cargo_args(
         &with_toolchain(parsed, build),
         &build_parsed,

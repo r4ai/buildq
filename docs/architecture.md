@@ -10,9 +10,9 @@ flowchart TD
     Cmd["Agent runs cargo cmd"] --> Shim["cargo shim"]
     Shim --> IsHeavy{"Heavy subcommand?"}
     IsHeavy -- "No (fmt, metadata)" --> Direct["Run real cargo directly"]
-    IsHeavy -- "Yes (build, test, run)" --> Queue["Acquire class slot (OS file lock)"]
-    Queue --> Pool["Lease best target/ member"]
-    Pool --> Manifest["Diff Git blob manifest & invalidate .fingerprint"]
+    IsHeavy -- "Yes (build, test, run)" --> Pool["Lease best target/ member (waits without a slot)"]
+    Pool --> Queue["Acquire class slot (OS file lock)"]
+    Queue --> Manifest["Diff Git blob manifest & invalidate .fingerprint"]
     Manifest --> Cargo["Execute real cargo"]
     Cargo --> IsRun{"Is cargo run?"}
     IsRun -- "No" --> Release["Save manifest, release member & slot"]
@@ -124,6 +124,7 @@ $BUILDQ_CACHE/
 - **Pool**: groups all worktrees of a Git repository (`git rev-parse --git-common-dir`) on one Rust toolchain (`rustc -vV`)
 - **Members**: up to `max_members` target directories (`m0`, `m1`, ...) per pool
 - **Exclusive lease**: each build leases one member exclusively (requires at least `slots` members for parallel builds)
+- **Lease before slot**: a build takes its member first and a build slot second, so a job waiting for a busy member (e.g. one retained by a native app) holds no machine-wide capacity and independent repositories keep building. Slot holders never wait for a member, so the order cannot deadlock
 
 ### Why Naive Sharing Fails
 
@@ -215,7 +216,7 @@ Running a binary directly inside `m0/debug/app.exe` would cause subsequent build
 
 `buildq` splits `cargo run` (and aliases resolving to `run`) into two phases:
 
-1. **Build Phase** (holds `build` slot + pool member `m<i>`)
+1. **Build Phase** (holds pool member `m<i>`, then `build` slot)
    - Runs `cargo build` with `--message-format=json-render-diagnostics` and the resolved `--bin`
    - Parses Cargo's JSON artifact messages for the executable, DLLs/dylibs, `.pdb` symbols, and link paths
    - Incrementally copies new or modified files (by size and `mtime`) into `$BUILDQ_CACHE/runs/r<j>`
