@@ -313,6 +313,14 @@ impl Sharing {
                 let Some(md) = e.current_excluding(&cfg.cache_dir, excluded) else {
                     continue;
                 };
+                // Removing one name of a surviving inode changes its ctime,
+                // which a real removal makes revoke the discount: project it.
+                if e.paths(&cfg.cache_dir)
+                    .iter()
+                    .any(|p| excluded(p) && fs::symlink_metadata(p).is_ok_and(|md| e.matches(&md)))
+                {
+                    continue;
+                }
                 if !seen.insert((e.dev, e.ino)) || holders.iter().any(|h| h.is(&e.pool, e.member)) {
                     continue;
                 }
@@ -368,6 +376,34 @@ impl Sharing {
             })
             .map(|g| g.bytes)
             .sum()
+    }
+
+    /// Usage that pruning `removed` paths adds back by revoking discounts:
+    /// removing some names of a holder changes its ctime, so the holder
+    /// stops matching and its surviving names count in full. Holders whose
+    /// names all go are freed through `pruned_discount` instead.
+    pub fn revoked_discount(&self, removed: &dyn Fn(&Path) -> bool) -> u64 {
+        let mut revoked = 0;
+        for g in &self.groups {
+            let (mut full, mut partial) = (0, 0);
+            for h in &g.holders {
+                let n = h.paths.iter().filter(|p| removed(p)).count();
+                if n == h.paths.len() {
+                    full += 1;
+                } else if n > 0 {
+                    partial += 1;
+                }
+            }
+            if partial == 0 || full == g.holders.len() {
+                continue;
+            }
+            let rest = g.holders.len() - full - partial;
+            // The group counted one copy; afterwards the partial holders
+            // count in full and the intact rest share one copy among them.
+            let after = (partial + rest.min(1)) as u64 * g.bytes;
+            revoked += after.saturating_sub(g.bytes);
+        }
+        revoked
     }
 
     /// Bytes that pruning `removed` paths of one member did not free, because

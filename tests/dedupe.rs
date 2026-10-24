@@ -569,6 +569,7 @@ fn a_failed_eviction_keeps_its_shared_blocks_charged() {
 #[cfg(unix)]
 #[test]
 fn a_surviving_hard_link_keeps_a_pruned_copy_shared() {
+    let mut after = Vec::new();
     for dry_run in [true, false] {
         let temp = tempfile::tempdir().unwrap();
         let c = cfg(temp.path());
@@ -587,14 +588,18 @@ fn a_surviving_hard_link_keeps_a_pruned_copy_shared() {
         );
         // The inode survives through its alias: only the fingerprint goes.
         assert_eq!(r.freed, 10, "dry_run={dry_run} {r:?}");
+        after.push(r.after);
         if !dry_run {
             assert!(c.cache_dir.join("pools/p/m0/debug/libdep.rlib").exists());
             // Unlinking a name changes the inode's ctime, which a rewrite
             // would too: the survivor is conservatively counted in full.
             let usage = buildq::gc::scan(&c, true);
             assert_eq!(usage.pools[0].shared, 0, "{usage:?}");
+            assert_eq!(usage.total, r.after);
         }
     }
+    // A dry run projects the same usage the real run leaves.
+    assert_eq!(after[0], after[1], "{after:?}");
 }
 
 #[cfg(unix)]
