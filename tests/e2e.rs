@@ -1679,3 +1679,91 @@ fn member_wait_does_not_hold_the_only_build_slot() {
 fn member_waits_do_not_hold_any_build_slot() {
     member_wait_frees_slots(2);
 }
+
+/// A source edit made while a leased build waits for a slot, with an old
+/// mtime, still reaches the member's manifest before Cargo builds.
+#[cfg(unix)]
+#[test]
+fn edits_during_a_slot_wait_reach_the_member_manifest() {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(tmp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='waiter'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            ("src/lib.rs", "pub fn v() -> u32 { 1 }\n"),
+        ],
+    );
+    let ws = root.join("ws");
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "-A"]);
+    git(&ws, &["commit", "-q", "-m", "init"]);
+    fs::create_dir_all(root.join("q")).unwrap();
+    fs::write(
+        root.join("q/config.toml"),
+        "slots = 1\n[cache]\nmin_free='0'\nmax_members=1\n",
+    )
+    .unwrap();
+    w.cargo(&ws, &["build", "--offline"]);
+
+    let (held, release) = (root.join("held"), root.join("release"));
+    let mut children = Children(Vec::new());
+    children.0.push(
+        Command::new(BQ)
+            .args(["run", "--", "sh", "-c"])
+            .arg(format!(
+                "touch '{}'; while [ ! -f '{}' ]; do sleep 0.05; done",
+                held.display(),
+                release.display()
+            ))
+            .env("BUILDQ_DIR", root.join("q"))
+            .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+            .env_remove("BUILDQ_HELD")
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap(),
+    );
+    wait_until("the slot holder", || held.exists());
+    children.0.push(
+        w.command(&ws, &["build", "--offline"])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap(),
+    );
+    let waiters = || {
+        let out = Command::new(BQ)
+            .args(["status", "--json"])
+            .env("BUILDQ_DIR", root.join("q"))
+            .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+            .output()
+            .unwrap();
+        let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap_or_default();
+        v["classes"][0]["waiters"].as_array().map_or(0, Vec::len)
+    };
+    wait_until("the build to wait for a slot", || waiters() > 0);
+    let lib = ws.join("src/lib.rs");
+    fs::write(&lib, "pub fn v() -> u32 { 2 }\n").unwrap();
+    set_old_mtime(&lib);
+    fs::write(&release, "").unwrap();
+    let build = children.0.pop().unwrap();
+    assert!(build.wait_with_output().unwrap().status.success());
+
+    let blob = Command::new("git")
+        .args(["hash-object", "src/lib.rs"])
+        .current_dir(&ws)
+        .output()
+        .unwrap();
+    let blob = String::from_utf8_lossy(&blob.stdout).trim().to_string();
+    let pools = fs::read_dir(root.join("cache/pools")).unwrap();
+    let pool = pools.flatten().find(|e| e.path().is_dir()).unwrap().path();
+    let manifest = fs::read_to_string(pool.join("m0.manifest")).unwrap();
+    assert!(
+        manifest.lines().any(|l| l == format!("{blob} src/lib.rs")),
+        "{manifest}"
+    );
+}
