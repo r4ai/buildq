@@ -590,3 +590,31 @@ fn a_rewritten_canonical_starts_a_new_group() {
     let members: Vec<usize> = groups[0].entries.iter().map(|e| e.member).collect();
     assert_eq!(members, vec![0, 2]);
 }
+
+#[cfg(unix)]
+#[test]
+fn a_replaced_alias_does_not_keep_a_pruned_copy_alive() {
+    for dry_run in [true, false] {
+        let temp = tempfile::tempdir().unwrap();
+        let c = cfg(temp.path());
+        for id in [0, 1] {
+            used(&c, id, buildq::util::now_ms());
+        }
+        if stale_shared_unit(&c, true).is_none() {
+            return;
+        }
+        // Cargo uplifts a newer build: the alias now names another inode.
+        let uplifted = c.cache_dir.join("pools/p/m0/debug/libdep.rlib");
+        fs::remove_file(&uplifted).unwrap();
+        fs::write(&uplifted, [3; 10_000]).unwrap();
+        let r = buildq::gc::gc(
+            &c,
+            &buildq::gc::Options {
+                dry_run,
+                ..Default::default()
+            },
+        );
+        // Pruning the stale rlib frees nothing: m1 still shares its blocks.
+        assert_eq!(r.freed, 10, "dry_run={dry_run} {r:?}");
+    }
+}

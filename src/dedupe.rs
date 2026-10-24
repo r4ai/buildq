@@ -308,7 +308,13 @@ impl Sharing {
                 holders.push(Holder {
                     pool: e.pool.clone(),
                     member: e.member,
-                    paths: e.paths(&cfg.cache_dir),
+                    // Only names that still hold the file: a replaced alias
+                    // must not keep a pruned holder alive.
+                    paths: e
+                        .paths(&cfg.cache_dir)
+                        .into_iter()
+                        .filter(|p| fs::symlink_metadata(p).is_ok_and(|md| e.matches(&md)))
+                        .collect(),
                 });
             }
             if holders.len() > 1 {
