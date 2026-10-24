@@ -159,6 +159,7 @@ sequenceDiagram
 1. **現在の Worktree 状態をスナップショット**
    - `git ls-files -s` と `git status` を実行
    - 変更ファイル・未追跡ファイルを `git hash-object` でハッシュ化（gitignore 対象は除外）
+   - 初期化済みサブモジュールは gitlink の代わりにサブモジュール自身のマニフェストを再帰的に展開し、サブモジュール内の path 依存も内容で比較
 2. **メンバーのマニフェストと差分比較**
    - 現在のマニフェストと `m<i>.manifest` を比較
    - 内容が異なる各ファイルを、最も近い親ディレクトリの `Cargo.toml`（`[package]` を持つもの）に紐づけ

@@ -89,14 +89,38 @@ fn split_z(s: &str) -> impl Iterator<Item = &str> {
     s.split('\0').filter(|p| !p.is_empty())
 }
 
-/// Uncommitted paths: modified, staged, renamed (both names), deleted and untracked.
+/// Uncommitted paths: modified, staged, renamed (both names), deleted and
+/// untracked, including those inside initialized submodules.
 pub fn dirty(wt: &Worktree) -> Vec<String> {
-    let mut c = git(&wt.root);
+    dirty_in(&wt.root)
+}
+
+fn dirty_in(root: &Path) -> Vec<String> {
+    let mut c = git(root);
     c.args(["status", "--porcelain", "-z", "--untracked-files=all"]);
     let Some(s) = output(c) else {
         return Vec::new();
     };
-    parse_porcelain_z(&s)
+    let mut out = Vec::new();
+    for p in parse_porcelain_z(&s) {
+        // A changed submodule is reported as one entry; list its files instead.
+        if is_submodule_checkout(root, &p) {
+            out.extend(
+                dirty_in(&root.join(&p))
+                    .into_iter()
+                    .map(|f| format!("{p}/{f}")),
+            );
+        } else {
+            out.push(p);
+        }
+    }
+    out
+}
+
+/// An initialized submodule (or nested checkout) at a tracked path. Untracked
+/// directories are reported with a trailing slash and are not descended into.
+fn is_submodule_checkout(root: &Path, rel: &str) -> bool {
+    !rel.ends_with('/') && root.join(rel).join(".git").exists()
 }
 
 pub fn parse_porcelain_z(s: &str) -> Vec<String> {
@@ -120,47 +144,73 @@ pub fn parse_porcelain_z(s: &str) -> Vec<String> {
 
 /// Content ids of every file in the working tree: index blob ids for clean
 /// files, freshly hashed ids for modified and untracked ones (ignored files
-/// are not included).
+/// are not included). Initialized submodules contribute their own files, so a
+/// path dependency inside one is compared by content like any other package;
+/// None if one of them cannot be read.
 pub fn manifest(wt: &Worktree) -> Option<crate::pool::Manifest> {
+    manifest_in(&wt.root)
+}
+
+fn manifest_in(root: &Path) -> Option<crate::pool::Manifest> {
     // ls-files and status are independent: run them side by side.
-    let root = wt.root.clone();
+    let status_root = root.to_path_buf();
     let status = std::thread::spawn(move || {
-        let mut c = git(&root);
+        let mut c = git(&status_root);
         c.args(["status", "--porcelain", "-z", "--untracked-files=all"]);
         output(c).map(|s| parse_porcelain_z(&s))
     });
-    let mut c = git(&wt.root);
+    let mut c = git(root);
     c.args(["ls-files", "-s", "-z"]);
     let listing = output(c)?;
     let mut m = crate::pool::Manifest::new();
+    let mut submodules = Vec::new();
     for entry in split_z(&listing) {
         // "<mode> <blob> <stage>\t<path>"
         if let Some((meta, path)) = entry.split_once('\t') {
-            let blob = meta.split(' ').nth(1).unwrap_or("").to_string();
+            let mut meta = meta.split(' ');
+            let mode = meta.next().unwrap_or("");
+            let blob = meta.next().unwrap_or("").to_string();
+            if mode == "160000" {
+                submodules.push(path.to_string());
+            }
             m.insert(path.to_string(), blob);
         }
     }
     let dirty = status.join().ok()??;
     let mut to_hash = Vec::new();
     for p in dirty {
-        if wt.root.join(&p).is_file() {
+        if root.join(&p).is_file() {
             to_hash.push(p);
         } else {
             m.remove(&p);
         }
     }
-    for (p, id) in hash_objects(wt, &to_hash)? {
+    for (p, id) in hash_objects_in(root, &to_hash)? {
         m.insert(p, id);
+    }
+    // The gitlink only names a commit; an uninitialized submodule keeps it.
+    for sub in submodules {
+        if !is_submodule_checkout(root, &sub) {
+            continue;
+        }
+        m.remove(&sub);
+        for (p, id) in manifest_in(&root.join(&sub))? {
+            m.insert(format!("{sub}/{p}"), id);
+        }
     }
     Some(m)
 }
 
 /// `git hash-object` for several worktree files at once.
 pub fn hash_objects(wt: &Worktree, paths: &[String]) -> Option<Vec<(String, String)>> {
+    hash_objects_in(&wt.root, paths)
+}
+
+fn hash_objects_in(root: &Path, paths: &[String]) -> Option<Vec<(String, String)>> {
     if paths.is_empty() {
         return Some(Vec::new());
     }
-    let mut child = git(&wt.root)
+    let mut child = git(root)
         .args(["hash-object", "--stdin-paths"])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())

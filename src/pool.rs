@@ -58,6 +58,8 @@ pub type Manifest = BTreeMap<String, String>;
 #[derive(Debug, Default)]
 pub struct RebuildGraph {
     dependents: BTreeMap<String, BTreeSet<String>>,
+    /// Every workspace member, whether or not a manifest file maps to it.
+    members: BTreeSet<String>,
 }
 
 impl RebuildGraph {
@@ -79,6 +81,7 @@ impl RebuildGraph {
         let mut graph = Self::default();
         for package in &packages {
             let name = package["name"].as_str()?;
+            graph.members.insert(name.into());
             for dep in package["dependencies"].as_array()? {
                 let Some(path) = dep["path"].as_str() else {
                     continue;
@@ -114,6 +117,10 @@ impl RebuildGraph {
             }
         }
         affected.len()
+    }
+
+    pub fn members(&self) -> &BTreeSet<String> {
+        &self.members
     }
 }
 
@@ -451,12 +458,15 @@ impl Pool {
                 // absolute paths baked into code and build-script outputs.
                 // Invalidate all local packages before recording the new root,
                 // including on upgrade from metadata without a known root.
+                // Members are added from metadata too, so ownership gaps in
+                // the manifest cannot keep another root's artifacts.
                 if meta.source_root.as_deref() != Some(&wt.key()) {
                     for f in current.keys().chain(manifest.keys()) {
                         if let Some(pkg) = owners(f, prev.as_deref()) {
                             p.packages.insert(pkg);
                         }
                     }
+                    p.packages.extend(graph.members().iter().cloned());
                 }
                 let built = self.dir.join(format!("m{id}")).exists() && !manifest.is_empty();
                 let score = Score {
@@ -728,6 +738,14 @@ mod tests {
             ],
         });
         let mut graph = RebuildGraph::from_metadata(&meta).unwrap();
+        assert_eq!(
+            graph
+                .members()
+                .iter()
+                .map(String::as_str)
+                .collect::<Vec<_>>(),
+            ["a", "app", "b", "core", "unrelated"]
+        );
         let cost = |names: &[&str]| graph.cost(&names.iter().map(|s| s.to_string()).collect());
         assert_eq!(cost(&["core"]), 4);
         assert_eq!(cost(&["a", "b"]), 3);
@@ -784,6 +802,7 @@ mod tests {
                 "core".into(),
                 BTreeSet::from(["a".into(), "b".into(), "app".into()]),
             )]),
+            ..Default::default()
         };
         let lease = pool
             .lease(
