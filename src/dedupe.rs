@@ -222,11 +222,14 @@ impl Ledger {
     }
 
     /// Group index of every recorded path.
+    /// Aliases are indexed too: they name the same recorded inode.
     fn index(&self) -> BTreeMap<Key, (usize, &Entry)> {
         let mut map = BTreeMap::new();
         for (g, group) in self.groups.iter().enumerate() {
             for e in &group.entries {
-                map.insert(e.key(), (g, e));
+                for rel in e.aliases.iter().chain(std::iter::once(&e.rel)) {
+                    map.insert((e.pool.clone(), e.member, rel.clone()), (g, e));
+                }
             }
         }
         map
@@ -602,6 +605,7 @@ fn plan<'a>(
             .map(|(g, _)| *g)
     };
     let mut work: Vec<Work> = Vec::new();
+    let mut inodes = BTreeSet::new();
     for copies in groups.values().filter(|c| c.len() > 1) {
         // Keep sharing with the copy an earlier pass chose, if still intact.
         let canonical = copies
@@ -614,6 +618,13 @@ fn plan<'a>(
             .iter()
             .filter(|c| c.member_key() != canonical.member_key())
         {
+            // Hard-linked names of one inode are one copy: plan and count it
+            // once, through whichever name comes first.
+            if let Some(id) = file_id(&other.md)
+                && !inodes.insert((other.pool.clone(), other.member, id))
+            {
+                continue;
+            }
             let group = group_of(other);
             if group.is_some() && firsts.iter().any(|f| group_of(f) == group) {
                 report.already_shared += 1;
