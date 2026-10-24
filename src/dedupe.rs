@@ -268,21 +268,33 @@ impl Ledger {
             group.entries.retain(|e| e.current(cache_dir).is_some());
         }
         self.groups.retain(|g| g.entries.len() > 1);
-        self.differing
-            .retain(|pair| pair.iter().all(|e| e.current(cache_dir).is_some()));
+        let mut seen = BTreeSet::new();
+        // Latest record first, so an older one of the same pair is dropped.
+        self.differing.reverse();
+        self.differing.retain(|pair| {
+            seen.insert((pair[0].key(), pair[1].key()))
+                && pair.iter().all(|e| e.current(cache_dir).is_some())
+        });
+        self.differing.reverse();
     }
 
     /// Records that a comparison found the two indexed files different.
+    /// An earlier record of the same pair is dropped by `retain_current`.
     fn record_differing(&mut self, w: &Work) {
-        let (Some(a), Some(b)) = (
+        if let (Some(a), Some(b)) = (
             Entry::of(w.canonical, &w.canonical.md),
             Entry::of(w.other, &w.other.md),
-        ) else {
-            return;
-        };
-        let keys = [a.key(), b.key()];
-        self.differing.retain(|[x, y]| [x.key(), y.key()] != keys);
-        self.differing.push([a, b]);
+        ) {
+            self.differing.push([a, b]);
+        }
+    }
+
+    /// Known-different pairs by both paths, the latest record winning.
+    fn differing_index(&self) -> BTreeMap<(Key, Key), &[Entry; 2]> {
+        self.differing
+            .iter()
+            .map(|pair| ((pair[0].key(), pair[1].key()), pair))
+            .collect()
     }
 }
 
@@ -555,10 +567,11 @@ fn plan<'a>(
     report: &mut Report,
 ) -> Vec<Work<'a>> {
     let recorded = ledger.index();
+    let differing = ledger.differing_index();
     let known_different = |a: &Candidate, b: &Candidate| {
-        ledger.differing.iter().any(|[x, y]| {
-            x.key() == a.key() && x.matches(&a.md) && y.key() == b.key() && y.matches(&b.md)
-        })
+        differing
+            .get(&(a.key(), b.key()))
+            .is_some_and(|[x, y]| x.matches(&a.md) && y.matches(&b.md))
     };
     // The ledger group a candidate still belongs to.
     let group_of = |c: &Candidate| {
