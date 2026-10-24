@@ -296,28 +296,50 @@ fn passes_stopped_by_the_read_limit_resume_at_the_next_pair() {
     }
     let mut o = opts(&c, false);
     o.max_read = 2000;
-    let compared = |members: &[usize]| {
-        let ledger = buildq::dedupe::Ledger::load(&c.cache_dir);
-        let mut got: Vec<usize> = ledger.differing.iter().map(|[_, b]| b.member).collect();
-        got.sort();
-        assert_eq!(got, members, "{ledger:?}");
-    };
-    let r = dedupe::run(&c, &o);
-    if r.unsupported.is_some() {
-        return;
+    let known = || buildq::dedupe::Ledger::load(&c.cache_dir).differing.len();
+    // Room for one comparison per pass: each pass learns one new pair of
+    // the six, never repeating one, until a pass completes.
+    for n in 1..=6 {
+        let r = dedupe::run(&c, &o);
+        if r.unsupported.is_some() {
+            return;
+        }
+        assert_eq!(r.compared, 1, "{r:?}");
+        assert_eq!(known(), n);
     }
-    assert!(r.read_limited, "{r:?}");
-    compared(&[1]);
     let r = dedupe::run(&c, &o);
-    assert!(r.read_limited, "{r:?}");
-    compared(&[1, 2]);
-    // The last pair fits: the pass completes and forgets its resume point.
-    let r = dedupe::run(&c, &o);
-    assert!(!r.read_limited, "{r:?}");
-    compared(&[1, 2, 3]);
+    assert_eq!((r.compared, r.read_limited), (0, false), "{r:?}");
     assert!(buildq::dedupe::Ledger::load(&c.cache_dir).resume.is_none());
-    let r = dedupe::run(&c, &o);
-    assert_eq!((r.compared, r.skipped_known_different), (0, 3), "{r:?}");
+}
+
+/// Identical copies that differ from the group's first copy still share.
+#[test]
+fn copies_that_differ_from_the_first_are_compared_with_each_other() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    put(&c, "p", 0, RLIB, &[b'A'; 4096]);
+    put(&c, "p", 1, RLIB, &[b'B'; 4096]);
+    put(&c, "p", 2, RLIB, &[b'B'; 4096]);
+    put(&c, "p", 3, RLIB, &[b'C'; 4096]);
+    let r = dedupe::run(&c, &opts(&c, true));
+    assert!(r.errors.is_empty(), "{r:?}");
+    assert_eq!((r.compared, r.identical, r.differing), (5, 1, 4), "{r:?}");
+}
+
+#[cfg(unix)]
+#[test]
+fn groups_with_several_contents_share_within_each() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    put(&c, "p", 0, RLIB, &[b'A'; 4096]);
+    put(&c, "p", 1, RLIB, &[b'B'; 4096]);
+    put(&c, "p", 2, RLIB, &[b'B'; 4096]);
+    let Some(r) = share(&c) else { return };
+    assert_eq!((r.shared, r.differing), (1, 2), "{r:?}");
+    assert_eq!(buildq::gc::scan(&c, true).pools[0].shared, 4096);
+    // Nothing is left to compare on the next pass.
+    let r = share(&c).unwrap();
+    assert_eq!((r.compared, r.already_shared), (0, 1), "{r:?}");
 }
 
 #[cfg(unix)]

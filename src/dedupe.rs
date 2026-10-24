@@ -532,20 +532,33 @@ pub fn run(cfg: &Config, opts: &Options) -> Report {
     }
     let mut ledger = Ledger::load(&cfg.cache_dir);
     let groups = index(cfg, opts, &mut report);
-    let work = plan(&groups, &ledger, &mut report);
-    let mut start = 0;
-    while start < work.len() && !report.stopped() {
-        let end = start
-            + work[start..]
-                .iter()
-                .take_while(|w| w.pair() == work[start].pair())
-                .count();
-        share_pair(&work[start..end], opts, &mut ledger, &mut report);
-        if report.read_limited {
-            let ((a, i), (b, j)) = work[start].pair();
-            ledger.resume = Some([(a.into(), i), (b.into(), j)]);
+    // Copies that differ from a group's first copy may still match each
+    // other: plan again with what this pass learned until nothing is new.
+    // Later rounds only add comparisons; their plan counts repeat the first.
+    let mut planned = BTreeSet::new();
+    let mut first = true;
+    while !report.stopped() {
+        let mut scratch = Report::default();
+        let counts = if first { &mut report } else { &mut scratch };
+        let work = plan(&groups, &ledger, &mut planned, counts);
+        first = false;
+        if work.is_empty() {
+            break;
         }
-        start = end;
+        let mut start = 0;
+        while start < work.len() && !report.stopped() {
+            let end = start
+                + work[start..]
+                    .iter()
+                    .take_while(|w| w.pair() == work[start].pair())
+                    .count();
+            share_pair(&work[start..end], opts, &mut ledger, &mut report);
+            if report.read_limited {
+                let ((a, i), (b, j)) = work[start].pair();
+                ledger.resume = Some([(a.into(), i), (b.into(), j)]);
+            }
+            start = end;
+        }
     }
     if !report.read_limited && report.unsupported.is_none() {
         ledger.resume = None;
@@ -560,18 +573,26 @@ pub fn run(cfg: &Config, opts: &Options) -> Report {
 }
 
 /// Picks each group's canonical copy and the copies still to share with it,
-/// ordered by member pair so one pair's locks cover a run of work.
+/// ordered by member pair so one pair's locks cover a run of work. A copy
+/// known to differ from the canonical one is compared with the next copy
+/// that differs too, so groups with several contents share within each.
+/// `planned` holds the pairs this pass already planned, which are not
+/// planned again.
 fn plan<'a>(
     groups: &'a BTreeMap<GroupKey, Vec<Candidate>>,
     ledger: &Ledger,
+    planned: &mut BTreeSet<(Key, Key)>,
     report: &mut Report,
 ) -> Vec<Work<'a>> {
     let recorded = ledger.index();
     let differing = ledger.differing_index();
     let known_different = |a: &Candidate, b: &Candidate| {
-        differing
-            .get(&(a.key(), b.key()))
-            .is_some_and(|[x, y]| x.matches(&a.md) && y.matches(&b.md))
+        let pair = |x: &Candidate, y: &Candidate| {
+            differing
+                .get(&(x.key(), y.key()))
+                .is_some_and(|[e, f]| e.matches(&x.md) && f.matches(&y.md))
+        };
+        pair(a, b) || pair(b, a)
     };
     // The ledger group a candidate still belongs to.
     let group_of = |c: &Candidate| {
@@ -587,20 +608,35 @@ fn plan<'a>(
             .iter()
             .find(|c| group_of(c).is_some())
             .unwrap_or(&copies[0]);
-        let group = group_of(canonical);
+        // One copy per content found so far, the canonical one first.
+        let mut firsts: Vec<&Candidate> = vec![canonical];
         for other in copies
             .iter()
             .filter(|c| c.member_key() != canonical.member_key())
         {
-            if group.is_some() && group_of(other) == group {
+            let group = group_of(other);
+            if group.is_some() && firsts.iter().any(|f| group_of(f) == group) {
                 report.already_shared += 1;
                 report.already_shared_bytes += footprint(&other.md, report.accounting);
-            } else if known_different(canonical, other) {
-                report.skipped_known_different += 1;
-            } else if !KEEPS_INODE && nlink(&other.md) > 1 {
+                continue;
+            }
+            if !KEEPS_INODE && nlink(&other.md) > 1 {
                 report.skipped_hardlinked += 1;
-            } else {
-                work.push(Work { canonical, other });
+                continue;
+            }
+            match firsts.iter().find(|f| !known_different(f, other)) {
+                None => {
+                    report.skipped_known_different += 1;
+                    firsts.push(other);
+                }
+                Some(first) => {
+                    if planned.insert((first.key(), other.key())) {
+                        work.push(Work {
+                            canonical: first,
+                            other,
+                        });
+                    }
+                }
             }
         }
     }
