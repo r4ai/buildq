@@ -269,6 +269,17 @@ impl Ledger {
         self.groups.retain(|g| g.entries.len() > 1);
     }
 
+    /// Drops entries with an `excluded` name: removing one name of an inode
+    /// changes its ctime, so a real pass would no longer match them either.
+    fn forget(&mut self, cache_dir: &Path, excluded: &dyn Fn(&Path) -> bool) {
+        let kept = |e: &Entry| !e.paths(cache_dir).iter().any(|p| excluded(p));
+        for group in &mut self.groups {
+            group.entries.retain(kept);
+        }
+        self.groups.retain(|g| g.entries.len() > 1);
+        self.differing.retain(|pair| pair.iter().all(kept));
+    }
+
     /// Drops entries whose path no longer holds the recorded file.
     fn retain_current(&mut self, cache_dir: &Path) {
         for group in &mut self.groups {
@@ -585,6 +596,7 @@ pub fn run_projected(
         return (report, Ledger::load(&cfg.cache_dir));
     }
     let mut ledger = Ledger::load(&cfg.cache_dir);
+    ledger.forget(&cfg.cache_dir, excluded);
     let opts = &Options {
         project: opts.dry_run && can_share(&cfg.cache_dir.join("pools")),
         ..opts.clone()

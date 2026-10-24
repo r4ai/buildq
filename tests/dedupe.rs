@@ -638,6 +638,37 @@ fn stale_shared_unit(c: &Config, uplift: bool) -> Option<()> {
     Some(())
 }
 
+/// Pruning one name of a shared, uplifted copy makes a real pass compare
+/// the surviving names again; a dry run projects the same.
+#[cfg(unix)]
+#[test]
+fn dry_runs_replan_copies_whose_aliases_pruning_removes() {
+    let mut results = Vec::new();
+    for dry_run in [true, false] {
+        let temp = tempfile::tempdir().unwrap();
+        let c = cfg(temp.path());
+        for id in [0, 1] {
+            used(&c, id, buildq::util::now_ms());
+        }
+        let m1 = c.cache_dir.join("pools/p/m1/debug");
+        fs::create_dir_all(m1.join("deps")).unwrap();
+        fs::write(m1.join("libdep.rlib"), [1; 10_000]).unwrap();
+        if stale_shared_unit(&c, true).is_none() {
+            return;
+        }
+        let r = buildq::gc::gc(
+            &c,
+            &buildq::gc::Options {
+                dry_run,
+                dedupe: true,
+                ..Default::default()
+            },
+        );
+        results.push((r.after, r.actions.len()));
+    }
+    assert_eq!(results[0], results[1], "{results:?}");
+}
+
 #[cfg(unix)]
 #[test]
 fn pruning_a_copy_another_member_shares_frees_only_its_own_bytes() {
