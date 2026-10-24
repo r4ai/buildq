@@ -341,7 +341,8 @@ A pass never changes a path's content, length, mode, or mtime.
 Fingerprints, member manifests, and the pool safety invariant therefore stay valid.
 
 Allocated block counts report every clone in full. Usage therefore subtracts
-each recorded group's copies beyond the first while every recorded device,
+each recorded group's copies beyond the first (each at most its length rounded
+up to whole blocks: preallocation beyond EOF is not shared) while every recorded device,
 inode, length, mtime, and ctime still matches. A rewrite drops that path from
 its group, even one that restores the old mtime; so does any other status
 change, such as adding or removing a hard link, which only overstates usage.
