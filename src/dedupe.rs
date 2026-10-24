@@ -79,6 +79,8 @@ pub struct Report {
     pub skipped_changed: usize,
     /// Hard-linked copies that replacing would split (macOS).
     pub skipped_hardlinked: usize,
+    /// Copies an earlier pass found different, with both files unchanged since.
+    pub skipped_known_different: usize,
     pub read_bytes: u64,
     /// The read limit stopped the pass before every candidate was compared.
     pub read_limited: bool,
@@ -123,6 +125,13 @@ pub struct Group {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Ledger {
     pub groups: Vec<Group>,
+    /// Pairs a comparison found different, skipped until either file changes.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub differing: Vec<[Entry; 2]>,
+    /// The member pair at which the read limit stopped the last pass; the
+    /// next pass starts there so later pairs are not starved.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resume: Option<[(String, usize); 2]>,
 }
 
 type Key = (String, usize, String);
@@ -259,6 +268,33 @@ impl Ledger {
             group.entries.retain(|e| e.current(cache_dir).is_some());
         }
         self.groups.retain(|g| g.entries.len() > 1);
+        let mut seen = BTreeSet::new();
+        // Latest record first, so an older one of the same pair is dropped.
+        self.differing.reverse();
+        self.differing.retain(|pair| {
+            seen.insert((pair[0].key(), pair[1].key()))
+                && pair.iter().all(|e| e.current(cache_dir).is_some())
+        });
+        self.differing.reverse();
+    }
+
+    /// Records that a comparison found the two indexed files different.
+    /// An earlier record of the same pair is dropped by `retain_current`.
+    fn record_differing(&mut self, w: &Work) {
+        if let (Some(a), Some(b)) = (
+            Entry::of(w.canonical, &w.canonical.md),
+            Entry::of(w.other, &w.other.md),
+        ) {
+            self.differing.push([a, b]);
+        }
+    }
+
+    /// Known-different pairs by both paths, the latest record winning.
+    fn differing_index(&self) -> BTreeMap<(Key, Key), &[Entry; 2]> {
+        self.differing
+            .iter()
+            .map(|pair| ((pair[0].key(), pair[1].key()), pair))
+            .collect()
     }
 }
 
@@ -505,7 +541,14 @@ pub fn run(cfg: &Config, opts: &Options) -> Report {
                 .take_while(|w| w.pair() == work[start].pair())
                 .count();
         share_pair(&work[start..end], opts, &mut ledger, &mut report);
+        if report.read_limited {
+            let ((a, i), (b, j)) = work[start].pair();
+            ledger.resume = Some([(a.into(), i), (b.into(), j)]);
+        }
         start = end;
+    }
+    if !report.read_limited && report.unsupported.is_none() {
+        ledger.resume = None;
     }
     if !opts.dry_run {
         ledger.retain_current(&cfg.cache_dir);
@@ -524,6 +567,12 @@ fn plan<'a>(
     report: &mut Report,
 ) -> Vec<Work<'a>> {
     let recorded = ledger.index();
+    let differing = ledger.differing_index();
+    let known_different = |a: &Candidate, b: &Candidate| {
+        differing
+            .get(&(a.key(), b.key()))
+            .is_some_and(|[x, y]| x.matches(&a.md) && y.matches(&b.md))
+    };
     // The ledger group a candidate still belongs to.
     let group_of = |c: &Candidate| {
         recorded
@@ -546,6 +595,8 @@ fn plan<'a>(
             if group.is_some() && group_of(other) == group {
                 report.already_shared += 1;
                 report.already_shared_bytes += footprint(&other.md, report.accounting);
+            } else if known_different(canonical, other) {
+                report.skipped_known_different += 1;
             } else if !KEEPS_INODE && nlink(&other.md) > 1 {
                 report.skipped_hardlinked += 1;
             } else {
@@ -554,6 +605,11 @@ fn plan<'a>(
         }
     }
     work.sort_by(|a, b| a.pair().cmp(&b.pair()));
+    // Resume where the read limit stopped the last pass, then wrap around.
+    if let Some([(a, i), (b, j)]) = &ledger.resume {
+        let at = work.partition_point(|w| w.pair() < ((a.as_str(), *i), (b.as_str(), *j)));
+        work.rotate_left(at);
+    }
     work
 }
 
@@ -722,6 +778,7 @@ fn share_pair(work: &[Work], opts: &Options, ledger: &mut Ledger, report: &mut R
                 Ok(true) => {}
                 Ok(false) => {
                     report.differing += 1;
+                    ledger.record_differing(w);
                     continue;
                 }
                 Err(e) => {
@@ -756,7 +813,10 @@ fn share_pair(work: &[Work], opts: &Options, ledger: &mut Ledger, report: &mut R
                     ledger.record(canonical, other);
                 }
             }
-            Ok(Outcome::Differs) => report.differing += 1,
+            Ok(Outcome::Differs) => {
+                report.differing += 1;
+                ledger.record_differing(w);
+            }
             Err(Failure::Unsupported(why)) => {
                 report.unsupported = Some(why);
                 return;
@@ -1075,11 +1135,15 @@ pub fn render(r: &Report) -> String {
         human_bytes(r.already_shared_bytes)
     ));
     s.push_str(&format!(
-        "differing: {} files; skipped: {} busy, {} changed, {} hard-linked\n",
-        r.differing, r.skipped_busy, r.skipped_changed, r.skipped_hardlinked
+        "differing: {} files; skipped: {} known different, {} busy, {} changed, {} hard-linked\n",
+        r.differing,
+        r.skipped_known_different,
+        r.skipped_busy,
+        r.skipped_changed,
+        r.skipped_hardlinked
     ));
     if r.read_limited {
-        s.push_str("stopped at the read limit; shared files are skipped on the next pass\n");
+        s.push_str("stopped at the read limit; the next pass resumes here\n");
     }
     if let Some(why) = &r.unsupported {
         s.push_str(&format!("unsupported: {why}\n"));

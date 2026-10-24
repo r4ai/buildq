@@ -259,6 +259,69 @@ fn differing_files_and_leftover_clones() {
 
 #[cfg(unix)]
 #[test]
+fn known_different_copies_are_skipped_until_either_changes() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    put(&c, "p", 0, RLIB, &[1; 4096]);
+    let b = put(&c, "p", 1, RLIB, &[2; 4096]);
+    let Some(r) = share(&c) else { return };
+    assert_eq!((r.compared, r.differing), (1, 1), "{r:?}");
+
+    let r = share(&c).unwrap();
+    assert_eq!((r.compared, r.read_bytes), (0, 0), "{r:?}");
+    assert_eq!(r.skipped_known_different, 1, "{r:?}");
+
+    fs::write(&b, [1; 4096]).unwrap();
+    age(&b, 10);
+    let r = share(&c).unwrap();
+    assert_eq!(
+        (r.compared, r.shared, r.skipped_known_different),
+        (1, 1, 0),
+        "{r:?}"
+    );
+    assert!(
+        buildq::dedupe::Ledger::load(&c.cache_dir)
+            .differing
+            .is_empty()
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn passes_stopped_by_the_read_limit_resume_at_the_next_pair() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    for id in 0..4 {
+        put(&c, "p", id, RLIB, &[id as u8; 1000]);
+    }
+    let mut o = opts(&c, false);
+    o.max_read = 2000;
+    let compared = |members: &[usize]| {
+        let ledger = buildq::dedupe::Ledger::load(&c.cache_dir);
+        let mut got: Vec<usize> = ledger.differing.iter().map(|[_, b]| b.member).collect();
+        got.sort();
+        assert_eq!(got, members, "{ledger:?}");
+    };
+    let r = dedupe::run(&c, &o);
+    if r.unsupported.is_some() {
+        return;
+    }
+    assert!(r.read_limited, "{r:?}");
+    compared(&[1]);
+    let r = dedupe::run(&c, &o);
+    assert!(r.read_limited, "{r:?}");
+    compared(&[1, 2]);
+    // The last pair fits: the pass completes and forgets its resume point.
+    let r = dedupe::run(&c, &o);
+    assert!(!r.read_limited, "{r:?}");
+    compared(&[1, 2, 3]);
+    assert!(buildq::dedupe::Ledger::load(&c.cache_dir).resume.is_none());
+    let r = dedupe::run(&c, &o);
+    assert_eq!((r.compared, r.skipped_known_different), (0, 3), "{r:?}");
+}
+
+#[cfg(unix)]
+#[test]
 fn hard_links_are_kept_together() {
     let temp = tempfile::tempdir().unwrap();
     let c = cfg(temp.path());
