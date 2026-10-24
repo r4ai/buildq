@@ -331,6 +331,7 @@ them as reflinks:
    - Groups by toolchain, volume, relative path, and length
 2. **Share each copy** with its group's first copy under both member locks
    - Rechecks the indexed inode, length, and mtime
+   - A copy that differs from the first is compared with the next differing copy, so a group with several contents shares within each
    - Releases the locks every 1 GiB or second so leases are not starved
    - Linux: `FIDEDUPERANGE`; the kernel compares bytes and keeps the inode
    - macOS: compares bytes, `clonefile`s, restores mode and timestamps, then `rename`s over the path
