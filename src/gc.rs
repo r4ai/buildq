@@ -589,7 +589,10 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     // run compares them and projects the sharing instead
     let mut projected = None;
     if opts.dedupe && dedupe_due(&cfg, opts.auto) {
-        let (r, ledger) = dedupe::run_projected(&cfg, &dedupe::Options::new(&cfg, dry));
+        // A dry run compares only the files that pruning would keep.
+        let (r, ledger) = dedupe::run_projected(&cfg, &dedupe::Options::new(&cfg, dry), &|path| {
+            dry && removed(&report, dry, path)
+        });
         report
             .warnings
             .extend(r.errors.iter().map(|e| format!("dedupe: {e}")));

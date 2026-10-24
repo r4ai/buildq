@@ -44,6 +44,9 @@ pub struct Options {
     pub min_size: u64,
     /// Stop after reading this many bytes for comparisons.
     pub max_read: u64,
+    /// Dry runs on a volume that can share: record identical copies in the
+    /// (unsaved) ledger as if shared.
+    project: bool,
 }
 
 impl Options {
@@ -52,6 +55,7 @@ impl Options {
             dry_run,
             min_size: cfg.dedupe_min_size,
             max_read: cfg.dedupe_max_read,
+            project: false,
         }
     }
 }
@@ -554,12 +558,18 @@ impl Work<'_> {
 type GroupKey = (String, u64, PathBuf, u64);
 
 pub fn run(cfg: &Config, opts: &Options) -> Report {
-    run_projected(cfg, opts).0
+    run_projected(cfg, opts, &|_| false).0
 }
 
-/// Like `run`, also returning the ledger as the pass leaves it; a dry run's
-/// includes the sharing it would have done.
-pub fn run_projected(cfg: &Config, opts: &Options) -> (Report, Ledger) {
+/// Like `run`, also returning the ledger as the pass leaves it, and leaving
+/// out files for which `excluded` holds (such as a GC dry run's planned
+/// removals). A dry run's ledger includes the sharing it would have done,
+/// if the cache volume supports sharing at all.
+pub fn run_projected(
+    cfg: &Config,
+    opts: &Options,
+    excluded: &dyn Fn(&Path) -> bool,
+) -> (Report, Ledger) {
     let mut report = Report {
         dry_run: opts.dry_run,
         accounting: cfg.accounting,
@@ -575,7 +585,11 @@ pub fn run_projected(cfg: &Config, opts: &Options) -> (Report, Ledger) {
         return (report, Ledger::load(&cfg.cache_dir));
     }
     let mut ledger = Ledger::load(&cfg.cache_dir);
-    let groups = index(cfg, opts, &mut report);
+    let opts = &Options {
+        project: opts.dry_run && can_share(&cfg.cache_dir.join("pools")),
+        ..opts.clone()
+    };
+    let groups = index(cfg, opts, excluded, &mut report);
     // Copies that differ from a group's first copy may still match each
     // other: plan again with what this pass learned until nothing is new.
     // Later rounds only add comparisons; their plan counts repeat the first.
@@ -709,7 +723,12 @@ fn plan<'a>(
 
 /// Indexes eligible files of idle members in every pool. Pools and members
 /// are visited in order, so a group's first copy is the lowest (pool, id).
-fn index(cfg: &Config, opts: &Options, report: &mut Report) -> BTreeMap<GroupKey, Vec<Candidate>> {
+fn index(
+    cfg: &Config,
+    opts: &Options,
+    excluded: &dyn Fn(&Path) -> bool,
+    report: &mut Report,
+) -> BTreeMap<GroupKey, Vec<Candidate>> {
     let mut groups: BTreeMap<GroupKey, Vec<Candidate>> = BTreeMap::new();
     let mut pools: Vec<PathBuf> = fs::read_dir(cfg.cache_dir.join("pools"))
         .into_iter()
@@ -751,7 +770,7 @@ fn index(cfg: &Config, opts: &Options, report: &mut Report) -> BTreeMap<GroupKey
                 let Ok(rel) = path.strip_prefix(&dir) else {
                     return;
                 };
-                if !eligible(rel) {
+                if !eligible(rel) || excluded(path) {
                     return;
                 }
                 let dev = file_id(md).map_or(0, |(dev, _)| dev);
@@ -886,10 +905,12 @@ fn share_pair(work: &[Work], opts: &Options, ledger: &mut Ledger, report: &mut R
                 report.identical += 1;
                 report.identical_bytes += bytes;
                 // Unsaved: the projection callers read from `run_projected`.
-                if let (Some(canonical), Some(other)) = (
-                    Entry::of(w.canonical, &w.canonical.md),
-                    Entry::of(w.other, &w.other.md),
-                ) {
+                if opts.project
+                    && let (Some(canonical), Some(other)) = (
+                        Entry::of(w.canonical, &w.canonical.md),
+                        Entry::of(w.other, &w.other.md),
+                    )
+                {
                     ledger.record(canonical, other);
                 }
                 continue;
@@ -927,6 +948,23 @@ fn share_pair(work: &[Work], opts: &Options, ledger: &mut Ledger, report: &mut R
                 .push(format!("share {}: {e}", w.other.path.display())),
         }
     }
+}
+
+/// Whether `dir`'s volume can share data: shares two small temporary files.
+fn can_share(dir: &Path) -> bool {
+    if !SUPPORTED || fs::create_dir_all(dir).is_err() {
+        return false;
+    }
+    let name = |n: &str| dir.join(format!("{TMP_PREFIX}probe-{}-{n}", std::process::id()));
+    let (a, b, tmp) = (name("a"), name("b"), name("tmp"));
+    let data = vec![7u8; 1 << 16];
+    let shared = fs::write(&a, &data).is_ok()
+        && fs::write(&b, &data).is_ok()
+        && matches!(platform::share(&a, &b, &tmp), Ok(Outcome::Shared));
+    for p in [a, b, tmp] {
+        let _ = fs::remove_file(p);
+    }
+    shared
 }
 
 /// True when the path still names the file that was indexed.
