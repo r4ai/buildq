@@ -83,6 +83,42 @@ fn private_state_small_files_and_other_pools_are_not_candidates() {
     let r = dedupe::run(&c, &opts(&c, true));
     assert_eq!(r.compared, 0, "{r:?}");
     assert_eq!(r.pools, 2);
+    assert_eq!((r.indexed, r.candidates), (3, 0), "{r:?}");
+}
+
+/// Metadata cost of a pass that may read nothing, which `dedupe_max_read`
+/// does not bound: `BQ_INDEX_FILES=100000 cargo test --test dedupe
+/// index_scale -- --ignored --nocapture`.
+#[test]
+#[ignore = "benchmark"]
+fn index_scale() {
+    let n: usize = std::env::var("BQ_INDEX_FILES")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(20_000);
+    let temp = tempfile::tempdir().unwrap();
+    let mut c = cfg(temp.path());
+    c.dedupe_max_read = 1;
+    for id in [0, 1] {
+        for i in 0..n / 2 {
+            let p = put(
+                &c,
+                "p",
+                id,
+                &format!("debug/deps/libprobe-{i:016x}.rlib"),
+                &[],
+            );
+            fs::File::options()
+                .write(true)
+                .open(p)
+                .unwrap()
+                .set_len(64 << 10)
+                .unwrap();
+        }
+    }
+    let r = dedupe::run(&c, &opts(&c, true));
+    assert!(r.read_limited, "{r:?}");
+    println!("{}", dedupe::render(&r));
 }
 
 #[test]

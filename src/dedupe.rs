@@ -65,6 +65,11 @@ pub struct Report {
     pub dry_run: bool,
     pub accounting: CacheAccounting,
     pub pools: usize,
+    /// Eligible files examined while indexing, and how long that took.
+    pub indexed: usize,
+    pub index_ms: u64,
+    /// Indexed files that another member holds under the same path and length.
+    pub candidates: usize,
     /// Files compared with the copy another member holds.
     pub compared: usize,
     pub identical: usize,
@@ -602,34 +607,27 @@ pub fn run_projected(
         project: opts.dry_run && can_share(&cfg.cache_dir.join("pools")),
         ..opts.clone()
     };
-    let groups = index(cfg, opts, excluded, &mut report);
-    // Copies that differ from a group's first copy may still match each
-    // other: plan again with what this pass learned until nothing is new.
-    // Later rounds only add comparisons; their plan counts repeat the first.
-    let mut planned = Planned::default();
-    let mut first = true;
-    while !report.stopped() {
-        let mut scratch = Report::default();
-        let counts = if first { &mut report } else { &mut scratch };
-        let work = plan(&groups, &ledger, &mut planned, counts);
-        first = false;
-        if work.is_empty() {
+    // One scope (toolchain) at a time: copies never share across scopes, so
+    // only one scope's file metadata is held at once. The scope where the
+    // read limit stopped the last pass goes first.
+    let mut scopes = scopes(cfg);
+    let resume = ledger.resume.clone();
+    if let Some([(pool, _), _]) = &resume
+        && let Some(at) = scopes.iter().position(|(_, pools)| {
+            pools
+                .iter()
+                .any(|p| p.file_name().is_some_and(|n| n == pool.as_str()))
+        })
+    {
+        scopes.rotate_left(at);
+    }
+    for (n, (scope, pools)) in scopes.iter().enumerate() {
+        if report.stopped() {
             break;
         }
-        let mut start = 0;
-        while start < work.len() && !report.stopped() {
-            let end = start
-                + work[start..]
-                    .iter()
-                    .take_while(|w| w.pair() == work[start].pair())
-                    .count();
-            share_pair(&work[start..end], opts, &mut ledger, &mut report);
-            if report.read_limited {
-                let ((a, i), (b, j)) = work[start].pair();
-                ledger.resume = Some([(a.into(), i), (b.into(), j)]);
-            }
-            start = end;
-        }
+        let groups = index(opts, scope, pools, excluded, &mut report);
+        let resume = if n == 0 { resume.as_ref() } else { None };
+        share_scope(&groups, opts, resume, &mut ledger, &mut report);
     }
     if !report.read_limited && report.unsupported.is_none() {
         ledger.resume = None;
@@ -643,6 +641,44 @@ pub fn run_projected(
     (report, ledger)
 }
 
+/// Compares and shares one scope's groups. Copies that differ from a
+/// group's first copy may still match each other: plan again with what
+/// this pass learned until nothing is new. Later rounds only add
+/// comparisons; their plan counts repeat the first.
+fn share_scope(
+    groups: &BTreeMap<GroupKey, Vec<Candidate>>,
+    opts: &Options,
+    resume: Option<&[(String, usize); 2]>,
+    ledger: &mut Ledger,
+    report: &mut Report,
+) {
+    let mut planned = Planned::default();
+    let mut first = true;
+    while !report.stopped() {
+        let mut scratch = Report::default();
+        let counts = if first { &mut *report } else { &mut scratch };
+        let work = plan(groups, ledger, resume, &mut planned, counts);
+        first = false;
+        if work.is_empty() {
+            break;
+        }
+        let mut start = 0;
+        while start < work.len() && !report.stopped() {
+            let end = start
+                + work[start..]
+                    .iter()
+                    .take_while(|w| w.pair() == work[start].pair())
+                    .count();
+            share_pair(&work[start..end], opts, ledger, report);
+            if report.read_limited {
+                let ((a, i), (b, j)) = work[start].pair();
+                ledger.resume = Some([(a.into(), i), (b.into(), j)]);
+            }
+            start = end;
+        }
+    }
+}
+
 /// Picks each group's canonical copy and the copies still to share with it,
 /// ordered by member pair so one pair's locks cover a run of work. A copy
 /// known to differ from the canonical one is compared with the next copy
@@ -652,6 +688,7 @@ pub fn run_projected(
 fn plan<'a>(
     groups: &'a BTreeMap<GroupKey, Vec<Candidate>>,
     ledger: &Ledger,
+    resume: Option<&[(String, usize); 2]>,
     planned: &mut Planned,
     report: &mut Report,
 ) -> Vec<Work<'a>> {
@@ -729,22 +766,15 @@ fn plan<'a>(
     }
     work.sort_by(|a, b| a.pair().cmp(&b.pair()));
     // Resume where the read limit stopped the last pass, then wrap around.
-    if let Some([(a, i), (b, j)]) = &ledger.resume {
+    if let Some([(a, i), (b, j)]) = resume {
         let at = work.partition_point(|w| w.pair() < ((a.as_str(), *i), (b.as_str(), *j)));
         work.rotate_left(at);
     }
     work
 }
 
-/// Indexes eligible files of idle members in every pool. Pools and members
-/// are visited in order, so a group's first copy is the lowest (pool, id).
-fn index(
-    cfg: &Config,
-    opts: &Options,
-    excluded: &dyn Fn(&Path) -> bool,
-    report: &mut Report,
-) -> BTreeMap<GroupKey, Vec<Candidate>> {
-    let mut groups: BTreeMap<GroupKey, Vec<Candidate>> = BTreeMap::new();
+/// Pools by sharing scope: their toolchain, or the pool alone without one.
+fn scopes(cfg: &Config) -> Vec<(String, Vec<PathBuf>)> {
     let mut pools: Vec<PathBuf> = fs::read_dir(cfg.cache_dir.join("pools"))
         .into_iter()
         .flatten()
@@ -753,18 +783,41 @@ fn index(
         .filter(|p| p.is_dir())
         .collect();
     pools.sort();
+    let mut scopes: BTreeMap<String, Vec<PathBuf>> = BTreeMap::new();
+    for pool_dir in pools {
+        let name = pool_dir
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_default();
+        let scope = read_json::<pool::PoolInfo>(&pool_dir.join("pool.json"))
+            .map(|i| i.toolchain_id)
+            .filter(|t| !t.is_empty())
+            .unwrap_or_else(|| format!("pool:{name}"));
+        scopes.entry(scope).or_default().push(pool_dir);
+    }
+    scopes.into_iter().collect()
+}
+
+/// Indexes eligible files of idle members in one scope's pools, keeping
+/// only files that another member holds under the same path and length.
+/// Pools and members are visited in order, so a group's first copy is the
+/// lowest (pool, id).
+fn index(
+    opts: &Options,
+    scope: &str,
+    pools: &[PathBuf],
+    excluded: &dyn Fn(&Path) -> bool,
+    report: &mut Report,
+) -> BTreeMap<GroupKey, Vec<Candidate>> {
+    let started = std::time::Instant::now();
+    let mut groups: BTreeMap<GroupKey, Vec<Candidate>> = BTreeMap::new();
     for pool_dir in pools {
         report.pools += 1;
         let name = pool_dir
             .file_name()
             .map(|n| n.to_string_lossy().into_owned())
             .unwrap_or_default();
-        // Without a recorded toolchain, a pool only shares within itself.
-        let scope = read_json::<pool::PoolInfo>(&pool_dir.join("pool.json"))
-            .map(|i| i.toolchain_id)
-            .filter(|t| !t.is_empty())
-            .unwrap_or_else(|| format!("pool:{name}"));
-        for id in pool::member_ids(&pool_dir) {
+        for id in pool::member_ids(pool_dir) {
             let dir = pool_dir.join(format!("m{id}"));
             if !dir.is_dir() {
                 continue;
@@ -790,7 +843,7 @@ fn index(
                 }
                 let dev = file_id(md).map_or(0, |(dev, _)| dev);
                 groups
-                    .entry((scope.clone(), dev, rel.to_path_buf(), md.len()))
+                    .entry((scope.to_string(), dev, rel.to_path_buf(), md.len()))
                     .or_default()
                     .push(Candidate {
                         pool: name.clone(),
@@ -805,6 +858,10 @@ fn index(
         }
     }
     link_aliases(&mut groups);
+    report.indexed += groups.values().map(Vec::len).sum::<usize>();
+    groups.retain(|_, copies| copies.len() > 1);
+    report.candidates += groups.values().map(Vec::len).sum::<usize>();
+    report.index_ms += started.elapsed().as_millis() as u64;
     groups
 }
 
@@ -1377,6 +1434,10 @@ pub fn render(r: &Report) -> String {
         s.push_str(&format!("skipped: {skipped}\n"));
         return s;
     }
+    s.push_str(&format!(
+        "indexed {} files ({} with copies elsewhere) in {} ms\n",
+        r.indexed, r.candidates, r.index_ms
+    ));
     s.push_str(&format!(
         "compared {} files in {} pools, read {} [{} accounting]\n",
         r.compared,

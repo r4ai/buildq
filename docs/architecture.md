@@ -330,6 +330,7 @@ them as reflinks:
    - Files of at least `dedupe_min_size` (default: `64KiB`)
    - Excludes `incremental/` and `.fingerprint/`
    - Groups by toolchain, volume, relative path, and length
+   - Works through one toolchain at a time, keeping only files with copies elsewhere, so a pass holds one toolchain's metadata at once; reports indexed files and indexing time
 2. **Share each copy** with its group's first copy under both member locks
    - Rechecks the indexed inode, length, and mtime
    - A copy that differs from the first is compared with the next differing copy, so a group with several contents shares within each
