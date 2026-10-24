@@ -585,23 +585,40 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         0
     };
 
-    // 2b. share identical files before budget decisions measure usage
-    if opts.dedupe && !dry && dedupe_due(&cfg, opts.auto) {
-        let r = dedupe::run(&cfg, &dedupe::Options::new(&cfg, false));
+    // 2b. share identical files before budget decisions measure usage; a dry
+    // run compares them and projects the sharing instead
+    let mut projected = None;
+    if opts.dedupe && dedupe_due(&cfg, opts.auto) {
+        // A dry run compares only the files that pruning would keep.
+        let (r, ledger) = dedupe::run_projected(&cfg, &dedupe::Options::new(&cfg, dry), &|path| {
+            dry && removed(&report, dry, path)
+        });
         report
             .warnings
             .extend(r.errors.iter().map(|e| format!("dedupe: {e}")));
-        if r.skipped.is_none() {
+        if !dry && r.skipped.is_none() {
             let _ = fs::write(cfg.cache_dir.join("dedupe.stamp"), now_ms().to_string());
         }
         report.dedupe = Some(r);
+        projected = dry.then_some(ledger);
     }
 
     // 3. idle pools
     let mut usage = scan(&cfg, report.failed_deletions > 0);
     // Evicting a copy that another member shares frees none of its blocks.
     // A dry run has removed nothing yet, so it treats planned removals as gone.
-    let sharing = dedupe::Sharing::load_excluding(&cfg, &|path| dry && removed(&report, dry, path));
+    let gone = |path: &Path| dry && removed(&report, dry, path);
+    let sharing = match &projected {
+        Some(ledger) => dedupe::Sharing::from_ledger(&cfg, ledger, &gone),
+        None => dedupe::Sharing::load_excluding(&cfg, &gone),
+    };
+    // Discount the projected pass adds beyond what is already shared.
+    let newly_shared = match &projected {
+        Some(_) => sharing
+            .discount()
+            .saturating_sub(dedupe::Sharing::load_excluding(&cfg, &gone).discount()),
+        None => 0,
+    };
     let mut evicted = BTreeSet::new();
     let mut removed_pools = Vec::new();
     for p in &usage.pools {
@@ -698,7 +715,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     }
     // Revoked discounts first: a later removal in the report may cancel them.
     let mut total = if dry {
-        (usage.total + revoked).saturating_sub(report.freed)
+        (usage.total + revoked).saturating_sub(report.freed + newly_shared)
     } else {
         usage.total
     };

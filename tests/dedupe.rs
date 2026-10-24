@@ -114,6 +114,25 @@ fn the_read_limit_stops_the_pass() {
 }
 
 #[test]
+fn projected_passes_skip_excluded_files() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    const STALE: &str = "debug/deps/libaaa-0123456789abcdef.rlib";
+    for id in [0, 1] {
+        put(&c, "p", id, STALE, &[1; 1000]);
+        put(&c, "p", id, RLIB, &[2; 1000]);
+    }
+    let mut o = opts(&c, true);
+    o.max_read = 2000;
+    let (r, _) = dedupe::run_projected(&c, &o, &|p| p.ends_with(STALE));
+    assert_eq!(
+        (r.compared, r.identical, r.read_limited),
+        (1, 1, false),
+        "{r:?}"
+    );
+}
+
+#[test]
 fn concurrent_passes_do_not_overlap() {
     let temp = tempfile::tempdir().unwrap();
     let c = cfg(temp.path());
@@ -474,11 +493,16 @@ fn gc_shares_before_budget_eviction_and_throttles_automatic_passes() {
         ..Default::default()
     };
 
+    // A dry run projects what the real run does, sharing or (where the
+    // volume cannot share) evicting, without changing anything.
     let dry = gc(&c, &pass(true, false));
-    assert!(dry.dedupe.is_none());
+    assert_eq!(dry.dedupe.as_ref().map(|d| d.identical), Some(1), "{dry:?}");
     assert!(!c.cache_dir.join("dedupe.json").exists());
+    assert!(!c.cache_dir.join("dedupe.stamp").exists());
 
     let r = gc(&c, &pass(false, false));
+    assert_eq!((dry.freed, dry.after), (r.freed, r.after), "{dry:?} {r:?}");
+    assert_eq!(dry.actions.len(), r.actions.len(), "{dry:?} {r:?}");
     let Some(d) = &r.dedupe else { panic!("{r:?}") };
     if d.unsupported.is_some() {
         return;
@@ -612,6 +636,37 @@ fn stale_shared_unit(c: &Config, uplift: bool) -> Option<()> {
     }
     share(c)?;
     Some(())
+}
+
+/// Pruning one name of a shared, uplifted copy makes a real pass compare
+/// the surviving names again; a dry run projects the same.
+#[cfg(unix)]
+#[test]
+fn dry_runs_replan_copies_whose_aliases_pruning_removes() {
+    let mut results = Vec::new();
+    for dry_run in [true, false] {
+        let temp = tempfile::tempdir().unwrap();
+        let c = cfg(temp.path());
+        for id in [0, 1] {
+            used(&c, id, buildq::util::now_ms());
+        }
+        let m1 = c.cache_dir.join("pools/p/m1/debug");
+        fs::create_dir_all(m1.join("deps")).unwrap();
+        fs::write(m1.join("libdep.rlib"), [1; 10_000]).unwrap();
+        if stale_shared_unit(&c, true).is_none() {
+            return;
+        }
+        let r = buildq::gc::gc(
+            &c,
+            &buildq::gc::Options {
+                dry_run,
+                dedupe: true,
+                ..Default::default()
+            },
+        );
+        results.push((r.after, r.actions.len()));
+    }
+    assert_eq!(results[0], results[1], "{results:?}");
 }
 
 #[cfg(unix)]
