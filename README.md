@@ -57,6 +57,7 @@ flowchart LR
 - **Automatic disk budget & GC**
   - Prunes stale incremental sessions and unused artifacts in the background
   - Reclaims idle caches toward a configurable disk budget (default: `60 GB`)
+  - Shares identical artifacts between members as reflinks (btrfs, XFS, APFS)
 - **Staged `cargo run`**
   - Copies compiled binaries and DLLs to an isolated run directory before execution
   - Prevents running executables from locking the shared `target/` directory on Windows
@@ -145,6 +146,7 @@ buildq: target <pool>/m0 (...)
 | `buildq history [-n N]` | Show recent jobs<br>(wait time, run time, exit code, pool member) |
 | `buildq cache ls [--refresh]` | Show target pools, member sizes, budget, and free space |
 | `buildq gc [--dry-run]` | Manually prune caches to fit within the disk budget |
+| `buildq cache dedupe [--dry-run]` | Share identical files between members as reflinks |
 | `buildq config` | Print effective configuration and directory paths |
 | `buildq run [-p PRIO] -- <cmd>...` | Queue any arbitrary command (with optional priority) |
 | `buildq run --host <H> -- <cmd>...` | Run a queued command on a remote SSH host |

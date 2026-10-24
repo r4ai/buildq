@@ -18,6 +18,7 @@ src/
   git.rs       # Git blob manifest calculation and parentless snapshots
   cargo.rs     # Cargo argument parsing, alias resolution, and metadata inspection
   gc.rs        # Disk budget tracking and 5-stage garbage collection
+  dedupe.rs    # Cross-member reflink deduplication and its ledger
   remote.rs    # SSH + Git remote execution transport and protocol
   exec.rs      # Process spawning, signal forwarding, Windows Job Objects, and the Unix watchdog
   lock.rs      # Cross-platform OS file locks (LockFileEx / flock)
@@ -27,6 +28,7 @@ src/
 tests/
   cli.rs       # Integration tests (queue concurrency, priority, shim, GC, remote)
   gc.rs        # GC filesystem regressions in a dedicated test process
+  dedupe.rs    # Deduplication on the test volume (skips without reflinks)
   e2e.rs       # End-to-end multi-worktree Cargo build & invalidation benchmark
   fixtures/    # Sample workspace used by E2E tests
 ```

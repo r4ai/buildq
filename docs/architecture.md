@@ -285,7 +285,8 @@ changes. JSON reports expose `accounting`; text output labels the selected basis
 
 Accounting units remain independent for cached estimates and eviction. Hardlinks
 across units, and reflink/shared extents across different file identities, are
-conservatively charged to each unit. `freed` reports removed accounted capacity,
+conservatively charged to each unit. The exception is sharing that
+[deduplication](#cross-member-deduplication) recorded, which is charged once. `freed` reports removed accounted capacity,
 not an exact change in volume free space. Action sizes describe path footprints
 and are not additive: pruning remeasures the member so deleting one alias cannot
 claim a retained inode's bytes. Dry runs project the same exclusions. Failed-trash
@@ -301,6 +302,7 @@ GC prunes artifacts in five stages from cheapest to most aggressive, skipping bu
    - Incremental sessions other than the newest finalized session per crate
    - Incremental crate directories untouched for `incremental_days` (default: `3`)
    - Superseded artifact variants (same crate, older hash) untouched for `stale_unit_days` (default: `14`)
+   - Then shares identical files across idle members ([deduplication](#cross-member-deduplication))
 3. **Idle pools**: removes entire pools unused for `pool_idle_days` (default: `21`)
 4. **Idle run directories**: removes `runs/r<i>` directories unused for 2 days
 5. **LRU member eviction**: evicts complete idle pool members in least-recently-used order until under budget
@@ -314,6 +316,38 @@ the reported path's permissions or file locks and rerun GC.
 
 Automatic budget checks may defer enforcement until the next refresh.
 `cache ls --refresh` and actual GC passes remeasure before eviction.
+
+### Cross-Member Deduplication
+
+Members on one toolchain often hold byte-identical registry dependency artifacts
+under the same relative path, even across repositories. After stage 2, GC shares
+them as reflinks:
+
+1. **Index idle members** without holding their locks
+   - Files of at least `dedupe_min_size` (default: `64KiB`)
+   - Excludes `incremental/` and `.fingerprint/`
+   - Groups by toolchain, volume, relative path, and length
+2. **Share each copy** with its group's first copy under both member locks
+   - Rechecks the indexed inode, length, and mtime
+   - Releases the locks every 1 GiB or second so leases are not starved
+   - Linux: `FIDEDUPERANGE`; the kernel compares bytes and keeps the inode
+   - macOS: compares bytes, `clonefile`s, restores mode and timestamps, then `rename`s over the path
+3. **Record shared paths** in `$BUILDQ_CACHE/dedupe.json`
+
+**Invariant**:
+A pass never changes a path's content, length, mode, or mtime.
+Fingerprints, member manifests, and the pool safety invariant therefore stay valid.
+
+Allocated block counts report every clone in full. Usage therefore subtracts
+each recorded group's copies beyond the first while every recorded device,
+inode, length, and mtime still matches. A rewrite by Cargo drops that path from
+its group, and an inode recorded twice counts once. Eviction claims only bytes
+that no remaining member shares.
+
+Manual `buildq gc` and background collectors run a pass, automatic ones at most
+hourly. Inline GC never does, because a job waits for it. A pass reads at most
+`dedupe_max_read` (default: `8G`). Volumes without reflinks report the pass as
+unsupported and change nothing.
 
 ### Free-Space Guard
 
@@ -414,5 +448,8 @@ transport remains available on Windows and requires no rsync installation.
   - Invoking `./target/debug/app` directly requires `[cargo] mirror_bins = true` in `config.toml`
 - **Background processes on Windows**
   - With `kill_tree = true` (default), background processes spawned during a build are terminated when the job exits
+- **Reflink support**
+  - Deduplication runs on Linux (btrfs, XFS with `reflink=1`, bcachefs) and macOS (APFS) only
+  - On macOS, hard-linked copies such as uplifted binaries are skipped, since replacing one name would split the pair
 - **Remote host shell**
   - Remote hosts require a POSIX default shell (Windows SSH hosts must use Git Bash as the default OpenSSH shell)

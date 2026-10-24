@@ -133,6 +133,16 @@ enum CacheCmd {
         #[arg(long)]
         refresh: bool,
     },
+    /// Find files that several idle members hold with identical content.
+    Dedupe {
+        #[arg(long)]
+        dry_run: bool,
+        /// Override `[cache] dedupe_max_read` for this run, e.g. 20G.
+        #[arg(long)]
+        max_read: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -263,6 +273,34 @@ fn main() -> ExitCode {
                 status
             }
         }
+        Cmd::Cache {
+            cmd:
+                CacheCmd::Dedupe {
+                    dry_run,
+                    max_read,
+                    json,
+                },
+        } => {
+            let mut opts = buildq::dedupe::Options::new(&cfg, dry_run);
+            if let Some(max_read) = max_read {
+                let Some(bytes) = parse_size(&max_read) else {
+                    eprintln!("buildq: bad --max-read");
+                    return ExitCode::from(2);
+                };
+                opts.max_read = bytes;
+            }
+            let r = buildq::dedupe::run(&cfg, &opts);
+            if json {
+                println!("{}", serde_json::to_string_pretty(&r).unwrap());
+            } else {
+                print!("{}", buildq::dedupe::render(&r));
+            }
+            if r.errors.is_empty() && r.skipped.is_none() {
+                ExitCode::SUCCESS
+            } else {
+                ExitCode::from(1)
+            }
+        }
         Cmd::Gc {
             dry_run,
             budget,
@@ -283,6 +321,7 @@ fn main() -> ExitCode {
                     dry_run,
                     budget,
                     auto,
+                    dedupe: cfg.dedupe == config::DedupeMode::Auto,
                 },
             );
             print_gc_report(&r, dry_run, json, auto)
@@ -330,6 +369,17 @@ fn print_gc_report(r: &gc::Report, dry_run: bool, json: bool, auto: bool) -> Exi
         }
         for a in &r.actions {
             println!("{}{a}", if dry_run { "would " } else { "" });
+        }
+        if let Some(d) = &r.dedupe {
+            match &d.unsupported {
+                Some(why) => println!("dedupe: unsupported ({why})"),
+                None => println!(
+                    "dedupe: shared {} files ({}); {} already shared",
+                    d.shared,
+                    human_bytes(d.shared_bytes),
+                    d.already_shared
+                ),
+            }
         }
         println!(
             "{} {}; cache {} -> {} (budget {})",

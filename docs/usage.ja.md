@@ -20,6 +20,7 @@ max_members = 3          # 最大 target/ 数 (最小: slots、デフォルト: 
 budget = "45G"           # BUILDQ_CACHE 全体の最大ディスク使用量 (デフォルト: "60G")
 min_free = "25G"         # ドライブ上に最低限残す空き容量 (デフォルト: "20G")
 # pool_explicit = true   # worktree 内を指す --target-dir / CARGO_TARGET_DIR もプールする (デフォルト: false)
+# dedupe = "off"         # GC でメンバー間の同一ファイルを共有する ("auto" | "off"、デフォルト: "auto")
 
 [cargo]
 rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を無効化 ("none" | "keep" | "/path")
@@ -143,6 +144,29 @@ run 待機中・実行中とも GC から保護し、残る予算超過を報告
 長時間動くネイティブアプリは、ビルドに使えるメンバー数を減らす場合がある。
 保持する分も見込んで `cache.max_members` を設定するか、アプリを終了して解放する。
 ビルドスロットはアプリ実行前に解放する。
+
+## Member Deduplication
+
+GC は、未使用メンバー間でバイト単位に同一のビルド成果物を共有する。
+同じツールチェーンであれば、別リポジトリのメンバーとも共有する。
+共有したファイルの内容・mode・mtime は変わらないため、Cargo は引き続き最新と判断する。
+`cache ls` はプールごとの共有量を表示し、予算では共有分を1回だけ数える。
+
+```sh
+buildq cache dedupe --dry-run   # ファイルを変更せず重複量を計測
+buildq cache dedupe             # `[cache] dedupe` に関係なく今すぐ共有
+```
+
+| 設定 | デフォルト | 説明 |
+| :--- | :--- | :--- |
+| `dedupe` | `"auto"` | `"off"` で GC 中の実行を無効化 |
+| `dedupe_min_size` | `"64KiB"` | これより小さいファイルは比較しない |
+| `dedupe_max_read` | `"8G"` | 1回の比較で読む上限 |
+
+共有には reflink が必要である。
+Linux では btrfs・`reflink=1` の XFS・bcachefs、macOS では APFS が対応する。
+それ以外では `unsupported` と報告して何も変更しない。dry-run での計測は可能である。
+詳細は [Cross-Member Deduplication](architecture.ja.md#cross-member-deduplication) を参照する。
 
 ## Project Cache Cleanup
 

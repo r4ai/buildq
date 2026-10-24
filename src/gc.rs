@@ -6,6 +6,8 @@
 //!    crate, incremental crate dirs untouched for `incremental_days`, and
 //!    superseded artifact variants (same package, other hash) older than
 //!    `stale_unit_days` (cargo-sweep style);
+//!    then, at most hourly for automatic runs, identical files of idle
+//!    members are shared as reflinks (`dedupe.rs`);
 //! 3. whole pools unused for `pool_idle_days` (old toolchains, dead repos);
 //! 4. idle run dirs older than two days;
 //! 5. while over budget: idle run copies, then whole members, each LRU first.
@@ -22,6 +24,7 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 
 use crate::config::{CacheAccounting, Config};
+use crate::dedupe;
 use crate::external::{self, ExternalDir};
 use crate::lock::{self, LockFile};
 use crate::pool::{self, MemberMeta, PoolInfo};
@@ -31,6 +34,8 @@ const DAY_MS: u64 = 86_400_000;
 /// Estimates are shared by jobs and inspection processes, not process-local.
 /// A bounded lifetime also catches in-place writes (directory mtimes do not).
 const SIZE_CACHE_MS: u64 = 60_000;
+/// Automatic runs read files for deduplication at most this often.
+const DEDUPE_INTERVAL_MS: u64 = 3_600_000;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct MemberEntry {
@@ -38,6 +43,8 @@ pub struct MemberEntry {
     pub dir: PathBuf,
     pub busy: bool,
     pub size: u64,
+    /// Bytes of `size` that another member also holds (see `dedupe`).
+    pub shared: u64,
     pub meta: MemberMeta,
 }
 
@@ -47,11 +54,17 @@ pub struct PoolEntry {
     pub dir: PathBuf,
     pub info: PoolInfo,
     pub members: Vec<MemberEntry>,
+    /// Copies that share data blocks with a copy counted elsewhere.
+    pub shared: u64,
 }
 
 impl PoolEntry {
     pub fn size(&self) -> u64 {
-        self.members.iter().map(|m| m.size).sum()
+        self.members
+            .iter()
+            .map(|m| m.size)
+            .sum::<u64>()
+            .saturating_sub(self.shared)
     }
     pub fn last_used(&self) -> u64 {
         self.members
@@ -196,6 +209,7 @@ pub fn external_warning(pool: u64, external: u64, budget: u64) -> Option<String>
 /// Reuse member size estimates for up to a minute, even across builds.
 /// `refresh` bypasses this cache; real GC passes always refresh before pruning.
 pub fn scan(cfg: &Config, refresh: bool) -> Usage {
+    let sharing = dedupe::Sharing::load(cfg);
     let mut pools = Vec::new();
     if let Ok(rd) = fs::read_dir(cfg.cache_dir.join("pools")) {
         for e in rd.flatten() {
@@ -204,6 +218,7 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
                 continue;
             }
             let info = read_json::<PoolInfo>(&dir.join("pool.json")).unwrap_or_default();
+            let name = e.file_name().to_string_lossy().to_string();
             let mut members = Vec::new();
             for id in pool::member_ids(&dir) {
                 let mdir = dir.join(format!("m{id}"));
@@ -239,6 +254,7 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
                 members.push(MemberEntry {
                     id,
                     size: meta.size_bytes,
+                    shared: sharing.member_shared(&name, id),
                     dir: mdir,
                     busy,
                     meta,
@@ -248,7 +264,8 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
                 continue;
             }
             pools.push(PoolEntry {
-                name: e.file_name().to_string_lossy().to_string(),
+                shared: sharing.pool_discount(&name),
+                name,
                 dir,
                 info,
                 members,
@@ -319,6 +336,8 @@ pub struct Options {
     pub budget: Option<u64>,
     /// Automatic run after a job: throttled, quiet.
     pub auto: bool,
+    /// Share identical files between idle members (never in a dry run).
+    pub dedupe: bool,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -337,6 +356,7 @@ pub struct Report {
     pub external: u64,
     pub warnings: Vec<String>,
     pub failed_deletions: usize,
+    pub dedupe: Option<dedupe::Report>,
     #[serde(skip)]
     planned_removals: BTreeSet<PathBuf>,
 }
@@ -437,6 +457,14 @@ fn recent_auto_usage(cfg: &Config) -> Option<Usage> {
     (usage.total <= usage.effective_budget).then_some(usage)
 }
 
+fn dedupe_due(cfg: &Config, auto: bool) -> bool {
+    let last = fs::read_to_string(cfg.cache_dir.join("dedupe.stamp"))
+        .ok()
+        .and_then(|s| s.trim().parse::<u64>().ok())
+        .unwrap_or(0);
+    !auto || now_ms().saturating_sub(last) >= DEDUPE_INTERVAL_MS
+}
+
 /// Advisory preflight before creating a collector process. The collector checks
 /// again under gc.lock; cached measurements have the same bounded freshness.
 pub fn auto_gc_needed(cfg: &Config) -> bool {
@@ -526,8 +554,23 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         }
     }
 
+    // 2b. share identical files before budget decisions measure usage
+    if opts.dedupe && !dry && dedupe_due(&cfg, opts.auto) {
+        let r = dedupe::run(&cfg, &dedupe::Options::new(&cfg, false));
+        report
+            .warnings
+            .extend(r.errors.iter().map(|e| format!("dedupe: {e}")));
+        if r.skipped.is_none() {
+            let _ = fs::write(cfg.cache_dir.join("dedupe.stamp"), now_ms().to_string());
+        }
+        report.dedupe = Some(r);
+    }
+
     // 3. idle pools
     let mut usage = scan(&cfg, report.failed_deletions > 0);
+    // Evicting a copy that another member shares frees none of its blocks.
+    let sharing = dedupe::Sharing::load(&cfg);
+    let mut evicted = BTreeSet::new();
     let mut removed_pools = Vec::new();
     for p in &usage.pools {
         if now.saturating_sub(p.last_used()) < cfg.pool_idle_days * DAY_MS {
@@ -569,7 +612,9 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
                     pruned.get(&dir).copied().unwrap_or(0)
                 } else {
                     0
-                });
+                })
+                .saturating_sub(sharing.exclusive_discount(&p.name, id, &evicted));
+            evicted.insert((p.name.clone(), id));
             evict_member(
                 &cfg,
                 &p.dir,
@@ -668,11 +713,15 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             let Ok(Some(l)) = lock::try_lock(&lock_path) else {
                 continue;
             };
-            let size = m.size.saturating_sub(if dry {
-                pruned.get(&m.dir).copied().unwrap_or(0)
-            } else {
-                0
-            });
+            let size = m
+                .size
+                .saturating_sub(if dry {
+                    pruned.get(&m.dir).copied().unwrap_or(0)
+                } else {
+                    0
+                })
+                .saturating_sub(sharing.exclusive_discount(&p.name, m.id, &evicted));
+            evicted.insert((p.name.clone(), m.id));
             let freed = evict_member(
                 &cfg,
                 &p.dir,
@@ -769,6 +818,8 @@ pub fn clean_repo(cfg: &Config, repo_key: &str, dry: bool) -> Report {
     };
     let usage = scan(cfg, true);
     report.before = usage.total;
+    let sharing = dedupe::Sharing::load(cfg);
+    let mut evicted = BTreeSet::new();
     let mut skipped = 0;
     for pool in usage.pools.iter().filter(|p| p.info.repo_key == repo_key) {
         let Ok(Some(_pool)) = lock::try_lock(&pool.dir.join("pool.lock")) else {
@@ -792,13 +843,16 @@ pub fn clean_repo(cfg: &Config, repo_key: &str, dry: bool) -> Report {
             if !dir.is_dir() {
                 continue;
             }
-            let bytes = util::size_for(&dir, cfg.accounting).unwrap_or_else(|_| {
-                pool.members
-                    .iter()
-                    .find(|m| m.id == id)
-                    .map(|m| m.size)
-                    .unwrap_or(0)
-            });
+            let bytes = util::size_for(&dir, cfg.accounting)
+                .unwrap_or_else(|_| {
+                    pool.members
+                        .iter()
+                        .find(|m| m.id == id)
+                        .map(|m| m.size)
+                        .unwrap_or(0)
+                })
+                .saturating_sub(sharing.exclusive_discount(&pool.name, id, &evicted));
+            evicted.insert((pool.name.clone(), id));
             evict_member(
                 cfg,
                 &pool.dir,
@@ -1043,11 +1097,16 @@ pub fn render(u: &Usage) -> String {
     }
     for p in &u.pools {
         s.push_str(&format!(
-            "{}  {}  (rustc {}, last used {} ago)\n",
+            "{}  {}  (rustc {}, last used {} ago{})\n",
             p.name,
             human_bytes(p.size()),
             p.info.toolchain,
-            util::ago(p.last_used())
+            util::ago(p.last_used()),
+            if p.shared > 0 {
+                format!(", {} shared between members", human_bytes(p.shared))
+            } else {
+                String::new()
+            }
         ));
         for m in &p.members {
             s.push_str(&format!(
