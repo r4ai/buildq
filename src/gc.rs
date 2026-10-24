@@ -696,8 +696,9 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     if !dry {
         usage = scan(&cfg, report.failed_deletions > 0);
     }
+    // Revoked discounts first: a later removal in the report may cancel them.
     let mut total = if dry {
-        usage.total.saturating_sub(report.freed) + revoked
+        (usage.total + revoked).saturating_sub(report.freed)
     } else {
         usage.total
     };

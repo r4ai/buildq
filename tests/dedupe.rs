@@ -602,6 +602,32 @@ fn a_surviving_hard_link_keeps_a_pruned_copy_shared() {
     assert_eq!(after[0], after[1], "{after:?}");
 }
 
+/// Removing the idle pool afterwards cancels a revoked discount.
+#[cfg(unix)]
+#[test]
+fn dry_runs_project_revoked_discounts_of_removed_pools() {
+    let mut after = Vec::new();
+    for dry_run in [true, false] {
+        let temp = tempfile::tempdir().unwrap();
+        let c = cfg(temp.path());
+        for id in [0, 1] {
+            used(&c, id, 0);
+        }
+        if stale_shared_unit(&c, true).is_none() {
+            return;
+        }
+        let r = buildq::gc::gc(
+            &c,
+            &buildq::gc::Options {
+                dry_run,
+                ..Default::default()
+            },
+        );
+        after.push(r.after);
+    }
+    assert_eq!(after, [0, 0]);
+}
+
 #[cfg(unix)]
 #[test]
 fn a_rewritten_canonical_starts_a_new_group() {
