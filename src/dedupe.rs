@@ -883,22 +883,31 @@ fn nlink(_: &fs::Metadata) -> u64 {
     1
 }
 
+/// Accounted bytes that sharing one copy can save. Sharing covers only the
+/// logical range, so allocated accounting caps the file's blocks at its
+/// length rounded up to whole blocks: preallocation beyond EOF stays private.
 fn footprint(md: &fs::Metadata, mode: CacheAccounting) -> u64 {
+    let (allocated, block) = allocation(md);
+    shareable(md.len(), allocated, block, mode)
+}
+
+fn shareable(len: u64, allocated: u64, block: u64, mode: CacheAccounting) -> u64 {
     match mode {
-        CacheAccounting::Logical => md.len(),
-        CacheAccounting::Allocated => allocated(md),
+        CacheAccounting::Logical => len,
+        CacheAccounting::Allocated => allocated.min(len.div_ceil(block.max(1)) * block.max(1)),
     }
 }
 
+/// Allocated bytes and the filesystem block size.
 #[cfg(unix)]
-fn allocated(md: &fs::Metadata) -> u64 {
+fn allocation(md: &fs::Metadata) -> (u64, u64) {
     use std::os::unix::fs::MetadataExt;
-    md.blocks().saturating_mul(512)
+    (md.blocks().saturating_mul(512), md.blksize())
 }
 
 #[cfg(not(unix))]
-fn allocated(md: &fs::Metadata) -> u64 {
-    md.len()
+fn allocation(md: &fs::Metadata) -> (u64, u64) {
+    (md.len(), 1)
 }
 
 fn same_bytes(a: &Path, b: &Path, len: u64) -> io::Result<bool> {
@@ -1152,4 +1161,27 @@ pub fn render(r: &Report) -> String {
         s.push_str(&format!("error: {e}\n"));
     }
     s
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn shareable_bytes_stop_at_the_logical_range() {
+        const MIB: u64 = 1 << 20;
+        let allocated =
+            |len, blocks, block| shareable(len, blocks, block, CacheAccounting::Allocated);
+        // Preallocation beyond EOF stays private.
+        assert_eq!(allocated(MIB, 32 * MIB, 4096), MIB);
+        // A partial final block is shared whole.
+        assert_eq!(allocated(MIB + 1, 32 * MIB, 4096), MIB + 4096);
+        // Sparse files share only what they allocate.
+        assert_eq!(allocated(32 * MIB, MIB, 4096), MIB);
+        assert_eq!(allocated(10, 4096, 0), 10);
+        assert_eq!(
+            shareable(MIB, 32 * MIB, 4096, CacheAccounting::Logical),
+            MIB
+        );
+    }
 }
