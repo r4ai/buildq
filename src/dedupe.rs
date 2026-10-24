@@ -831,11 +831,46 @@ fn link_aliases(groups: &mut BTreeMap<GroupKey, Vec<Candidate>>) {
 /// Temporary clones of an interrupted pass. Called under the member lock.
 fn remove_leftovers(member_dir: &Path) {
     for e in fs::read_dir(member_dir).into_iter().flatten().flatten() {
+        let name = e.file_name().to_string_lossy().into_owned();
+        if name.starts_with(TMP_PREFIX) && name.ends_with(".names") {
+            restore_names(&e.path());
+        }
+    }
+    for e in fs::read_dir(member_dir).into_iter().flatten().flatten() {
         if e.file_name().to_string_lossy().starts_with(TMP_PREFIX) {
             let _ = fs::remove_file(e.path());
         }
     }
 }
+
+/// An interrupted re-link (macOS) left some names on the clone: put every
+/// journaled name back on the original inode, which `.orig` still holds.
+#[cfg(unix)]
+fn restore_names(journal: &Path) {
+    use std::os::unix::ffi::OsStrExt;
+    let original = journal.with_extension("orig");
+    let Ok(names) = fs::read(journal) else {
+        return;
+    };
+    if !original.exists() {
+        return;
+    }
+    for (i, name) in names
+        .split(|b| *b == 0)
+        .filter(|n| !n.is_empty())
+        .enumerate()
+    {
+        let link = original.with_extension(format!("back{i}"));
+        if fs::hard_link(&original, &link).is_ok()
+            && fs::rename(&link, std::ffi::OsStr::from_bytes(name)).is_err()
+        {
+            let _ = fs::remove_file(&link);
+        }
+    }
+}
+
+#[cfg(not(unix))]
+fn restore_names(_: &Path) {}
 
 /// Build outputs only: rustc owns incremental sessions and Cargo owns
 /// fingerprints, both of which are small or private to one member.
@@ -1263,8 +1298,10 @@ mod platform {
             });
         }
         // Until every name has moved, keep one for the original inode so a
-        // failure can move the moved ones back.
+        // failure can move the moved ones back, and journal the names so the
+        // next pass can if this process dies (`restore_names`).
         let original = tmp.with_extension("orig");
+        let journal = tmp.with_extension("names");
         let mut moved = 0;
         // The clone carries the source's metadata; give it the destination's.
         let mut place = || -> io::Result<()> {
@@ -1275,6 +1312,12 @@ mod platform {
             File::open(tmp)?.set_times(times)?;
             if !aliases.is_empty() {
                 fs::hard_link(dst, &original)?;
+                let mut names = Vec::new();
+                for name in std::iter::once(dst).chain(aliases.iter().map(PathBuf::as_path)) {
+                    names.extend_from_slice(name.as_os_str().as_bytes());
+                    names.push(0);
+                }
+                fs::write(&journal, names)?;
             }
             // Aliases first: until `dst` moves, the clone has a known name.
             for (i, alias) in aliases.iter().enumerate() {
@@ -1294,6 +1337,8 @@ mod platform {
             }
             let _ = fs::remove_file(tmp);
         }
+        // The journal goes first: without it, `.orig` is a plain leftover.
+        let _ = fs::remove_file(&journal);
         let _ = fs::remove_file(&original);
         result.map_err(Failure::Io)?;
         Ok(Outcome::Shared)

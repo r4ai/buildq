@@ -447,6 +447,45 @@ fn a_failed_relink_keeps_the_hard_links_together() {
     assert!(leftovers.is_empty(), "{leftovers:?}");
 }
 
+/// A pass killed mid-relink left the alias on the clone: the next pass puts
+/// the journaled names back together before removing its leftovers.
+#[cfg(unix)]
+#[test]
+fn an_interrupted_relink_is_restored() {
+    use std::os::unix::ffi::OsStrExt;
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    let b = put(&c, "p", 1, RLIB, &[4; 8192]);
+    let uplifted = b.parent().unwrap().parent().unwrap().join("libdep.rlib");
+    let member = c.cache_dir.join("pools/p/m1");
+    let original = member.join(".buildq-dedupe-1-0.orig");
+    fs::hard_link(&b, &original).unwrap();
+    let mut names = Vec::new();
+    for n in [&b, &uplifted] {
+        names.extend_from_slice(n.as_os_str().as_bytes());
+        names.push(0);
+    }
+    fs::write(member.join(".buildq-dedupe-1-0.names"), names).unwrap();
+    // The alias already moved to a clone of the same content.
+    fs::write(&uplifted, [4; 8192]).unwrap();
+    assert_ne!(ino(&b), ino(&uplifted));
+
+    let r = dedupe::run(&c, &opts(&c, false));
+    assert!(r.errors.is_empty(), "{r:?}");
+    assert_eq!(ino(&b), ino(&uplifted));
+    assert_eq!(fs::read(&uplifted).unwrap(), vec![4; 8192]);
+    let leftovers: Vec<_> = fs::read_dir(&member)
+        .unwrap()
+        .flatten()
+        .filter(|e| {
+            e.file_name()
+                .to_string_lossy()
+                .starts_with(".buildq-dedupe-")
+        })
+        .collect();
+    assert!(leftovers.is_empty(), "{leftovers:?}");
+}
+
 #[cfg(unix)]
 #[test]
 fn hard_links_are_kept_together() {
