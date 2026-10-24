@@ -81,7 +81,8 @@ pub struct Report {
     pub skipped_busy: usize,
     /// Files whose size or identity changed between indexing and comparison.
     pub skipped_changed: usize,
-    /// Hard-linked copies that replacing would split (macOS).
+    /// Hard-linked copies with names outside the index, which replacing
+    /// would split (macOS).
     pub skipped_hardlinked: usize,
     /// Copies an earlier pass found different, with both files unchanged since.
     pub skipped_known_different: usize,
@@ -700,7 +701,9 @@ fn plan<'a>(
                 }
                 continue;
             }
-            if !KEEPS_INODE && nlink(&other.md) > 1 {
+            // Replacing the inode re-links every indexed name; a name the
+            // index does not know would be split off.
+            if !KEEPS_INODE && nlink(&other.md) > 1 + other.aliases.len() as u64 {
                 report.skipped_hardlinked += usize::from(first_time);
                 continue;
             }
@@ -828,11 +831,46 @@ fn link_aliases(groups: &mut BTreeMap<GroupKey, Vec<Candidate>>) {
 /// Temporary clones of an interrupted pass. Called under the member lock.
 fn remove_leftovers(member_dir: &Path) {
     for e in fs::read_dir(member_dir).into_iter().flatten().flatten() {
+        let name = e.file_name().to_string_lossy().into_owned();
+        if name.starts_with(TMP_PREFIX) && name.ends_with(".names") {
+            restore_names(&e.path());
+        }
+    }
+    for e in fs::read_dir(member_dir).into_iter().flatten().flatten() {
         if e.file_name().to_string_lossy().starts_with(TMP_PREFIX) {
             let _ = fs::remove_file(e.path());
         }
     }
 }
+
+/// An interrupted re-link (macOS) left some names on the clone: put every
+/// journaled name back on the original inode, which `.orig` still holds.
+#[cfg(unix)]
+fn restore_names(journal: &Path) {
+    use std::os::unix::ffi::OsStrExt;
+    let original = journal.with_extension("orig");
+    let Ok(names) = fs::read(journal) else {
+        return;
+    };
+    if !original.exists() {
+        return;
+    }
+    for (i, name) in names
+        .split(|b| *b == 0)
+        .filter(|n| !n.is_empty())
+        .enumerate()
+    {
+        let link = original.with_extension(format!("back{i}"));
+        if fs::hard_link(&original, &link).is_ok()
+            && fs::rename(&link, std::ffi::OsStr::from_bytes(name)).is_err()
+        {
+            let _ = fs::remove_file(&link);
+        }
+    }
+}
+
+#[cfg(not(unix))]
+fn restore_names(_: &Path) {}
 
 /// Build outputs only: rustc owns incremental sessions and Cargo owns
 /// fingerprints, both of which are small or private to one member.
@@ -932,7 +970,13 @@ fn share_pair(work: &[Work], opts: &Options, ledger: &mut Ledger, report: &mut R
             .other
             .member_dir
             .join(format!("{TMP_PREFIX}{}-{n}", std::process::id()));
-        match platform::share(&w.canonical.path, &w.other.path, &tmp) {
+        let aliases: Vec<PathBuf> = w
+            .other
+            .aliases
+            .iter()
+            .map(|a| w.other.member_dir.join(a))
+            .collect();
+        match platform::share(&w.canonical.path, &w.other.path, &aliases, &tmp) {
             Ok(Outcome::Shared) => {
                 report.identical += 1;
                 report.identical_bytes += bytes;
@@ -972,7 +1016,7 @@ fn can_share(dir: &Path) -> bool {
     let data = vec![7u8; 1 << 16];
     let shared = fs::write(&a, &data).is_ok()
         && fs::write(&b, &data).is_ok()
-        && matches!(platform::share(&a, &b, &tmp), Ok(Outcome::Shared));
+        && matches!(platform::share(&a, &b, &[], &tmp), Ok(Outcome::Shared));
     for p in [a, b, tmp] {
         let _ = fs::remove_file(p);
     }
@@ -1100,7 +1144,7 @@ mod platform {
     use std::fs::{File, OpenOptions};
     use std::io;
     use std::os::fd::AsRawFd;
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     use super::{Failure, Outcome};
 
@@ -1138,7 +1182,13 @@ mod platform {
         }
     }
 
-    pub(super) fn share(src: &Path, dst: &Path, _tmp: &Path) -> Result<Outcome, Failure> {
+    /// Shares in place, so `dst`'s other names keep pointing at it.
+    pub(super) fn share(
+        src: &Path,
+        dst: &Path,
+        _aliases: &[PathBuf],
+        _tmp: &Path,
+    ) -> Result<Outcome, Failure> {
         let s = File::open(src).map_err(Failure::Io)?;
         // Owners may dedupe into a read-only descriptor; avoid write opens,
         // which a still-running test executable would refuse.
@@ -1208,7 +1258,7 @@ mod platform {
     use std::fs::{self, File, FileTimes};
     use std::io;
     use std::os::unix::ffi::OsStrExt;
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     use super::{Failure, Outcome};
 
@@ -1219,9 +1269,23 @@ mod platform {
         CString::new(p.as_os_str().as_bytes()).map_err(|e| Failure::Io(io::Error::other(e)))
     }
 
-    /// The caller compared both files and holds both member locks.
-    pub(super) fn share(src: &Path, dst: &Path, tmp: &Path) -> Result<Outcome, Failure> {
+    /// The caller compared both files and holds both member locks. `aliases`
+    /// are `dst`'s other names; each is re-linked to the clone so the
+    /// hard-link set stays together.
+    pub(super) fn share(
+        src: &Path,
+        dst: &Path,
+        aliases: &[PathBuf],
+        tmp: &Path,
+    ) -> Result<Outcome, Failure> {
+        use std::os::unix::fs::MetadataExt;
         let md = fs::symlink_metadata(dst).map_err(Failure::Io)?;
+        // Under the locks: a name added since indexing would be split off.
+        if md.nlink() != 1 + aliases.len() as u64 || aliases.iter().any(|a| !same_inode(a, &md)) {
+            return Err(Failure::Io(io::Error::other(
+                "hard links changed since indexing",
+            )));
+        }
         let (src_c, tmp_c) = (c_path(src)?, c_path(tmp)?);
         let flags = CLONE_NOFOLLOW | CLONE_NOOWNERCOPY;
         if unsafe { libc::clonefile(src_c.as_ptr(), tmp_c.as_ptr(), flags) } != 0 {
@@ -1233,30 +1297,74 @@ mod platform {
                 _ => Failure::Io(e),
             });
         }
+        // Until every name has moved, keep one for the original inode so a
+        // failure can move the moved ones back, and journal the names so the
+        // next pass can if this process dies (`restore_names`).
+        let original = tmp.with_extension("orig");
+        let journal = tmp.with_extension("names");
+        let mut moved = 0;
         // The clone carries the source's metadata; give it the destination's.
-        let place = || -> io::Result<()> {
+        let mut place = || -> io::Result<()> {
             fs::set_permissions(tmp, md.permissions())?;
             let times = FileTimes::new()
                 .set_accessed(md.accessed()?)
                 .set_modified(md.modified()?);
             File::open(tmp)?.set_times(times)?;
+            if !aliases.is_empty() {
+                fs::hard_link(dst, &original)?;
+                let mut names = Vec::new();
+                for name in std::iter::once(dst).chain(aliases.iter().map(PathBuf::as_path)) {
+                    names.extend_from_slice(name.as_os_str().as_bytes());
+                    names.push(0);
+                }
+                fs::write(&journal, names)?;
+            }
+            // Aliases first: until `dst` moves, the clone has a known name.
+            for (i, alias) in aliases.iter().enumerate() {
+                relink(tmp, &tmp.with_extension(format!("alias{i}")), alias)?;
+                moved += 1;
+            }
             fs::rename(tmp, dst)
         };
-        place().map_err(|e| {
+        let result = place();
+        if result.is_err() {
+            for (i, alias) in aliases[..moved].iter().enumerate() {
+                let _ = relink(
+                    &original,
+                    &original.with_extension(format!("back{i}")),
+                    alias,
+                );
+            }
             let _ = fs::remove_file(tmp);
-            Failure::Io(e)
-        })?;
+        }
+        // The journal goes first: without it, `.orig` is a plain leftover.
+        let _ = fs::remove_file(&journal);
+        let _ = fs::remove_file(&original);
+        result.map_err(Failure::Io)?;
         Ok(Outcome::Shared)
+    }
+
+    /// Points `name` at `from`'s inode through the temporary `link`.
+    fn relink(from: &Path, link: &Path, name: &Path) -> io::Result<()> {
+        fs::hard_link(from, link)?;
+        fs::rename(link, name).inspect_err(|_| {
+            let _ = fs::remove_file(link);
+        })
+    }
+
+    fn same_inode(path: &Path, md: &fs::Metadata) -> bool {
+        use std::os::unix::fs::MetadataExt;
+        fs::symlink_metadata(path).is_ok_and(|a| (a.dev(), a.ino()) == (md.dev(), md.ino()))
     }
 }
 
 #[cfg(not(any(target_os = "linux", target_os = "macos")))]
 mod platform {
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     use super::{Failure, Outcome};
 
-    pub(super) fn share(_: &Path, _: &Path, _: &Path) -> Result<Outcome, Failure> {
+    pub(super) fn share(_: &Path, _: &Path, _: &[PathBuf], _: &Path) -> Result<Outcome, Failure> {
         Err(Failure::Unsupported(
             "buildq shares files only on Linux and macOS".into(),
         ))

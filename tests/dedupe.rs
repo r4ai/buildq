@@ -378,31 +378,23 @@ fn hard_linked_names_count_once() {
         .unwrap();
     }
     let dry = dedupe::run(&c, &opts(&c, true));
-    if cfg!(target_os = "linux") {
-        assert_eq!(
-            (dry.compared, dry.identical, dry.identical_bytes),
-            (1, 1, 8192),
-            "{dry:?}"
-        );
-    } else {
-        assert_eq!((dry.compared, dry.skipped_hardlinked), (0, 1), "{dry:?}");
-    }
+    assert_eq!(
+        (dry.compared, dry.identical, dry.identical_bytes),
+        (1, 1, 8192),
+        "{dry:?}"
+    );
     let Some(r) = share(&c) else { return };
-    if cfg!(target_os = "linux") {
-        assert_eq!(
-            (r.compared, r.shared, r.shared_bytes),
-            (1, 1, 8192),
-            "{r:?}"
-        );
-        let r = share(&c).unwrap();
-        assert_eq!(
-            (r.compared, r.already_shared, r.already_shared_bytes),
-            (0, 1, 8192),
-            "{r:?}"
-        );
-    } else {
-        assert_eq!((r.compared, r.skipped_hardlinked), (0, 1), "{r:?}");
-    }
+    assert_eq!(
+        (r.compared, r.shared, r.shared_bytes),
+        (1, 1, 8192),
+        "{r:?}"
+    );
+    let r = share(&c).unwrap();
+    assert_eq!(
+        (r.compared, r.already_shared, r.already_shared_bytes),
+        (0, 1, 8192),
+        "{r:?}"
+    );
 }
 
 /// An alias may pair with another counterpart than its first name did.
@@ -417,15 +409,81 @@ fn an_alias_still_matches_a_different_counterpart() {
     let b = put(&c, "p", 1, RLIB, &[b'B'; 8192]);
     fs::hard_link(&b, up(&b)).unwrap();
     let dry = dedupe::run(&c, &opts(&c, true));
-    if cfg!(target_os = "linux") {
-        assert_eq!(
-            (dry.compared, dry.identical, dry.differing),
-            (2, 1, 1),
-            "{dry:?}"
-        );
-    } else {
-        assert_eq!((dry.compared, dry.skipped_hardlinked), (0, 1), "{dry:?}");
+    assert_eq!(
+        (dry.compared, dry.identical, dry.differing),
+        (2, 1, 1),
+        "{dry:?}"
+    );
+}
+
+/// A failed replacement moves already re-linked names back (macOS).
+#[cfg(target_os = "macos")]
+#[test]
+fn a_failed_relink_keeps_the_hard_links_together() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    put(&c, "p", 0, RLIB, &[4; 8192]);
+    let b = put(&c, "p", 1, RLIB, &[4; 8192]);
+    let uplifted = b.parent().unwrap().parent().unwrap().join("libdep.rlib");
+    fs::hard_link(&b, &uplifted).unwrap();
+    // The alias moves first; replacing the hashed name then fails.
+    let deps = b.parent().unwrap().to_path_buf();
+    fs::set_permissions(&deps, fs::Permissions::from_mode(0o555)).unwrap();
+    let r = dedupe::run(&c, &opts(&c, false));
+    fs::set_permissions(&deps, fs::Permissions::from_mode(0o755)).unwrap();
+    assert_eq!((r.shared, r.errors.len()), (0, 1), "{r:?}");
+    assert_eq!(ino(&b), ino(&uplifted));
+    assert_eq!(fs::metadata(&b).unwrap().len(), 8192);
+    let leftovers: Vec<_> = fs::read_dir(c.cache_dir.join("pools/p/m1"))
+        .unwrap()
+        .flatten()
+        .filter(|e| {
+            e.file_name()
+                .to_string_lossy()
+                .starts_with(".buildq-dedupe-")
+        })
+        .collect();
+    assert!(leftovers.is_empty(), "{leftovers:?}");
+}
+
+/// A pass killed mid-relink left the alias on the clone: the next pass puts
+/// the journaled names back together before removing its leftovers.
+#[cfg(unix)]
+#[test]
+fn an_interrupted_relink_is_restored() {
+    use std::os::unix::ffi::OsStrExt;
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    let b = put(&c, "p", 1, RLIB, &[4; 8192]);
+    let uplifted = b.parent().unwrap().parent().unwrap().join("libdep.rlib");
+    let member = c.cache_dir.join("pools/p/m1");
+    let original = member.join(".buildq-dedupe-1-0.orig");
+    fs::hard_link(&b, &original).unwrap();
+    let mut names = Vec::new();
+    for n in [&b, &uplifted] {
+        names.extend_from_slice(n.as_os_str().as_bytes());
+        names.push(0);
     }
+    fs::write(member.join(".buildq-dedupe-1-0.names"), names).unwrap();
+    // The alias already moved to a clone of the same content.
+    fs::write(&uplifted, [4; 8192]).unwrap();
+    assert_ne!(ino(&b), ino(&uplifted));
+
+    let r = dedupe::run(&c, &opts(&c, false));
+    assert!(r.errors.is_empty(), "{r:?}");
+    assert_eq!(ino(&b), ino(&uplifted));
+    assert_eq!(fs::read(&uplifted).unwrap(), vec![4; 8192]);
+    let leftovers: Vec<_> = fs::read_dir(&member)
+        .unwrap()
+        .flatten()
+        .filter(|e| {
+            e.file_name()
+                .to_string_lossy()
+                .starts_with(".buildq-dedupe-")
+        })
+        .collect();
+    assert!(leftovers.is_empty(), "{leftovers:?}");
 }
 
 #[cfg(unix)]
@@ -433,17 +491,26 @@ fn an_alias_still_matches_a_different_counterpart() {
 fn hard_links_are_kept_together() {
     let temp = tempfile::tempdir().unwrap();
     let c = cfg(temp.path());
-    put(&c, "p", 0, RLIB, &[4; 8192]);
+    let a = put(&c, "p", 0, RLIB, &[4; 8192]);
     let b = put(&c, "p", 1, RLIB, &[4; 8192]);
     let uplifted = b.parent().unwrap().parent().unwrap().join("libdep.rlib");
     fs::hard_link(&b, &uplifted).unwrap();
+    // A name the index does not see (incremental state is never indexed).
+    let hidden = b.parent().unwrap().parent().unwrap().join("incremental/x");
+    fs::create_dir_all(hidden.parent().unwrap()).unwrap();
+    fs::hard_link(&b, &hidden).unwrap();
     let Some(r) = share(&c) else { return };
     if cfg!(target_os = "linux") {
-        // Shared in place: both names keep pointing at the shared inode.
+        // Shared in place: every name keeps pointing at the shared inode.
         assert_eq!(r.shared, 1, "{r:?}");
     } else {
-        // Replacing one name would split the pair, so neither is replaced.
+        // Replacing the inode would split the unseen name off.
         assert_eq!((r.shared, r.skipped_hardlinked), (0, 1), "{r:?}");
+        fs::remove_file(&hidden).unwrap();
+        // With every name indexed, all of them move to the clone together.
+        let r = share(&c).unwrap();
+        assert_eq!(r.shared, 1, "{r:?}");
+        assert_eq!(fs::read(&uplifted).unwrap(), fs::read(&a).unwrap());
     }
     assert_eq!(ino(&b), ino(&uplifted));
 }

@@ -459,6 +459,6 @@ transport remains available on Windows and requires no rsync installation.
   - With `kill_tree = true` (default), background processes spawned during a build are terminated when the job exits
 - **Reflink support**
   - Deduplication runs on Linux (btrfs, XFS with `reflink=1`, bcachefs) and macOS (APFS) only
-  - On macOS, hard-linked copies such as uplifted binaries are skipped, since replacing one name would split the pair
+  - On macOS, hard-linked copies such as uplifted binaries have every name re-linked to the clone; a copy with a name the pass does not index (for example under `incremental/`) is skipped, since replacing it would split the names
 - **Remote host shell**
   - Remote hosts require a POSIX default shell (Windows SSH hosts must use Git Bash as the default OpenSSH shell)
