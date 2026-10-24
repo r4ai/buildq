@@ -210,6 +210,36 @@ fn sharing_keeps_content_mode_and_mtime_and_shrinks_usage() {
     assert_eq!((r.shared, r.already_shared), (1, 1), "{r:?}");
 }
 
+/// An in-place rewrite that restores the old mtime, as
+/// `cp --preserve=timestamps` does, breaks sharing and so the discount.
+#[cfg(unix)]
+#[test]
+fn timestamp_preserving_rewrites_revoke_the_discount() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    let data: Vec<u8> = (0..50_000u32).map(|i| (i % 251) as u8).collect();
+    put(&c, "p", 0, RLIB, &data);
+    let b = put(&c, "p", 1, RLIB, &data);
+    let Some(r) = share(&c) else { return };
+    assert_eq!(r.shared, 1, "{r:?}");
+    assert_eq!(buildq::gc::scan(&c, true).pools[0].shared, 50_000);
+
+    let (inode, mtime) = (ino(&b), fs::metadata(&b).unwrap().modified().unwrap());
+    let other: Vec<u8> = data.iter().map(|x| x ^ 0xff).collect();
+    let f = fs::File::options().write(true).open(&b).unwrap();
+    std::io::Write::write_all(&mut &f, &other).unwrap();
+    f.set_modified(mtime).unwrap();
+    drop(f);
+    assert_eq!(
+        (ino(&b), fs::metadata(&b).unwrap().modified().unwrap()),
+        (inode, mtime)
+    );
+
+    assert_eq!(buildq::gc::scan(&c, true).pools[0].shared, 0);
+    let r = share(&c).unwrap();
+    assert_eq!((r.already_shared, r.differing), (0, 1), "{r:?}");
+}
+
 #[cfg(unix)]
 #[test]
 fn differing_files_and_leftover_clones() {
@@ -539,6 +569,7 @@ fn a_failed_eviction_keeps_its_shared_blocks_charged() {
 #[cfg(unix)]
 #[test]
 fn a_surviving_hard_link_keeps_a_pruned_copy_shared() {
+    let mut after = Vec::new();
     for dry_run in [true, false] {
         let temp = tempfile::tempdir().unwrap();
         let c = cfg(temp.path());
@@ -557,12 +588,44 @@ fn a_surviving_hard_link_keeps_a_pruned_copy_shared() {
         );
         // The inode survives through its alias: only the fingerprint goes.
         assert_eq!(r.freed, 10, "dry_run={dry_run} {r:?}");
+        after.push(r.after);
         if !dry_run {
             assert!(c.cache_dir.join("pools/p/m0/debug/libdep.rlib").exists());
+            // Unlinking a name changes the inode's ctime, which a rewrite
+            // would too: the survivor is conservatively counted in full.
             let usage = buildq::gc::scan(&c, true);
-            assert_eq!(usage.pools[0].shared, 10_000, "{usage:?}");
+            assert_eq!(usage.pools[0].shared, 0, "{usage:?}");
+            assert_eq!(usage.total, r.after);
         }
     }
+    // A dry run projects the same usage the real run leaves.
+    assert_eq!(after[0], after[1], "{after:?}");
+}
+
+/// Removing the idle pool afterwards cancels a revoked discount.
+#[cfg(unix)]
+#[test]
+fn dry_runs_project_revoked_discounts_of_removed_pools() {
+    let mut after = Vec::new();
+    for dry_run in [true, false] {
+        let temp = tempfile::tempdir().unwrap();
+        let c = cfg(temp.path());
+        for id in [0, 1] {
+            used(&c, id, 0);
+        }
+        if stale_shared_unit(&c, true).is_none() {
+            return;
+        }
+        let r = buildq::gc::gc(
+            &c,
+            &buildq::gc::Options {
+                dry_run,
+                ..Default::default()
+            },
+        );
+        after.push(r.after);
+    }
+    assert_eq!(after, [0, 0]);
 }
 
 #[cfg(unix)]
@@ -614,7 +677,8 @@ fn a_replaced_alias_does_not_keep_a_pruned_copy_alive() {
                 ..Default::default()
             },
         );
-        // Pruning the stale rlib frees nothing: m1 still shares its blocks.
-        assert_eq!(r.freed, 10, "dry_run={dry_run} {r:?}");
+        // Unlinking the alias changed the rlib's ctime, so its sharing is no
+        // longer proven: usage counted it in full, and so does pruning it.
+        assert_eq!(r.freed, 10_010, "dry_run={dry_run} {r:?}");
     }
 }

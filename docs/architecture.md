@@ -342,8 +342,10 @@ Fingerprints, member manifests, and the pool safety invariant therefore stay val
 
 Allocated block counts report every clone in full. Usage therefore subtracts
 each recorded group's copies beyond the first while every recorded device,
-inode, length, and mtime still matches. A rewrite by Cargo drops that path from
-its group, and an inode recorded twice counts once. Eviction claims only bytes
+inode, length, mtime, and ctime still matches. A rewrite drops that path from
+its group, even one that restores the old mtime; so does any other status
+change, such as adding or removing a hard link, which only overstates usage.
+An inode recorded twice counts once. Eviction claims only bytes
 that no remaining member shares.
 
 Manual `buildq gc` and background collectors run a pass, automatic ones at most

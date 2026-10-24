@@ -108,6 +108,10 @@ pub struct Entry {
     pub ino: u64,
     pub len: u64,
     pub mtime_ns: u64,
+    /// Catches in-place rewrites that restore mtime (`cp --preserve=timestamps`).
+    /// Missing in older ledgers: such entries stop matching until shared again.
+    #[serde(default)]
+    pub ctime_ns: u64,
 }
 
 /// Paths that share data blocks with each other.
@@ -139,6 +143,7 @@ impl Entry {
             ino,
             len: md.len(),
             mtime_ns: mtime_ns(md),
+            ctime_ns: ctime_ns(md),
         })
     }
 
@@ -159,8 +164,14 @@ impl Entry {
     }
 
     fn same_file(&self, other: &Entry) -> bool {
-        (self.dev, self.ino, self.len, self.mtime_ns)
-            == (other.dev, other.ino, other.len, other.mtime_ns)
+        (self.dev, self.ino, self.len, self.mtime_ns, self.ctime_ns)
+            == (
+                other.dev,
+                other.ino,
+                other.len,
+                other.mtime_ns,
+                other.ctime_ns,
+            )
     }
 
     fn matches(&self, md: &fs::Metadata) -> bool {
@@ -168,6 +179,7 @@ impl Entry {
             && file_id(md) == Some((self.dev, self.ino))
             && md.len() == self.len
             && mtime_ns(md) == self.mtime_ns
+            && ctime_ns(md) == self.ctime_ns
     }
 
     /// The current metadata when any recorded name still holds the file.
@@ -301,6 +313,14 @@ impl Sharing {
                 let Some(md) = e.current_excluding(&cfg.cache_dir, excluded) else {
                     continue;
                 };
+                // Removing one name of a surviving inode changes its ctime,
+                // which a real removal makes revoke the discount: project it.
+                if e.paths(&cfg.cache_dir)
+                    .iter()
+                    .any(|p| excluded(p) && fs::symlink_metadata(p).is_ok_and(|md| e.matches(&md)))
+                {
+                    continue;
+                }
                 if !seen.insert((e.dev, e.ino)) || holders.iter().any(|h| h.is(&e.pool, e.member)) {
                     continue;
                 }
@@ -356,6 +376,34 @@ impl Sharing {
             })
             .map(|g| g.bytes)
             .sum()
+    }
+
+    /// Usage that pruning `removed` paths adds back by revoking discounts:
+    /// removing some names of a holder changes its ctime, so the holder
+    /// stops matching and its surviving names count in full. Holders whose
+    /// names all go are freed through `pruned_discount` instead.
+    pub fn revoked_discount(&self, removed: &dyn Fn(&Path) -> bool) -> u64 {
+        let mut revoked = 0;
+        for g in &self.groups {
+            let (mut full, mut partial) = (0, 0);
+            for h in &g.holders {
+                let n = h.paths.iter().filter(|p| removed(p)).count();
+                if n == h.paths.len() {
+                    full += 1;
+                } else if n > 0 {
+                    partial += 1;
+                }
+            }
+            if partial == 0 || full == g.holders.len() {
+                continue;
+            }
+            let rest = g.holders.len() - full - partial;
+            // The group counted one copy; afterwards the partial holders
+            // count in full and the intact rest share one copy among them.
+            let after = (partial + rest.min(1)) as u64 * g.bytes;
+            revoked += after.saturating_sub(g.bytes);
+        }
+        revoked
     }
 
     /// Bytes that pruning `removed` paths of one member did not free, because
@@ -736,6 +784,21 @@ fn mtime_ns(md: &fs::Metadata) -> u64 {
         .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
         .map(|d| d.as_nanos() as u64)
         .unwrap_or(0)
+}
+
+/// Status change time: any write, link, or mode change updates it, so a
+/// recorded identity only matches while sharing cannot have been broken.
+#[cfg(unix)]
+fn ctime_ns(md: &fs::Metadata) -> u64 {
+    use std::os::unix::fs::MetadataExt;
+    (md.ctime() as u64)
+        .saturating_mul(1_000_000_000)
+        .saturating_add(md.ctime_nsec() as u64)
+}
+
+#[cfg(not(unix))]
+fn ctime_ns(_: &fs::Metadata) -> u64 {
+    0
 }
 
 #[cfg(unix)]

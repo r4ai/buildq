@@ -578,6 +578,13 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         }
     }
 
+    // A real run measures revoked discounts by rescanning; a dry run projects them.
+    let revoked = if dry {
+        before_prune.revoked_discount(&|path| removed(&report, dry, path))
+    } else {
+        0
+    };
+
     // 2b. share identical files before budget decisions measure usage
     if opts.dedupe && !dry && dedupe_due(&cfg, opts.auto) {
         let r = dedupe::run(&cfg, &dedupe::Options::new(&cfg, false));
@@ -689,9 +696,12 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     if !dry {
         usage = scan(&cfg, report.failed_deletions > 0);
     }
-    let mut total = usage
-        .total
-        .saturating_sub(if dry { report.freed } else { 0 });
+    // Revoked discounts first: a later removal in the report may cancel them.
+    let mut total = if dry {
+        (usage.total + revoked).saturating_sub(report.freed)
+    } else {
+        usage.total
+    };
     // Both live artifacts and trash contribute to usage. Deleting either
     // decreases used and increases free equally in the dry-run projection.
     let budget = usage.effective_budget;
