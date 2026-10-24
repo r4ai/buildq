@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::cargo::{self, Parsed, Route, TargetDirChoice};
-use crate::config::{Config, WrapperMode};
+use crate::config::{CargoBackend, Config, WrapperMode};
 use crate::exec;
 use crate::git::{self, Worktree};
 use crate::history;
@@ -200,6 +200,91 @@ fn real_cargo(cfg: &Config) -> Result<PathBuf, String> {
         crate::shim::shim_dir().as_deref(),
     )
     .ok_or_else(|| "cannot find the real cargo on PATH (set BUILDQ_REAL_CARGO)".to_string())
+}
+
+/// What a queued cargo job runs. Passthrough commands, nested cargo and
+/// buildq's own probes always use the real cargo directly.
+#[derive(Debug, PartialEq, Eq)]
+enum Launcher {
+    Cargo,
+    /// mbx wraps the real cargo (`CARGO`) and its compilers. buildq keeps
+    /// owning target placement, so mbx's views and check lanes stay off.
+    Mbx(PathBuf),
+}
+
+impl Launcher {
+    fn resolve(cfg: &Config, real: &Path) -> Result<Launcher, String> {
+        if cfg.backend == CargoBackend::Cargo {
+            return Ok(Launcher::Cargo);
+        }
+        let shim = crate::shim::shim_dir();
+        let mbx = match &cfg.mbx {
+            Some(p) if !p.is_file() => {
+                return Err(format!("cargo.mbx {} does not exist", p.display()));
+            }
+            Some(p) => p.clone(),
+            None => cargo::find_on_path(
+                if cfg!(windows) {
+                    &["mbx.exe", "mbx.cmd"]
+                } else {
+                    &["mbx"]
+                },
+                shim.as_deref(),
+            )
+            .ok_or("cargo.backend = \"mbx\": cannot find mbx on PATH (set cargo.mbx)")?,
+        };
+        mbx_launcher(mbx, real, &cfg.wrapper)
+    }
+
+    fn command(&self, real: &Path) -> Command {
+        match self {
+            Launcher::Cargo => Command::new(real),
+            Launcher::Mbx(mbx) => {
+                let mut c = Command::new(mbx);
+                c.env("CARGO", real)
+                    .env("MBX_TARGET_VIEWS", "0")
+                    .env("MBX_TARGET_LANES", "0");
+                c
+            }
+        }
+    }
+
+    fn program<'a>(&'a self, real: &'a Path) -> &'a Path {
+        match self {
+            Launcher::Cargo => real,
+            Launcher::Mbx(mbx) => mbx,
+        }
+    }
+}
+
+/// Refuses chains that would loop (mbx -> buildq, cargo -> mbx) or silently
+/// stop caching (an explicit rustc wrapper, which mbx defers to).
+fn mbx_launcher(mbx: PathBuf, real: &Path, wrapper: &WrapperMode) -> Result<Launcher, String> {
+    if let WrapperMode::Path(p) = wrapper {
+        return Err(format!(
+            "cargo.rustc_wrapper = {p:?} conflicts with cargo.backend = \"mbx\": mbx sets RUSTC_WRAPPER itself and would not cache; use \"none\" or \"keep\""
+        ));
+    }
+    let is_buildq = env::current_exe().is_ok_and(|me| crate::util::same_path(&me, &mbx));
+    let in_shim_dir = mbx
+        .parent()
+        .is_some_and(|d| d.join(crate::shim::MARKER).exists());
+    if is_buildq || in_shim_dir {
+        return Err(format!(
+            "cargo.mbx {} is buildq itself; point cargo.mbx at the mbx binary",
+            mbx.display()
+        ));
+    }
+    // Only the resolved name: multiplexing shims (mise) canonicalize both
+    // cargo and mbx to the same binary without forming a loop.
+    let resolved = crate::util::canonical(real);
+    if crate::util::file_stem_lower(&resolved.to_string_lossy()) == "mbx" {
+        return Err(format!(
+            "the real cargo {} resolves to mbx; set cargo.real or BUILDQ_REAL_CARGO to the toolchain's cargo",
+            real.display()
+        ));
+    }
+    Ok(Launcher::Mbx(mbx))
 }
 
 pub struct Toolchain {
@@ -727,8 +812,9 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     if cargo::route(&parsed, &|s| cfg.is_heavy(s)) == Route::Passthrough {
         return passthrough(args);
     }
+    let launcher = Launcher::resolve(cfg, &real)?;
     if parsed.sub() == Some("run") && opt_absent(&parsed, "--message-format") {
-        return cargo_run(cfg, opts, &real, args, &parsed);
+        return cargo_run(cfg, opts, &real, &launcher, args, &parsed);
     }
     trace("parsed");
     // Lease the member before taking a slot: waiting for a busy member must
@@ -754,7 +840,7 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
         g.set_target(&format!("{}/{}", c.name, l.name()));
     }
     let started = now_ms();
-    let mut cmd = Command::new(&real);
+    let mut cmd = launcher.command(&real);
     cmd.args(&cmd_args);
     cargo_env(&mut cmd, cfg, &parsed, target.as_deref());
     let execution = if lease.is_some() && cfg.min_free > 0 {
@@ -762,7 +848,7 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     } else {
         exec::run(&mut cmd, cfg.kill_tree)
     }
-    .map_err(|e| format!("{}: {e}", real.display()));
+    .map_err(|e| format!("{}: {e}", launcher.program(&real).display()));
     let code = execution.as_ref().copied().unwrap_or(125);
     trace("cargo finished");
     if let (Some(c), Some(l)) = (ctx.as_mut(), lease.as_mut()) {
@@ -1173,6 +1259,7 @@ fn cargo_run(
     cfg: &Config,
     opts: &Opts,
     real: &Path,
+    launcher: &Launcher,
     args: &[String],
     parsed: &Parsed,
 ) -> Result<i32, String> {
@@ -1224,7 +1311,7 @@ fn cargo_run(
     if let (Some(l), Some(c)) = (&lease, &ctx) {
         g.set_target(&format!("{}/{}", c.name, l.name()));
     }
-    let mut cmd = Command::new(real);
+    let mut cmd = launcher.command(real);
     cmd.args(&cmd_args).stdout(Stdio::piped());
     cargo_env(&mut cmd, cfg, &build_parsed, target.as_deref());
     let enforce_reserve = lease.is_some() && cfg.min_free > 0;
@@ -1233,7 +1320,7 @@ fn cargo_run(
     }
     let mut child = cmd
         .spawn()
-        .map_err(|e| format!("{}: {e}", real.display()))?;
+        .map_err(|e| format!("{}: {e}", launcher.program(real).display()))?;
     let guard = exec::ChildGuard::attach(&child, cfg.kill_tree || enforce_reserve);
     let output = child.stdout.take();
     let reader = std::thread::spawn(move || {
@@ -1654,6 +1741,44 @@ fn sync_into(dir: &Path, files: &[PathBuf]) -> io::Result<u64> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn mbx_launcher_refuses_loops_and_explicit_wrappers() {
+        use super::{Launcher, WrapperMode, mbx_launcher};
+        let t = tempfile::tempdir().unwrap();
+        let bin = t.path().join("bin");
+        std::fs::create_dir_all(&bin).unwrap();
+        let mbx = bin.join("mbx");
+        let cargo = bin.join("cargo");
+        std::fs::write(&mbx, "").unwrap();
+        std::fs::write(&cargo, "").unwrap();
+        assert_eq!(
+            mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Disable),
+            Ok(Launcher::Mbx(mbx.clone()))
+        );
+        assert!(mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Keep).is_ok());
+        let err = mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Path("sccache".into()));
+        assert!(err.unwrap_err().contains("rustc_wrapper"));
+        // A real cargo that is mbx (or mbx's Cargo shim linked to it) loops.
+        assert!(
+            mbx_launcher(mbx.clone(), &mbx, &WrapperMode::Disable)
+                .unwrap_err()
+                .contains("BUILDQ_REAL_CARGO")
+        );
+        #[cfg(unix)]
+        {
+            let linked = t.path().join("cargo");
+            std::os::unix::fs::symlink(&mbx, &linked).unwrap();
+            assert!(mbx_launcher(mbx.clone(), &linked, &WrapperMode::Disable).is_err());
+        }
+        // mbx inside a buildq shim dir would re-enter buildq.
+        std::fs::write(bin.join(crate::shim::MARKER), "").unwrap();
+        assert!(
+            mbx_launcher(mbx, &cargo, &WrapperMode::Disable)
+                .unwrap_err()
+                .contains("buildq itself")
+        );
+    }
+
     #[test]
     fn build_dirs_cover_deps_for_bins_and_examples() {
         let t = tempfile::tempdir().unwrap();

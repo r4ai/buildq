@@ -374,13 +374,18 @@ pub fn find_real_cargo(configured: Option<&Path>, skip_dir: Option<&Path>) -> Op
     if let Some(p) = configured {
         return Some(p.to_path_buf());
     }
-    let me = env::current_exe().ok().map(|p| crate::util::canonical(&p));
-    let path = env::var_os("PATH")?;
     let names: &[&str] = if cfg!(windows) {
         &["cargo.exe", "cargo.cmd", "cargo.bat"]
     } else {
         &["cargo"]
     };
+    find_on_path(names, skip_dir)
+}
+
+/// The first of `names` on PATH that is not buildq itself, skipping shim dirs.
+pub fn find_on_path(names: &[&str], skip_dir: Option<&Path>) -> Option<PathBuf> {
+    let me = env::current_exe().ok().map(|p| crate::util::canonical(&p));
+    let path = env::var_os("PATH")?;
     for dir in env::split_paths(&path) {
         if dir.as_os_str().is_empty() || dir.join(crate::shim::MARKER).exists() {
             continue;

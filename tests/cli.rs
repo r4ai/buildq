@@ -959,6 +959,75 @@ fn shim_inside_a_held_job_is_passthrough() {
     assert_eq!(s.history_len(), 0);
 }
 
+#[test]
+#[cfg(unix)]
+fn mbx_backend_wraps_queued_jobs_and_keeps_target_ownership() {
+    use std::os::unix::fs::PermissionsExt;
+    let s = shim_setup();
+    let mbx = s.e.root.join("mbxbin/mbx");
+    fs::create_dir_all(mbx.parent().unwrap()).unwrap();
+    fs::write(
+        &mbx,
+        "#!/bin/sh\necho MBX \"$@\"\necho REAL=$CARGO\necho VIEWS=$MBX_TARGET_VIEWS LANES=$MBX_TARGET_LANES\nexec \"$CARGO\" \"$@\"\n",
+    )
+    .unwrap();
+    fs::set_permissions(&mbx, fs::Permissions::from_mode(0o755)).unwrap();
+    let config = s.e.root.join("q/config.toml");
+    let base = fs::read_to_string(&config).unwrap();
+    fs::write(
+        &config,
+        format!("{base}[cargo]\nbackend = \"mbx\"\nmbx = {:?}\n", mbx),
+    )
+    .unwrap();
+
+    let out = s.cargo(&["build", "-p", "a"], 0);
+    assert!(out.status.success(), "{}", stderr(&out));
+    assert!(line(&out, "MBX").starts_with("build -p a "));
+    assert_eq!(
+        line(&out, "REAL="),
+        s.e.root.join("realbin/cargo").to_str().unwrap()
+    );
+    assert_eq!(line(&out, "VIEWS="), "0 LANES=0");
+    // buildq still places the pooled target and records the job.
+    assert!(scoped_target(&out).contains("pools"));
+    assert_eq!(line(&out, "HELD="), "build");
+    assert_eq!(s.history_len(), 1);
+
+    // Light commands reach the real cargo without mbx.
+    let out = s.cargo(&["fmt"], 0);
+    assert_eq!(line(&out, "ARGS"), "fmt");
+    assert!(!String::from_utf8_lossy(&out.stdout).contains("MBX"));
+
+    // An explicit rustc wrapper would make mbx skip caching: refuse it.
+    fs::write(
+        &config,
+        format!(
+            "{base}[cargo]\nbackend = \"mbx\"\nmbx = {:?}\nrustc_wrapper = \"sccache\"\n",
+            mbx
+        ),
+    )
+    .unwrap();
+    let out = s.cargo(&["build"], 0);
+    assert!(!out.status.success());
+    assert!(stderr(&out).contains("rustc_wrapper"), "{}", stderr(&out));
+    assert_eq!(s.history_len(), 1);
+
+    // A missing mbx fails before queueing.
+    fs::write(
+        &config,
+        format!("{base}[cargo]\nbackend = \"mbx\"\nmbx = \"/nonexistent/mbx\"\n"),
+    )
+    .unwrap();
+    let out = s.cargo(&["check"], 0);
+    assert!(!out.status.success());
+    assert!(
+        stderr(&out).contains("/nonexistent/mbx"),
+        "{}",
+        stderr(&out)
+    );
+    assert_eq!(s.history_len(), 1);
+}
+
 fn stderr(out: &Output) -> String {
     String::from_utf8_lossy(&out.stderr).to_string()
 }

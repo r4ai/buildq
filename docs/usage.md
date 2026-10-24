@@ -25,6 +25,7 @@ min_free = "25G"         # Minimum free disk space to preserve on volume (defaul
 [cargo]
 rustc_wrapper = "none"   # Disable global sccache per job ("none" | "keep" | "/path")
 # jobs = 8               # CARGO_BUILD_JOBS per build (default: cores / slots)
+# backend = "mbx"        # Run queued jobs through mr-boxington ("cargo" | "mbx", default: "cargo")
 ```
 
 `cache.max_members` must be at least the effective `slots` value, including
@@ -121,6 +122,43 @@ let status = std::process::Command::new(std::env::var_os("CARGO").unwrap())
     .unwrap();
 assert!(status.success());
 ```
+
+## mr-boxington (mbx)
+
+`[cargo] backend = "mbx"` runs queued Cargo jobs through
+[mr-boxington](https://github.com/jdx/mr-boxington), which restores matching
+compiler outputs from its shared store. It is opt-in; the default backend runs
+the real Cargo directly.
+
+```toml
+[cargo]
+backend = "mbx"
+# mbx = "/absolute/path/to/mbx"   # Default: `mbx` on PATH
+```
+
+Responsibilities stay split:
+
+- buildq keeps job admission, pooled target placement, content-based source
+  invalidation, `cargo run` staging, and its own GC. Each job gets
+  `MBX_TARGET_VIEWS=0` and `MBX_TARGET_LANES=0`, so mbx does not create
+  managed targets or check lanes.
+- mbx wraps the compilers. buildq passes the resolved real Cargo as `CARGO`
+  and forwards `+toolchain` unchanged, so the real Cargo must be one that
+  accepts it (a rustup or mise proxy).
+- Only queued jobs use mbx. Light commands, nested Cargo inside a job, and
+  buildq's own `cargo metadata` probes run the real Cargo directly.
+
+buildq refuses a combination that would loop or silently stop caching:
+`cargo.rustc_wrapper` set to a path (mbx would defer to it), a real Cargo that
+resolves to mbx or its Cargo shim, and an `mbx` path that is buildq itself.
+Keep `rustc_wrapper = "none"` (the default) or `"keep"`; with `"keep"`, a
+`RUSTC_WRAPPER` already in the environment still makes mbx skip caching.
+
+mbx keeps its own store, private incremental state, and collector, outside
+`cache.budget`. Budget the volume for both, or set `MBX_GC_AUTO` and mbx's
+budget explicitly. `buildq cache ls` and `buildq gc` report and collect only
+buildq's pool. Combined storage accounting and coordinated collection are
+tracked separately.
 
 ## Cache Budget
 

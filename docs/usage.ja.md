@@ -25,6 +25,7 @@ min_free = "25G"         # ドライブ上に最低限残す空き容量 (デフ
 [cargo]
 rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を無効化 ("none" | "keep" | "/path")
 # jobs = 8               # 1ビルドあたりの CARGO_BUILD_JOBS (デフォルト: コア数 / slots)
+# backend = "mbx"        # キューのジョブを mr-boxington 経由で実行 ("cargo" | "mbx"、デフォルト: "cargo")
 ```
 
 `cache.max_members` の最小値は、環境変数の上書きを含む有効な `slots` の値である。
@@ -118,6 +119,38 @@ let status = std::process::Command::new(std::env::var_os("CARGO").unwrap())
     .unwrap();
 assert!(status.success());
 ```
+
+## mr-boxington (mbx)
+
+`[cargo] backend = "mbx"` を指定すると、キューを通る Cargo ジョブを [mr-boxington](https://github.com/jdx/mr-boxington) 経由で実行する。
+mbx は共有ストアから一致するコンパイラ出力を復元する。
+この設定はオプトインであり、デフォルトでは本物の Cargo を直接実行する。
+
+```toml
+[cargo]
+backend = "mbx"
+# mbx = "/absolute/path/to/mbx"   # デフォルト: PATH 上の `mbx`
+```
+
+責務は次のように分担する。
+
+- buildq は、ジョブの受け入れ、プール target の配置、内容ベースのソース無効化、`cargo run` のステージング、自身の GC を受け持つ。
+  各ジョブに `MBX_TARGET_VIEWS=0` と `MBX_TARGET_LANES=0` を渡すため、mbx は managed target も check lane も作らない。
+- mbx はコンパイラをラップする。
+  buildq は解決した本物の Cargo を `CARGO` として渡し、`+toolchain` もそのまま転送する。
+  そのため、本物の Cargo は `+toolchain` を受け付けるもの（rustup や mise のプロキシ）でなければならない。
+- mbx を使うのはキューを通るジョブだけである。
+  軽いコマンド、ジョブ内のネストした Cargo、buildq 自身の `cargo metadata` による調査は、本物の Cargo を直接実行する。
+
+ループする構成や、キャッシュが黙って無効になる構成は拒否する。
+具体的には、`cargo.rustc_wrapper` にパスを指定した場合（mbx はそのラッパーに処理を委ね、キャッシュしない）、本物の Cargo が mbx かその Cargo shim に解決される場合、`mbx` のパスが buildq 自身を指す場合である。
+`rustc_wrapper` は `"none"`（デフォルト）か `"keep"` にする。
+`"keep"` の場合でも、環境変数に `RUSTC_WRAPPER` が設定されていれば mbx はキャッシュしない。
+
+mbx は、ストア、非共有のインクリメンタル状態、コレクタを独自に持ち、これらは `cache.budget` の対象外である。
+ボリュームの容量は両方を見込んで確保するか、`MBX_GC_AUTO` と mbx の予算を明示的に設定する。
+`buildq cache ls` と `buildq gc` が報告・回収するのは buildq のプールだけである。
+両者を合わせたストレージの集計と GC の協調は、別途扱う。
 
 ## Cache Budget
 
