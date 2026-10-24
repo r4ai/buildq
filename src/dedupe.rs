@@ -158,6 +158,11 @@ impl Entry {
             .collect()
     }
 
+    fn same_file(&self, other: &Entry) -> bool {
+        (self.dev, self.ino, self.len, self.mtime_ns)
+            == (other.dev, other.ino, other.len, other.mtime_ns)
+    }
+
     fn matches(&self, md: &fs::Metadata) -> bool {
         md.is_file()
             && file_id(md) == Some((self.dev, self.ino))
@@ -210,7 +215,11 @@ impl Ledger {
     fn record(&mut self, canonical: Entry, other: Entry) {
         let (ck, ok) = (canonical.key(), other.key());
         for group in &mut self.groups {
-            group.entries.retain(|e| e.key() != ok);
+            // A different file at the canonical path shared other data: its
+            // group must not adopt the new copy.
+            group
+                .entries
+                .retain(|e| e.key() != ok && (e.key() != ck || e.same_file(&canonical)));
         }
         match self
             .groups

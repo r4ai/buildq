@@ -564,3 +564,29 @@ fn a_surviving_hard_link_keeps_a_pruned_copy_shared() {
         }
     }
 }
+
+#[cfg(unix)]
+#[test]
+fn a_rewritten_canonical_starts_a_new_group() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    let a = put(&c, "p", 0, RLIB, &[1; 8000]);
+    put(&c, "p", 1, RLIB, &[1; 8000]);
+    if share(&c).is_none() {
+        return;
+    }
+    // m0 is rebuilt with other content while m1 is busy; m2 matches m0 now.
+    fs::write(&a, [2; 8000]).unwrap();
+    put(&c, "p", 2, RLIB, &[2; 8000]);
+    let busy = lock::lock(&c.cache_dir.join("pools/p/m1.lock")).unwrap();
+    let r = share(&c).unwrap();
+    assert_eq!(r.shared, 1, "{r:?}");
+    drop(busy);
+    // Only m0 and m2 share; m1 keeps its own, different data.
+    let usage = buildq::gc::scan(&c, true);
+    assert_eq!(usage.pools[0].shared, 8000, "{usage:?}");
+    let groups = buildq::dedupe::Ledger::load(&c.cache_dir).groups;
+    assert_eq!(groups.len(), 1, "{groups:?}");
+    let members: Vec<usize> = groups[0].entries.iter().map(|e| e.member).collect();
+    assert_eq!(members, vec![0, 2]);
+}
