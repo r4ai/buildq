@@ -145,6 +145,7 @@ buildq: target <pool>/m0 (...)
 | `buildq top` | Live jobs, wait durations, remote status, and target pool usage |
 | `buildq history [-n N]` | Show recent jobs<br>(wait time, run time, exit code, pool member) |
 | `buildq cache ls [--refresh]` | Show target pools, member sizes, budget, and free space |
+| `buildq cache clean [--all] [--dry-run]` | Remove idle pooled targets of this repository (or all with `--all`) |
 | `buildq gc [--dry-run]` | Manually prune caches to fit within the disk budget |
 | `buildq cache dedupe [--dry-run]` | Share identical files between members as reflinks |
 | `buildq config` | Print effective configuration and directory paths |

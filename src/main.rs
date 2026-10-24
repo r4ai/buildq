@@ -120,6 +120,9 @@ enum Cmd {
 enum CacheCmd {
     /// Remove idle pooled targets for this Git repository (all worktrees/toolchains).
     Clean {
+        /// Remove idle pooled targets of every repository instead.
+        #[arg(long)]
+        all: bool,
         #[arg(long)]
         dry_run: bool,
         #[arg(long)]
@@ -252,20 +255,25 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Cmd::Cache {
-            cmd: CacheCmd::Clean { dry_run, json },
+            cmd: CacheCmd::Clean { all, dry_run, json },
         } => {
-            let directory = match std::env::current_dir() {
-                Ok(dir) => dir,
-                Err(error) => {
-                    eprintln!("buildq: {error}");
+            let repo = if all {
+                None
+            } else {
+                let directory = match std::env::current_dir() {
+                    Ok(dir) => dir,
+                    Err(error) => {
+                        eprintln!("buildq: {error}");
+                        return ExitCode::from(125);
+                    }
+                };
+                let Some(repo) = buildq::git::discover(&directory) else {
+                    eprintln!("buildq: cache clean requires a Git repository (or --all)");
                     return ExitCode::from(125);
-                }
+                };
+                Some(repo.repo_key())
             };
-            let Some(repo) = buildq::git::discover(&directory) else {
-                eprintln!("buildq: cache clean requires a Git repository");
-                return ExitCode::from(125);
-            };
-            let report = gc::clean_repo(&cfg, &repo.repo_key(), dry_run);
+            let report = gc::clean_pools(&cfg, repo.as_deref(), dry_run);
             let status = print_gc_report(&report, dry_run, json, false);
             if report.skipped.is_some() {
                 ExitCode::from(1)

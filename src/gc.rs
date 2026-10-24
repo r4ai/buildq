@@ -826,9 +826,10 @@ fn evict_member(
     freed
 }
 
-/// Remove only idle target pools for one repository, across its toolchains.
+/// Remove idle target pools of one repository (across its toolchains), or of
+/// every repository when `repo_key` is `None`.
 /// Retain coordination locks and never touch run copies or external targets.
-pub fn clean_repo(cfg: &Config, repo_key: &str, dry: bool) -> Report {
+pub fn clean_pools(cfg: &Config, repo_key: Option<&str>, dry: bool) -> Report {
     let mut report = Report {
         accounting: cfg.accounting,
         ..Default::default()
@@ -853,7 +854,8 @@ pub fn clean_repo(cfg: &Config, repo_key: &str, dry: bool) -> Report {
     let sharing = dedupe::Sharing::load(cfg);
     let mut evicted = BTreeSet::new();
     let mut skipped = 0;
-    for pool in usage.pools.iter().filter(|p| p.info.repo_key == repo_key) {
+    let selected = |p: &&PoolEntry| repo_key.is_none_or(|k| p.info.repo_key == k);
+    for pool in usage.pools.iter().filter(selected) {
         let Ok(Some(_pool)) = lock::try_lock(&pool.dir.join("pool.lock")) else {
             skipped += 1;
             report.warnings.push(format!(
@@ -892,7 +894,7 @@ pub fn clean_repo(cfg: &Config, repo_key: &str, dry: bool) -> Report {
                 bytes,
                 dry,
                 &mut report,
-                format!("remove project member {}/m{id}", pool.name),
+                format!("remove member {}/m{id}", pool.name),
             );
             if report.failed_deletions == failures {
                 evicted.insert((pool.name.clone(), id));
@@ -906,7 +908,7 @@ pub fn clean_repo(cfg: &Config, repo_key: &str, dry: bool) -> Report {
     }
     report.observe(&after);
     if skipped > 0 {
-        report.skipped = Some(format!("{skipped} project pools are busy or inaccessible"));
+        report.skipped = Some(format!("{skipped} pools are busy or inaccessible"));
     }
     report
 }
