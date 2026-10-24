@@ -236,25 +236,63 @@ impl Launcher {
         mbx_launcher(mbx, real, &cfg.wrapper)
     }
 
-    fn command(&self, real: &Path) -> Command {
-        match self {
-            Launcher::Cargo => Command::new(real),
-            Launcher::Mbx(mbx) => {
-                let mut c = Command::new(mbx);
-                c.env("CARGO", real)
-                    .env("MBX_TARGET_VIEWS", "0")
-                    .env("MBX_TARGET_LANES", "0");
-                c
-            }
-        }
+    /// The job's command with `args`; `sub` is the resolved subcommand.
+    fn command(&self, real: &Path, args: &[String], sub: Option<&str>) -> Command {
+        let Launcher::Mbx(mbx) = self else {
+            let mut c = Command::new(real);
+            c.args(args);
+            return c;
+        };
+        let Some(args) = mbx_args(args, sub) else {
+            note(
+                "cargo.backend = \"mbx\": these Cargo options cannot follow this subcommand, which mbx requires; running cargo without mbx",
+            );
+            let mut c = Command::new(real);
+            c.args(args);
+            return c;
+        };
+        let mut c = Command::new(mbx);
+        c.args(args)
+            .env("CARGO", real)
+            .env("MBX_TARGET_VIEWS", "0")
+            .env("MBX_TARGET_LANES", "0");
+        c
     }
+}
 
-    fn program<'a>(&'a self, real: &'a Path) -> &'a Path {
-        match self {
-            Launcher::Cargo => real,
-            Launcher::Mbx(mbx) => mbx,
+/// Subcommands that read Cargo's global options after their name too.
+const GLOBALS_AFTER: &[&str] = &[
+    "build", "check", "test", "run", "bench", "doc", "rustc", "rustdoc", "fix", "install", "clippy",
+];
+
+/// mbx accepts only `+toolchain` before the subcommand, while Cargo also takes
+/// its global options there. Moves them after a subcommand that reads them
+/// the same way; None when they cannot move: an external subcommand would get
+/// them as its own arguments, and `-C` must precede the subcommand.
+fn mbx_args(args: &[String], sub: Option<&str>) -> Option<Vec<String>> {
+    let start = args.iter().take_while(|a| a.starts_with('+')).count();
+    let mut i = start;
+    while let Some(a) = args.get(i).filter(|a| a.starts_with('-')) {
+        if a.starts_with("-C") {
+            return None;
         }
+        i += if matches!(a.as_str(), "--config" | "--color" | "-Z") {
+            2
+        } else {
+            1
+        };
     }
+    if i == start {
+        return Some(args.to_vec());
+    }
+    if i >= args.len() || !GLOBALS_AFTER.contains(&sub?) {
+        return None;
+    }
+    let mut out = args[..start].to_vec();
+    out.push(args[i].clone());
+    out.extend_from_slice(&args[start..i]);
+    out.extend_from_slice(&args[i + 1..]);
+    Some(out)
 }
 
 /// Refuses chains that would loop (mbx -> buildq, cargo -> mbx) or silently
@@ -840,15 +878,15 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
         g.set_target(&format!("{}/{}", c.name, l.name()));
     }
     let started = now_ms();
-    let mut cmd = launcher.command(&real);
-    cmd.args(&cmd_args);
+    let mut cmd = launcher.command(&real, &cmd_args, parsed.sub());
+    let program = PathBuf::from(cmd.get_program());
     cargo_env(&mut cmd, cfg, &parsed, target.as_deref());
     let execution = if lease.is_some() && cfg.min_free > 0 {
         exec::run_guarded(&mut cmd, &mut || crate::storage::check(cfg))
     } else {
         exec::run(&mut cmd, cfg.kill_tree)
     }
-    .map_err(|e| format!("{}: {e}", launcher.program(&real).display()));
+    .map_err(|e| format!("{}: {e}", program.display()));
     let code = execution.as_ref().copied().unwrap_or(125);
     trace("cargo finished");
     if let (Some(c), Some(l)) = (ctx.as_mut(), lease.as_mut()) {
@@ -1311,8 +1349,9 @@ fn cargo_run(
     if let (Some(l), Some(c)) = (&lease, &ctx) {
         g.set_target(&format!("{}/{}", c.name, l.name()));
     }
-    let mut cmd = launcher.command(real);
-    cmd.args(&cmd_args).stdout(Stdio::piped());
+    let mut cmd = launcher.command(real, &cmd_args, build_parsed.sub());
+    let program = PathBuf::from(cmd.get_program());
+    cmd.stdout(Stdio::piped());
     cargo_env(&mut cmd, cfg, &build_parsed, target.as_deref());
     let enforce_reserve = lease.is_some() && cfg.min_free > 0;
     if enforce_reserve {
@@ -1320,7 +1359,7 @@ fn cargo_run(
     }
     let mut child = cmd
         .spawn()
-        .map_err(|e| format!("{}: {e}", launcher.program(real).display()))?;
+        .map_err(|e| format!("{}: {e}", program.display()))?;
     let guard = exec::ChildGuard::attach(&child, cfg.kill_tree || enforce_reserve);
     let output = child.stdout.take();
     let reader = std::thread::spawn(move || {
@@ -1741,6 +1780,30 @@ fn sync_into(dir: &Path, files: &[PathBuf]) -> io::Result<u64> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn mbx_args_move_cargo_globals_after_the_subcommand() {
+        let v = |s: &str| s.split_whitespace().map(str::to_string).collect::<Vec<_>>();
+        let moved = |s: &str, sub| super::mbx_args(&v(s), Some(sub)).map(|a| a.join(" "));
+        assert_eq!(moved("build -p a", "build").unwrap(), "build -p a");
+        assert_eq!(
+            moved(
+                "+nightly --color always -v --config x=1 -Z flag lint -- -D w",
+                "clippy"
+            )
+            .unwrap(),
+            "+nightly lint --color always -v --config x=1 -Z flag -- -D w"
+        );
+        assert_eq!(
+            moved("--config=x=1 --offline test --target-dir=t", "test").unwrap(),
+            "test --config=x=1 --offline --target-dir=t"
+        );
+        // Plain external subcommands keep working; globals cannot move into them.
+        assert_eq!(moved("nextest run", "nextest").unwrap(), "nextest run");
+        assert_eq!(moved("--locked nextest run", "nextest"), None);
+        assert_eq!(moved("-C dir build", "build"), None);
+        assert_eq!(moved("-Cdir build", "build"), None);
+    }
+
     #[test]
     fn mbx_launcher_refuses_loops_and_explicit_wrappers() {
         use super::{Launcher, WrapperMode, mbx_launcher};

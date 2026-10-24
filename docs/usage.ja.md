@@ -139,6 +139,9 @@ backend = "mbx"
 - mbx はコンパイラをラップする。
   buildq は解決した本物の Cargo を `CARGO` として渡し、`+toolchain` もそのまま転送する。
   そのため、本物の Cargo は `+toolchain` を受け付けるもの（rustup や mise のプロキシ）でなければならない。
+  mbx はサブコマンドの前にそれ以外の引数を受け付けない。
+  そのため buildq は、Cargo のグローバルオプション（`--config`、`--color`、`-v`、`--locked` など）を組み込みサブコマンドまたは `clippy` の後ろへ移す。
+  外部サブコマンドの前にある場合や `-C` を使う場合は移せないので、そのジョブは mbx を使わずに本物の Cargo で実行し、その旨を表示する。
 - mbx を使うのはキューを通るジョブだけである。
   軽いコマンド、ジョブ内のネストした Cargo、buildq 自身の `cargo metadata` による調査は、本物の Cargo を直接実行する。
 

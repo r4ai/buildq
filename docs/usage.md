@@ -144,7 +144,11 @@ Responsibilities stay split:
   managed targets or check lanes.
 - mbx wraps the compilers. buildq passes the resolved real Cargo as `CARGO`
   and forwards `+toolchain` unchanged, so the real Cargo must be one that
-  accepts it (a rustup or mise proxy).
+  accepts it (a rustup or mise proxy). mbx takes nothing else before the
+  subcommand, so buildq moves Cargo's global options (`--config`, `--color`,
+  `-v`, `--locked`, ...) after a built-in subcommand or `clippy`. Before an
+  external subcommand, or with `-C`, they cannot move; that job runs the real
+  Cargo without mbx and says so.
 - Only queued jobs use mbx. Light commands, nested Cargo inside a job, and
   buildq's own `cargo metadata` probes run the real Cargo directly.
 
