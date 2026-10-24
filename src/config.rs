@@ -80,6 +80,12 @@ pub struct CacheFile {
     pub gc_after_job: Option<bool>,
     /// Background requires a reaping init; inline waits in the current process.
     pub gc_mode: CacheGcMode,
+    /// Share identical files between idle members during GC (default auto).
+    pub dedupe: DedupeMode,
+    /// Skip files below this length when deduplicating, e.g. "64KiB".
+    pub dedupe_min_size: Option<String>,
+    /// Bytes one deduplication pass may read for comparisons, e.g. "8G".
+    pub dedupe_max_read: Option<String>,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
@@ -88,6 +94,15 @@ pub enum CacheGcMode {
     #[default]
     Background,
     Inline,
+}
+
+#[derive(Debug, Default, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum DedupeMode {
+    /// Manual and background GC passes; never inline GC, which a job waits for.
+    #[default]
+    Auto,
+    Off,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
@@ -171,6 +186,9 @@ pub struct Config {
     pub pool_idle_days: u64,
     pub gc_after_job: bool,
     pub gc_mode: CacheGcMode,
+    pub dedupe: DedupeMode,
+    pub dedupe_min_size: u64,
+    pub dedupe_max_read: u64,
     pub real_cargo: Option<PathBuf>,
     pub wrapper: WrapperMode,
     pub jobs: usize,
@@ -298,6 +316,19 @@ impl Config {
                 .or(f.cache.gc_after_job)
                 .unwrap_or(true),
             gc_mode: f.cache.gc_mode,
+            dedupe: f.cache.dedupe,
+            dedupe_min_size: f
+                .cache
+                .dedupe_min_size
+                .as_deref()
+                .and_then(parse_size)
+                .unwrap_or(64 << 10),
+            dedupe_max_read: f
+                .cache
+                .dedupe_max_read
+                .as_deref()
+                .and_then(parse_size)
+                .unwrap_or(8 << 30),
             real_cargo: env_nonempty("BUILDQ_REAL_CARGO")
                 .map(PathBuf::from)
                 .or(f.cargo.real),
@@ -396,6 +427,18 @@ pub fn describe(cfg: &Config) -> String {
             }
         }
         .into(),
+    );
+    p(
+        &mut s,
+        "deduplication",
+        match cfg.dedupe {
+            DedupeMode::Auto => format!(
+                "auto (files from {}, read up to {} per pass)",
+                crate::util::human_bytes(cfg.dedupe_min_size),
+                crate::util::human_bytes(cfg.dedupe_max_read)
+            ),
+            DedupeMode::Off => "off".into(),
+        },
     );
     p(&mut s, "rustc wrapper", format!("{:?}", cfg.wrapper));
     p(

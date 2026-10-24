@@ -57,6 +57,7 @@ flowchart LR
 - **ディスク容量制限と自動 GC**
   - 不要なインクリメンタルキャッシュや古い成果物をバックグラウンドで自動削除
   - 容量予算（デフォルト: `60 GB`）に向けて未使用キャッシュを回収
+  - メンバー間の同一成果物を reflink で共有（btrfs・XFS・APFS）
 - **実行ファイルを分離する `cargo run`**
   - ビルド完了後、実行ファイルと DLL を専用ディレクトリへコピーしてから起動
   - アプリ実行中の `target/` ロック（Windows 等）による後続ビルドの失敗を防止
@@ -145,6 +146,7 @@ buildq: target <pool>/m0 (...)
 | `buildq history [-n N]` | 直近のジョブ履歴を表示<br>（待機時間・実行時間・終了コード・使用プール） |
 | `buildq cache ls [--refresh]` | プール一覧・各メンバーの容量・空き容量を表示 |
 | `buildq gc [--dry-run]` | キャッシュを手動整理し、ディスク予算内に縮小 |
+| `buildq cache dedupe [--dry-run]` | メンバー間の同一ファイルを reflink で共有 |
 | `buildq config` | 現在有効な設定値とディレクトリパスを表示 |
 | `buildq run [-p PRIO] -- <cmd>...` | 任意のコマンドをキュー経由で実行（優先度指定可） |
 | `buildq run --host <H> -- <cmd>...` | SSH 経由でリモートホスト上でコマンドを実行 |

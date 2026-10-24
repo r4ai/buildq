@@ -20,6 +20,7 @@ max_members = 3          # Max target/ dirs per repo+toolchain (minimum: slots; 
 budget = "45G"           # Max disk usage under BUILDQ_CACHE (default: "60G")
 min_free = "25G"         # Minimum free disk space to preserve on volume (default: "20G")
 # pool_explicit = true   # Also pool explicit --target-dir / CARGO_TARGET_DIR inside the worktree (default: false)
+# dedupe = "off"         # Share identical files between members during GC ("auto" | "off", default: "auto")
 
 [cargo]
 rustc_wrapper = "none"   # Disable global sccache per job ("none" | "keep" | "/path")
@@ -147,6 +148,29 @@ leased while queued or running. GC protects that member and reports remaining
 overflow. A long-running native application can therefore reduce build capacity;
 allow enough `cache.max_members` for its retained member, or stop the application
 to release it. Compilations still release their build slots before execution.
+
+## Member Deduplication
+
+GC shares byte-identical build outputs between idle members, including members
+of other repositories on the same toolchain. Shared files keep their content,
+mode, and mtime, so Cargo still treats them as fresh. `cache ls` shows the
+shared bytes per pool, and the budget counts them once.
+
+```sh
+buildq cache dedupe --dry-run   # Measure duplication without changing files
+buildq cache dedupe             # Share now, regardless of `[cache] dedupe`
+```
+
+| Setting | Default | Description |
+| :--- | :--- | :--- |
+| `dedupe` | `"auto"` | `"off"` disables passes during GC |
+| `dedupe_min_size` | `"64KiB"` | Smaller files are not compared |
+| `dedupe_max_read` | `"8G"` | Bytes one pass may read for comparisons |
+
+Sharing needs reflinks: btrfs, XFS with `reflink=1`, or bcachefs on Linux, and
+APFS on macOS. Elsewhere a pass reports `unsupported` and changes nothing; a
+dry run still measures duplication. See
+[Cross-Member Deduplication](architecture.md#cross-member-deduplication).
 
 ## Project Cache Cleanup
 

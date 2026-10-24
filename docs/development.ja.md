@@ -18,6 +18,7 @@ src/
   git.rs       # Git blob マニフェスト計算と親なしスナップショット作成
   cargo.rs     # Cargo 引数パース・エイリアス解決・メタデータ取得
   gc.rs        # ディスク予算管理と5段階ガベージコレクション
+  dedupe.rs    # メンバー間の reflink 重複排除と記録
   remote.rs    # SSH + Git リモート実行トランスポートとプロトコル
   exec.rs      # プロセス起動・シグナル転送・Windows Job Object 制御・Unix 監視プロセス
   lock.rs      # クロスプラットフォーム OS ファイルロック (LockFileEx / flock)
@@ -27,6 +28,7 @@ src/
 tests/
   cli.rs       # 結合テスト (並列数制限・優先度・shim・GC・リモートプロトコル)
   gc.rs        # 独立プロセスで実行する GC ファイルシステム回帰テスト
+  dedupe.rs    # テスト用ボリューム上の重複排除 (reflink 非対応ならスキップ)
   e2e.rs       # 2つの Git worktree を用いた実 Cargo ビルド・無効化ベンチマーク
   fixtures/    # E2E テスト用のサンプルワークスペース
 ```
@@ -230,7 +232,7 @@ buildq shim install cargo --into C:\bq\bin
 ## Releases
 
 Rust edition は 2024、MSRV は 1.89 である。CI とリリースには
-`rust-toolchain.toml` の Rust 1.99.0 を使用する。
+`rust-toolchain.toml` の Rust 1.99.1 を使用する。
 ツールチェーン更新時は両バージョンの CI 成功を確認する。
 CI は整形、厳格な Clippy、ドキュメント、依存関係、および Linux・macOS・Windows
 での実 Cargo E2E を検査する。Dependabot は週次・グループ単位で更新を提案し、

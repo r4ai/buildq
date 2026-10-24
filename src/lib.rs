@@ -4,6 +4,7 @@
 pub mod cargo;
 mod cargo_config;
 pub mod config;
+pub mod dedupe;
 pub mod exec;
 pub mod external;
 pub mod gc;
