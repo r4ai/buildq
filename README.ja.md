@@ -95,7 +95,7 @@ Bevy を使う **3 つの worktree の同時ビルド**で実測。
 ### 1. Install the binary
 
 ```sh
-cargo install --git https://github.com/r4ai/buildq
+cargo install --git https://github.com/r4ai/buildq buildq
 ```
 
 ### 2. Install the `cargo` shim
