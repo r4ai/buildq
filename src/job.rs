@@ -1164,11 +1164,7 @@ fn cargo_run(
     parsed: &Parsed,
 ) -> Result<i32, String> {
     // `[env]` relative paths follow the rule of the Cargo that would run this.
-    let rule = crate::cargo_config::relative_rule(
-        &probe_toolchain(real, parsed.toolchain.as_deref())
-            .map(|t| t.id)
-            .unwrap_or_default(),
-    );
+    let rule = crate::cargo_config::cargo_relative_rule(real, parsed.toolchain.as_deref());
     let runner = crate::cargo_config::runner(real, &cwd(), parsed, rule)?;
     let sub = parsed.sub_index.unwrap();
     let selected = match pick_target(real, parsed) {

@@ -133,32 +133,43 @@ pub(crate) enum RelativeTo {
     LastDefinition,
 }
 
-/// Picks the rule from `rustc -vV` output of the toolchain that runs Cargo.
-/// Nightlies of 1.97 got the change on 2026-05-05; unknown versions get the
-/// current rule.
-pub(crate) fn relative_rule(rustc_vv: &str) -> RelativeTo {
-    let field = |k: &str| {
-        rustc_vv
-            .lines()
-            .find_map(|l| l.strip_prefix(k))
-            .map(str::trim)
-    };
-    let Some(release) = field("release:") else {
+/// Picks the rule from `cargo -V` output, e.g.
+/// `cargo 1.97.0-nightly (0123abcd 2026-05-06)`. Nightlies of 1.97 got the
+/// change on 2026-05-05; unknown versions get the current rule.
+pub(crate) fn relative_rule(cargo_v: &str) -> RelativeTo {
+    let mut words = cargo_v.split_whitespace();
+    let Some(release) = words.nth(1) else {
         return RelativeTo::ValueOrigin;
     };
+    let date = words.last().map(|d| d.trim_end_matches(')'));
     let (version, pre) = release.split_once('-').unwrap_or((release, ""));
     let mut parts = version.split('.').map(|p| p.parse::<u32>().ok());
     let (Some(Some(major)), Some(Some(minor))) = (parts.next(), parts.next()) else {
         return RelativeTo::ValueOrigin;
     };
     let old = (major, minor) < (1, 97)
-        || ((major, minor) == (1, 97)
-            && !pre.is_empty()
-            && field("commit-date:").is_some_and(|d| d < "2026-05-05"));
+        || ((major, minor) == (1, 97) && !pre.is_empty() && date.is_some_and(|d| d < "2026-05-05"));
     if old {
         RelativeTo::LastDefinition
     } else {
         RelativeTo::ValueOrigin
+    }
+}
+
+/// The rule of the Cargo that `real` (with an optional `+toolchain`) runs.
+pub(crate) fn cargo_relative_rule(real: &Path, toolchain: Option<&str>) -> RelativeTo {
+    let mut c = Command::new(real);
+    if let Some(t) = toolchain {
+        c.arg(format!("+{t}"));
+    }
+    let out = c
+        .arg("-V")
+        .stdin(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .output();
+    match out {
+        Ok(o) if o.status.success() => relative_rule(&String::from_utf8_lossy(&o.stdout)),
+        _ => RelativeTo::ValueOrigin,
     }
 }
 
@@ -465,11 +476,9 @@ mod tests {
         );
 
         let vv = |release: &str, date: &str| {
-            relative_rule(&format!(
-                "rustc {release}\nrelease: {release}\ncommit-date: {date}\n"
-            ))
+            relative_rule(&format!("cargo {release} (0123abcd {date})\n"))
         };
-        assert_eq!(vv("1.89.0", "2025-08-04"), RelativeTo::LastDefinition);
+        assert_eq!(vv("1.89.0", "2025-07-30"), RelativeTo::LastDefinition);
         assert_eq!(vv("1.96.0", "2026-05-25"), RelativeTo::LastDefinition);
         assert_eq!(
             vv("1.97.0-nightly", "2026-05-01"),
