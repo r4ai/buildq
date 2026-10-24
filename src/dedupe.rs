@@ -229,32 +229,59 @@ pub struct Sharing {
 struct Shared {
     /// Accounted bytes of one copy.
     bytes: u64,
-    holders: Vec<(String, usize)>,
+    holders: Vec<Holder>,
+}
+
+#[derive(Debug, Clone)]
+struct Holder {
+    pool: String,
+    member: usize,
+    path: PathBuf,
+}
+
+impl Holder {
+    fn is(&self, pool: &str, id: usize) -> bool {
+        self.pool == pool && self.member == id
+    }
 }
 
 impl Sharing {
     /// Validates the ledger against the filesystem.
+    pub fn load(cfg: &Config) -> Sharing {
+        Self::load_excluding(cfg, &|_| false)
+    }
+
+    /// Like `load`, treating paths for which `excluded` holds as gone, as a
+    /// dry run does for the paths it plans to remove.
     ///
     /// A file identity counts in one group at most: Cargo hard-links uplifted
     /// outputs, so two recorded paths can name one inode, and member sizes
     /// already count such an inode once. Dropping a repeat only overstates
     /// usage, never understates it.
-    pub fn load(cfg: &Config) -> Sharing {
+    pub fn load_excluding(cfg: &Config, excluded: &dyn Fn(&Path) -> bool) -> Sharing {
         let ledger = Ledger::load(&cfg.cache_dir);
         let mut seen = BTreeSet::new();
         let mut groups = Vec::new();
         for group in &ledger.groups {
             let mut bytes = 0;
-            let mut holders: Vec<(String, usize)> = Vec::new();
+            let mut holders: Vec<Holder> = Vec::new();
             for e in &group.entries {
+                let path = e.path(&cfg.cache_dir);
+                if excluded(&path) {
+                    continue;
+                }
                 let Some(md) = e.current(&cfg.cache_dir) else {
                     continue;
                 };
-                if !seen.insert((e.dev, e.ino)) || holders.contains(&(e.pool.clone(), e.member)) {
+                if !seen.insert((e.dev, e.ino)) || holders.iter().any(|h| h.is(&e.pool, e.member)) {
                     continue;
                 }
                 bytes = footprint(&md, cfg.accounting);
-                holders.push((e.pool.clone(), e.member));
+                holders.push(Holder {
+                    pool: e.pool.clone(),
+                    member: e.member,
+                    path,
+                });
             }
             if holders.len() > 1 {
                 groups.push(Shared { bytes, holders });
@@ -268,7 +295,7 @@ impl Sharing {
     pub fn pool_discount(&self, pool: &str) -> u64 {
         self.groups
             .iter()
-            .map(|g| g.bytes * g.holders[1..].iter().filter(|h| h.0 == pool).count() as u64)
+            .map(|g| g.bytes * g.holders[1..].iter().filter(|h| h.pool == pool).count() as u64)
             .sum()
     }
 
@@ -285,15 +312,42 @@ impl Sharing {
         id: usize,
         removed: &BTreeSet<(String, usize)>,
     ) -> u64 {
-        let me = (pool.to_string(), id);
         self.groups
             .iter()
             .filter(|g| {
-                g.holders.contains(&me)
-                    && g.holders.iter().any(|h| *h != me && !removed.contains(h))
+                g.holders.iter().any(|h| h.is(pool, id))
+                    && g.holders
+                        .iter()
+                        .any(|h| !h.is(pool, id) && !removed.contains(&(h.pool.clone(), h.member)))
             })
             .map(|g| g.bytes)
             .sum()
+    }
+
+    /// Bytes that pruning `removed` paths of one member did not free, because
+    /// another holder keeps the blocks. `gone` collects pruned holder paths
+    /// across members, so the last holder's removal is credited in full.
+    pub fn pruned_discount(
+        &self,
+        pool: &str,
+        id: usize,
+        removed: &dyn Fn(&Path) -> bool,
+        gone: &mut BTreeSet<PathBuf>,
+    ) -> u64 {
+        let mut kept = 0;
+        for g in &self.groups {
+            let Some(mine) = g.holders.iter().find(|h| h.is(pool, id)) else {
+                continue;
+            };
+            if !removed(&mine.path) {
+                continue;
+            }
+            gone.insert(mine.path.clone());
+            if g.holders.iter().any(|h| !gone.contains(&h.path)) {
+                kept += g.bytes;
+            }
+        }
+        kept
     }
 }
 

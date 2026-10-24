@@ -378,3 +378,150 @@ fn cross_pool_sharing_is_charged_once_and_survives_retiring_a_pool() {
     let usage = buildq::gc::scan(&c, true);
     assert_eq!((usage.total, usage.pools[0].shared), (20_000, 0));
 }
+
+/// m0 holds a stale unit (hash `a…`, superseded by `b…`) whose rlib it shares
+/// with m1, where it is still the only unit and so is not pruned.
+#[cfg(unix)]
+fn stale_shared_unit(c: &Config) -> Option<()> {
+    put(
+        c,
+        "p",
+        0,
+        "debug/deps/libdep-aaaaaaaaaaaaaaaa.rlib",
+        &[1; 10_000],
+    );
+    put(
+        c,
+        "p",
+        1,
+        "debug/deps/libdep-aaaaaaaaaaaaaaaa.rlib",
+        &[1; 10_000],
+    );
+    put(
+        c,
+        "p",
+        0,
+        "debug/deps/libdep-bbbbbbbbbbbbbbbb.rlib",
+        &[2; 5_000],
+    );
+    for (id, hash, days) in [
+        (0, "aaaaaaaaaaaaaaaa", 30),
+        (0, "bbbbbbbbbbbbbbbb", 0),
+        (1, "aaaaaaaaaaaaaaaa", 30),
+    ] {
+        let fp = put(
+            c,
+            "p",
+            id,
+            &format!("debug/.fingerprint/dep-{hash}/lib-dep"),
+            &[0; 10],
+        );
+        age(&fp, days * 86_400);
+    }
+    share(c)?;
+    Some(())
+}
+
+#[cfg(unix)]
+#[test]
+fn pruning_a_copy_another_member_shares_frees_only_its_own_bytes() {
+    for dry_run in [true, false] {
+        let temp = tempfile::tempdir().unwrap();
+        let c = cfg(temp.path());
+        for id in [0, 1] {
+            used(&c, id, buildq::util::now_ms());
+        }
+        if stale_shared_unit(&c).is_none() {
+            return;
+        }
+        let before = buildq::gc::scan(&c, true).total;
+        let r = buildq::gc::gc(
+            &c,
+            &buildq::gc::Options {
+                dry_run,
+                ..Default::default()
+            },
+        );
+        // Only the stale fingerprint is freed; m1 keeps the rlib's blocks.
+        assert_eq!(r.freed, 10, "dry_run={dry_run} {r:?}");
+        if !dry_run {
+            assert_eq!(buildq::gc::scan(&c, true).total, before - 10);
+        }
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn dry_run_projects_eviction_after_pruning_like_a_real_run() {
+    let mut runs = Vec::new();
+    for dry_run in [true, false] {
+        let temp = tempfile::tempdir().unwrap();
+        let mut c = cfg(temp.path());
+        used(&c, 0, buildq::util::now_ms());
+        used(&c, 1, buildq::util::now_ms() - 60_000);
+        if stale_shared_unit(&c).is_none() {
+            return;
+        }
+        // After pruning: the new unit (5010) in m0, the old one (10010) in m1.
+        c.budget = 14_000;
+        let r = buildq::gc::gc(
+            &c,
+            &buildq::gc::Options {
+                dry_run,
+                ..Default::default()
+            },
+        );
+        if !dry_run {
+            assert!(!c.cache_dir.join("pools/p/m1").exists());
+            assert!(c.cache_dir.join("pools/p/m0").exists());
+        }
+        runs.push((r.freed, r.after));
+    }
+    if runs.len() == 2 {
+        assert_eq!(runs[0], runs[1], "dry run vs real run");
+        assert_eq!(runs[1], (10_020, 5_010));
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn a_failed_eviction_keeps_its_shared_blocks_charged() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let mut c = cfg(temp.path());
+    let rel = "debug/deps/locked/libbig.rlib";
+    let held = put(&c, "p", 0, rel, &[7; 20_000]);
+    put(&c, "p", 1, rel, &[7; 20_000]);
+    put(&c, "p", 0, "debug/deps/own-0", &[1; 1000]);
+    put(&c, "p", 1, "debug/deps/own-1", &[2; 1000]);
+    used(&c, 0, buildq::util::now_ms() - 60_000);
+    used(&c, 1, buildq::util::now_ms());
+    if share(&c).is_none() {
+        return;
+    }
+    // m0's shared copy cannot be deleted, even after moving it to trash.
+    let locked = held.parent().unwrap().to_path_buf();
+    fs::set_permissions(&locked, fs::Permissions::from_mode(0o555)).unwrap();
+    if fs::write(locked.join("probe"), b"").is_ok() {
+        eprintln!("skipping: permissions are not enforced (root?)");
+        return;
+    }
+    c.budget = 0;
+    let r = buildq::gc::gc(&c, &buildq::gc::Options::default());
+    let trash: Vec<_> = fs::read_dir(c.cache_dir.join("trash"))
+        .unwrap()
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.is_dir())
+        .collect();
+    for t in &trash {
+        let _ = fs::set_permissions(
+            t.join("debug/deps/locked"),
+            fs::Permissions::from_mode(0o755),
+        );
+    }
+    assert_eq!(r.failed_deletions, 1, "{r:?}");
+    // The trash copy still holds the shared blocks: evicting m1 frees only
+    // its own file.
+    assert_eq!(r.freed, 1000, "{r:?}");
+}

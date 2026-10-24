@@ -457,6 +457,19 @@ fn recent_auto_usage(cfg: &Config) -> Option<Usage> {
     (usage.total <= usage.effective_budget).then_some(usage)
 }
 
+/// Whether a path is gone after pruning: planned for removal in a dry run,
+/// missing otherwise.
+fn removed(report: &Report, dry: bool, path: &Path) -> bool {
+    if dry {
+        report
+            .planned_removals
+            .iter()
+            .any(|planned| path.starts_with(planned))
+    } else {
+        fs::symlink_metadata(path).is_err()
+    }
+}
+
 fn dedupe_due(cfg: &Config, auto: bool) -> bool {
     let last = fs::read_to_string(cfg.cache_dir.join("dedupe.stamp"))
         .ok()
@@ -533,6 +546,9 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     }
     // 2. inside idle members
     let mut pruned = BTreeMap::new();
+    // Pruning a copy that another member shares frees none of its blocks.
+    let before_prune = dedupe::Sharing::load(&cfg);
+    let mut pruned_holders = BTreeSet::new();
     for p in &usage.pools {
         for m in &p.members {
             let Ok(Some(_l)) = lock::try_lock(&p.dir.join(format!("m{}.lock", m.id))) else {
@@ -540,7 +556,15 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
             };
             let label = format!("{}/m{}", p.name, m.id);
             let freed = prune_member(&m.dir, &cfg, now, dry, &label, &mut report);
+            // Keep the member's raw reduction for its own projected size.
             pruned.insert(m.dir.clone(), freed);
+            let kept = before_prune.pruned_discount(
+                &p.name,
+                m.id,
+                &|path| removed(&report, dry, path),
+                &mut pruned_holders,
+            );
+            report.freed = report.freed.saturating_sub(kept);
             if !dry {
                 let mp = p.dir.join(format!("m{}.json", m.id));
                 let mut meta = read_json::<MemberMeta>(&mp).unwrap_or_else(|| m.meta.clone());
@@ -569,7 +593,8 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
     // 3. idle pools
     let mut usage = scan(&cfg, report.failed_deletions > 0);
     // Evicting a copy that another member shares frees none of its blocks.
-    let sharing = dedupe::Sharing::load(&cfg);
+    // A dry run has removed nothing yet, so it treats planned removals as gone.
+    let sharing = dedupe::Sharing::load_excluding(&cfg, &|path| dry && removed(&report, dry, path));
     let mut evicted = BTreeSet::new();
     let mut removed_pools = Vec::new();
     for p in &usage.pools {
@@ -614,7 +639,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
                     0
                 })
                 .saturating_sub(sharing.exclusive_discount(&p.name, id, &evicted));
-            evicted.insert((p.name.clone(), id));
+            let failures = report.failed_deletions;
             evict_member(
                 &cfg,
                 &p.dir,
@@ -629,6 +654,9 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
                     util::ago(last_used)
                 ),
             );
+            if report.failed_deletions == failures {
+                evicted.insert((p.name.clone(), id));
+            }
         }
         removed_pools.push(p.dir.clone());
     }
@@ -721,7 +749,7 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
                     0
                 })
                 .saturating_sub(sharing.exclusive_discount(&p.name, m.id, &evicted));
-            evicted.insert((p.name.clone(), m.id));
+            let failures = report.failed_deletions;
             let freed = evict_member(
                 &cfg,
                 &p.dir,
@@ -737,6 +765,10 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
                     human_bytes(budget)
                 ),
             );
+            // A failed deletion, even from trash, leaves shared blocks in place.
+            if report.failed_deletions == failures {
+                evicted.insert((p.name.clone(), m.id));
+            }
             drop(l);
             // Keep the lock inode so a concurrent lease cannot acquire a
             // replacement lock while an existing handle is still held.
@@ -852,7 +884,7 @@ pub fn clean_repo(cfg: &Config, repo_key: &str, dry: bool) -> Report {
                         .unwrap_or(0)
                 })
                 .saturating_sub(sharing.exclusive_discount(&pool.name, id, &evicted));
-            evicted.insert((pool.name.clone(), id));
+            let failures = report.failed_deletions;
             evict_member(
                 cfg,
                 &pool.dir,
@@ -862,6 +894,9 @@ pub fn clean_repo(cfg: &Config, repo_key: &str, dry: bool) -> Report {
                 &mut report,
                 format!("remove project member {}/m{id}", pool.name),
             );
+            if report.failed_deletions == failures {
+                evicted.insert((pool.name.clone(), id));
+            }
         }
     }
     let mut after = scan(cfg, true);
