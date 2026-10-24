@@ -350,7 +350,9 @@ that no remaining member shares.
 
 Manual `buildq gc` and background collectors run a pass, automatic ones at most
 hourly. Inline GC never does, because a job waits for it. A pass reads at most
-`dedupe_max_read` (default: `8G`). Volumes without reflinks report the pass as
+`dedupe_max_read` (default: `8G`); the next pass starts at the member pair
+where the limit stopped it. Copies found different are recorded too and
+skipped until either file changes. Volumes without reflinks report the pass as
 unsupported and change nothing.
 
 ### Free-Space Guard
