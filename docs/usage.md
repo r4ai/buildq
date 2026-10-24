@@ -195,7 +195,17 @@ in a pool is busy or inaccessible, that pool is skipped and the command exits `1
 other idle toolchain pools may already have been cleaned. Stop/wait for those
 jobs and retry. Stable lock files remain.
 
-Other repositories, run copies, and external target directories are preserved.
+To remove idle pooled targets of every repository at once, from any directory:
+
+```sh
+buildq cache clean --all --dry-run
+buildq cache clean --all
+```
+
+Busy pools are skipped the same way.
+
+Without `--all`, other repositories are preserved. Run copies and external
+target directories are always preserved.
 GC handles eligible run copies; use ordinary Cargo clean on an external directory
 you own. Report before/after totals cover the managed cache, while actions identify
 this repository's removed members. Failed deletions also exit nonzero.

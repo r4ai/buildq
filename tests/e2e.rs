@@ -878,6 +878,26 @@ fn project_cache_clean_is_explicit_scoped_and_respects_live_leases() {
     assert!(other_pool.join("m0").exists());
     assert!(root.join("cache/runs/r9/copied-app").exists());
     assert!(compiled(&w.cargo(&ws, &["build", "--offline", "--verbose"]).0) > 0);
+    let outside = command()
+        .current_dir(&root)
+        .args(["cache", "clean", "--json"])
+        .output()
+        .unwrap();
+    assert_eq!(outside.status.code(), Some(125));
+    let all = command()
+        .current_dir(&root)
+        .args(["cache", "clean", "--all", "--json"])
+        .output()
+        .unwrap();
+    assert!(
+        all.status.success(),
+        "{}",
+        String::from_utf8_lossy(&all.stderr)
+    );
+    assert!(!pool.join("m0").exists());
+    assert!(!other_pool.join("m0").exists());
+    assert!(other_pool.join("pool.lock").exists());
+    assert!(root.join("cache/runs/r9/copied-app").exists());
 }
 
 fn copy_dir(from: &Path, to: &Path) {
