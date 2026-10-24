@@ -981,7 +981,7 @@ fn can_share(dir: &Path) -> bool {
     let data = vec![7u8; 1 << 16];
     let shared = fs::write(&a, &data).is_ok()
         && fs::write(&b, &data).is_ok()
-        && matches!(platform::share(&a, &b, &tmp), Ok(Outcome::Shared));
+        && matches!(platform::share(&a, &b, &[], &tmp), Ok(Outcome::Shared));
     for p in [a, b, tmp] {
         let _ = fs::remove_file(p);
     }
@@ -1243,8 +1243,10 @@ mod platform {
         aliases: &[PathBuf],
         tmp: &Path,
     ) -> Result<Outcome, Failure> {
+        use std::os::unix::fs::MetadataExt;
         let md = fs::symlink_metadata(dst).map_err(Failure::Io)?;
-        if aliases.iter().any(|a| !same_inode(a, &md)) {
+        // Under the locks: a name added since indexing would be split off.
+        if md.nlink() != 1 + aliases.len() as u64 || aliases.iter().any(|a| !same_inode(a, &md)) {
             return Err(Failure::Io(io::Error::other(
                 "hard links changed since indexing",
             )));
@@ -1260,29 +1262,49 @@ mod platform {
                 _ => Failure::Io(e),
             });
         }
+        // Until every name has moved, keep one for the original inode so a
+        // failure can move the moved ones back.
+        let original = tmp.with_extension("orig");
+        let mut moved = 0;
         // The clone carries the source's metadata; give it the destination's.
-        let place = || -> io::Result<()> {
+        let mut place = || -> io::Result<()> {
             fs::set_permissions(tmp, md.permissions())?;
             let times = FileTimes::new()
                 .set_accessed(md.accessed()?)
                 .set_modified(md.modified()?);
             File::open(tmp)?.set_times(times)?;
+            if !aliases.is_empty() {
+                fs::hard_link(dst, &original)?;
+            }
             // Aliases first: until `dst` moves, the clone has a known name.
             for (i, alias) in aliases.iter().enumerate() {
-                let link = tmp.with_extension(format!("alias{i}"));
-                fs::hard_link(tmp, &link)?;
-                if let Err(e) = fs::rename(&link, alias) {
-                    let _ = fs::remove_file(&link);
-                    return Err(e);
-                }
+                relink(tmp, &tmp.with_extension(format!("alias{i}")), alias)?;
+                moved += 1;
             }
             fs::rename(tmp, dst)
         };
-        place().map_err(|e| {
+        let result = place();
+        if result.is_err() {
+            for (i, alias) in aliases[..moved].iter().enumerate() {
+                let _ = relink(
+                    &original,
+                    &original.with_extension(format!("back{i}")),
+                    alias,
+                );
+            }
             let _ = fs::remove_file(tmp);
-            Failure::Io(e)
-        })?;
+        }
+        let _ = fs::remove_file(&original);
+        result.map_err(Failure::Io)?;
         Ok(Outcome::Shared)
+    }
+
+    /// Points `name` at `from`'s inode through the temporary `link`.
+    fn relink(from: &Path, link: &Path, name: &Path) -> io::Result<()> {
+        fs::hard_link(from, link)?;
+        fs::rename(link, name).inspect_err(|_| {
+            let _ = fs::remove_file(link);
+        })
     }
 
     fn same_inode(path: &Path, md: &fs::Metadata) -> bool {

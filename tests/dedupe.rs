@@ -416,6 +416,37 @@ fn an_alias_still_matches_a_different_counterpart() {
     );
 }
 
+/// A failed replacement moves already re-linked names back (macOS).
+#[cfg(target_os = "macos")]
+#[test]
+fn a_failed_relink_keeps_the_hard_links_together() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    put(&c, "p", 0, RLIB, &[4; 8192]);
+    let b = put(&c, "p", 1, RLIB, &[4; 8192]);
+    let uplifted = b.parent().unwrap().parent().unwrap().join("libdep.rlib");
+    fs::hard_link(&b, &uplifted).unwrap();
+    // The alias moves first; replacing the hashed name then fails.
+    let deps = b.parent().unwrap().to_path_buf();
+    fs::set_permissions(&deps, fs::Permissions::from_mode(0o555)).unwrap();
+    let r = dedupe::run(&c, &opts(&c, false));
+    fs::set_permissions(&deps, fs::Permissions::from_mode(0o755)).unwrap();
+    assert_eq!((r.shared, r.errors.len()), (0, 1), "{r:?}");
+    assert_eq!(ino(&b), ino(&uplifted));
+    assert_eq!(fs::metadata(&b).unwrap().len(), 8192);
+    let leftovers: Vec<_> = fs::read_dir(c.cache_dir.join("pools/p/m1"))
+        .unwrap()
+        .flatten()
+        .filter(|e| {
+            e.file_name()
+                .to_string_lossy()
+                .starts_with(".buildq-dedupe-")
+        })
+        .collect();
+    assert!(leftovers.is_empty(), "{leftovers:?}");
+}
+
 #[cfg(unix)]
 #[test]
 fn hard_links_are_kept_together() {
