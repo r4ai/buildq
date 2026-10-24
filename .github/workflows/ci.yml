@@ -152,6 +152,11 @@ jobs:
         run: |
           rustup toolchain install "$MSRV" --profile minimal --no-self-update
           cargo +"$MSRV" check --locked --all-targets --all-features
+      # buildq emulates the running Cargo's `[env]` rules; compare with the oldest supported one.
+      - name: Compare run environment with MSRV Cargo
+        env:
+          MSRV: ${{ steps.msrv.outputs.version }}
+        run: cargo +"$MSRV" test --locked --test e2e run_applies_effective_cargo_config_environment
 
   dependencies:
     runs-on: ubuntu-24.04

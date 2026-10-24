@@ -14,6 +14,8 @@ struct Entry {
     value: Option<(String, PathBuf)>,
     force: Option<bool>,
     relative: Option<bool>,
+    /// Root of the last config that set any field of this variable.
+    last_root: PathBuf,
 }
 
 fn merge(entries: &mut BTreeMap<String, Entry>, table: &toml::Table, root: &Path) {
@@ -22,6 +24,7 @@ fn merge(entries: &mut BTreeMap<String, Entry>, table: &toml::Table, root: &Path
     };
     for (name, value) in vars {
         let entry = entries.entry(name.clone()).or_default();
+        entry.last_root = root.into();
         if let Some(value) = value.as_str() {
             entry.value = Some((value.into(), root.into()));
         } else if let Some(table) = value.as_table() {
@@ -120,9 +123,49 @@ fn load_env(cwd: &Path, parsed: &Parsed) -> Result<BTreeMap<String, Entry>, Stri
     Ok(entries)
 }
 
+/// Which config a `relative = true` value is resolved against when the
+/// fields of one variable come from several configs.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum RelativeTo {
+    /// Cargo 1.97+ (rust-lang/cargo#16957): the config that set `value`.
+    ValueOrigin,
+    /// Earlier Cargo: the highest-precedence config defining the variable.
+    LastDefinition,
+}
+
+/// Picks the rule from `rustc -vV` output of the toolchain that runs Cargo.
+/// Nightlies of 1.97 got the change on 2026-05-05; unknown versions get the
+/// current rule.
+pub(crate) fn relative_rule(rustc_vv: &str) -> RelativeTo {
+    let field = |k: &str| {
+        rustc_vv
+            .lines()
+            .find_map(|l| l.strip_prefix(k))
+            .map(str::trim)
+    };
+    let Some(release) = field("release:") else {
+        return RelativeTo::ValueOrigin;
+    };
+    let (version, pre) = release.split_once('-').unwrap_or((release, ""));
+    let mut parts = version.split('.').map(|p| p.parse::<u32>().ok());
+    let (Some(Some(major)), Some(Some(minor))) = (parts.next(), parts.next()) else {
+        return RelativeTo::ValueOrigin;
+    };
+    let old = (major, minor) < (1, 97)
+        || ((major, minor) == (1, 97)
+            && !pre.is_empty()
+            && field("commit-date:").is_some_and(|d| d < "2026-05-05"));
+    if old {
+        RelativeTo::LastDefinition
+    } else {
+        RelativeTo::ValueOrigin
+    }
+}
+
 fn values(
     entries: BTreeMap<String, Entry>,
     inherited: impl Fn(&str) -> bool,
+    rule: RelativeTo,
 ) -> BTreeMap<String, OsString> {
     entries
         .into_iter()
@@ -130,7 +173,11 @@ fn values(
             if !entry.force.unwrap_or(false) && inherited(&name) {
                 return None;
             }
-            let (value, root) = entry.value?;
+            let (value, value_root) = entry.value?;
+            let root = match rule {
+                RelativeTo::ValueOrigin => value_root,
+                RelativeTo::LastDefinition => entry.last_root,
+            };
             let value = if entry.relative.unwrap_or(false) {
                 root.join(value).into_os_string()
             } else {
@@ -141,10 +188,17 @@ fn values(
         .collect()
 }
 
-pub(crate) fn apply_env(cmd: &mut Command, cwd: &Path, parsed: &Parsed) -> Result<(), String> {
-    cmd.envs(values(load_env(cwd, parsed)?, |name| {
-        env::var_os(name).is_some()
-    }));
+pub(crate) fn apply_env(
+    cmd: &mut Command,
+    cwd: &Path,
+    parsed: &Parsed,
+    rule: RelativeTo,
+) -> Result<(), String> {
+    cmd.envs(values(
+        load_env(cwd, parsed)?,
+        |name| env::var_os(name).is_some(),
+        rule,
+    ));
     Ok(())
 }
 
@@ -218,6 +272,7 @@ pub(crate) fn runner(
     real: &Path,
     cwd: &Path,
     parsed: &Parsed,
+    rule: RelativeTo,
 ) -> Result<Option<Vec<OsString>>, String> {
     let mut runners = Runners::default();
     for file in config_files(cwd).iter().rev() {
@@ -225,7 +280,11 @@ pub(crate) fn runner(
             runners.merge(table, root)
         })?;
     }
-    let configured_env = values(load_env(cwd, parsed)?, |name| env::var_os(name).is_some());
+    let configured_env = values(
+        load_env(cwd, parsed)?,
+        |name| env::var_os(name).is_some(),
+        rule,
+    );
     let get_env = |name: &str| {
         configured_env
             .get(name)
@@ -374,9 +433,52 @@ mod tests {
             &"[env]\nA={force=false}".parse().unwrap(),
             Path::new("/child"),
         );
-        let vars = values(entries, |name| name == "B");
+        let vars = values(entries, |name| name == "B", RelativeTo::ValueOrigin);
         assert_eq!(vars["A"], Path::new("/parent").join("data").as_os_str());
         assert!(!vars.contains_key("B"));
+    }
+
+    #[test]
+    fn relative_values_follow_the_running_cargos_rule() {
+        let entries = || {
+            let mut entries = BTreeMap::new();
+            merge(
+                &mut entries,
+                &"[env]\nA={value='data',relative=true}".parse().unwrap(),
+                Path::new("/home"),
+            );
+            merge(
+                &mut entries,
+                &"[env]\nA={force=true}".parse().unwrap(),
+                Path::new("/ws"),
+            );
+            entries
+        };
+        let a = |rule| values(entries(), |_| false, rule)["A"].clone();
+        assert_eq!(
+            a(RelativeTo::ValueOrigin),
+            Path::new("/home/data").as_os_str()
+        );
+        assert_eq!(
+            a(RelativeTo::LastDefinition),
+            Path::new("/ws/data").as_os_str()
+        );
+
+        let vv = |release: &str, date: &str| {
+            relative_rule(&format!(
+                "rustc {release}\nrelease: {release}\ncommit-date: {date}\n"
+            ))
+        };
+        assert_eq!(vv("1.89.0", "2025-08-04"), RelativeTo::LastDefinition);
+        assert_eq!(vv("1.96.0", "2026-05-25"), RelativeTo::LastDefinition);
+        assert_eq!(
+            vv("1.97.0-nightly", "2026-05-01"),
+            RelativeTo::LastDefinition
+        );
+        assert_eq!(vv("1.97.0-nightly", "2026-05-06"), RelativeTo::ValueOrigin);
+        assert_eq!(vv("1.97.0", "2026-07-06"), RelativeTo::ValueOrigin);
+        assert_eq!(vv("1.99.1", "2026-10-01"), RelativeTo::ValueOrigin);
+        assert_eq!(relative_rule(""), RelativeTo::ValueOrigin);
     }
 
     #[test]
