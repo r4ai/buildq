@@ -10,9 +10,9 @@ flowchart TD
     Cmd["cargo コマンド実行"] --> Shim["cargo shim"]
     Shim --> IsHeavy{"重いサブコマンドか?"}
     IsHeavy -- "No (fmt, metadata)" --> Direct["本来の cargo を直接実行"]
-    IsHeavy -- "Yes (build, test, run)" --> Queue["クラススロットを取得 (OS ファイルロック)"]
-    Queue --> Pool["最適な target/ メンバーをリース"]
-    Pool --> Manifest["Git blob マニフェスト比較 & .fingerprint 削除"]
+    IsHeavy -- "Yes (build, test, run)" --> Pool["最適な target/ メンバーをリース (スロットなしで待機)"]
+    Pool --> Queue["クラススロットを取得 (OS ファイルロック)"]
+    Queue --> Manifest["Git blob マニフェスト比較 & .fingerprint 削除"]
     Manifest --> Cargo["本来の cargo を実行"]
     Cargo --> IsRun{"cargo run か?"}
     IsRun -- "No" --> Release["マニフェスト保存・メンバーとスロットを解放"]
@@ -120,6 +120,7 @@ $BUILDQ_CACHE/
 - **プール単位**: 同一 Git リポジトリ（`git rev-parse --git-common-dir`）かつ同一ツールチェイン（`rustc -vV`）の全 worktree を1つのプールに集約
 - **メンバー数**: 1プールあたり最大 `max_members` 個の `target/` ディレクトリ（`m0`, `m1`, ...）を保持
 - **排他リース**: 各ビルドジョブは1つのメンバーを実行完了まで排他リース（並列ビルドには最低 `slots` 個のメンバーが必要）
+- **リースが先、スロットが後**: ビルドはメンバーを先に、ビルドスロットを後に取得する。使用中のメンバー（例: ネイティブアプリが保持）を待つジョブはマシン全体の容量を占有せず、無関係なリポジトリのビルドは進行できる。スロット保持者がメンバーを待つことはないため、この順序でデッドロックしない
 
 ### Why Naive Sharing Fails
 
@@ -210,7 +211,7 @@ Windows では実行中の `.exe` ファイルが OS によってロックされ
 
 そのため、`buildq` は `cargo run`（および `run` に解決されるエイリアス）を2つのフェーズに分割する。
 
-1. **ビルドフェーズ**（`build` スロット + メンバー `m<i>` を保持）
+1. **ビルドフェーズ**（メンバー `m<i>`、次に `build` スロットを保持）
    - `--message-format=json-render-diagnostics` と対象の `--bin` を付与して `cargo build` を実行
    - JSON メッセージから実行ファイル・DLL / 共有ライブラリ・`.pdb`・リンクパスを特定
    - サイズまたは `mtime` が変化したファイルのみを `$BUILDQ_CACHE/runs/r<j>` へ差分コピー
