@@ -457,9 +457,22 @@ fn pool_ctx(
         },
     )
     .ok()?;
+    let manifest = git::manifest(&wt)?;
+    let metadata = workspace_metadata(real, parsed);
+    let uncovered = metadata
+        .as_ref()
+        .map(|m| pool::uncovered_path_deps(m, &wt.root, &manifest))
+        .unwrap_or_default();
+    if !uncovered.is_empty() {
+        let names: Vec<_> = uncovered.iter().map(|p| p.display().to_string()).collect();
+        note(&format!(
+            "path dependencies outside the repository's tracked files rely on Cargo's mtime checks only: {}",
+            names.join(", ")
+        ));
+    }
     Some(PoolCtx {
-        manifest: git::manifest(&wt)?,
-        rebuild_graph: workspace_metadata(real, parsed)
+        manifest,
+        rebuild_graph: metadata
             .as_ref()
             .and_then(pool::RebuildGraph::from_metadata)
             .unwrap_or_default(),
