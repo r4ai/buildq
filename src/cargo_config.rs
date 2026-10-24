@@ -466,14 +466,8 @@ mod tests {
             entries
         };
         let a = |rule| values(entries(), |_| false, rule)["A"].clone();
-        assert_eq!(
-            a(RelativeTo::ValueOrigin),
-            Path::new("/home/data").as_os_str()
-        );
-        assert_eq!(
-            a(RelativeTo::LastDefinition),
-            Path::new("/ws/data").as_os_str()
-        );
+        assert_eq!(a(RelativeTo::ValueOrigin), Path::new("/home").join("data"));
+        assert_eq!(a(RelativeTo::LastDefinition), Path::new("/ws").join("data"));
 
         let vv = |release: &str, date: &str| {
             relative_rule(&format!("cargo {release} (0123abcd {date})\n"))
