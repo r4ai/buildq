@@ -1767,3 +1767,50 @@ fn edits_during_a_slot_wait_reach_the_member_manifest() {
         "{manifest}"
     );
 }
+
+/// Tracked workspace packages are covered by the source manifest; a sibling
+/// path dependency is not, and the job says so.
+#[test]
+fn path_dependencies_outside_the_repository_are_reported() {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(tmp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='app'\nversion='0.1.0'\nedition='2021'\n\n[dependencies]\ninner = { path = 'inner' }\noutside = { path = '../outside' }\n\n[workspace]\n",
+            ),
+            (
+                "src/main.rs",
+                "fn main() { println!(\"{}{}\", inner::V, outside::V); }\n",
+            ),
+            (
+                "inner/Cargo.toml",
+                "[package]\nname='inner'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            ("inner/src/lib.rs", "pub const V: u8 = 1;\n"),
+        ],
+    );
+    let outside = root.join("outside");
+    fs::create_dir_all(outside.join("src")).unwrap();
+    fs::write(
+        outside.join("Cargo.toml"),
+        "[package]\nname='outside'\nversion='0.1.0'\nedition='2021'\n",
+    )
+    .unwrap();
+    fs::write(outside.join("src/lib.rs"), "pub const V: u8 = 2;\n").unwrap();
+    let ws = root.join("ws");
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "-A"]);
+    git(&ws, &["commit", "-q", "-m", "init"]);
+    let (out, _) = w.cargo(&ws, &["run", "--offline"]);
+    assert_eq!(stdout(&out), "12");
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    let line = stderr
+        .lines()
+        .find(|l| l.contains("rely on Cargo's mtime checks only"))
+        .unwrap_or_else(|| panic!("{stderr}"));
+    let expected = format!(": {}", Path::new("..").join("outside").display());
+    assert!(line.ends_with(&expected), "{line}");
+}

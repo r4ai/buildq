@@ -161,6 +161,7 @@ sequenceDiagram
    - `git ls-files -s` と `git status` を実行
    - 変更ファイル・未追跡ファイルを `git hash-object` でハッシュ化（gitignore 対象は除外）
    - 初期化済みサブモジュールは gitlink の代わりにサブモジュール自身のマニフェストを再帰的に展開し、サブモジュール内の path 依存も内容で比較
+   - Worktree の外（または Git が無視するディレクトリ）にある path 依存はマニフェストに含まれず、鮮度判定は Cargo の mtime 比較だけに頼る。ジョブはそれらを note で列挙する
 2. **メンバーのマニフェストと差分比較**
    - 現在のマニフェストと `m<i>.manifest` を比較
    - 内容が異なる各ファイルを、最も近い親ディレクトリの `Cargo.toml`（`[package]` を持つもの）に紐づけ

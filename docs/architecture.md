@@ -165,6 +165,7 @@ Before starting a build on member `m<i>`:
    - Computes the worktree manifest via `git ls-files -s` and `git status`
    - Hashes modified and untracked files with `git hash-object` (ignoring gitignored files)
    - Replaces each initialized submodule's gitlink with the submodule's own manifest, recursively, so path dependencies inside submodules are compared by content
+   - Path dependencies outside the worktree (or in Git-ignored directories) are not in the manifest: their freshness relies on Cargo's mtime checks only, and each job lists them in a note
 2. **Diff against member**
    - Compares the worktree manifest against `m<i>.manifest`
    - Maps each changed file to its owning Cargo package (nearest ancestor `Cargo.toml` with `[package]`)

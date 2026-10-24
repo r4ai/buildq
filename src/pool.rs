@@ -124,6 +124,64 @@ impl RebuildGraph {
     }
 }
 
+/// Path dependencies of workspace members whose sources the manifest does
+/// not cover (outside the worktree, or ignored by Git): pooling cannot
+/// invalidate them by content. Relative to `root` where possible.
+pub fn uncovered_path_deps(
+    meta: &serde_json::Value,
+    root: &Path,
+    manifest: &Manifest,
+) -> Vec<PathBuf> {
+    let root = crate::util::canonical(root);
+    let members = meta["workspace_members"].as_array();
+    let mut out = BTreeSet::new();
+    for package in meta["packages"].as_array().into_iter().flatten() {
+        if !members.is_some_and(|m| m.contains(&package["id"])) {
+            continue;
+        }
+        for dep in package["dependencies"].as_array().into_iter().flatten() {
+            let Some(path) = dep["path"].as_str() else {
+                continue;
+            };
+            let path = crate::util::canonical(Path::new(path));
+            let covered = path.strip_prefix(&root).is_ok_and(|rel| {
+                let rel = rel.to_string_lossy().replace('\\', "/");
+                let key = if rel.is_empty() {
+                    "Cargo.toml".to_string()
+                } else {
+                    format!("{rel}/Cargo.toml")
+                };
+                manifest.contains_key(&key)
+            });
+            if !covered {
+                out.insert(pathdiff(&path, &root));
+            }
+        }
+    }
+    out.into_iter().collect()
+}
+
+/// `path` relative to `base` when they share a prefix, else `path` itself.
+fn pathdiff(path: &Path, base: &Path) -> PathBuf {
+    let common = path
+        .components()
+        .zip(base.components())
+        .take_while(|(a, b)| a == b)
+        .count();
+    if common <= 1 {
+        return path.to_path_buf();
+    }
+    let ups = base.components().count() - common;
+    std::iter::repeat_n(Path::new(".."), ups)
+        .map(Path::to_path_buf)
+        .chain(
+            path.components()
+                .skip(common)
+                .map(|c| PathBuf::from(c.as_os_str())),
+        )
+        .collect()
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct PoolInfo {
@@ -684,6 +742,33 @@ mod tests {
         assert_eq!(o.owner("crates/x/Cargo.toml").as_deref(), Some("xx"));
         assert_eq!(o.owner("Cargo.toml"), None);
         assert_eq!(o.owner("docs/a.md"), None);
+    }
+
+    #[test]
+    fn path_deps_outside_the_manifest_are_reported() {
+        use serde_json::json;
+        let t = tempfile::tempdir().unwrap();
+        let base = crate::util::canonical(t.path());
+        let root = base.join("app");
+        for d in ["app/sub", "app/ignored", "outside"] {
+            fs::create_dir_all(base.join(d)).unwrap();
+        }
+        let dep = |d: &str| json!({"name": d, "path": base.join(d).to_str().unwrap()});
+        let meta = json!({
+            "workspace_members": ["app"],
+            "packages": [
+                {"id": "app", "dependencies": [
+                    dep("app/sub"), dep("app/ignored"), dep("outside"),
+                    {"name": "serde", "path": null},
+                ]},
+                {"id": "nonmember", "dependencies": [dep("outside/other")]},
+            ],
+        });
+        let manifest = m(&[("Cargo.toml", "1"), ("sub/Cargo.toml", "2")]);
+        assert_eq!(
+            uncovered_path_deps(&meta, &root, &manifest),
+            [PathBuf::from("../outside"), PathBuf::from("ignored")]
+        );
     }
 
     #[test]
