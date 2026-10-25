@@ -140,6 +140,9 @@ pub struct CargoFile {
     pub backend: CargoBackend,
     /// Path of mbx for `backend = "mbx"` (default: `mbx` on PATH).
     pub mbx: Option<PathBuf>,
+    /// With `backend = "mbx"`, also run Cargo invoked inside a held job
+    /// through mbx (default false: such Cargo runs directly).
+    pub nested_mbx: Option<bool>,
     /// "none" (default: disable sccache etc. per job), "keep", or a wrapper path.
     pub rustc_wrapper: Option<String>,
     /// `CARGO_BUILD_JOBS` per job (default: cores / slots).
@@ -224,6 +227,7 @@ pub struct Config {
     pub real_cargo: Option<PathBuf>,
     pub backend: CargoBackend,
     pub mbx: Option<PathBuf>,
+    pub nested_mbx: bool,
     pub wrapper: WrapperMode,
     pub jobs: usize,
     pub limit_test_threads: bool,
@@ -374,6 +378,9 @@ impl Config {
                 .or(f.cargo.real),
             backend: f.cargo.backend,
             mbx: f.cargo.mbx,
+            nested_mbx: env_bool("BUILDQ_NESTED_MBX")
+                .or(f.cargo.nested_mbx)
+                .unwrap_or(false),
             wrapper,
             jobs: f.cargo.jobs.unwrap_or((cores / slots).max(1)),
             limit_test_threads: f.cargo.limit_test_threads.unwrap_or(true),

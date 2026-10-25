@@ -1048,6 +1048,26 @@ fn mbx_backend_wraps_queued_jobs_and_keeps_target_ownership() {
         stderr(&out)
     );
     assert_eq!(s.history_len(), 4);
+
+    // Cargo nested inside a held job runs directly unless `nested_mbx` asks
+    // for mbx; either way it never queues or takes a pooled target.
+    let nested = |extra: &str| {
+        fs::write(
+            &config,
+            format!("{base}[cargo]\nbackend = \"mbx\"\nmbx = {:?}\n{extra}", mbx),
+        )
+        .unwrap();
+        s.cargo_with(&["build", "-p", "a"], 0, &[("BUILDQ_HELD", "build")])
+    };
+    let out = nested("");
+    assert!(out.status.success(), "{}", stderr(&out));
+    assert!(!String::from_utf8_lossy(&out.stdout).contains("MBX"));
+    let out = nested("nested_mbx = true\n");
+    assert!(out.status.success(), "{}", stderr(&out));
+    assert!(line(&out, "MBX").starts_with("build -p a"));
+    assert_eq!(line(&out, "VIEWS="), "0 LANES=0");
+    assert!(!line(&out, "MBX").contains("pools"));
+    assert_eq!(s.history_len(), 4);
 }
 
 fn stderr(out: &Output) -> String {
