@@ -588,6 +588,8 @@ struct Planned {
 /// Fingerprints of copies, read lazily for the groups a pass must compare.
 struct Prints {
     known: BTreeMap<Key, Print>,
+    /// Read this pass, also for copies without a file identity to keep.
+    read_now: BTreeMap<Key, u64>,
     fresh: Vec<Print>,
     /// Bytes read since the last charge to the report.
     read: u64,
@@ -605,6 +607,7 @@ impl Prints {
                 .map(|p| (p.entry.key(), p.clone()))
                 .collect(),
             fresh: Vec::new(),
+            read_now: BTreeMap::new(),
             read: 0,
             room: 0,
             limited: false,
@@ -617,6 +620,9 @@ impl Prints {
         if let Some(p) = self.known.get(&c.key()).filter(|p| p.entry.matches(&c.md)) {
             return Some(p.print);
         }
+        if let Some(print) = self.read_now.get(&c.key()) {
+            return Some(*print);
+        }
         let cost = c.md.len().min(2 * FINGERPRINT_BLOCK);
         if cost > self.room - self.read.min(self.room) {
             self.limited = true;
@@ -625,12 +631,13 @@ impl Prints {
         self.read += cost;
         match fingerprint(&c.path, c.md.len()) {
             Ok(print) => {
-                let p = Print {
-                    entry: Entry::of(c, &c.md)?,
-                    print,
-                };
-                self.known.insert(c.key(), p.clone());
-                self.fresh.push(p);
+                self.read_now.insert(c.key(), print);
+                // Without a file identity (Windows) it is used, not kept.
+                if let Some(entry) = Entry::of(c, &c.md) {
+                    let p = Print { entry, print };
+                    self.known.insert(c.key(), p.clone());
+                    self.fresh.push(p);
+                }
                 Some(print)
             }
             Err(e) => {
