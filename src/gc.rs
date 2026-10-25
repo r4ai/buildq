@@ -351,6 +351,8 @@ pub struct Report {
     pub over_budget_bytes: u64,
     pub over_budget_reasons: Vec<String>,
     pub skipped: Option<String>,
+    /// Extra passes run for automatic requests that arrived during this one.
+    pub follow_ups: usize,
     /// Explicit target dirs outside the pool: counted, never pruned.
     pub external: u64,
     pub warnings: Vec<String>,
@@ -483,7 +485,41 @@ pub fn auto_gc_needed(cfg: &Config) -> bool {
     recent_auto_usage(cfg).is_none()
 }
 
+/// Automatic requests that found another collector at work, coalesced into
+/// one flag the collector checks after it releases `gc.lock`.
+const PENDING: &str = "gc.pending";
+const CONTENDED: &str = "another gc is running; it will run again for this request";
+/// Bound on the follow-up passes one collector runs for such requests.
+const MAX_FOLLOW_UPS: usize = 3;
+
+/// Collects garbage. An automatic run that finds another collector working
+/// leaves a request behind instead of being dropped: that collector, after
+/// releasing the lock, runs a bounded follow-up pass, so members that were
+/// busy during its pass are reconsidered once their jobs finish.
 pub fn gc(cfg: &Config, opts: &Options) -> Report {
+    let mut report = gc_once(cfg, opts);
+    if !opts.auto || opts.dry_run {
+        return report;
+    }
+    let pending = cfg.cache_dir.join(PENDING);
+    // Checked after our lock is gone: a request made while we held it is
+    // seen either here or by the collector that holds the lock next.
+    while report.follow_ups < MAX_FOLLOW_UPS
+        && report.skipped.as_deref() != Some(CONTENDED)
+        && fs::remove_file(&pending).is_ok()
+    {
+        let mut next = gc_once(cfg, opts);
+        next.follow_ups = report.follow_ups + 1;
+        next.before = report.before;
+        next.freed += report.freed;
+        report.actions.append(&mut next.actions);
+        next.actions = std::mem::take(&mut report.actions);
+        report = next;
+    }
+    report
+}
+
+fn gc_once(cfg: &Config, opts: &Options) -> Report {
     let mut report = Report {
         accounting: cfg.accounting,
         ..Default::default()
@@ -493,8 +529,19 @@ pub fn gc(cfg: &Config, opts: &Options) -> Report {
         cfg.budget = b;
     }
     let _ = fs::create_dir_all(&cfg.cache_dir);
-    let Ok(Some(_gc_lock)) = lock::try_lock(&cfg.cache_dir.join("gc.lock")) else {
-        report.skipped = Some("another gc is running".into());
+    let gc_lock = cfg.cache_dir.join("gc.lock");
+    let mut held = lock::try_lock(&gc_lock).ok().flatten();
+    if held.is_none() && opts.auto && !opts.dry_run {
+        let _ = fs::write(cfg.cache_dir.join(PENDING), now_ms().to_string());
+        // The holder may have checked for requests and released meanwhile.
+        held = lock::try_lock(&gc_lock).ok().flatten();
+    }
+    let Some(_gc_lock) = held else {
+        report.skipped = Some(if opts.auto && !opts.dry_run {
+            CONTENDED.into()
+        } else {
+            "another gc is running".into()
+        });
         report.observe(&scan(&cfg, false));
         report.before = report.after;
         return report;
