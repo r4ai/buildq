@@ -1188,3 +1188,38 @@ fn a_real_pass_records_that_the_volume_shares() {
     assert_eq!(dry.sharing.state, dedupe::State::Supported);
     assert!(dedupe::render(&dry).contains("this filesystem can share"));
 }
+
+/// A scope with more candidate copies than `max_index` is indexed in
+/// batches, holding only copies that have a match, and finds the same
+/// identical copies as one index would.
+#[test]
+fn a_scope_beyond_the_index_limit_is_processed_in_batches() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    for g in 0..12 {
+        let rel = format!("debug/deps/libdep{g}-0123456789abcdef.rlib");
+        put(&c, "p", 0, &rel, &[g as u8; 2000]);
+        put(&c, "p", 1, &rel, &[g as u8; 2000]);
+        // Files only one member has are counted, never indexed.
+        put(
+            &c,
+            "p",
+            0,
+            &format!("debug/deps/libonly{g}-1.rlib"),
+            &[1; 2000],
+        );
+    }
+    let whole = dedupe::run(&c, &opts(&c, true));
+    assert_eq!(whole.index_batches, 1, "{whole:?}");
+    let mut o = opts(&c, true);
+    o.max_index = 5;
+    let batched = dedupe::run(&c, &o);
+    assert!(batched.errors.is_empty(), "{batched:?}");
+    assert!(batched.index_batches > 1, "{batched:?}");
+    assert_eq!((batched.indexed, batched.candidates), (36, 24));
+    assert_eq!(
+        (batched.identical, batched.identical_bytes),
+        (whole.identical, whole.identical_bytes)
+    );
+    assert_eq!(batched.identical, 12);
+}

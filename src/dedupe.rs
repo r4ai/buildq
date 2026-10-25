@@ -47,6 +47,9 @@ pub struct Options {
     pub min_size: u64,
     /// Stop after reading this many bytes for comparisons.
     pub max_read: u64,
+    /// Most candidate copies one index holds; a larger scope is indexed and
+    /// shared in batches, walking its members once per batch.
+    pub max_index: usize,
     /// Dry runs on a volume that can share: record identical copies in the
     /// (unsaved) ledger as if shared.
     project: bool,
@@ -58,6 +61,7 @@ impl Options {
             dry_run,
             min_size: cfg.dedupe_min_size,
             max_read: cfg.dedupe_max_read,
+            max_index: cfg.dedupe_max_index,
             project: false,
         }
     }
@@ -71,6 +75,9 @@ pub struct Report {
     /// Eligible files examined while indexing, and how long that took.
     pub indexed: usize,
     pub index_ms: u64,
+    /// Index batches the scopes needed to stay within `max_index` copies;
+    /// more than one per scope means each was walked that many times.
+    pub index_batches: usize,
     /// Indexed files that another member holds under the same path and length.
     pub candidates: usize,
     /// Files compared with the copy another member holds.
@@ -785,9 +792,24 @@ pub fn run_projected(
         if report.stopped() {
             break;
         }
-        let groups = index(opts, scope, pools, excluded, &mut report);
+        let counts = count_keys(opts, pools, excluded, &mut report);
+        let wanted: usize = counts
+            .values()
+            .filter(|&&c| c > 1)
+            .map(|&c| c as usize)
+            .sum();
+        let batches = wanted.div_ceil(opts.max_index.max(1)).max(1) as u64;
         let resume = if n == 0 { resume.as_ref() } else { None };
-        share_scope(&groups, opts, resume, &mut ledger, &mut report);
+        for batch in 0..batches {
+            if report.stopped() {
+                break;
+            }
+            report.index_batches += 1;
+            let keep =
+                |key: u64| counts.get(&key).is_some_and(|&c| c > 1) && key % batches == batch;
+            let groups = index(opts, scope, pools, excluded, &keep, &mut report);
+            share_scope(&groups, opts, resume, &mut ledger, &mut report);
+        }
     }
     if !report.read_limited && report.unsupported.is_none() {
         ledger.resume = None;
@@ -1068,17 +1090,26 @@ fn scopes(cfg: &Config) -> Vec<(String, Vec<PathBuf>)> {
 /// only files that another member holds under the same path and length.
 /// Pools and members are visited in order, so a group's first copy is the
 /// lowest (pool, id).
-fn index(
+/// A group key (device, relative path, length) as a hash: equal keys hash
+/// equally, so a collision only lets a lone copy into an index.
+fn key_hash(dev: u64, rel: &Path, len: u64) -> u64 {
+    let mut b = rel.as_os_str().as_encoded_bytes().to_vec();
+    b.extend(dev.to_le_bytes());
+    b.extend(len.to_le_bytes());
+    util::fnv64(&b)
+}
+
+/// Visits each eligible file of the scope's idle members as (member dir,
+/// pool name, member id, path, metadata, key hash).
+#[allow(clippy::type_complexity)]
+fn walk_scope(
     opts: &Options,
-    scope: &str,
     pools: &[PathBuf],
     excluded: &dyn Fn(&Path) -> bool,
-    report: &mut Report,
-) -> BTreeMap<GroupKey, Vec<Candidate>> {
-    let started = std::time::Instant::now();
-    let mut groups: BTreeMap<GroupKey, Vec<Candidate>> = BTreeMap::new();
+    on_busy: &mut dyn FnMut(),
+    visit: &mut dyn FnMut(&Path, &str, usize, &Path, &fs::Metadata, u64),
+) {
     for pool_dir in pools {
-        report.pools += 1;
         let name = pool_dir
             .file_name()
             .map(|n| n.to_string_lossy().into_owned())
@@ -1090,7 +1121,7 @@ fn index(
             }
             // Indexing does not hold the lock; sharing rechecks each file.
             let Ok(Some(lock)) = lock::try_lock(&dir.with_extension("lock")) else {
-                report.skipped_busy += 1;
+                on_busy();
                 continue;
             };
             if !opts.dry_run {
@@ -1108,23 +1139,77 @@ fn index(
                     return;
                 }
                 let dev = file_id(md).map_or(0, |(dev, _)| dev);
-                groups
-                    .entry((scope.to_string(), dev, rel.to_path_buf(), md.len()))
-                    .or_default()
-                    .push(Candidate {
-                        pool: name.clone(),
-                        member: id,
-                        member_dir: dir.clone(),
-                        rel: rel.to_path_buf(),
-                        aliases: Vec::new(),
-                        path: path.to_path_buf(),
-                        md: md.clone(),
-                    });
+                visit(&dir, &name, id, path, md, key_hash(dev, rel, md.len()));
             });
         }
     }
+}
+
+/// How many copies share each group key: a few bytes per file, so only
+/// keys with company are indexed in full.
+fn count_keys(
+    opts: &Options,
+    pools: &[PathBuf],
+    excluded: &dyn Fn(&Path) -> bool,
+    report: &mut Report,
+) -> std::collections::HashMap<u64, u32> {
+    let started = std::time::Instant::now();
+    report.pools += pools.len();
+    let mut counts = std::collections::HashMap::new();
+    let mut busy = 0;
+    walk_scope(
+        opts,
+        pools,
+        excluded,
+        &mut || busy += 1,
+        &mut |_, _, _, _, _, key| {
+            *counts.entry(key).or_insert(0u32) += 1;
+        },
+    );
+    report.skipped_busy += busy;
+    report.indexed += counts.values().map(|&c| c as usize).sum::<usize>();
+    report.index_ms += started.elapsed().as_millis() as u64;
+    counts
+}
+
+fn index(
+    opts: &Options,
+    scope: &str,
+    pools: &[PathBuf],
+    excluded: &dyn Fn(&Path) -> bool,
+    keep: &dyn Fn(u64) -> bool,
+    report: &mut Report,
+) -> BTreeMap<GroupKey, Vec<Candidate>> {
+    let started = std::time::Instant::now();
+    let mut groups: BTreeMap<GroupKey, Vec<Candidate>> = BTreeMap::new();
+    // Members that turned busy since counting are counted then, not here.
+    walk_scope(
+        opts,
+        pools,
+        excluded,
+        &mut || {},
+        &mut |dir, name, id, path, md, key| {
+            // Every name of a hard-linked inode, so aliases can be filled in.
+            if !keep(key) && nlink(md) < 2 {
+                return;
+            }
+            let rel = path.strip_prefix(dir).unwrap_or(path);
+            let dev = file_id(md).map_or(0, |(dev, _)| dev);
+            groups
+                .entry((scope.to_string(), dev, rel.to_path_buf(), md.len()))
+                .or_default()
+                .push(Candidate {
+                    pool: name.to_string(),
+                    member: id,
+                    member_dir: dir.to_path_buf(),
+                    rel: rel.to_path_buf(),
+                    aliases: Vec::new(),
+                    path: path.to_path_buf(),
+                    md: md.clone(),
+                });
+        },
+    );
     link_aliases(&mut groups);
-    report.indexed += groups.values().map(Vec::len).sum::<usize>();
     groups.retain(|_, copies| copies.len() > 1);
     report.candidates += groups.values().map(Vec::len).sum::<usize>();
     report.index_ms += started.elapsed().as_millis() as u64;

@@ -92,6 +92,9 @@ pub struct CacheFile {
     pub dedupe_min_size: Option<String>,
     /// Bytes one deduplication pass may read for comparisons, e.g. "8G".
     pub dedupe_max_read: Option<String>,
+    /// Most candidate copies one deduplication index holds (default 100000);
+    /// larger toolchain scopes are processed in batches.
+    pub dedupe_max_index: Option<usize>,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
@@ -224,6 +227,7 @@ pub struct Config {
     pub dedupe: DedupeMode,
     pub dedupe_min_size: u64,
     pub dedupe_max_read: u64,
+    pub dedupe_max_index: usize,
     pub real_cargo: Option<PathBuf>,
     pub backend: CargoBackend,
     pub mbx: Option<PathBuf>,
@@ -373,6 +377,7 @@ impl Config {
                 .as_deref()
                 .and_then(parse_size)
                 .unwrap_or(8 << 30),
+            dedupe_max_index: f.cache.dedupe_max_index.unwrap_or(100_000).max(1),
             real_cargo: env_nonempty("BUILDQ_REAL_CARGO")
                 .map(PathBuf::from)
                 .or(f.cargo.real),
