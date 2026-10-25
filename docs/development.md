@@ -149,6 +149,7 @@ Each CLI handles arguments; shared implementation uses normal imports.
 | `buildq_bench/measurement.py` | Subprocess measurements, resource sampling, JSONL output |
 | `buildq_bench/scenarios.py` | Worktree, cache, and concurrency scenarios |
 | `buildq_bench/plotting.py` | Bilingual comparison figures from recorded data |
+| `buildq_bench/soak.py` | Resumable multi-day soak runner, invariant checks, summary |
 
 ```sh
 uv run --directory scripts --locked pytest
@@ -158,6 +159,54 @@ uv run --directory scripts --locked ruff format --check .
 
 After changing dependencies, run `uv lock --project scripts` and commit `pyproject.toml` and `uv.lock` together.
 Do not commit `.venv`, tool caches, or `__pycache__`.
+
+## Soak testing
+
+`scripts/soak.py` is a bounded, resumable endurance runner (issue #38).
+It rotates pinned repositories (Bevy v0.16.1, Tokio tokio-1.45.1 with `-p tokio@1.45.1`, ripgrep 14.1.1, rust-analyzer 2025-06-02) across several worktrees.
+The seeded schedule mixes cold and warm builds, tests, `--release` and feature changes, source edits (reverted later), bursts of queued jobs, SIGTERM/SIGINT cancellation, and periodic `gc --json` (some with a 1M budget to force eviction).
+Queue, config, cache, `TMPDIR` (outside any checkout, as ripgrep's tests require), `CARGO_HOME`, clones, worktrees, and logs all live under `--root`; the runner signals only process groups it started.
+
+```sh
+cargo build --release
+uv run --project scripts --locked python scripts/soak.py \
+  --root /var/tmp/buildq-soak --buildq "$PWD/target/release/buildq" \
+  --duration 24h --worktrees 3 --slots 2 --budget 40G --min-free 10G --seed 1
+```
+
+- Use `--duration 48h` for the preferred length; the first run clones the repositories and needs network access
+- Rerun the same command after a crash or reboot to resume: it appends to `logs/soak.jsonl`, keeps the original start time, and continues the schedule (a different `--seed` is refused)
+- `--local-fixtures` generates small offline Cargo workspaces for smoke tests, for example `--duration 5m --budget 200M --min-free 1G`
+- GitHub-hosted jobs stop at 6 hours, so a 24-48 hour run needs a self-hosted machine; there is no CI workflow for it
+
+Outputs under `--root/logs`:
+
+| File | Content |
+| :--- | :--- |
+| `soak.jsonl` | One line per `start`, `resume`, `action`, `sample`, and `history_stats` record |
+| `summary.json` | Pass/fail per invariant, counts, and peaks; printed on exit, exit status 1 on failure |
+| `jobs/` | Raw stdout/stderr of every job |
+
+An `action` records the command, cwd, revision, config, exit code, duration, and stderr tail.
+A `sample` records `status --json`, `cache ls --json`, `du -sk` of the cache (allocated bytes), free disk, trash, and `ps` PID/PPID/PGID/RSS of buildq/cargo/rustc and of the runner's own groups.
+RSS is reported separately from `page_cache_kb` (Linux `/proc/meminfo`).
+
+Read `summary.json` from `passed`, then `invariants.<name>.examples` for the first violations:
+
+| Invariant | Fails when |
+| :--- | :--- |
+| `exit_codes` | A build, test, burst job, or GC exited non-zero (cancelled jobs excluded) |
+| `correct_outputs` | A fixture build printed a marker different from its worktree's current source |
+| `no_orphan_processes` | A process remains in the group of a buildq that has exited |
+| `slot_limit` | More busy holders than slots, or more cargo processes than build plus run slots |
+| `no_stranded_tickets` | A waiter exceeds `--stranded-after` with a free slot, or three times that regardless |
+| `cancellation_cleanup` | A cancelled job left processes behind or ignored its signal for 60 s |
+| `gc_errors` | `gc --json` failed, was not JSON, or reported failed deletions or dedupe errors |
+| `storage_policy` | Over budget while idle for 3 consecutive samples, or free space below `--min-free` while idle |
+| `accounting_matches_disk` | While idle, `du` exceeds buildq's reported total plus trash by more than 25% plus 256 MiB |
+
+`max_du_bytes`, `min_free_disk_bytes`, `max_trash_bytes`, `max_tree_rss_kb`, and `queue_wait` (maximum and p95 slot wait from `history`) give the remaining resource picture.
+For OSS repositories only exit codes are checked; output correctness is verified with the fixtures.
 
 ## Container Process Lifecycle
 

@@ -149,6 +149,7 @@ uv run --project scripts --locked python scripts/plot-bevy-benchmark.py
 | `buildq_bench/measurement.py` | サブプロセスの測定、リソース集計、JSONL 出力 |
 | `buildq_bench/scenarios.py` | worktree・キャッシュ・並行実行の検証シナリオ |
 | `buildq_bench/plotting.py` | 集計データから日英の比較図を生成 |
+| `buildq_bench/soak.py` | 再開可能な長時間ソークの実行、不変条件の検査、サマリー生成 |
 
 ```sh
 uv run --directory scripts --locked pytest
@@ -158,6 +159,54 @@ uv run --directory scripts --locked ruff format --check .
 
 依存を変更した場合は `uv lock --project scripts` を実行し、`pyproject.toml` と `uv.lock` を同時にコミットする。
 `.venv`・ツールキャッシュ・`__pycache__` はコミットしない。
+
+## Soak testing
+
+`scripts/soak.py` は、時間を区切って実行でき、中断後に再開できる耐久テストランナーである (issue #38)。
+固定したリポジトリ (Bevy v0.16.1、Tokio tokio-1.45.1 と `-p tokio@1.45.1`、ripgrep 14.1.1、rust-analyzer 2025-06-02) を複数の worktree で順に使う。
+シード付きのスケジュールで、コールド/ウォームのビルド、テスト、`--release` と feature の変更、ソース編集 (後で revert)、キュー待ちジョブのバースト、SIGTERM/SIGINT によるキャンセル、定期的な `gc --json` (一部は予算 1M でエビクションを強制) を混ぜる。
+キュー、設定、キャッシュ、`TMPDIR` (ripgrep のテストの前提どおりチェックアウトの外)、`CARGO_HOME`、クローン、worktree、ログはすべて `--root` 配下に置き、シグナルを送るのは自身が起動したプロセスグループだけである。
+
+```sh
+cargo build --release
+uv run --project scripts --locked python scripts/soak.py \
+  --root /var/tmp/buildq-soak --buildq "$PWD/target/release/buildq" \
+  --duration 24h --worktrees 3 --slots 2 --budget 40G --min-free 10G --seed 1
+```
+
+- 推奨の 48 時間は `--duration 48h`。初回はリポジトリを clone するためネットワークが必要
+- 異常終了や再起動後は同じコマンドを再実行すると再開する。`logs/soak.jsonl` に追記し、開始時刻とスケジュールを引き継ぐ (`--seed` が異なると拒否)
+- `--local-fixtures` はオフラインの小さな Cargo ワークスペースを生成する。スモークテストでは `--duration 5m --budget 200M --min-free 1G` など
+- GitHub ホストのジョブは 6 時間で停止するため、24〜48 時間の実行にはセルフホストのマシンが必要。CI ワークフローは用意しない
+
+`--root/logs` の出力:
+
+| ファイル | 内容 |
+| :--- | :--- |
+| `soak.jsonl` | `start`・`resume`・`action`・`sample`・`history_stats` を 1 行ずつ記録 |
+| `summary.json` | 不変条件ごとの合否、件数、ピーク値。終了時に表示し、失敗時の終了コードは 1 |
+| `jobs/` | 各ジョブの stdout/stderr の生ログ |
+
+`action` にはコマンド、cwd、リビジョン、設定、終了コード、所要時間、stderr の末尾を記録する。
+`sample` には `status --json`、`cache ls --json`、キャッシュの `du -sk` (実割り当てバイト数)、空きディスク、trash、buildq/cargo/rustc と自身のプロセスグループの `ps` による PID/PPID/PGID/RSS を記録する。
+RSS は `page_cache_kb` (Linux の `/proc/meminfo`) と別に記録する。
+
+`summary.json` は `passed` を見て、失敗していれば `invariants.<名前>.examples` で最初の違反を確認する。
+
+| 不変条件 | 失敗する条件 |
+| :--- | :--- |
+| `exit_codes` | ビルド・テスト・バースト・GC が非 0 で終了 (キャンセルしたジョブを除く) |
+| `correct_outputs` | フィクスチャのビルドが、その worktree の現在のソースと異なるマーカーを出力 |
+| `no_orphan_processes` | 終了済みの buildq のプロセスグループにプロセスが残存 |
+| `slot_limit` | 稼働中ホルダーがスロット数を超過、または cargo プロセス数がビルド+実行スロット数を超過 |
+| `no_stranded_tickets` | 待機者が `--stranded-after` を超えて空きスロットがある、または空きの有無にかかわらず 3 倍を超過 |
+| `cancellation_cleanup` | キャンセルしたジョブがプロセスを残した、または 60 秒間シグナルを無視 |
+| `gc_errors` | `gc --json` が失敗、JSON でない、または削除失敗や dedupe エラーを報告 |
+| `storage_policy` | アイドル中に予算超過が 3 サンプル連続、またはアイドル中の空きが `--min-free` 未満 |
+| `accounting_matches_disk` | アイドル中の `du` が buildq の報告値 (trash を含む) の 25% + 256 MiB を超過 |
+
+`max_du_bytes`・`min_free_disk_bytes`・`max_trash_bytes`・`max_tree_rss_kb`・`queue_wait` (`history` から求めたスロット待ちの最大値と p95) でリソースの全体像を確認する。
+OSS リポジトリで検査するのは終了コードのみで、出力の正しさはフィクスチャで検証する。
 
 ## Container Process Lifecycle
 
