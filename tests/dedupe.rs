@@ -37,6 +37,7 @@ fn put(c: &Config, pool: &str, id: usize, rel: &str, data: &[u8]) -> PathBuf {
 
 /// 20,000 bytes that differ from other `byte`s only outside both
 /// fingerprinted blocks.
+#[cfg(unix)]
 fn mid(byte: u8) -> Vec<u8> {
     let mut data = vec![0; 20_000];
     data[10_000] = byte;
