@@ -164,7 +164,7 @@ fn measure(
 }
 
 #[cfg(unix)]
-fn file_footprint(
+pub(crate) fn file_footprint(
     _path: &Path,
     md: &fs::Metadata,
     mode: crate::config::CacheAccounting,
@@ -178,7 +178,7 @@ fn file_footprint(
 }
 
 #[cfg(windows)]
-fn file_footprint(
+pub(crate) fn file_footprint(
     path: &Path,
     md: &fs::Metadata,
     mode: crate::config::CacheAccounting,

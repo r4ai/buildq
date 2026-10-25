@@ -166,8 +166,13 @@ rustup がない場合や、`cargo.real` / `BUILDQ_REAL_CARGO` がそのよう�
 
 mbx は、ストア、非共有のインクリメンタル状態、コレクタを独自に持ち、これらは `cache.budget` の対象外である。
 ボリュームの容量は両方を見込んで確保するか、`MBX_GC_AUTO` と mbx の予算を明示的に設定する。
-`buildq cache ls` と `buildq gc` が報告・回収するのは buildq のプールだけである。
-両者を合わせたストレージの集計と GC の協調は、別途扱う。
+`buildq gc` が回収するのは buildq のプールだけである。
+
+`buildq cache ls`（`--json` では任意の `mbx` オブジェクト）は `mbx cache stats --json` も実行し、mbx のストア・ターゲット・インクリメンタル・生成物のバイト数、プールのうち mbx ストアのファイルとハードリンクされている分（デバイスと inode で一度だけ計上）、重複を除いた合計を報告する。
+mbx は論理バイトで数えるため、`accounting = "allocated"` では合計は推定値になる。
+reflink は共有として検出できず、ストアが別のファイルシステムにある場合は共有 0 になる。
+mbx を実行できない場合は、代わりに注記（JSON では `mbx_note`）を表示する。
+GC の協調は別途扱う。
 
 ## Cache Budget
 

@@ -236,27 +236,29 @@ enum Launcher {
     Mbx(PathBuf),
 }
 
+/// The mbx binary: `cargo.mbx`, else `mbx` on PATH (outside the shim dir).
+pub fn find_mbx(cfg: &Config) -> Result<PathBuf, String> {
+    match &cfg.mbx {
+        Some(p) if !p.is_file() => Err(format!("cargo.mbx {} does not exist", p.display())),
+        Some(p) => Ok(p.clone()),
+        None => cargo::find_on_path(
+            if cfg!(windows) {
+                &["mbx.exe", "mbx.cmd"]
+            } else {
+                &["mbx"]
+            },
+            crate::shim::shim_dir().as_deref(),
+        )
+        .ok_or_else(|| "cargo.backend = \"mbx\": cannot find mbx on PATH (set cargo.mbx)".into()),
+    }
+}
+
 impl Launcher {
     fn resolve(cfg: &Config, real: &Path) -> Result<Launcher, String> {
         if cfg.backend == CargoBackend::Cargo {
             return Ok(Launcher::Cargo);
         }
-        let shim = crate::shim::shim_dir();
-        let mbx = match &cfg.mbx {
-            Some(p) if !p.is_file() => {
-                return Err(format!("cargo.mbx {} does not exist", p.display()));
-            }
-            Some(p) => p.clone(),
-            None => cargo::find_on_path(
-                if cfg!(windows) {
-                    &["mbx.exe", "mbx.cmd"]
-                } else {
-                    &["mbx"]
-                },
-                shim.as_deref(),
-            )
-            .ok_or("cargo.backend = \"mbx\": cannot find mbx on PATH (set cargo.mbx)")?,
-        };
+        let mbx = find_mbx(cfg)?;
         mbx_launcher(mbx, real, &cfg.wrapper)
     }
 
