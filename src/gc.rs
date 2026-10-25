@@ -142,14 +142,13 @@ impl Usage {
     }
 }
 
-/// Measure at most once per TTL while the caller owns the member lease.
-/// This also seeds the first size estimate after a new member's build.
+/// Measures the member the caller still holds after its build. Any build may
+/// have grown it, so a size cached by an earlier build is never reused here:
+/// the oversize warning and the next automatic-GC preflight would otherwise
+/// see a stale, under-budget estimate. One walk per build; scans by others
+/// keep the TTL.
 pub fn completed_member_warning(cfg: &Config, dir: &Path, meta: &mut MemberMeta) -> Option<String> {
-    if (meta.size_accounting != Some(cfg.accounting)
-        || meta.size_ms == 0
-        || now_ms().saturating_sub(meta.size_ms) >= SIZE_CACHE_MS)
-        && let Ok(size) = util::size_for(dir, cfg.accounting)
-    {
+    if let Ok(size) = util::size_for(dir, cfg.accounting) {
         meta.size_bytes = size;
         meta.size_ms = now_ms();
         meta.size_accounting = Some(cfg.accounting);

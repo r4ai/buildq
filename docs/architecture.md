@@ -264,9 +264,11 @@ An oversized build may finish if the free-space guard permits it. A completed
 member larger than the entire configured budget produces a warning with guidance
 to increase the budget or reduce artifacts. GC can evict that member once idle,
 even if it is the only one; the next invocation then starts cold. Member-size
-diagnostics reuse estimates for up to 60 seconds, with an initial measurement
-after the first build and fresh measurements during actual GC. This avoids
-walking a warm target directory after every job.
+size is measured once after every build by the job that holds it, because any
+build may have grown it; this keeps the oversize warning and the automatic-GC
+preflight from trusting a stale estimate. Other scans (status, `cache ls`, the
+GC preflight) reuse an idle member's estimate for up to 60 seconds, and actual
+GC measures afresh.
 
 The effective budget adapts to available volume space:
 

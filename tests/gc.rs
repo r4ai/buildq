@@ -279,7 +279,7 @@ fn busy_overflow_reports_why_gc_cannot_meet_the_soft_budget() {
 }
 
 #[test]
-fn completed_member_warning_reuses_and_expires_the_size_estimate() {
+fn completed_member_warning_measures_every_finished_build() {
     let temp = tempfile::tempdir().unwrap();
     let mut c = cfg(temp.path());
     c.budget = 1000;
@@ -288,10 +288,8 @@ fn completed_member_warning_reuses_and_expires_the_size_estimate() {
     let warning = completed_member_warning(&c, &dir, &mut meta).unwrap();
     assert!(warning.contains("next build will be cold"));
     assert_eq!(meta.size_bytes, 4000);
+    // A warm build within the size TTL may still have grown the member.
     file(&dir.join("new-artifact"), 4000, 0);
-    completed_member_warning(&c, &dir, &mut meta);
-    assert_eq!(meta.size_bytes, 4000, "warm jobs must reuse the estimate");
-    meta.size_ms = now_ms() - SIZE_CACHE_MS - 1;
     completed_member_warning(&c, &dir, &mut meta);
     assert_eq!(meta.size_bytes, 8000);
     c.budget = 9000;
