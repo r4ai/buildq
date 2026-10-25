@@ -192,6 +192,13 @@ new member records an empty manifest until the clone is in place, so a crash
 mid-seed only costs a rebuild. Clones are counted at full size by the budget
 until deduplication proves them shared; volumes without clones start empty.
 
+The same setting keeps a warm member per worktree: when the best free member was
+last built for another worktree (so reusing it would rebuild every local
+package) and the pool may still grow, the job gets a new member seeded from it
+instead. The copy rebuilds what reuse would have, and the original stays warm
+for its worktree, so later switches back find nothing to rebuild. Growth stays
+bounded by `max_members` and the budget check for members beyond `slots`.
+
 A source-root change invalidates every local package so embedded paths such as
 `CARGO_MANIFEST_DIR` refer to the current worktree. Registry/git dependencies
 stay shared; same-root builds retain normal incremental reuse.

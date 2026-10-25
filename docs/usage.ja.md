@@ -22,7 +22,7 @@ min_free = "25G"         # ドライブ上に最低限残す空き容量 (デフ
 # pool_explicit = true   # worktree 内を指す --target-dir / CARGO_TARGET_DIR もプールする (デフォルト: false)
 # pool_fallback = true   # プールを開けない (Git やツールチェーンの失敗) とき、失敗せず警告してプール外でビルドする (デフォルト: false、環境変数 BUILDQ_POOL_FALLBACK)
 # dedupe = "off"         # GC でメンバー間の同一ファイルを共有する ("auto" | "off"、デフォルト: "auto")
-# seed_members = true    # 新しいメンバーを最も近いビルド済みメンバーの copy-on-write クローンから始める (APFS、Btrfs、XFS、実験的、デフォルト: false、環境変数 BUILDQ_SEED_MEMBERS)
+# seed_members = true    # 新しいメンバーを最も近いビルド済みメンバーの copy-on-write クローンから始め、worktree ごとに温かいメンバーを残す (APFS、Btrfs、XFS、実験的、デフォルト: false、環境変数 BUILDQ_SEED_MEMBERS)
 
 [cargo]
 rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を無効化 ("none" | "keep" | "/path")

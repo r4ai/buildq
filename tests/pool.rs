@@ -170,3 +170,54 @@ fn lease_waits_when_full() {
     drop(held);
     assert_eq!(t.join().unwrap(), id);
 }
+
+/// With seeding, worktrees taking turns keep one warm member each while the
+/// pool may grow, instead of rebuilding one shared member at every switch.
+#[test]
+fn seeding_keeps_a_warm_member_per_alternating_worktree() {
+    let dir = tempfile::tempdir().unwrap();
+    let pool = Pool::open(dir.path().join("p"), PoolInfo::default())
+        .unwrap()
+        .with_seeding(true);
+    let mut owners = |f: &str, _: Option<&str>| owner(f);
+    let mut lease = |name: &str, current: &Manifest, max: usize| {
+        pool.lease(
+            &wt(name),
+            current,
+            &RebuildGraph::default(),
+            &mut owners,
+            max,
+            &mut |_| true,
+            Duration::from_millis(5),
+            &mut || {},
+        )
+        .unwrap()
+    };
+    let a = m(&[("crates/a/src/lib.rs", "1")]);
+    let b = m(&[("crates/a/src/lib.rs", "2")]);
+    let l = lease("a", &a, 3);
+    assert_eq!(l.id, 0);
+    std::fs::write(l.target_dir.join("artifact"), "built for a").unwrap();
+    drop(l);
+
+    let l = lease("b", &b, 3);
+    if l.seeded_from.is_none() {
+        // This volume cannot clone: b reuses a's member as before.
+        assert_eq!(l.id, 0);
+        return;
+    }
+    assert_eq!((l.id, l.seeded_from), (1, Some(0)));
+    assert!(l.target_dir.join("artifact").exists());
+    assert_eq!(l.plan.packages.iter().collect::<Vec<_>>(), ["a"]);
+    drop(l);
+    for (name, current, id) in [("a", &a, 0), ("b", &b, 1)] {
+        let l = lease(name, current, 3);
+        assert_eq!(l.id, id);
+        assert!(l.plan.packages.is_empty(), "{name}: {:?}", l.plan);
+    }
+
+    // At the member cap a third worktree reuses the closest member.
+    let c = m(&[("crates/a/src/lib.rs", "3")]);
+    let l = lease("c", &c, 2);
+    assert!(!l.fresh_member && l.seeded_from.is_none());
+}
