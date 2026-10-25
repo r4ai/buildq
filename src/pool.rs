@@ -560,13 +560,35 @@ impl Pool {
                     best = Some((score, *id, p));
                 }
             }
+            let new_id = (0..).find(|i| !ids.contains(i)).unwrap();
+            // Held until a seed from an idle member is cloned.
+            let mut seed_lock = None;
             let chosen = match best {
+                // Reusing another worktree's member would throw away its
+                // warm local packages; a seeded copy rebuilds the same ones
+                // and leaves the original warm for that worktree.
+                Some((score, id, p))
+                    if self.seed
+                        && score.other_worktree
+                        && !p.packages.is_empty()
+                        && ids.len() < max_members
+                        && can_clone(&self.dir)
+                        && may_grow(ids.len()) =>
+                {
+                    let pos = free.iter().position(|(i, _)| *i == id).unwrap();
+                    seed_lock = Some(free.swap_remove(pos).1);
+                    let l = lock::try_lock(&self.lock_path(new_id))?
+                        .ok_or_else(|| io::Error::other("new member lock busy"))?;
+                    let fresh = plan(&Manifest::new(), current, &mut |f| owners(f, None));
+                    // Idle and locked by us: nothing in it is half written.
+                    Some((new_id, l, fresh, true, Some((id, p, now_ms()))))
+                }
                 Some((_, id, p)) => {
                     let pos = free.iter().position(|(i, _)| *i == id).unwrap();
                     Some((id, free.swap_remove(pos).1, p, false, None))
                 }
                 None if ids.len() < max_members && may_grow(ids.len()) => {
-                    let id = (0..).find(|i| !ids.contains(i)).unwrap();
+                    let id = new_id;
                     let l = lock::try_lock(&self.lock_path(id))?
                         .ok_or_else(|| io::Error::other("new member lock busy"))?;
                     let p = plan(&Manifest::new(), current, &mut |f| owners(f, None));
@@ -624,6 +646,7 @@ impl Pool {
                     }
                     write_manifest(&self.manifest_path(id), current)?;
                 }
+                drop(seed_lock);
                 return Ok(Lease {
                     id,
                     target_dir,
@@ -711,6 +734,18 @@ pub fn seed_member(src: &Path, dst: &Path, since_ms: u64) -> bool {
         return false;
     }
     true
+}
+
+/// Whether `dir`'s volume clones files (a tiny probe, removed again).
+fn can_clone(dir: &Path) -> bool {
+    let probe = dir.join(format!(".seed-probe-{}", std::process::id()));
+    let copy = dir.join(format!(".seed-probe-{}-copy", std::process::id()));
+    let ok = fs::create_dir_all(&probe).is_ok()
+        && fs::write(probe.join("f"), b"probe").is_ok()
+        && clone_tree(&probe, &copy).is_ok();
+    let _ = fs::remove_dir_all(&probe);
+    let _ = fs::remove_dir_all(&copy);
+    ok
 }
 
 fn touched_since(dir: &Path, since: std::time::SystemTime) -> bool {
