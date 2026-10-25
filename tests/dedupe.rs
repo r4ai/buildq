@@ -1091,6 +1091,7 @@ fn passes_limited_while_fingerprinting_still_cover_every_group() {
     }
     let prints = buildq::dedupe::Ledger::load(&c.cache_dir).prints.len();
     assert_eq!(prints, 24);
+}
 
 /// A copy larger than the whole read limit is skipped, not retried forever
 /// in front of the smaller copies that fit.
