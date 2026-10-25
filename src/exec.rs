@@ -8,6 +8,10 @@
 //! process (`buildq __watch`) inherits the locks buildq holds: if buildq dies
 //! first, it kills the child tree (or, without `kill_tree`, waits for the
 //! child) before the locks, and with them the slot and pool member, go free.
+//! A SIGTERM, SIGHUP or SIGINT with `kill_tree` freezes and records the
+//! child's tree before the child hears of it, and the guard kills what is left
+//! of that tree when the child exits, so a build script orphaned by Cargo's
+//! exit cannot keep writing to a member that is already free again.
 
 use std::io;
 use std::process::{Child, Command, ExitStatus};
@@ -121,6 +125,10 @@ pub struct ChildGuard {
     job: Option<windows_sys::Win32::Foundation::HANDLE>,
     #[cfg(unix)]
     watchdog: Option<Child>,
+    #[cfg(unix)]
+    tracker: Option<nix::Tracker>,
+    #[cfg(unix)]
+    child: i32,
 }
 
 #[cfg(windows)]
@@ -144,14 +152,155 @@ mod nix {
     use std::process::{Child, Command, Stdio};
     use std::sync::atomic::{AtomicI32, Ordering};
     pub static CHILD: AtomicI32 = AtomicI32::new(0);
+    /// Write end of the running [`Tracker`]'s pipe, -1 without one.
+    static TRACKER: AtomicI32 = AtomicI32::new(-1);
 
-    pub extern "C" fn on_int(_: libc::c_int) {}
+    /// Ctrl+C reaches the child from the terminal; only the tracker hears it.
+    pub extern "C" fn on_int(sig: libc::c_int) {
+        notify(sig);
+    }
 
     pub extern "C" fn forward(sig: libc::c_int) {
+        if notify(sig) {
+            return;
+        }
         let pid = CHILD.load(Ordering::SeqCst);
         if pid > 0 {
             unsafe {
                 libc::kill(pid, sig);
+            }
+        }
+    }
+
+    /// Hands the signal to the tracker, which forwards it itself.
+    fn notify(sig: libc::c_int) -> bool {
+        let fd = TRACKER.load(Ordering::SeqCst);
+        if fd < 0 {
+            return false;
+        }
+        let b = sig as u8;
+        unsafe { libc::write(fd, (&raw const b).cast(), 1) };
+        true
+    }
+
+    /// Records the child's process tree once a cancelling signal arrives and
+    /// keeps following its forks until the child has exited.
+    pub struct Tracker {
+        wake: i32,
+        thread: std::thread::JoinHandle<Tracked>,
+    }
+
+    #[derive(Default)]
+    pub struct Tracked {
+        pub tree: Vec<i32>,
+        /// Ctrl+C (or SIGQUIT) reached the whole job, not just buildq.
+        pub interrupted: bool,
+    }
+
+    impl Tracker {
+        pub fn start(child: i32) -> Option<Tracker> {
+            let mut fds = [0; 2];
+            if unsafe { libc::pipe(fds.as_mut_ptr()) } != 0 {
+                return None;
+            }
+            for fd in fds {
+                unsafe { libc::fcntl(fd, libc::F_SETFD, libc::FD_CLOEXEC) };
+            }
+            let [read, wake] = fds;
+            let thread = std::thread::spawn(move || {
+                let tree = track(child, read);
+                unsafe { libc::close(read) };
+                tree
+            });
+            TRACKER.store(wake, Ordering::SeqCst);
+            Some(Tracker { wake, thread })
+        }
+
+        /// Stops tracking (the child has exited) and returns the recorded
+        /// tree, empty when no cancelling signal arrived.
+        pub fn finish(self) -> Tracked {
+            TRACKER.store(-1, Ordering::SeqCst);
+            let stop = 0u8;
+            unsafe { libc::write(self.wake, (&raw const stop).cast(), 1) };
+            let tree = self.thread.join().unwrap_or_default();
+            unsafe { libc::close(self.wake) };
+            tree
+        }
+    }
+
+    /// Reads one signal number per byte; 0 means the child is gone.
+    fn next_signal(fd: i32, timeout_ms: i32) -> Option<Option<i32>> {
+        let mut p = libc::pollfd {
+            fd,
+            events: libc::POLLIN,
+            revents: 0,
+        };
+        if unsafe { libc::poll(&mut p, 1, timeout_ms) } <= 0 {
+            return Some(None);
+        }
+        let mut b = 0u8;
+        if unsafe { libc::read(fd, (&raw mut b).cast(), 1) } != 1 || b == 0 {
+            return None;
+        }
+        Some(Some(i32::from(b)))
+    }
+
+    fn track(child: i32, fd: i32) -> Tracked {
+        let mut tracked = Tracked::default();
+        let tree = &mut tracked.tree;
+        while let Some(sig) = next_signal(fd, if tree.is_empty() { -1 } else { 50 }) {
+            let Some(sig) = sig else {
+                extend(tree, false);
+                continue;
+            };
+            if tree.is_empty() {
+                // Frozen, nothing can exit (and orphan its children) or fork
+                // between the scan and the signal.
+                tree.push(child);
+                unsafe { libc::kill(child, libc::SIGSTOP) };
+                extend(tree, true);
+            }
+            if sig == libc::SIGINT || sig == libc::SIGQUIT {
+                tracked.interrupted = true;
+            } else {
+                unsafe { libc::kill(child, sig) };
+            }
+            for &pid in tree.iter() {
+                unsafe { libc::kill(pid, libc::SIGCONT) };
+            }
+        }
+        tracked
+    }
+
+    /// Orphans in our process group. The terminal's Ctrl+C can end Cargo
+    /// before the tracker freezes it, and a helper that ignores the signal is
+    /// then adopted by init; it is still in the job buildq runs in.
+    pub fn group_orphans() -> Vec<i32> {
+        let group = unsafe { libc::getpgrp() };
+        let me = std::process::id() as i32;
+        processes()
+            .into_iter()
+            .filter(|&(pid, ppid, pgid)| pgid == group && ppid == 1 && pid != me)
+            .map(|(pid, ..)| pid)
+            .collect()
+    }
+
+    /// Adds the descendants of `tree`, stopping each as it is found if asked.
+    fn extend(tree: &mut Vec<i32>, stop: bool) {
+        loop {
+            let found: Vec<i32> = processes()
+                .into_iter()
+                .filter(|(pid, ppid, _)| tree.contains(ppid) && !tree.contains(pid))
+                .map(|(pid, ..)| pid)
+                .collect();
+            if found.is_empty() {
+                break;
+            }
+            for pid in found {
+                if stop {
+                    unsafe { libc::kill(pid, libc::SIGSTOP) };
+                }
+                tree.push(pid);
             }
         }
     }
@@ -198,9 +347,9 @@ mod nix {
         true
     }
 
-    /// (pid, ppid) of every process.
+    /// (pid, ppid, pgid) of every process.
     #[cfg(target_os = "linux")]
-    fn processes() -> Vec<(i32, i32)> {
+    fn processes() -> Vec<(i32, i32, i32)> {
         let Ok(dir) = std::fs::read_dir("/proc") else {
             return Vec::new();
         };
@@ -208,18 +357,18 @@ mod nix {
             .filter_map(|e| {
                 let pid = e.file_name().to_str()?.parse().ok()?;
                 let stat = std::fs::read_to_string(e.path().join("stat")).ok()?;
-                // `pid (comm) state ppid ...`; comm may contain spaces.
-                let ppid = stat.rsplit_once(')')?.1.split_whitespace().nth(1)?;
-                Some((pid, ppid.parse().ok()?))
+                // `pid (comm) state ppid pgrp ...`; comm may contain spaces.
+                let mut it = stat.rsplit_once(')')?.1.split_whitespace().skip(1);
+                Some((pid, it.next()?.parse().ok()?, it.next()?.parse().ok()?))
             })
             .collect()
     }
 
-    /// (pid, ppid) of every process.
+    /// (pid, ppid, pgid) of every process.
     #[cfg(not(target_os = "linux"))]
-    fn processes() -> Vec<(i32, i32)> {
+    fn processes() -> Vec<(i32, i32, i32)> {
         let Ok(out) = Command::new("ps")
-            .args(["-A", "-o", "pid=", "-o", "ppid="])
+            .args(["-A", "-o", "pid=", "-o", "ppid=", "-o", "pgid="])
             .output()
         else {
             return Vec::new();
@@ -228,7 +377,7 @@ mod nix {
             .lines()
             .filter_map(|l| {
                 let mut it = l.split_whitespace().map(str::parse);
-                Some((it.next()?.ok()?, it.next()?.ok()?))
+                Some((it.next()?.ok()?, it.next()?.ok()?, it.next()?.ok()?))
             })
             .collect()
     }
@@ -238,20 +387,7 @@ mod nix {
     pub fn kill_tree(root: i32) {
         let mut tree = vec![root];
         unsafe { libc::kill(root, libc::SIGSTOP) };
-        loop {
-            let found: Vec<i32> = processes()
-                .into_iter()
-                .filter(|(pid, ppid)| tree.contains(ppid) && !tree.contains(pid))
-                .map(|(pid, _)| pid)
-                .collect();
-            if found.is_empty() {
-                break;
-            }
-            for pid in found {
-                unsafe { libc::kill(pid, libc::SIGSTOP) };
-                tree.push(pid);
-            }
-        }
+        extend(&mut tree, true);
         for &pid in &tree {
             unsafe { libc::kill(pid, libc::SIGKILL) };
         }
@@ -365,8 +501,11 @@ impl ChildGuard {
                     nix::forward as *const () as libc::sighandler_t,
                 );
             }
+            let pid = child.id() as i32;
             ChildGuard {
+                tracker: kill_tree.then(|| nix::Tracker::start(pid)).flatten(),
                 watchdog: nix::spawn_watchdog(child.id(), kill_tree),
+                child: pid,
             }
         }
     }
@@ -382,6 +521,26 @@ impl Drop for ChildGuard {
             // The child has exited; closing the job kills stragglers it left.
             if let Some(h) = self.job.take() {
                 windows_sys::Win32::Foundation::CloseHandle(h);
+            }
+        }
+        // A cancelled child may have left build scripts behind: they still
+        // hold the member, so the slot stays ours until they are gone.
+        #[cfg(unix)]
+        if let Some(t) = self.tracker.take() {
+            let mut tracked = t.finish();
+            if tracked.interrupted {
+                tracked.tree.extend(nix::group_orphans());
+            }
+            let left: Vec<i32> = tracked
+                .tree
+                .into_iter()
+                .filter(|&pid| pid != self.child && nix::alive(pid))
+                .collect();
+            for &pid in &left {
+                nix::kill_tree(pid);
+            }
+            while left.iter().any(|&pid| nix::alive(pid)) {
+                std::thread::sleep(std::time::Duration::from_millis(20));
             }
         }
         #[cfg(unix)]
