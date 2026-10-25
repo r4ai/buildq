@@ -2101,3 +2101,163 @@ fn sigterm_kills_the_cancelled_build_script() {
 fn sigint_kills_the_cancelled_build_script() {
     cancelled_build_kills_its_build_script("INT");
 }
+
+/// The real mbx binary: `BUILDQ_TEST_MBX`, else the first `mbx` on PATH. A
+/// mise shim is resolved to the binary behind it with `mise which mbx`.
+fn real_mbx() -> Option<PathBuf> {
+    if let Some(p) = std::env::var_os("BUILDQ_TEST_MBX") {
+        return Some(PathBuf::from(p));
+    }
+    let found = std::env::split_paths(&std::env::var_os("PATH")?)
+        .map(|d| d.join("mbx"))
+        .find(|p| p.is_file())?;
+    if found.components().any(|c| c.as_os_str() == "shims") {
+        let out = Command::new("mise")
+            .args(["which", "mbx"])
+            .output()
+            .ok()
+            .filter(|o| o.status.success())?;
+        return Some(PathBuf::from(String::from_utf8_lossy(&out.stdout).trim()));
+    }
+    Some(found)
+}
+
+/// The `N` of mbx's `mbx[cache]: N hits` stderr line, summed over the output.
+fn mbx_cache_hits(out: &Output) -> usize {
+    String::from_utf8_lossy(&out.stderr)
+        .lines()
+        .filter_map(|l| {
+            let rest = l.split("mbx[cache]:").nth(1)?;
+            rest.split_whitespace().next()?.parse::<usize>().ok()
+        })
+        .sum()
+}
+
+/// `[cargo] backend = "mbx"` against a real mbx: the commands run, buildq
+/// keeps owning target placement (no mbx view or lane), and a second worktree
+/// is served from mbx's cache. Every mbx call uses a cache directory inside
+/// the tempdir with automatic GC off, so the user's own mbx cache is never
+/// touched.
+#[test]
+#[ignore = "needs a real mbx on PATH (or BUILDQ_TEST_MBX); run with --ignored"]
+fn mbx_backend_runs_against_a_real_mbx() {
+    let Some(mbx) = real_mbx().filter(|p| p.is_file()) else {
+        println!("skipped: no mbx on PATH and BUILDQ_TEST_MBX unset");
+        return;
+    };
+    let temp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(temp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='mbx-app'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            (
+                "src/lib.rs",
+                "pub fn answer() -> u32 { 42 }\n#[cfg(test)]\nmod tests {\n    #[test]\n    fn answers() { assert_eq!(super::answer(), 42); }\n}\n",
+            ),
+            (
+                "src/main.rs",
+                "fn main() { println!(\"mbx-ok={}\", mbx_app::answer()); }\n",
+            ),
+        ],
+    );
+    let ws = root.join("ws");
+    fs::write(ws.join(".gitignore"), "/target\n").unwrap();
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "."]);
+    git(&ws, &["commit", "-qm", "fixture"]);
+    let ws2 = root.join("ws2");
+    git(&ws, &["worktree", "add", "-q", ws2.to_str().unwrap()]);
+
+    fs::create_dir_all(root.join("q")).unwrap();
+    fs::write(
+        root.join("q/config.toml"),
+        format!(
+            "[cache]\nmin_free='0'\n[cargo]\nbackend = \"mbx\"\nmbx = {:?}\n",
+            mbx
+        ),
+    )
+    .unwrap();
+    let mbx_cache = root.join("mbx-cache");
+    let cmd = |dir: &Path, args: &[&str]| {
+        let mut c = w.command(dir, args);
+        c.env("MBX_CACHE_DIR", &mbx_cache)
+            .env("MBX_GC_AUTO", "0")
+            .env("BUILDQ_REAL_CARGO", &w.real_cargo);
+        c
+    };
+    let ok = |dir: &Path, args: &[&str]| {
+        let out = cmd(dir, args).output().unwrap();
+        assert!(
+            out.status.success(),
+            "cargo {args:?}: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        out
+    };
+
+    let first = ok(&ws, &["build", "--offline"]);
+    eprintln!(
+        "first build stderr:\n{}",
+        String::from_utf8_lossy(&first.stderr)
+    );
+    assert!(mbx_cache.exists(), "mbx did not use the isolated cache dir");
+    let run = ok(&ws, &["run", "--offline"]);
+    assert_eq!(stdout(&run), "mbx-ok=42");
+    ok(&ws, &["test", "--offline"]);
+    ok(&ws, &["check", "--offline"]);
+    if Command::new(&w.real_cargo)
+        .args(["clippy", "--version"])
+        .output()
+        .is_ok_and(|o| o.status.success())
+    {
+        ok(&ws, &["clippy", "--offline"]);
+    } else {
+        println!("skipped clippy: not installed");
+    }
+    let active = Command::new("rustup")
+        .args(["show", "active-toolchain"])
+        .current_dir(&ws)
+        .output()
+        .ok()
+        .filter(|o| o.status.success())
+        .and_then(|o| {
+            String::from_utf8_lossy(&o.stdout)
+                .split_whitespace()
+                .next()
+                .map(str::to_string)
+        });
+    match active {
+        Some(tc) => {
+            ok(&ws, &[&format!("+{tc}"), "build", "--offline"]);
+        }
+        None => println!("skipped +toolchain: rustup not found"),
+    }
+
+    let second = ok(&ws2, &["build", "--offline"]);
+    eprintln!(
+        "second build stderr:\n{}",
+        String::from_utf8_lossy(&second.stderr)
+    );
+    let hits = mbx_cache_hits(&second);
+    println!("mbx cache hits in the second worktree: {hits}");
+    assert!(
+        hits > 0,
+        "no mbx cache hits: {}",
+        String::from_utf8_lossy(&second.stderr)
+    );
+    let again = ok(&ws2, &["run", "--offline"]);
+    assert_eq!(stdout(&again), "mbx-ok=42");
+
+    // buildq owns target placement: mbx made no view or lane in a worktree.
+    for dir in [&ws, &ws2] {
+        assert!(
+            fs::symlink_metadata(dir.join("target")).is_err(),
+            "{} has a target entry",
+            dir.display()
+        );
+    }
+}
