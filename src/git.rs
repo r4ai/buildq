@@ -125,10 +125,6 @@ pub fn discover(dir: &Path) -> Option<Worktree> {
     })
 }
 
-fn split_z(s: &str) -> impl Iterator<Item = &str> {
-    s.split('\0').filter(|p| !p.is_empty())
-}
-
 /// Uncommitted paths: modified, staged, renamed (both names), deleted and
 /// untracked, including those inside initialized submodules.
 pub fn dirty(wt: &Worktree) -> Vec<String> {
@@ -200,12 +196,14 @@ fn manifest_in(root: &Path) -> Result<crate::pool::Manifest, String> {
         checked(c, "status").map(|s| parse_porcelain_z(&s))
     });
     let mut c = git(root);
-    c.args(["ls-files", "-s", "-z"]);
+    c.args(["ls-files", "-s", "-z", "--debug"]);
     let listing = checked(c, "ls-files")?;
     let mut m = crate::pool::Manifest::new();
     let mut submodules = Vec::new();
-    for entry in split_z(&listing) {
-        // "<mode> <blob> <stage>\t<path>"
+    // Git's stat cache compares whole seconds, so a same-size edit that keeps
+    // the old mtime within the cached ctime's second looks clean to `status`.
+    let mut stale = std::collections::BTreeSet::new();
+    for (entry, cached) in parse_ls_files_debug(&listing) {
         if let Some((meta, path)) = entry.split_once('\t') {
             let mut meta = meta.split(' ');
             let mode = meta.next().unwrap_or("");
@@ -213,20 +211,25 @@ fn manifest_in(root: &Path) -> Result<crate::pool::Manifest, String> {
             if mode == "160000" {
                 submodules.push(path.to_string());
             }
+            if matches!(mode, "100644" | "100755")
+                && cached.is_some_and(|c| stat_differs(&root.join(path), &c))
+            {
+                stale.insert(path.to_string());
+            }
             m.insert(path.to_string(), blob);
         }
     }
     let dirty = status
         .join()
         .map_err(|_| "git status: thread panicked".to_string())??;
-    let mut to_hash = Vec::new();
     for p in dirty {
         if root.join(&p).is_file() {
-            to_hash.push(p);
+            stale.insert(p);
         } else {
             m.remove(&p);
         }
     }
+    let to_hash: Vec<String> = stale.into_iter().collect();
     for (p, id) in hash_objects_in(root, &to_hash)? {
         m.insert(p, id);
     }
@@ -241,6 +244,91 @@ fn manifest_in(root: &Path) -> Result<crate::pool::Manifest, String> {
         }
     }
     Ok(m)
+}
+
+/// The stat data the index caches for an entry, as `ls-files --debug` prints
+/// it. Git stores 32-bit values, so the live ones are truncated to compare.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct CachedStat {
+    ctime: (u32, u32),
+    mtime: (u32, u32),
+    ino: u32,
+    size: u32,
+}
+
+/// Splits `ls-files -s -z --debug` into "<mode> <blob> <stage>\t<path>"
+/// entries, each with the stat block that follows its NUL-terminated path.
+fn parse_ls_files_debug(s: &str) -> Vec<(&str, Option<CachedStat>)> {
+    const STAT_LINES: usize = 5;
+    let mut out: Vec<(&str, Option<CachedStat>)> = Vec::new();
+    let mut rest = s;
+    while !rest.is_empty() {
+        let (head, tail) = rest.split_once('\0').unwrap_or((rest, ""));
+        let mut end = 0;
+        for _ in 0..STAT_LINES {
+            match head[end..].find('\n') {
+                Some(i) => end += i + 1,
+                None => break,
+            }
+        }
+        // The first chunk has no stat block in front of it.
+        let (block, entry) = if out.is_empty() {
+            ("", head)
+        } else {
+            head.split_at(end)
+        };
+        if let Some(last) = out.last_mut() {
+            last.1 = parse_stat_block(block);
+        }
+        if !entry.is_empty() {
+            out.push((entry, None));
+        }
+        rest = tail;
+    }
+    out
+}
+
+fn parse_stat_block(block: &str) -> Option<CachedStat> {
+    let mut fields = std::collections::HashMap::new();
+    for part in block.split(['\n', '\t']) {
+        if let Some((k, v)) = part.trim().split_once(": ") {
+            fields.insert(k, v.trim());
+        }
+    }
+    let time = |k: &str| -> Option<(u32, u32)> {
+        let (s, ns) = fields.get(k)?.split_once(':')?;
+        Some((s.parse().ok()?, ns.parse().ok()?))
+    };
+    let num = |k: &str| -> Option<u32> { fields.get(k)?.parse().ok() };
+    Some(CachedStat {
+        ctime: time("ctime")?,
+        mtime: time("mtime")?,
+        ino: num("ino")?,
+        size: num("size")?,
+    })
+}
+
+/// Whether the file's stat no longer matches what the index cached, at full
+/// precision. Nanoseconds count only when the index recorded them.
+#[cfg(unix)]
+fn stat_differs(path: &Path, cached: &CachedStat) -> bool {
+    use std::os::unix::fs::MetadataExt;
+    let Ok(md) = fs::symlink_metadata(path) else {
+        return false;
+    };
+    let with_ns = cached.ctime.1 != 0 || cached.mtime.1 != 0;
+    let time = |s: i64, ns: i64| (s as u32, if with_ns { ns as u32 } else { 0 });
+    md.is_file()
+        && (time(md.ctime(), md.ctime_nsec()) != cached.ctime
+            || time(md.mtime(), md.mtime_nsec()) != cached.mtime
+            || md.ino() as u32 != cached.ino
+            || md.size() as u32 != cached.size)
+}
+
+/// Windows has no ctime or inode to catch an edit Git's stat cache misses.
+#[cfg(not(unix))]
+fn stat_differs(_path: &Path, _cached: &CachedStat) -> bool {
+    false
 }
 
 /// `git hash-object` for several worktree files at once.
@@ -332,5 +420,78 @@ mod tests {
             parse_porcelain_z(s),
             ["src/a.rs", "new.rs", "old.rs", "notes/x.txt"]
         );
+    }
+
+    #[test]
+    fn ls_files_debug_parse() {
+        let block = |n: u32| {
+            format!(
+                "  ctime: {n}:5\n  mtime: {n}:6\n  dev: 1\tino: {n}\n  uid: 1\tgid: 1\n  size: {n}\tflags: 0\n"
+            )
+        };
+        let s = format!(
+            "100644 aa 0\ta.rs\0{}100755 bb 0\tline\nbreak.rs\0{}",
+            block(1),
+            block(2)
+        );
+        let stat = |n| CachedStat {
+            ctime: (n, 5),
+            mtime: (n, 6),
+            ino: n,
+            size: n,
+        };
+        assert_eq!(
+            parse_ls_files_debug(&s),
+            [
+                ("100644 aa 0\ta.rs", Some(stat(1))),
+                ("100755 bb 0\tline\nbreak.rs", Some(stat(2))),
+            ]
+        );
+    }
+
+    /// `checkStat=minimal` makes Git's false-clean result deterministic: it
+    /// compares only mtime seconds and size, like the same-second race does.
+    #[cfg(unix)]
+    #[test]
+    fn manifest_hashes_a_backdated_edit_git_status_calls_clean() {
+        let tmp = tempfile::tempdir().unwrap();
+        let root = canonical(tmp.path());
+        let run = |args: &[&str]| {
+            let out = git(&root)
+                .args(["-c", "user.name=t", "-c", "user.email=t@t"])
+                .args(args)
+                .output()
+                .unwrap();
+            assert!(out.status.success(), "git {args:?}");
+            String::from_utf8_lossy(&out.stdout).trim().to_string()
+        };
+        run(&["init", "-q"]);
+        run(&["config", "core.checkStat", "minimal"]);
+        run(&["config", "core.trustctime", "false"]);
+        let file = root.join("data.txt");
+        let old = std::time::SystemTime::now() - std::time::Duration::from_secs(86_400);
+        let write = |text: &str| {
+            fs::write(&file, text).unwrap();
+            fs::File::options()
+                .write(true)
+                .open(&file)
+                .unwrap()
+                .set_modified(old)
+                .unwrap();
+        };
+        write("ALPHA");
+        run(&["add", "data.txt"]);
+        run(&["commit", "-q", "-m", "init"]);
+        let alpha = run(&["rev-parse", "HEAD:data.txt"]);
+        write("DELTA");
+        let delta = run(&["hash-object", "data.txt"]);
+        assert_ne!(alpha, delta);
+        assert_eq!(
+            run(&["status", "--porcelain"]),
+            "",
+            "git must call it clean"
+        );
+        let m = manifest_in(&root).unwrap();
+        assert_eq!(m.get("data.txt"), Some(&delta));
     }
 }
