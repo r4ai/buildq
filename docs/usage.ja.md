@@ -221,6 +221,7 @@ buildq cache dedupe             # `[cache] dedupe` に関係なく今すぐ共�
 | `dedupe` | `"auto"` | `"off"` で GC 中の実行を無効化 |
 | `dedupe_min_size` | `"64KiB"` | これより小さいファイルは比較しない |
 | `dedupe_max_read` | `"8G"` | 1回の比較で読む上限 |
+| `dedupe_max_index` | `100000` | 1つのインデックスが保持する候補コピーの上限。超えるツールチェーンの範囲はバッチに分けて索引・共有し（レポートの `index_batches`）、バッチごとにメンバーを走査する |
 
 共有には reflink が必要である。
 Linux では btrfs・`reflink=1` の XFS・bcachefs、macOS では APFS が対応する。
