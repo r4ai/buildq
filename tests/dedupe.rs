@@ -35,6 +35,15 @@ fn put(c: &Config, pool: &str, id: usize, rel: &str, data: &[u8]) -> PathBuf {
     p
 }
 
+/// 20,000 bytes that differ from other `byte`s only outside both
+/// fingerprinted blocks.
+#[cfg(unix)]
+fn mid(byte: u8) -> Vec<u8> {
+    let mut data = vec![0; 20_000];
+    data[10_000] = byte;
+    data
+}
+
 const RLIB: &str = "debug/deps/libdep-0123456789abcdef.rlib";
 
 #[test]
@@ -52,7 +61,8 @@ fn dry_run_counts_identical_copies_beyond_the_first_without_changes() {
     assert!(r.errors.is_empty(), "{r:?}");
     assert_eq!((r.compared, r.identical, r.differing), (3, 2, 1));
     assert_eq!(r.identical_bytes, 6000);
-    assert_eq!(r.read_bytes, 2 * (3000 + 3000 + 500));
+    // Three copies of 3000 bytes are fingerprinted whole first.
+    assert_eq!(r.read_bytes, 3 * 3000 + 2 * (3000 + 3000 + 500));
 
     let after = (fs::metadata(&a).unwrap(), fs::metadata(&b).unwrap());
     assert_eq!(before.0.modified().unwrap(), after.0.modified().unwrap());
@@ -143,10 +153,11 @@ fn the_read_limit_stops_the_pass() {
         put(&c, "p", id, RLIB, &[5; 1000]);
     }
     let mut o = opts(&c, true);
-    o.max_read = 2000;
+    // Fingerprints cost 3000, leaving room for one comparison.
+    o.max_read = 5000;
     let r = dedupe::run(&c, &o);
     assert!(r.read_limited, "{r:?}");
-    assert_eq!((r.compared, r.read_bytes), (1, 2000));
+    assert_eq!((r.compared, r.read_bytes), (1, 5000));
 }
 
 #[test]
@@ -347,10 +358,11 @@ fn passes_stopped_by_the_read_limit_resume_at_the_next_pair() {
     let temp = tempfile::tempdir().unwrap();
     let c = cfg(temp.path());
     for id in 0..4 {
-        put(&c, "p", id, RLIB, &[id as u8; 1000]);
+        put(&c, "p", id, RLIB, &mid(id as u8));
     }
     let mut o = opts(&c, false);
-    o.max_read = 2000;
+    // Four fingerprints, then one comparison.
+    o.max_read = 4 * 8192 + 2 * 20_000;
     let known = || buildq::dedupe::Ledger::load(&c.cache_dir).differing.len();
     // Room for one comparison per pass: each pass learns one new pair of
     // the six, never repeating one, until a pass completes.
@@ -374,10 +386,10 @@ fn passes_stopped_by_the_read_limit_resume_at_the_next_pair() {
 fn copies_that_differ_from_the_first_are_compared_with_each_other() {
     let temp = tempfile::tempdir().unwrap();
     let c = cfg(temp.path());
-    put(&c, "p", 0, RLIB, &[b'A'; 4096]);
-    put(&c, "p", 1, RLIB, &[b'B'; 4096]);
-    put(&c, "p", 2, RLIB, &[b'B'; 4096]);
-    put(&c, "p", 3, RLIB, &[b'C'; 4096]);
+    put(&c, "p", 0, RLIB, &mid(b'A'));
+    put(&c, "p", 1, RLIB, &mid(b'B'));
+    put(&c, "p", 2, RLIB, &mid(b'B'));
+    put(&c, "p", 3, RLIB, &mid(b'C'));
     let r = dedupe::run(&c, &opts(&c, true));
     assert!(r.errors.is_empty(), "{r:?}");
     assert_eq!((r.compared, r.identical, r.differing), (5, 1, 4), "{r:?}");
@@ -388,12 +400,12 @@ fn copies_that_differ_from_the_first_are_compared_with_each_other() {
 fn groups_with_several_contents_share_within_each() {
     let temp = tempfile::tempdir().unwrap();
     let c = cfg(temp.path());
-    put(&c, "p", 0, RLIB, &[b'A'; 4096]);
-    put(&c, "p", 1, RLIB, &[b'B'; 4096]);
-    put(&c, "p", 2, RLIB, &[b'B'; 4096]);
+    put(&c, "p", 0, RLIB, &mid(b'A'));
+    put(&c, "p", 1, RLIB, &mid(b'B'));
+    put(&c, "p", 2, RLIB, &mid(b'B'));
     let Some(r) = share(&c) else { return };
     assert_eq!((r.shared, r.differing), (1, 2), "{r:?}");
-    assert_eq!(buildq::gc::scan(&c, true).pools[0].shared, 4096);
+    assert_eq!(buildq::gc::scan(&c, true).pools[0].shared, 20_000);
     // Nothing is left to compare on the next pass.
     let r = share(&c).unwrap();
     assert_eq!((r.compared, r.already_shared), (0, 1), "{r:?}");
@@ -991,6 +1003,94 @@ fn a_replaced_alias_does_not_keep_a_pruned_copy_alive() {
         // longer proven: usage counted it in full, and so does pruning it.
         assert_eq!(r.freed, 10_010, "dry_run={dry_run} {r:?}");
     }
+}
+
+/// `n` copies of one path and length; the first `same` are identical and the
+/// rest each differ in the first block.
+fn divergent(c: &Config, n: usize, same: usize) {
+    for i in 0..n {
+        let mut data = vec![9u8; 20_000];
+        let id = if i < same { 0 } else { i };
+        data[..8].copy_from_slice(&(id as u64).to_le_bytes());
+        put(c, "p", i, RLIB, &data);
+    }
+}
+
+#[test]
+fn copies_that_differ_in_the_first_block_are_not_compared_pairwise() {
+    for n in [8, 32, 128] {
+        let temp = tempfile::tempdir().unwrap();
+        let c = cfg(temp.path());
+        divergent(&c, n, 0);
+        let r = dedupe::run(&c, &opts(&c, true));
+        assert!(r.errors.is_empty(), "{r:?}");
+        eprintln!("n={n} compared={} read_bytes={}", r.compared, r.read_bytes);
+        assert_eq!((r.compared, r.identical), (0, 0), "{r:?}");
+        assert_eq!(r.read_bytes, (n * 8192) as u64);
+    }
+}
+
+#[test]
+fn identical_copies_among_divergent_ones_are_still_found() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    divergent(&c, 20, 5);
+    let r = dedupe::run(&c, &opts(&c, true));
+    assert!(r.errors.is_empty(), "{r:?}");
+    assert_eq!((r.compared, r.identical, r.differing), (4, 4, 0), "{r:?}");
+}
+
+#[test]
+fn fingerprints_count_against_the_read_limit() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut c = cfg(temp.path());
+    divergent(&c, 8, 0);
+    c.dedupe_max_read = 8192 * 4;
+    let r = dedupe::run(&c, &opts(&c, true));
+    assert!(r.read_limited && r.read_bytes <= c.dedupe_max_read, "{r:?}");
+}
+
+#[cfg(unix)]
+#[test]
+fn settled_groups_read_nothing_on_the_next_pass() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    divergent(&c, 12, 4);
+    let Some(first) = share(&c) else { return };
+    assert!(first.read_bytes > 0, "{first:?}");
+    let r = share(&c).unwrap();
+    assert_eq!((r.compared, r.read_bytes), (0, 0), "{r:?}");
+}
+
+#[test]
+fn passes_limited_while_fingerprinting_still_cover_every_group() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut c = cfg(temp.path());
+    for g in 0..6 {
+        let rel = format!("debug/deps/libdep{g}-0123456789abcdef.rlib");
+        for id in 0..4 {
+            let mut data = vec![9u8; 20_000];
+            data[0] = id as u8;
+            put(&c, "p", id, &rel, &data);
+        }
+    }
+    // Room for three fingerprints per pass, far fewer than the 24 copies.
+    c.dedupe_max_read = 3 * 8192;
+    let mut passes = 0;
+    loop {
+        let r = dedupe::run(&c, &opts(&c, false));
+        if r.unsupported.is_some() {
+            return;
+        }
+        assert!(r.read_bytes <= c.dedupe_max_read, "{r:?}");
+        passes += 1;
+        assert!(passes <= 12, "no progress: {r:?}");
+        if !r.read_limited {
+            break;
+        }
+    }
+    let prints = buildq::dedupe::Ledger::load(&c.cache_dir).prints.len();
+    assert_eq!(prints, 24);
 }
 
 /// A copy larger than the whole read limit is skipped, not retried forever
