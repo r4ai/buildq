@@ -17,7 +17,6 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::{self, File};
-use std::hash::{DefaultHasher, Hash, Hasher};
 use std::io::{self, Read, Seek, SeekFrom};
 use std::path::{Component, Path, PathBuf};
 
@@ -928,22 +927,19 @@ fn partitions<'a>(
 }
 
 /// Hashes the first and last `FINGERPRINT_BLOCK` bytes; copies of equal
-/// length that differ there cannot be identical.
+/// length that differ there cannot be identical. FNV-1a stays the same
+/// across builds, so fingerprints kept in the ledger stay comparable.
 fn fingerprint(path: &Path, len: u64) -> io::Result<u64> {
     let mut file = File::open(path)?;
-    let mut hasher = DefaultHasher::new();
     let head = len.min(FINGERPRINT_BLOCK);
-    let mut buf = vec![0u8; head as usize];
-    file.read_exact(&mut buf)?;
-    buf.hash(&mut hasher);
     let tail = len.min(2 * FINGERPRINT_BLOCK) - head;
+    let mut buf = vec![0u8; (head + tail) as usize];
+    file.read_exact(&mut buf[..head as usize])?;
     if tail > 0 {
-        buf.resize(tail as usize, 0);
         file.seek(SeekFrom::End(-(tail as i64)))?;
-        file.read_exact(&mut buf)?;
-        buf.hash(&mut hasher);
+        file.read_exact(&mut buf[head as usize..])?;
     }
-    Ok(hasher.finish())
+    Ok(util::fnv64(&buf))
 }
 
 /// Pools by sharing scope: their toolchain, or the pool alone without one.
