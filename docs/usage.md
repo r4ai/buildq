@@ -22,6 +22,7 @@ min_free = "25G"         # Minimum free disk space to preserve on volume (defaul
 # pool_explicit = true   # Also pool explicit --target-dir / CARGO_TARGET_DIR inside the worktree (default: false)
 # pool_fallback = true   # If the pool cannot be opened (Git/toolchain failure), build outside it with a warning instead of failing (default: false; env BUILDQ_POOL_FALLBACK)
 # dedupe = "off"         # Share identical files between members during GC ("auto" | "off", default: "auto")
+# seed_members = true    # Start a new member as a copy-on-write clone of the closest built one (APFS, Btrfs, XFS; experimental; default: false; env BUILDQ_SEED_MEMBERS)
 
 [cargo]
 rustc_wrapper = "none"   # Disable global sccache per job ("none" | "keep" | "/path")

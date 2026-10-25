@@ -144,7 +144,10 @@ fn lease_waits_when_full() {
     let waiting = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let flag = waiting.clone();
     let t = thread::spawn(move || {
-        let pool = Pool { dir: root };
+        let pool = Pool {
+            dir: root,
+            seed: false,
+        };
         let mut owners = |f: &str, _: Option<&str>| owner(f);
         let l = pool
             .lease(

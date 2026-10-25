@@ -65,6 +65,9 @@ pub struct CacheFile {
     /// When the pool cannot be used (Git or toolchain failure), build into
     /// Cargo's own target dir with a warning instead of failing (default false).
     pub pool_fallback: Option<bool>,
+    /// Seed a new member from a copy-on-write clone of the closest built one
+    /// (APFS, Btrfs, XFS; default false).
+    pub seed_members: Option<bool>,
     /// Members per pool (default = slots + 1; minimum = slots).
     pub max_members: Option<usize>,
     /// Upper bound for everything under the pool root, e.g. "60G".
@@ -205,6 +208,7 @@ pub struct Config {
     pub pool: bool,
     pub pool_explicit: bool,
     pub pool_fallback: bool,
+    pub seed_members: bool,
     pub max_members: usize,
     pub budget: u64,
     pub accounting: CacheAccounting,
@@ -337,6 +341,9 @@ impl Config {
                 .unwrap_or(false),
             pool_fallback: env_bool("BUILDQ_POOL_FALLBACK")
                 .or(f.cache.pool_fallback)
+                .unwrap_or(false),
+            seed_members: env_bool("BUILDQ_SEED_MEMBERS")
+                .or(f.cache.seed_members)
                 .unwrap_or(false),
             max_members: f.cache.max_members.unwrap_or(slots + 1).max(slots),
             budget,
