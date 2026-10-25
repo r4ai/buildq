@@ -103,6 +103,7 @@ constraints; `BUILDQ_HELD` prevents queue reentry only.
   - Forwards `SIGTERM` and `SIGHUP` directly to the child process
   - A watchdog process (`buildq __watch`) inherits the slot and pool-member locks
   - If `buildq` dies first (even by `SIGKILL`), the watchdog kills the child's process tree (`kill_tree = true`) or waits for the child to exit (`kill_tree = false`), and only then releases the locks
+  - On `SIGTERM`, `SIGHUP` or `SIGINT` with `kill_tree = true`, buildq freezes and records the child's process tree before forwarding the signal, and once the child exits it kills whatever is left of that tree (plus, for `SIGINT`, orphans in its own process group) before releasing the slot, so a build script orphaned by Cargo's exit cannot keep writing into a member that is free again
 
 ## 2. Shared `target/` Pool
 
