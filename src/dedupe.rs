@@ -17,7 +17,8 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::{self, File};
-use std::io::{self, Read};
+use std::hash::{DefaultHasher, Hash, Hasher};
+use std::io::{self, Read, Seek, SeekFrom};
 use std::path::{Component, Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
@@ -30,6 +31,8 @@ use crate::util::{self, human_bytes, read_json, write_json};
 /// Release member locks at least this often so leases are not starved.
 const BATCH_BYTES: u64 = 1 << 30;
 const BATCH_MS: u128 = 1_000;
+/// Bytes hashed at each end of a copy to tell divergent copies apart.
+const FINGERPRINT_BLOCK: u64 = 4096;
 /// Temporary clones live in the member root until renamed into place.
 const TMP_PREFIX: &str = ".buildq-dedupe-";
 /// Linux shares data in place; macOS replaces the path with a new inode,
@@ -554,6 +557,9 @@ struct Planned {
     inodes: BTreeSet<(Inode, Inode)>,
 }
 
+/// Content fingerprints of the copies in groups of more than two, by path.
+type Fingerprints = BTreeMap<Key, u64>;
+
 /// A member's file identity.
 type Inode = (String, usize, (u64, u64));
 
@@ -653,11 +659,12 @@ fn share_scope(
     report: &mut Report,
 ) {
     let mut planned = Planned::default();
+    let prints = fingerprints(groups, opts, report);
     let mut first = true;
     while !report.stopped() {
         let mut scratch = Report::default();
         let counts = if first { &mut *report } else { &mut scratch };
-        let work = plan(groups, ledger, resume, &mut planned, counts);
+        let work = plan(groups, &prints, ledger, resume, &mut planned, counts);
         first = false;
         if work.is_empty() {
             break;
@@ -684,9 +691,11 @@ fn share_scope(
 /// known to differ from the canonical one is compared with the next copy
 /// that differs too, so groups with several contents share within each.
 /// `planned` holds the pairs this pass already planned, which are not
-/// planned again.
+/// planned again. Copies of a group of more than two are only paired within
+/// the same fingerprint; one without a fingerprint is left out.
 fn plan<'a>(
     groups: &'a BTreeMap<GroupKey, Vec<Candidate>>,
+    prints: &Fingerprints,
     ledger: &Ledger,
     resume: Option<&[(String, usize); 2]>,
     planned: &mut Planned,
@@ -717,7 +726,7 @@ fn plan<'a>(
     let inode = |c: &Candidate| -> Option<Inode> {
         file_id(&c.md).map(|id| (c.pool.clone(), c.member, id))
     };
-    for copies in groups.values().filter(|c| c.len() > 1) {
+    for copies in groups.values().flat_map(|c| partitions(c, prints)) {
         // Keep sharing with the copy an earlier pass chose, if still intact.
         let canonical = copies
             .iter()
@@ -771,6 +780,78 @@ fn plan<'a>(
         work.rotate_left(at);
     }
     work
+}
+
+/// Splits a group by fingerprint into the runs worth comparing. A pair has
+/// nothing to narrow down and keeps its single comparison.
+fn partitions<'a>(copies: &'a [Candidate], prints: &Fingerprints) -> Vec<Vec<&'a Candidate>> {
+    if copies.len() <= 2 {
+        return if copies.len() == 2 {
+            vec![copies.iter().collect()]
+        } else {
+            vec![]
+        };
+    }
+    let mut parts: BTreeMap<u64, Vec<&Candidate>> = BTreeMap::new();
+    for c in copies {
+        if let Some(print) = prints.get(&c.key()) {
+            parts.entry(*print).or_default().push(c);
+        }
+    }
+    parts.into_values().filter(|p| p.len() > 1).collect()
+}
+
+/// Fingerprints every copy of the groups of more than two, charging the
+/// bytes read to the read limit. Hard-linked names of one inode share one.
+fn fingerprints(
+    groups: &BTreeMap<GroupKey, Vec<Candidate>>,
+    opts: &Options,
+    report: &mut Report,
+) -> Fingerprints {
+    let mut prints = Fingerprints::new();
+    let mut by_inode: BTreeMap<Inode, u64> = BTreeMap::new();
+    for c in groups.values().filter(|c| c.len() > 2).flatten() {
+        let id = file_id(&c.md).map(|id| (c.pool.clone(), c.member, id));
+        if let Some(print) = id.as_ref().and_then(|id| by_inode.get(id)) {
+            prints.insert(c.key(), *print);
+            continue;
+        }
+        let cost = c.md.len().min(2 * FINGERPRINT_BLOCK);
+        if report.read_bytes.saturating_add(cost) > opts.max_read {
+            report.read_limited = true;
+            break;
+        }
+        report.read_bytes += cost;
+        match fingerprint(&c.path, c.md.len()) {
+            Ok(print) => {
+                prints.insert(c.key(), print);
+                by_inode.extend(id.map(|id| (id, print)));
+            }
+            Err(e) => report
+                .errors
+                .push(format!("fingerprint {}: {e}", c.path.display())),
+        }
+    }
+    prints
+}
+
+/// Hashes the first and last `FINGERPRINT_BLOCK` bytes; copies of equal
+/// length that differ there cannot be identical.
+fn fingerprint(path: &Path, len: u64) -> io::Result<u64> {
+    let mut file = File::open(path)?;
+    let mut hasher = DefaultHasher::new();
+    let head = len.min(FINGERPRINT_BLOCK);
+    let mut buf = vec![0u8; head as usize];
+    file.read_exact(&mut buf)?;
+    buf.hash(&mut hasher);
+    let tail = len.min(2 * FINGERPRINT_BLOCK) - head;
+    if tail > 0 {
+        buf.resize(tail as usize, 0);
+        file.seek(SeekFrom::End(-(tail as i64)))?;
+        file.read_exact(&mut buf)?;
+        buf.hash(&mut hasher);
+    }
+    Ok(hasher.finish())
 }
 
 /// Pools by sharing scope: their toolchain, or the pool alone without one.
