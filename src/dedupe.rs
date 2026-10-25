@@ -761,7 +761,10 @@ pub fn run_projected(
     };
     ledger.forget(&cfg.cache_dir, excluded);
     let opts = &Options {
-        project: opts.dry_run && can_share(&cfg.cache_dir.join("pools")),
+        // A volume a real pass found unable to share projects nothing.
+        project: opts.dry_run
+            && report.sharing.state != State::Unsupported
+            && can_share(&cfg.cache_dir.join("pools")),
         ..opts.clone()
     };
     // One scope (toolchain) at a time: copies never share across scopes, so
