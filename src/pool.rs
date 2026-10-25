@@ -226,6 +226,8 @@ pub struct Plan {
 
 pub struct Pool {
     pub dir: PathBuf,
+    /// Seed new members from a copy-on-write clone of the closest built one.
+    pub seed: bool,
 }
 
 pub struct Lease {
@@ -235,6 +237,8 @@ pub struct Lease {
     pub meta: MemberMeta,
     pub plan: Plan,
     pub fresh_member: bool,
+    /// The member a new one was cloned from, if seeding succeeded.
+    pub seeded_from: Option<usize>,
     _lock: LockFile,
 }
 
@@ -471,7 +475,50 @@ impl Pool {
         });
         info.last_used_ms = now_ms();
         let _ = write_json(&info_path, &info);
-        Ok(Pool { dir })
+        Ok(Pool { dir, seed: false })
+    }
+
+    pub fn with_seeding(mut self, on: bool) -> Pool {
+        self.seed = on;
+        self
+    }
+
+    /// How well member `id` fits `current`: its score and what it must
+    /// invalidate. Cargo can reuse workspace artifacts across roots,
+    /// including absolute paths baked into code and build-script outputs, so
+    /// a member last built for another root invalidates all local packages
+    /// (also on upgrade from metadata without a known root). Members are
+    /// added from metadata too, so ownership gaps in the manifest cannot keep
+    /// another root's artifacts.
+    fn assess(
+        &self,
+        id: usize,
+        wt: &Worktree,
+        current: &Manifest,
+        graph: &RebuildGraph,
+        owners: &mut dyn FnMut(&str, Option<&str>) -> Option<String>,
+    ) -> (Score, Plan, MemberMeta) {
+        let meta = read_json::<MemberMeta>(&self.meta_path(id)).unwrap_or_default();
+        let manifest = read_manifest(&self.manifest_path(id));
+        let prev = meta.last_worktree.clone();
+        let mut p = plan(&manifest, current, &mut |f| owners(f, prev.as_deref()));
+        if meta.source_root.as_deref() != Some(&wt.key()) {
+            for f in current.keys().chain(manifest.keys()) {
+                if let Some(pkg) = owners(f, prev.as_deref()) {
+                    p.packages.insert(pkg);
+                }
+            }
+            p.packages.extend(graph.members().iter().cloned());
+        }
+        let built = self.dir.join(format!("m{id}")).exists() && !manifest.is_empty();
+        let score = Score {
+            empty: !built,
+            packages: graph.cost(&p.packages),
+            files: p.changed.len(),
+            other_worktree: meta.last_worktree.as_deref() != Some(&wt.key()),
+            stale: u64::MAX - meta.last_used_ms,
+        };
+        (score, p, meta)
     }
 
     pub fn member_ids(&self) -> Vec<usize> {
@@ -508,32 +555,7 @@ impl Pool {
             }
             let mut best: Option<(Score, usize, Plan)> = None;
             for (id, _) in &free {
-                let meta = read_json::<MemberMeta>(&self.meta_path(*id)).unwrap_or_default();
-                let manifest = read_manifest(&self.manifest_path(*id));
-                let prev = meta.last_worktree.clone();
-                let mut p = plan(&manifest, current, &mut |f| owners(f, prev.as_deref()));
-                // Cargo can reuse workspace artifacts across roots, including
-                // absolute paths baked into code and build-script outputs.
-                // Invalidate all local packages before recording the new root,
-                // including on upgrade from metadata without a known root.
-                // Members are added from metadata too, so ownership gaps in
-                // the manifest cannot keep another root's artifacts.
-                if meta.source_root.as_deref() != Some(&wt.key()) {
-                    for f in current.keys().chain(manifest.keys()) {
-                        if let Some(pkg) = owners(f, prev.as_deref()) {
-                            p.packages.insert(pkg);
-                        }
-                    }
-                    p.packages.extend(graph.members().iter().cloned());
-                }
-                let built = self.dir.join(format!("m{id}")).exists() && !manifest.is_empty();
-                let score = Score {
-                    empty: !built,
-                    packages: graph.cost(&p.packages),
-                    files: p.changed.len(),
-                    other_worktree: meta.last_worktree.as_deref() != Some(&wt.key()),
-                    stale: u64::MAX - meta.last_used_ms,
-                };
+                let (score, p, _) = self.assess(*id, wt, current, graph, owners);
                 if best.as_ref().map(|(s, _, _)| score < *s).unwrap_or(true) {
                     best = Some((score, *id, p));
                 }
@@ -541,19 +563,31 @@ impl Pool {
             let chosen = match best {
                 Some((_, id, p)) => {
                     let pos = free.iter().position(|(i, _)| *i == id).unwrap();
-                    Some((id, free.swap_remove(pos).1, p, false))
+                    Some((id, free.swap_remove(pos).1, p, false, None))
                 }
                 None if ids.len() < max_members && may_grow(ids.len()) => {
                     let id = (0..).find(|i| !ids.contains(i)).unwrap();
                     let l = lock::try_lock(&self.lock_path(id))?
                         .ok_or_else(|| io::Error::other("new member lock busy"))?;
                     let p = plan(&Manifest::new(), current, &mut |f| owners(f, None));
-                    Some((id, l, p, true))
+                    // Every member is busy here: the closest built one,
+                    // still being built in, is the seed.
+                    let seed = self
+                        .seed
+                        .then(|| {
+                            ids.iter()
+                                .map(|&i| (self.assess(i, wt, current, graph, owners), i))
+                                .filter(|((s, _, _), _)| !s.empty)
+                                .min_by(|a, b| a.0.0.cmp(&b.0.0))
+                                .map(|((_, p, meta), i)| (i, p, meta.last_used_ms))
+                        })
+                        .flatten();
+                    Some((id, l, p, true, seed))
                 }
                 None => None,
             };
             drop(free);
-            if let Some((id, l, p, fresh)) = chosen {
+            if let Some((id, l, p, fresh, seed)) = chosen {
                 let target_dir = self.dir.join(format!("m{id}"));
                 fs::create_dir_all(&target_dir)?;
                 let meta_path = self.meta_path(id);
@@ -563,9 +597,14 @@ impl Pool {
                     ..Default::default()
                 });
                 // Invalidate before recording the new manifest: a crash in
-                // between only costs a rebuild, never a stale artifact.
+                // between only costs a rebuild, never a stale artifact. A
+                // member being seeded records no files until it is cloned.
                 invalidate(&target_dir, &p.packages);
-                write_manifest(&self.manifest_path(id), current)?;
+                let empty = Manifest::new();
+                write_manifest(
+                    &self.manifest_path(id),
+                    if seed.is_some() { &empty } else { current },
+                )?;
                 meta.id = id;
                 meta.last_used_ms = now_ms();
                 meta.last_worktree = Some(wt.key());
@@ -574,6 +613,17 @@ impl Pool {
                 meta.jobs += 1;
                 write_json(&meta_path, &meta)?;
                 drop(guard);
+                // Cloned outside pool.lock: our member lock keeps others out.
+                let mut p = p;
+                let mut seeded_from = None;
+                if let Some((src, sp, since)) = seed {
+                    if seed_member(&self.dir.join(format!("m{src}")), &target_dir, since) {
+                        invalidate(&target_dir, &sp.packages);
+                        p = sp;
+                        seeded_from = Some(src);
+                    }
+                    write_manifest(&self.manifest_path(id), current)?;
+                }
                 return Ok(Lease {
                     id,
                     target_dir,
@@ -581,6 +631,7 @@ impl Pool {
                     meta,
                     plan: p,
                     fresh_member: fresh,
+                    seeded_from,
                     _lock: l,
                 });
             }
@@ -627,6 +678,107 @@ struct Score {
     stale: u64,
 }
 
+/// Seeds the empty member `dst` with a copy-on-write clone of `src`, which
+/// another job may be building in since `since_ms`. Units it touched since
+/// then may be half written in the clone, so their fingerprints go and Cargo
+/// rebuilds them; so do incremental sessions. What remains matches `src`'s
+/// manifest. False, leaving `dst` empty, where the volume cannot clone.
+pub fn seed_member(src: &Path, dst: &Path, since_ms: u64) -> bool {
+    let Some(name) = dst.file_name() else {
+        return false;
+    };
+    // Not `m<id>`-shaped: member listings must not pick it up.
+    let tmp = dst.with_file_name(format!(".seed-{}", name.to_string_lossy()));
+    let _ = fs::remove_dir_all(&tmp);
+    if clone_tree(src, &tmp).is_err() {
+        let _ = fs::remove_dir_all(&tmp);
+        return false;
+    }
+    let since = std::time::UNIX_EPOCH + Duration::from_millis(since_ms.saturating_sub(2_000));
+    for fp in fingerprint_dirs(&tmp) {
+        if let Some(profile) = fp.parent() {
+            let _ = fs::remove_dir_all(profile.join("incremental"));
+        }
+        for unit in fs::read_dir(&fp).into_iter().flatten().flatten() {
+            if touched_since(&unit.path(), since) {
+                let _ = fs::remove_dir_all(unit.path());
+            }
+        }
+    }
+    if fs::remove_dir(dst).is_err() || fs::rename(&tmp, dst).is_err() {
+        let _ = fs::remove_dir_all(&tmp);
+        let _ = fs::create_dir_all(dst);
+        return false;
+    }
+    true
+}
+
+fn touched_since(dir: &Path, since: std::time::SystemTime) -> bool {
+    fs::read_dir(dir).into_iter().flatten().flatten().any(|e| {
+        e.metadata()
+            .and_then(|m| m.modified())
+            .map_or(true, |t| t >= since)
+    })
+}
+
+/// APFS clones a directory tree in one call, timestamps included.
+#[cfg(target_os = "macos")]
+fn clone_tree(src: &Path, dst: &Path) -> io::Result<()> {
+    use std::os::unix::ffi::OsStrExt;
+    let c = |p: &Path| std::ffi::CString::new(p.as_os_str().as_bytes()).map_err(io::Error::other);
+    let (s, d) = (c(src)?, c(dst)?);
+    // <sys/clonefile.h>; libc does not export them.
+    const CLONE_NOFOLLOW: u32 = 0x0001;
+    const CLONE_NOOWNERCOPY: u32 = 0x0002;
+    let flags = CLONE_NOFOLLOW | CLONE_NOOWNERCOPY;
+    if unsafe { libc::clonefile(s.as_ptr(), d.as_ptr(), flags) } != 0 {
+        return Err(io::Error::last_os_error());
+    }
+    Ok(())
+}
+
+/// Btrfs and XFS clone file by file; mtimes are kept for Cargo's checks.
+/// Files the running build removes meanwhile are skipped.
+#[cfg(target_os = "linux")]
+fn clone_tree(src: &Path, dst: &Path) -> io::Result<()> {
+    use std::os::unix::io::AsRawFd;
+    fs::create_dir(dst)?;
+    for e in fs::read_dir(src)?.flatten() {
+        let (from, to) = (e.path(), dst.join(e.file_name()));
+        let Ok(ft) = e.file_type() else { continue };
+        let gone = |r: io::Result<()>| match r {
+            Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(()),
+            r => r,
+        };
+        if ft.is_dir() {
+            gone(clone_tree(&from, &to))?;
+        } else if ft.is_symlink() {
+            gone(fs::read_link(&from).and_then(|t| std::os::unix::fs::symlink(t, &to)))?;
+        } else if ft.is_file() {
+            gone((|| {
+                let md = e.metadata()?;
+                let s = fs::File::open(&from)?;
+                let d = fs::File::create(&to)?;
+                if unsafe { libc::ioctl(d.as_raw_fd(), libc::FICLONE, s.as_raw_fd()) } != 0 {
+                    return Err(io::Error::last_os_error());
+                }
+                d.set_permissions(md.permissions())?;
+                d.set_times(
+                    fs::FileTimes::new()
+                        .set_modified(md.modified()?)
+                        .set_accessed(md.accessed()?),
+                )
+            })())?;
+        }
+    }
+    Ok(())
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "linux")))]
+fn clone_tree(_src: &Path, _dst: &Path) -> io::Result<()> {
+    Err(io::ErrorKind::Unsupported.into())
+}
+
 /// Touches files in the worktree (sets mtime to now) so cargo's mtime check
 /// sees them as newer than any artifact.
 pub fn touch(root: &Path, files: &[String]) -> usize {
@@ -646,6 +798,49 @@ pub fn touch(root: &Path, files: &[String]) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A clone keeps what the source built before `since` (mtimes intact),
+    /// drops units touched after it and incremental sessions, and leaves the
+    /// destination empty where the volume cannot clone.
+    #[test]
+    fn seeding_drops_units_the_source_may_still_be_writing() {
+        let t = tempfile::tempdir().unwrap();
+        let (src, dst) = (t.path().join("m0"), t.path().join("m1"));
+        let old = std::time::SystemTime::now() - Duration::from_secs(86_400);
+        let put = |rel: &str, aged: bool| {
+            let p = src.join(rel);
+            fs::create_dir_all(p.parent().unwrap()).unwrap();
+            fs::write(&p, rel).unwrap();
+            if aged {
+                let f = fs::File::options().write(true).open(&p).unwrap();
+                f.set_modified(old).unwrap();
+            }
+        };
+        put("debug/deps/libdone-1.rlib", true);
+        put("debug/.fingerprint/done-1/lib-done", true);
+        put("debug/.fingerprint/done-1/invoked.timestamp", true);
+        put("debug/deps/libbusy-2.rlib", false);
+        put("debug/.fingerprint/busy-2/invoked.timestamp", false);
+        put("debug/incremental/busy-2/s-1/query-cache.bin", true);
+        fs::create_dir_all(&dst).unwrap();
+        let since = now_ms() - 3_600_000;
+        if !seed_member(&src, &dst, since) {
+            assert_eq!(fs::read_dir(&dst).unwrap().count(), 0);
+            return;
+        }
+        let kept = dst.join("debug/deps/libdone-1.rlib");
+        assert_eq!(
+            fs::read_to_string(&kept).unwrap(),
+            "debug/deps/libdone-1.rlib"
+        );
+        assert_eq!(fs::metadata(&kept).unwrap().modified().unwrap(), old);
+        assert!(dst.join("debug/.fingerprint/done-1/lib-done").exists());
+        assert!(!dst.join("debug/.fingerprint/busy-2").exists());
+        assert!(!dst.join("debug/incremental").exists());
+        // The source is untouched, and no seeding leftovers remain.
+        assert!(src.join("debug/.fingerprint/busy-2").exists());
+        assert!(!t.path().join(".seed-m1").exists());
+    }
 
     fn m(pairs: &[(&str, &str)]) -> Manifest {
         pairs

@@ -712,7 +712,8 @@ fn pool_ctx(
             last_used_ms: now_ms(),
         },
     )
-    .map_err(|e| format!("pool {}: {e}", dir.display()))?;
+    .map_err(|e| format!("pool {}: {e}", dir.display()))?
+    .with_seeding(cfg.seed_members);
     let manifest = git::manifest(&wt)?;
     let metadata = workspace_metadata(real, parsed);
     let uncovered = metadata
@@ -780,7 +781,12 @@ fn lease_member(cfg: &Config, ctx: &mut PoolCtx) -> Result<Lease, String> {
         )
         .map_err(|e| format!("pool {}: {e}", ctx.pool.dir.display()))?;
     let touched = pool::touch(&ctx.wt.root, &lease.plan.outside);
-    let what = if lease.fresh_member {
+    let what = if let Some(src) = lease.seeded_from {
+        format!(
+            "new member seeded from m{src}, {} package(s) invalidated",
+            lease.plan.packages.len()
+        )
+    } else if lease.fresh_member {
         "new member (full build)".to_string()
     } else if lease.plan.packages.is_empty() {
         "no source differences".to_string()
