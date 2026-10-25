@@ -195,6 +195,8 @@ mod nix {
         pub tree: Vec<i32>,
         /// Ctrl+C (or SIGQUIT) reached the whole job, not just buildq.
         pub interrupted: bool,
+        /// Orphans already in our process group when the child started.
+        pub foreign: Vec<i32>,
     }
 
     impl Tracker {
@@ -246,9 +248,14 @@ mod nix {
     }
 
     fn track(child: i32, fd: i32) -> Tracked {
-        let mut tracked = Tracked::default();
+        let mut tracked = Tracked {
+            foreign: group_orphans(),
+            ..Tracked::default()
+        };
         let tree = &mut tracked.tree;
-        while let Some(sig) = next_signal(fd, if tree.is_empty() { -1 } else { 50 }) {
+        // A child that survives the signal (a REPL after Ctrl+C) may run on
+        // for long: follow its forks, but at a modest rate.
+        while let Some(sig) = next_signal(fd, if tree.is_empty() { -1 } else { 250 }) {
             let Some(sig) = sig else {
                 extend(tree, false);
                 continue;
@@ -529,7 +536,12 @@ impl Drop for ChildGuard {
         if let Some(t) = self.tracker.take() {
             let mut tracked = t.finish();
             if tracked.interrupted {
-                tracked.tree.extend(nix::group_orphans());
+                let foreign = tracked.foreign;
+                tracked.tree.extend(
+                    nix::group_orphans()
+                        .into_iter()
+                        .filter(|pid| !foreign.contains(pid)),
+                );
             }
             let left: Vec<i32> = tracked
                 .tree
