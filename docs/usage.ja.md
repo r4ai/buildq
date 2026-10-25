@@ -153,7 +153,8 @@ backend = "mbx"
 `"keep"` の場合でも、環境変数に `RUSTC_WRAPPER` が設定されていれば mbx はキャッシュしない。
 
 PATH 上の Cargo 自体が mbx を実行する場合（mbx の Cargo shim、ラッパースクリプト、それらを指す mise の shim）、mbx は自分自身をラップしてしまう。
-このとき buildq は `rustup which cargo` が返すツールチェーンの cargo を mbx に渡し、その旨を表示する。
+buildq 自身の Cargo の調査も mbx を経由し、mbx が worktree に管理用の `target` ビューを作ってしまう。
+そのため buildq は、ジョブと調査の両方に `rustup which cargo` が返すツールチェーンの cargo を使い、その旨を表示する。
 rustup がない場合や、`cargo.real` / `BUILDQ_REAL_CARGO` がそのような Cargo を明示している場合は、これらの設定名を示してジョブを止める。
 
 mbx は、ストア、非共有のインクリメンタル状態、コレクタを独自に持ち、これらは `cache.budget` の対象外である。

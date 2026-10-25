@@ -161,9 +161,11 @@ Keep `rustc_wrapper = "none"` (the default) or `"keep"`; with `"keep"`, a
 
 A Cargo found on `PATH` that runs mbx itself (mbx's Cargo shim, a wrapper
 script, or a mise shim whose cargo is one of those) would make mbx wrap itself.
-buildq then hands mbx the active toolchain's cargo from `rustup which cargo`
-and says so. Without rustup, or when `cargo.real` / `BUILDQ_REAL_CARGO` names
-such a Cargo explicitly, the job stops and names those settings.
+It would also route buildq's own Cargo probes through mbx, which then creates
+its managed `target` view in the worktree. buildq therefore uses the active
+toolchain's cargo from `rustup which cargo` for the job and its probes, and says
+so. Without rustup, or when `cargo.real` / `BUILDQ_REAL_CARGO` names such a
+Cargo explicitly, the job stops and names those settings.
 
 mbx keeps its own store, private incremental state, and collector, outside
 `cache.budget`. Budget the volume for both, or set `MBX_GC_AUTO` and mbx's

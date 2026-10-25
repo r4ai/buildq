@@ -195,11 +195,35 @@ pub fn run_command(cfg: &Config, opts: &Opts, argv: &[String]) -> Result<i32, St
 }
 
 fn real_cargo(cfg: &Config) -> Result<PathBuf, String> {
-    cargo::find_real_cargo(
+    let found = cargo::find_real_cargo(
         cfg.real_cargo.as_deref(),
         crate::shim::shim_dir().as_deref(),
     )
-    .ok_or_else(|| "cannot find the real cargo on PATH (set BUILDQ_REAL_CARGO)".to_string())
+    .ok_or_else(|| "cannot find the real cargo on PATH (set BUILDQ_REAL_CARGO)".to_string())?;
+    if cfg.backend == CargoBackend::Mbx && cfg.real_cargo.is_none() {
+        return Ok(unwrapped_cargo(found, &toolchain_cargo));
+    }
+    Ok(found)
+}
+
+/// A cargo found on PATH that runs mbx (mbx's Cargo shim, a mise wrapper)
+/// would make mbx wrap itself, and would route buildq's own probes through
+/// mbx: the toolchain's cargo stands in when `toolchain_cargo` finds one.
+fn unwrapped_cargo(found: PathBuf, toolchain_cargo: &dyn Fn() -> Option<PathBuf>) -> PathBuf {
+    if !runs_mbx(&found) {
+        return found;
+    }
+    match toolchain_cargo().filter(|c| !runs_mbx(c)) {
+        Some(cargo) => {
+            note(&format!(
+                "cargo.backend = \"mbx\": {} runs mbx, so buildq uses the toolchain's cargo {} (set cargo.real or BUILDQ_REAL_CARGO to choose another)",
+                found.display(),
+                cargo.display()
+            ));
+            cargo
+        }
+        None => found,
+    }
 }
 
 /// What a queued cargo job runs. Passthrough commands, nested cargo and
@@ -207,13 +231,9 @@ fn real_cargo(cfg: &Config) -> Result<PathBuf, String> {
 #[derive(Debug, PartialEq, Eq)]
 enum Launcher {
     Cargo,
-    /// mbx wraps `cargo` (its `CARGO`) and the compilers. buildq keeps
+    /// mbx wraps the real cargo (`CARGO`) and its compilers. buildq keeps
     /// owning target placement, so mbx's views and check lanes stay off.
-    /// `cargo` is the real cargo unless that one runs mbx itself.
-    Mbx {
-        mbx: PathBuf,
-        cargo: PathBuf,
-    },
+    Mbx(PathBuf),
 }
 
 impl Launcher {
@@ -237,18 +257,12 @@ impl Launcher {
             )
             .ok_or("cargo.backend = \"mbx\": cannot find mbx on PATH (set cargo.mbx)")?,
         };
-        mbx_launcher(
-            mbx,
-            real,
-            &cfg.wrapper,
-            cfg.real_cargo.is_some(),
-            &toolchain_cargo,
-        )
+        mbx_launcher(mbx, real, &cfg.wrapper)
     }
 
     /// The job's command with `args`, whose aliases are expanded.
     fn command(&self, real: &Path, args: &[String]) -> Command {
-        let Launcher::Mbx { mbx, cargo } = self else {
+        let Launcher::Mbx(mbx) = self else {
             let mut c = Command::new(real);
             c.args(args);
             return c;
@@ -257,13 +271,13 @@ impl Launcher {
             note(
                 "cargo.backend = \"mbx\": mbx cannot forward this command line to Cargo; running cargo without mbx",
             );
-            let mut c = Command::new(cargo);
+            let mut c = Command::new(real);
             c.args(args);
             return c;
         };
         let mut c = Command::new(mbx);
         c.args(args)
-            .env("CARGO", cargo)
+            .env("CARGO", real)
             .env("MBX_TARGET_VIEWS", "0")
             .env("MBX_TARGET_LANES", "0");
         c
@@ -334,16 +348,8 @@ fn mbx_args(args: &[String]) -> Option<Vec<String>> {
 }
 
 /// Refuses chains that would loop (mbx -> buildq, cargo -> mbx) or silently
-/// stop caching (an explicit rustc wrapper, which mbx defers to). A cargo
-/// found on PATH that runs mbx (mbx's Cargo shim, a mise wrapper) is replaced
-/// by the toolchain's own cargo when `toolchain_cargo` finds one.
-fn mbx_launcher(
-    mbx: PathBuf,
-    real: &Path,
-    wrapper: &WrapperMode,
-    configured: bool,
-    toolchain_cargo: &dyn Fn() -> Option<PathBuf>,
-) -> Result<Launcher, String> {
+/// stop caching (an explicit rustc wrapper, which mbx defers to).
+fn mbx_launcher(mbx: PathBuf, real: &Path, wrapper: &WrapperMode) -> Result<Launcher, String> {
     if let WrapperMode::Path(p) = wrapper {
         return Err(format!(
             "cargo.rustc_wrapper = {p:?} conflicts with cargo.backend = \"mbx\": mbx sets RUSTC_WRAPPER itself and would not cache; use \"none\" or \"keep\""
@@ -359,30 +365,13 @@ fn mbx_launcher(
             mbx.display()
         ));
     }
-    if !runs_mbx(real) {
-        return Ok(Launcher::Mbx {
-            mbx,
-            cargo: real.to_path_buf(),
-        });
-    }
-    let fix = "set cargo.real or BUILDQ_REAL_CARGO to the toolchain's cargo";
-    if configured {
-        return Err(format!("the real cargo {} runs mbx; {fix}", real.display()));
-    }
-    match toolchain_cargo().filter(|c| !runs_mbx(c)) {
-        Some(cargo) => {
-            note(&format!(
-                "cargo.backend = \"mbx\": {} runs mbx, so mbx gets the toolchain's cargo {} ({fix} to choose another)",
-                real.display(),
-                cargo.display()
-            ));
-            Ok(Launcher::Mbx { mbx, cargo })
-        }
-        None => Err(format!(
-            "the real cargo {} runs mbx, which would wrap itself; {fix}",
+    if runs_mbx(real) {
+        return Err(format!(
+            "the real cargo {} runs mbx, which would wrap itself; set cargo.real or BUILDQ_REAL_CARGO to the toolchain's cargo",
             real.display()
-        )),
+        ));
     }
+    Ok(Launcher::Mbx(mbx))
 }
 
 /// Whether running `cargo` ends up in mbx: mbx itself or a link to it, a
@@ -988,7 +977,7 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     // mbx parses the subcommand itself, so it gets the expanded alias.
     let source = match launcher {
         Launcher::Cargo => args.to_vec(),
-        Launcher::Mbx { .. } => with_toolchain(&parsed, parsed.args.clone()),
+        Launcher::Mbx(_) => with_toolchain(&parsed, parsed.args.clone()),
     };
     let (cmd_args, target) = cargo_args(&source, &parsed, lease.as_ref(), ctx.as_ref());
     if let (Some(l), Some(c)) = (&lease, &ctx) {
@@ -1922,7 +1911,7 @@ mod tests {
 
     #[test]
     fn mbx_launcher_refuses_loops_and_explicit_wrappers() {
-        use super::{Launcher, WrapperMode, mbx_launcher};
+        use super::{Launcher, WrapperMode, mbx_launcher, unwrapped_cargo};
         let t = tempfile::tempdir().unwrap();
         let bin = t.path().join("bin");
         std::fs::create_dir_all(&bin).unwrap();
@@ -1930,16 +1919,10 @@ mod tests {
         let cargo = bin.join("cargo");
         std::fs::write(&mbx, "").unwrap();
         std::fs::write(&cargo, "").unwrap();
-        let none = || None;
-        let launch = |real: &Path, wrapper: &WrapperMode| {
-            mbx_launcher(mbx.clone(), real, wrapper, false, &none)
-        };
+        let launch = |real: &Path, wrapper: &WrapperMode| mbx_launcher(mbx.clone(), real, wrapper);
         assert_eq!(
             launch(&cargo, &WrapperMode::Disable),
-            Ok(Launcher::Mbx {
-                mbx: mbx.clone(),
-                cargo: cargo.clone()
-            })
+            Ok(Launcher::Mbx(mbx.clone()))
         );
         assert!(launch(&cargo, &WrapperMode::Keep).is_ok());
         let err = launch(&cargo, &WrapperMode::Path("sccache".into()));
@@ -1956,42 +1939,24 @@ mod tests {
             std::os::unix::fs::symlink(&mbx, &linked).unwrap();
             assert!(launch(&linked, &WrapperMode::Disable).is_err());
         }
-        // A wrapper script that runs mbx loops too, unless the toolchain's
-        // cargo can stand in; an explicitly configured cargo is not replaced.
+        // So does a wrapper script that runs mbx; the toolchain's cargo
+        // stands in for one found on PATH, when there is one.
         let script = t.path().join("wrapped").join("cargo");
         std::fs::create_dir_all(script.parent().unwrap()).unwrap();
-        std::fs::write(&script, "#!/bin/sh\nexec mbx cargo \"$@\"\n").unwrap();
+        std::fs::write(&script, "#!/bin/sh\nexec mbx \"$@\"\n").unwrap();
         assert!(
             launch(&script, &WrapperMode::Disable)
                 .unwrap_err()
                 .contains("would wrap itself")
         );
-        let toolchain = || Some(cargo.clone());
         assert_eq!(
-            mbx_launcher(
-                mbx.clone(),
-                &script,
-                &WrapperMode::Disable,
-                false,
-                &toolchain
-            ),
-            Ok(Launcher::Mbx {
-                mbx: mbx.clone(),
-                cargo: cargo.clone()
-            })
+            unwrapped_cargo(script.clone(), &|| Some(cargo.clone())),
+            cargo
         );
-        assert!(
-            mbx_launcher(
-                mbx.clone(),
-                &script,
-                &WrapperMode::Disable,
-                true,
-                &toolchain
-            )
-            .is_err()
-        );
+        assert_eq!(unwrapped_cargo(script.clone(), &|| None), script);
+        assert_eq!(unwrapped_cargo(cargo.clone(), &|| Some(mbx.clone())), cargo);
         // Scripts that merely mention a longer name are not mbx.
-        std::fs::write(&script, "#!/bin/sh\nexec mbxtool cargo \"$@\"\n").unwrap();
+        std::fs::write(&script, "#!/bin/sh\nexec mbxtool \"$@\"\n").unwrap();
         assert!(launch(&script, &WrapperMode::Disable).is_ok());
         // mbx inside a buildq shim dir would re-enter buildq.
         std::fs::write(bin.join(crate::shim::MARKER), "").unwrap();
