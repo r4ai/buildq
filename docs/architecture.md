@@ -182,6 +182,16 @@ Before starting a build on member `m<i>`:
 For every package in `m<i>`, either its fingerprints are absent, or its artifacts reflect the exact content in `m<i>.manifest`.
 Because invalidation happens *before* Cargo runs, this holds across partial builds (`-p foo`), failed builds, and killed builds.
 
+With `[cache] seed_members = true` (experimental), a member created because every
+other one is busy starts as a copy-on-write clone of the closest built member
+(APFS `clonefile`; Btrfs/XFS `FICLONE`, mtimes kept) instead of empty. That
+source may still be building, so the clone drops `incremental/` and every unit
+fingerprint touched since the source's current job began; what remains matches
+the source's manifest, and the usual diff then invalidates what differs. The
+new member records an empty manifest until the clone is in place, so a crash
+mid-seed only costs a rebuild. Clones are counted at full size by the budget
+until deduplication proves them shared; volumes without clones start empty.
+
 A source-root change invalidates every local package so embedded paths such as
 `CARGO_MANIFEST_DIR` refer to the current worktree. Registry/git dependencies
 stay shared; same-root builds retain normal incremental reuse.
