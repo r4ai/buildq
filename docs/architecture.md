@@ -46,7 +46,8 @@ $BUILDQ_DIR/<class>/
 
 ### Scheduling & Priority
 
-- Waiters poll every `250 ms` (configurable via `poll_ms`)
+- Releasing a slot (and handing one out) bumps a per-class change counter; waiters re-read only that counter every few milliseconds and rescan the queue once enough changes happened for them to be within reach of a slot
+- A fallback scan every `250 ms` (`poll_ms`; up to eight times as long further back in the queue) notices a holder that was killed without releasing normally
 - Under `queue.lock`, a waiter lists live tickets grouped by the worktree cap, then sorted by `(priority DESC, seq ASC)`
 - Waiter claims a free slot only when its rank is below the number of free slots
 - Strict FIFO ordering within the same group and priority

@@ -7,6 +7,8 @@
 //! seq                   monotonically increasing ticket counter
 //! slot-<i>.lock         held by the job running in slot i (for its whole life)
 //! slot-<i>.json         who holds slot i (written by the holder)
+//! gen                   change counter, bumped under queue.lock when a slot
+//!                       frees or a ticket leaves; waiters watch it cheaply
 //! tickets/t-<seq>-<pid>.lock / .json   one per waiting job, locked by the waiter
 //! ```
 //!
@@ -19,12 +21,17 @@
 //! takes a slot, then ranking is recomputed with the new holder. This keeps
 //! FIFO within equal standing even when multiple slots become free at once.
 //! If every waiter is at the cap, the head still runs: idle slots are usable.
+//!
+//! Between full scans a waiter only re-reads `gen`, every few milliseconds,
+//! and rescans once enough changes happened for it to be within reach of a
+//! slot. A fallback scan every `poll` (longer far back in the queue) still
+//! notices a killed holder, which frees its slot without bumping `gen`.
 
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
 
@@ -98,13 +105,17 @@ pub struct ClassQueue {
     pub max_per_worktree: usize,
 }
 
+/// How often a waiter re-reads the change counter between full scans.
+const WATCH: Duration = Duration::from_millis(5);
+
 /// Holding this means holding a slot. Dropping it frees the slot.
 #[derive(Debug)]
 pub struct SlotGuard {
-    _lock: LockFile,
+    lock: Option<LockFile>,
     pub slot: usize,
     pub info: JobInfo,
     info_path: PathBuf,
+    queue_dir: PathBuf,
     pub waited_ms: u64,
 }
 
@@ -118,7 +129,25 @@ impl SlotGuard {
 impl Drop for SlotGuard {
     fn drop(&mut self) {
         let _ = fs::remove_file(&self.info_path);
+        // Free the slot before waking waiters, or they find it still held.
+        self.lock = None;
+        if let Ok(_g) = lock::lock(&self.queue_dir.join("queue.lock")) {
+            bump(&self.queue_dir);
+        }
     }
+}
+
+/// The change counter; 0 before the first change.
+fn generation(dir: &Path) -> u64 {
+    fs::read_to_string(dir.join("gen"))
+        .ok()
+        .and_then(|s| s.trim().parse().ok())
+        .unwrap_or(0)
+}
+
+/// Records a change waiters may care about. Callers hold `queue.lock`.
+fn bump(dir: &Path) {
+    let _ = fs::write(dir.join("gen"), (generation(dir) + 1).to_string());
 }
 
 struct Ticket {
@@ -259,6 +288,7 @@ impl ClassQueue {
         };
 
         let mut last: Option<WaitState> = None;
+        let (mut seen, mut rank);
         loop {
             {
                 let _g = lock::lock(&queue_lock)?;
@@ -287,12 +317,15 @@ impl ClassQueue {
                         let _ = fs::remove_file(&info_path);
                     }
                     drop(ticket);
+                    // The others move up a place.
+                    bump(&self.dir);
                     return Ok(SlotGuard {
-                        _lock: l,
+                        lock: Some(l),
                         slot,
                         waited_ms: info.started_ms - info.enqueued_ms,
                         info,
                         info_path,
+                        queue_dir: self.dir.clone(),
                     });
                 }
                 let state = WaitState {
@@ -304,8 +337,28 @@ impl ClassQueue {
                     on_wait(state);
                     last = Some(state);
                 }
+                seen = generation(&self.dir);
+                rank = position;
             }
-            thread::sleep(self.poll);
+            self.wait_for_change(seen, rank);
+        }
+    }
+
+    /// Sleeps until enough changes happened for a waiter at `rank` to reach
+    /// a slot (each change frees a slot or moves waiters up by one at most),
+    /// or until the fallback scan is due: every `poll` near the head, where a
+    /// killed holder's slot must be noticed, and up to eight times as long
+    /// further back, where changes will wake the waiter first.
+    fn wait_for_change(&self, seen: u64, rank: usize) {
+        let back = (1 + rank / self.slots).min(8) as u32;
+        let until = Instant::now() + self.poll * back;
+        let tick = WATCH.min(self.poll);
+        loop {
+            thread::sleep(tick);
+            let changes = generation(&self.dir).saturating_sub(seen);
+            if Instant::now() >= until || (changes > 0 && changes as usize + self.slots > rank) {
+                return;
+            }
         }
     }
 
