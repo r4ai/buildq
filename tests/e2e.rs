@@ -142,6 +142,74 @@ fn oversized_builds_warn_before_gc_discards_their_reusable_artifacts() {
     }
 }
 
+/// A warm member that grows within the size TTL is measured again after the
+/// build: it warns, and the recent-and-under-budget GC shortcut does not skip it.
+#[test]
+fn warm_growth_within_the_size_ttl_warns_and_is_collected() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(temp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='growing-app'\nversion='0.1.0'\nedition='2021'\n",
+            ),
+            ("src/main.rs", "fn main() {}\n"),
+            (
+                "build.rs",
+                r#"fn main() {
+            let mb: usize = std::env::var("GROW_MB").unwrap().parse().unwrap();
+            std::fs::write(std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("large"), vec![1u8; mb*1024*1024]).unwrap();
+            println!("cargo:rerun-if-env-changed=GROW_MB");
+        }"#,
+            ),
+        ],
+    );
+    let ws = root.join("ws");
+    git(&ws, &["init", "-q"]);
+    git(&ws, &["add", "."]);
+    git(&ws, &["commit", "-qm", "fixture"]);
+    fs::create_dir_all(root.join("q")).unwrap();
+    fs::write(
+        root.join("q/config.toml"),
+        "slots=1\n[cargo]\nmirror_bins=false\n[cache]\nbudget='12M'\nmin_free='0'\ndedupe='off'\n",
+    )
+    .unwrap();
+    let gc = || {
+        let out = Command::new(BQ)
+            .args(["gc", "--auto", "--json"])
+            .env("BUILDQ_DIR", root.join("q"))
+            .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+            .env("BUILDQ_CACHE", root.join("cache"))
+            .output()
+            .unwrap();
+        assert!(out.status.success());
+        serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()
+    };
+    let build = |mb: &str| {
+        let out = w
+            .command(&ws, &["build", "--offline"])
+            .env("GROW_MB", mb)
+            .output()
+            .unwrap();
+        let err = String::from_utf8_lossy(&out.stderr).to_string();
+        assert!(out.status.success(), "{err}");
+        err
+    };
+    let err = build("1");
+    assert!(!err.contains("exceeds the entire cache budget"), "{err}");
+    // A recent GC stamp within budget enables the preflight shortcut.
+    let report = gc();
+    assert_ne!(report["after"], 0, "{report}");
+
+    let err = build("16");
+    assert!(err.contains("exceeds the entire cache budget"), "{err}");
+    let report = gc();
+    assert!(report["skipped"].is_null(), "{report}");
+    assert_eq!(report["after"], 0, "{report}");
+}
+
 #[test]
 fn copied_runs_honor_cargo_runner_config_environment_and_cli() {
     let temp = tempfile::tempdir().unwrap();
