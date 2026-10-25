@@ -47,6 +47,46 @@ pub fn git(dir: &Path) -> Command {
     c
 }
 
+/// Git for the content manifest. The Git LFS clean filter writes into
+/// `.git/lfs/tmp`, which a sandbox may mount read-only; without it a modified
+/// LFS file is hashed by its raw content, which still tells edits apart.
+fn manifest_git(dir: &Path) -> Command {
+    let mut c = git(dir);
+    c.args([
+        "-c",
+        "filter.lfs.clean=",
+        "-c",
+        "filter.lfs.process=",
+        "-c",
+        "filter.lfs.required=false",
+    ]);
+    c
+}
+
+/// Stdout of a successful run, else what failed with Git's last error line.
+fn checked(mut c: Command, what: &str) -> Result<String, String> {
+    let dir = c
+        .get_current_dir()
+        .map(Path::to_path_buf)
+        .unwrap_or_default();
+    let fail = |e: &str| format!("git {what} failed in {}: {e}", dir.display());
+    let out = c.output().map_err(|e| fail(&e.to_string()))?;
+    if !out.status.success() {
+        return Err(fail(last_line(&out.stderr)));
+    }
+    Ok(String::from_utf8_lossy(&out.stdout).to_string())
+}
+
+fn last_line(stderr: &[u8]) -> &str {
+    std::str::from_utf8(stderr)
+        .unwrap_or("")
+        .lines()
+        .rev()
+        .find(|l| !l.trim().is_empty())
+        .unwrap_or("")
+        .trim()
+}
+
 fn output(mut c: Command) -> Option<String> {
     let out = c.stderr(Stdio::null()).output().ok()?;
     out.status
@@ -141,23 +181,23 @@ pub fn parse_porcelain_z(s: &str) -> Vec<String> {
 /// Content ids of every file in the working tree: index blob ids for clean
 /// files, freshly hashed ids for modified and untracked ones (ignored files
 /// are not included). Initialized submodules contribute their own files, so a
-/// path dependency inside one is compared by content like any other package;
-/// None if one of them cannot be read.
-pub fn manifest(wt: &Worktree) -> Option<crate::pool::Manifest> {
+/// path dependency inside one is compared by content like any other package.
+/// Fails with Git's reason if one of them cannot be read.
+pub fn manifest(wt: &Worktree) -> Result<crate::pool::Manifest, String> {
     manifest_in(&wt.root)
 }
 
-fn manifest_in(root: &Path) -> Option<crate::pool::Manifest> {
+fn manifest_in(root: &Path) -> Result<crate::pool::Manifest, String> {
     // ls-files and status are independent: run them side by side.
     let status_root = root.to_path_buf();
     let status = std::thread::spawn(move || {
-        let mut c = git(&status_root);
+        let mut c = manifest_git(&status_root);
         c.args(["status", "--porcelain", "-z", "--untracked-files=all"]);
-        output(c).map(|s| parse_porcelain_z(&s))
+        checked(c, "status").map(|s| parse_porcelain_z(&s))
     });
     let mut c = git(root);
     c.args(["ls-files", "-s", "-z", "--debug"]);
-    let listing = output(c)?;
+    let listing = checked(c, "ls-files")?;
     let mut m = crate::pool::Manifest::new();
     let mut submodules = Vec::new();
     // Git's stat cache compares whole seconds, so a same-size edit that keeps
@@ -179,7 +219,9 @@ fn manifest_in(root: &Path) -> Option<crate::pool::Manifest> {
             m.insert(path.to_string(), blob);
         }
     }
-    let dirty = status.join().ok()??;
+    let dirty = status
+        .join()
+        .map_err(|_| "git status: thread panicked".to_string())??;
     for p in dirty {
         if root.join(&p).is_file() {
             stale.insert(p);
@@ -201,7 +243,7 @@ fn manifest_in(root: &Path) -> Option<crate::pool::Manifest> {
             m.insert(format!("{sub}/{p}"), id);
         }
     }
-    Some(m)
+    Ok(m)
 }
 
 /// The stat data the index caches for an entry, as `ls-files --debug` prints
@@ -290,37 +332,40 @@ fn stat_differs(_path: &Path, _cached: &CachedStat) -> bool {
 }
 
 /// `git hash-object` for several worktree files at once.
-pub fn hash_objects(wt: &Worktree, paths: &[String]) -> Option<Vec<(String, String)>> {
+pub fn hash_objects(wt: &Worktree, paths: &[String]) -> Result<Vec<(String, String)>, String> {
     hash_objects_in(&wt.root, paths)
 }
 
-fn hash_objects_in(root: &Path, paths: &[String]) -> Option<Vec<(String, String)>> {
+fn hash_objects_in(root: &Path, paths: &[String]) -> Result<Vec<(String, String)>, String> {
     if paths.is_empty() {
-        return Some(Vec::new());
+        return Ok(Vec::new());
     }
-    let mut child = git(root)
+    let fail =
+        |e: &dyn std::fmt::Display| format!("git hash-object failed in {}: {e}", root.display());
+    let mut child = manifest_git(root)
         .args(["hash-object", "--stdin-paths"])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .stderr(Stdio::null())
+        .stderr(Stdio::piped())
         .spawn()
-        .ok()?;
+        .map_err(|e| fail(&e))?;
     let input = paths.join("\n") + "\n";
-    let mut stdin = child.stdin.take()?;
+    let mut stdin = child.stdin.take().ok_or_else(|| fail(&"no stdin"))?;
     let writer = std::thread::spawn(move || {
         use std::io::Write;
         let _ = stdin.write_all(input.as_bytes());
     });
-    let out = child.wait_with_output().ok()?;
+    let out = child.wait_with_output().map_err(|e| fail(&e))?;
     let _ = writer.join();
-    let ids = String::from_utf8_lossy(&out.stdout);
-    Some(
-        paths
-            .iter()
-            .cloned()
-            .zip(ids.lines().map(|l| l.trim().to_string()))
-            .collect(),
-    )
+    let ids: Vec<String> = String::from_utf8_lossy(&out.stdout)
+        .lines()
+        .map(|l| l.trim().to_string())
+        .collect();
+    // A partial answer would leave some files at their stale index ids.
+    if !out.status.success() || ids.len() != paths.len() {
+        return Err(fail(&last_line(&out.stderr)));
+    }
+    Ok(paths.iter().cloned().zip(ids).collect())
 }
 
 /// Commits the working tree (tracked + untracked, honouring .gitignore) as a

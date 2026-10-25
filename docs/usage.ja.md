@@ -20,6 +20,7 @@ max_members = 3          # 最大 target/ 数 (最小: slots、デフォルト: 
 budget = "45G"           # BUILDQ_CACHE 全体の最大ディスク使用量 (デフォルト: "60G")
 min_free = "25G"         # ドライブ上に最低限残す空き容量 (デフォルト: "20G")
 # pool_explicit = true   # worktree 内を指す --target-dir / CARGO_TARGET_DIR もプールする (デフォルト: false)
+# pool_fallback = true   # プールを開けない (Git やツールチェーンの失敗) とき、失敗せず警告してプール外でビルドする (デフォルト: false、環境変数 BUILDQ_POOL_FALLBACK)
 # dedupe = "off"         # GC でメンバー間の同一ファイルを共有する ("auto" | "off"、デフォルト: "auto")
 
 [cargo]

@@ -20,6 +20,7 @@ max_members = 3          # Max target/ dirs per repo+toolchain (minimum: slots; 
 budget = "45G"           # Max disk usage under BUILDQ_CACHE (default: "60G")
 min_free = "25G"         # Minimum free disk space to preserve on volume (default: "20G")
 # pool_explicit = true   # Also pool explicit --target-dir / CARGO_TARGET_DIR inside the worktree (default: false)
+# pool_fallback = true   # If the pool cannot be opened (Git/toolchain failure), build outside it with a warning instead of failing (default: false; env BUILDQ_POOL_FALLBACK)
 # dedupe = "off"         # Share identical files between members during GC ("auto" | "off", default: "auto")
 
 [cargo]
