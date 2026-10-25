@@ -101,3 +101,36 @@ fn status_reports_holder() {
     drop(g);
     assert_eq!(q.status().busy(), 0);
 }
+
+/// A released slot wakes the waiter at once instead of after the poll
+/// interval, which stays the fallback for holders that die without telling.
+#[test]
+fn a_release_wakes_the_next_waiter_before_the_poll_interval() {
+    let dir = tempfile::tempdir().unwrap();
+    let poll = Duration::from_secs(5);
+    let q = ClassQueue::new(dir.path(), "build", 1, poll);
+    let held = q.acquire(info("first", 0), &mut |_| {}).unwrap();
+    let root = dir.path().to_path_buf();
+    let (tx, rx) = std::sync::mpsc::channel();
+    let waiter = thread::spawn(move || {
+        let q = ClassQueue::new(&root, "build", 1, poll);
+        let mut queued = Some(tx);
+        let g = q
+            .acquire(info("second", 0), &mut |_| {
+                if let Some(tx) = queued.take() {
+                    tx.send(()).unwrap();
+                }
+            })
+            .unwrap();
+        drop(g);
+    });
+    rx.recv().unwrap();
+    let released = std::time::Instant::now();
+    drop(held);
+    waiter.join().unwrap();
+    assert!(
+        released.elapsed() < Duration::from_secs(1),
+        "woke after {:?}",
+        released.elapsed()
+    );
+}
