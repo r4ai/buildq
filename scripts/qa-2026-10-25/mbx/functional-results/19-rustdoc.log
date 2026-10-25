@@ -1,0 +1,12 @@
+buildq: target repo-d7cb3eaa/m0 (no source differences)
+    Checking qa-lib v0.1.0 (/workspace/qa-mbx-state/functional/repo/lib)
+ Documenting qa-lib v0.1.0 (/workspace/qa-mbx-state/functional/repo/lib)
+ Documenting qa-app v0.1.0 (/workspace/qa-mbx-state/functional/repo/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.40s
+   Generated /workspace/qa-mbx-state/functional/pool/pools/repo-d7cb3eaa/m0/doc/qa_app/index.html and 1 other file
+mbx[cache]: 0 hits, 3 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 40.2 KiB stored locally
+mbx[cache]: compiler time: 0s estimated avoided; 634.0ms spent (3 miss in 634.0ms)
+mbx[cache]: 1 compilations kept their own incremental state, so they were not stored
+mbx[cache]: slowest uncached crates: qa_lib 337.5ms, qa_app 296.5ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 26.8ms, key 778µs, lookup 409µs, permit_wait 581µs, restore 1µs, startup 85µs, unattributed 1.9ms
+mbx[cache]: timing: 421.9ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 782µs CAS write, 0s materialization

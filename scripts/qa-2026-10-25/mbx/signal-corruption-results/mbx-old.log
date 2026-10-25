@@ -1,0 +1,9 @@
+buildq: target repo-4acb417f/m0 (new member (full build))
+mbx[setup]: first build on this machine
+mbx[setup]:   cache is /workspace/qa-mbx-state/signal-corruption/mbx/mbx, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
+mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
+   Compiling qa-cancelled-output v0.1.0 (/workspace/qa-mbx-state/signal-corruption/mbx/repo)
+error: failed to write `/workspace/qa-mbx-state/signal-corruption/mbx/pool/pools/repo-4acb417f/m0/debug/.fingerprint/qa-cancelled-output-f16f4fd3fe817246/run-build-script-build-script-build`
+
+Caused by:
+  No such file or directory (os error 2)

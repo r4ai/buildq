@@ -1,0 +1,11 @@
+buildq: [     0 ms] start
+buildq: target rust-analyzer-392e8313/m0 (42 package(s) invalidated: base-db, cfg, edition, hir, hir-def, hir-expand +36)
+   Compiling stdx v0.0.0 (/workspace/qa-oss/rust-analyzer-b/crates/stdx)
+   Compiling edition v0.0.0 (/workspace/qa-oss/rust-analyzer-b/crates/edition)
+   Compiling parser v0.0.0 (/workspace/qa-oss/rust-analyzer-b/crates/parser)
+   Compiling profile v0.0.0 (/workspace/qa-oss/rust-analyzer-b/crates/profile)
+   Compiling paths v0.0.0 (/workspace/qa-oss/rust-analyzer-b/crates/paths)
+   Compiling syntax v0.0.0 (/workspace/qa-oss/rust-analyzer-b/crates/syntax)
+   Compiling test-utils v0.0.0 (/workspace/qa-oss/rust-analyzer-b/crates/test-utils)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 13.30s
+buildq: copied 10.7 MiB to run dir /workspace/qa-oss/cache/runs/r0

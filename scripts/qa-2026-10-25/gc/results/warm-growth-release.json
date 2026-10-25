@@ -1,0 +1,8 @@
+{
+  "budget": 33554432,
+  "cached_total": 9875456,
+  "refreshed_total": 75997184,
+  "warning": false,
+  "manual_gc_freed": 75997184,
+  "manual_gc_after": 0
+}

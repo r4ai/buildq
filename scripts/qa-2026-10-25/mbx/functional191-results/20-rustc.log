@@ -1,0 +1,9 @@
+buildq: target repo-8d450ac9/m0 (no source differences)
+   Compiling qa-lib v0.1.0 (/workspace/qa-mbx-state/functional191/repo/lib)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.14s
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 11.1 KiB stored locally
+mbx[cache]: could not look up 1 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: compiler time: 0s estimated avoided; 84.2ms spent (1 unconsulted in 84.2ms)
+mbx[cache]: slowest uncached crates: qa_lib 84.2ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 83.6ms, flight_wait 462µs, key 11.0ms, lookup 3.7ms, permit_wait 1.1ms, predict 2.3ms, startup 62µs, store 14.2ms, unattributed 7.6ms
+mbx[cache]: timing: 205.8ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 5.4ms CAS write, 0s materialization

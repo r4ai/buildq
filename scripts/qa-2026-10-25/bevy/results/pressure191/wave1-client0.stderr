@@ -1,0 +1,71 @@
+buildq: [     0 ms] start
+buildq: target wt0-30c61a56/m0 (no source differences)
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.21
+   Compiling rustversion v1.0.23
+   Compiling strum_macros v0.26.4
+   Compiling serde v1.0.229
+   Compiling bitflags v2.13.2
+   Compiling uuid v1.28.0
+   Compiling hashbrown v0.15.5
+   Compiling glam v0.29.3
+   Compiling bevy_platform v0.16.1
+   Compiling bevy_utils v0.16.1
+   Compiling smol_str v0.2.2
+   Compiling erased-serde v0.4.10
+   Compiling bevy_tasks v0.16.1
+   Compiling nix v0.31.3
+   Compiling ctrlc v3.5.2
+   Compiling wgpu-types v24.0.0
+   Compiling bevy_reflect v0.16.1
+   Compiling spirv v0.3.0+sdk-1.3.268.0
+   Compiling strum v0.26.3
+   Compiling naga v24.0.0
+   Compiling bevy_ecs v0.16.1
+   Compiling bevy_math v0.16.1
+   Compiling gpu-alloc-types v0.3.1
+   Compiling gpu-descriptor-types v0.2.0
+   Compiling ron v0.8.1
+   Compiling bevy_app v0.16.1
+   Compiling png v0.18.1
+   Compiling gpu-descriptor v0.3.2
+   Compiling gpu-alloc v0.6.2
+   Compiling encase v0.10.0
+   Compiling wgpu-hal v24.0.4
+   Compiling bevy_color v0.16.2
+   Compiling bevy_asset v0.16.1
+   Compiling image v0.25.10
+   Compiling bevy_log v0.16.1
+   Compiling hexasphere v15.1.0
+   Compiling bevy_image v0.16.1
+   Compiling bevy_transform v0.16.1
+   Compiling wgpu-core v24.0.5
+   Compiling bevy_input v0.16.1
+   Compiling bevy_time v0.16.1
+   Compiling bevy_mikktspace v0.16.1
+   Compiling bevy_diagnostic v0.16.1
+   Compiling naga_oil v0.17.1
+   Compiling wgpu v24.0.5
+   Compiling bevy_mesh v0.16.1
+   Compiling bevy_window v0.16.1
+   Compiling bevy_render v0.16.1
+   Compiling bevy_core_pipeline v0.16.1
+   Compiling bevy_pbr v0.16.1
+   Compiling bevy_internal v0.16.1
+   Compiling bevy v0.16.1
+   Compiling bevy-heavy-probe v0.1.0 (/workspace/qa-bevy-pressure-191/wt0)
+    Finished `dev` profile [unoptimized] target(s) in 1m 29s
+mbx[cache]: 1 hits, 53 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 497.5 MiB stored locally
+mbx[cache]: compiler time: 719.6ms estimated avoided; 2m 18s spent (53 miss in 2m 18s)
+mbx[cache]: slowest uncached crates: bevy_pbr 26.78s, bevy_render 17.53s, bevy_core_pipeline 13.93s, bevy_ecs 10.54s, naga 7.73s
+mbx[cache]: wrapper phases (cumulative, exclusive): blob_transfer 3.6ms, compiler 2m 17s, flight_wait 8.6ms, key 341.6ms, lookup 18.5ms, permit_wait 52.1ms, predict 80.0ms, restore 2.3ms, startup 4.1ms, store 807.7ms, unattributed 207.3ms
+mbx[cache]: timing: 1m 29s session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 437.6ms CAS write, 2.2ms materialization
+mbx[cache]: materialization: 0 outputs (0 B) reflinked, 0 outputs (0 B) hard linked, 1 outputs (14.4 MiB) copied, 1 outputs (251 B) already in place
+mbx[gc]: evicted 1683 objects and 273 action results (848.5 MiB logical); 253.8 MiB logical remain
+buildq: copied 84.9 MiB to run dir /workspace/qa-bevy-pressure-191/pool/runs/r0
+buildq: warning: completed cache member /workspace/qa-bevy-pressure-191/pool/pools/wt0-30c61a56/m0 (1.1 GiB) exceeds the entire cache budget 768.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse
+buildq: completed cache member /workspace/qa-bevy-pressure-191/pool/pools/wt0-30c61a56/m0 (1.1 GiB) exceeds the entire cache budget 768.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse
+buildq: cache exceeds its effective budget by 523.0 MiB (soft limit): busy artifacts are protected; retry GC after jobs finish

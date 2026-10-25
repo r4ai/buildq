@@ -1,0 +1,24 @@
+
+running 1 test
+test good ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test lib/src/lib.rs - add (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+buildq: target repo-8d450ac9/m0 (1 package(s) invalidated: qa-lib)
+   Compiling qa-lib v0.1.0 (/workspace/qa-mbx-state/functional191/repo/lib)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.41s
+     Running unittests src/lib.rs (/workspace/qa-mbx-state/functional191/pool/pools/repo-8d450ac9/m0/debug/deps/qa_lib-d34e0d642a48915b)
+   Doc-tests qa_lib
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: bypassed 1 compilations: 1 rustdoc
+mbx[cache]: compiler time: 0s estimated avoided; 509.3ms spent (2 unconsulted in 509.3ms)
+mbx[cache]: 2 compilations kept their own incremental state, so they were not stored
+mbx[cache]: slowest uncached crates: qa_lib 509.3ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 501.9ms, key 11.1ms, lookup 13.5ms, permit_wait 2.4ms, startup 126µs, unattributed 32.9ms
+mbx[cache]: timing: 1.04s session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 0s materialization

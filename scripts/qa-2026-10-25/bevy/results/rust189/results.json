@@ -1,0 +1,4394 @@
+[
+  {
+    "trial": 1,
+    "mode": "plain",
+    "phase": "cold",
+    "wall_s": 410.471202641,
+    "jobs": [
+      {
+        "name": "cold-0",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt0",
+        "wall_s": 390.29003883999997,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1679249408,
+        "sampled_cpu_s": 230.22,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-1",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt1",
+        "wall_s": 409.680190602,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1480933376,
+        "sampled_cpu_s": 232.97,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-2",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt2",
+        "wall_s": 410.457553791,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1487794176,
+        "sampled_cpu_s": 230.78,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-3",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt3",
+        "wall_s": 406.225520919,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1474285568,
+        "sampled_cpu_s": 231.06,
+        "peak_processes": 7,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-4",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt4",
+        "wall_s": 396.356654404,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1648791552,
+        "sampled_cpu_s": 230.94,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-5",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt5",
+        "wall_s": 405.58382751000005,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1623805952,
+        "sampled_cpu_s": 231.51,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      }
+    ],
+    "peak_rss_bytes": 7895666688,
+    "peak_rustc": 13,
+    "sampled_cpu_s": 1386.99,
+    "storage": {
+      "allocated": 6875725824,
+      "logical": 6839869357,
+      "files": 11382,
+      "hardlink_aliases": 162,
+      "unique_inodes": 11220
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "plain",
+    "phase": "warm1",
+    "wall_s": 0.8350254110000606,
+    "jobs": [
+      {
+        "name": "warm1-0",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt0",
+        "wall_s": 0.7694392240000525,
+        "exit": 0,
+        "peak_tree_rss_bytes": 69431296,
+        "sampled_cpu_s": 0.11,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-1",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt1",
+        "wall_s": 0.8018448889999945,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72908800,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-2",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt2",
+        "wall_s": 0.7781102600000622,
+        "exit": 0,
+        "peak_tree_rss_bytes": 71860224,
+        "sampled_cpu_s": 0.16999999999999998,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-3",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt3",
+        "wall_s": 0.7956513700000869,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72880128,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-4",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt4",
+        "wall_s": 0.7997714819999828,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72900608,
+        "sampled_cpu_s": 0.17,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-5",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt5",
+        "wall_s": 0.8194795480000039,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72912896,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      }
+    ],
+    "peak_rss_bytes": 437399552,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 0.91,
+    "storage": {
+      "allocated": 6875725824,
+      "logical": 6839869357,
+      "files": 11382,
+      "hardlink_aliases": 162,
+      "unique_inodes": 11220
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "plain",
+    "phase": "warm2",
+    "wall_s": 0.775656142999992,
+    "jobs": [
+      {
+        "name": "warm2-0",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt0",
+        "wall_s": 0.7489846529999795,
+        "exit": 0,
+        "peak_tree_rss_bytes": 71843840,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-1",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt1",
+        "wall_s": 0.7618362240000351,
+        "exit": 0,
+        "peak_tree_rss_bytes": 71868416,
+        "sampled_cpu_s": 0.15,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-2",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt2",
+        "wall_s": 0.7572448959999747,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72179712,
+        "sampled_cpu_s": 0.18,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-3",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt3",
+        "wall_s": 0.766705242999933,
+        "exit": 0,
+        "peak_tree_rss_bytes": 73244672,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-4",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt4",
+        "wall_s": 0.7606692629999543,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72986624,
+        "sampled_cpu_s": 0.15,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-5",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-plain/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-plain/wt5",
+        "wall_s": 0.7496470940000108,
+        "exit": 0,
+        "peak_tree_rss_bytes": 67383296,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      }
+    ],
+    "peak_rss_bytes": 437641216,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 0.92,
+    "storage": {
+      "allocated": 6875725824,
+      "logical": 6839869357,
+      "files": 11382,
+      "hardlink_aliases": 162,
+      "unique_inodes": 11220
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "buildq2",
+    "phase": "cold",
+    "wall_s": 215.88371472799997,
+    "jobs": [
+      {
+        "name": "cold-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt0",
+        "wall_s": 206.98779251199994,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1631444992,
+        "sampled_cpu_s": 227.35,
+        "peak_processes": 11,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt1",
+        "wall_s": 215.77326394500005,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1205682176,
+        "sampled_cpu_s": 4.64,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt2",
+        "wall_s": 211.356924068,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206927360,
+        "sampled_cpu_s": 4.68,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt3",
+        "wall_s": 211.415625246,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206919168,
+        "sampled_cpu_s": 4.79,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt4",
+        "wall_s": 206.91132410900002,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1605603328,
+        "sampled_cpu_s": 225.88,
+        "peak_processes": 11,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt5",
+        "wall_s": 215.87429263599995,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1207275520,
+        "sampled_cpu_s": 4.8500000000000005,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 3169886208,
+    "peak_rustc": 4,
+    "sampled_cpu_s": 471.87,
+    "storage": {
+      "allocated": 2291912704,
+      "logical": 2279986451,
+      "files": 3798,
+      "hardlink_aliases": 54,
+      "unique_inodes": 3744
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "buildq2",
+    "phase": "warm1",
+    "wall_s": 9.19705784000007,
+    "jobs": [
+      {
+        "name": "warm1-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt0",
+        "wall_s": 9.188879376000045,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1204920320,
+        "sampled_cpu_s": 4.01,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt1",
+        "wall_s": 0.45364449399994555,
+        "exit": 0,
+        "peak_tree_rss_bytes": 78893056,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 4,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt2",
+        "wall_s": 4.7690294179999455,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206964224,
+        "sampled_cpu_s": 4.01,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt3",
+        "wall_s": 4.967634152999949,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1207021568,
+        "sampled_cpu_s": 4.260000000000001,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt4",
+        "wall_s": 9.009812354000019,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1205313536,
+        "sampled_cpu_s": 4.01,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt5",
+        "wall_s": 0.4470415170000024,
+        "exit": 0,
+        "peak_tree_rss_bytes": 73863168,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 4,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      }
+    ],
+    "peak_rss_bytes": 2416427008,
+    "peak_rustc": 2,
+    "sampled_cpu_s": 16.57,
+    "storage": {
+      "allocated": 2291912704,
+      "logical": 2279986461,
+      "files": 3798,
+      "hardlink_aliases": 54,
+      "unique_inodes": 3744
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "buildq2",
+    "phase": "warm2",
+    "wall_s": 12.908896830999993,
+    "jobs": [
+      {
+        "name": "warm2-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt0",
+        "wall_s": 8.783870901,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206796288,
+        "sampled_cpu_s": 4.1899999999999995,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt1",
+        "wall_s": 4.261540169,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1205489664,
+        "sampled_cpu_s": 3.94,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt2",
+        "wall_s": 4.452477006000095,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206755328,
+        "sampled_cpu_s": 4.11,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt3",
+        "wall_s": 12.90011008199997,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206816768,
+        "sampled_cpu_s": 3.94,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt4",
+        "wall_s": 8.489611884000055,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206976512,
+        "sampled_cpu_s": 4.02,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-buildq2/wt5",
+        "wall_s": 12.609415612999896,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1204961280,
+        "sampled_cpu_s": 3.92,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 2425675776,
+    "peak_rustc": 2,
+    "sampled_cpu_s": 24.099999999999998,
+    "storage": {
+      "allocated": 2291912704,
+      "logical": 2279986423,
+      "files": 3798,
+      "hardlink_aliases": 54,
+      "unique_inodes": 3744
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "mbx",
+    "phase": "cold",
+    "wall_s": 129.49849288000007,
+    "jobs": [
+      {
+        "name": "cold-0",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt0",
+        "wall_s": 129.49006763700004,
+        "exit": 0,
+        "peak_tree_rss_bytes": 453832704,
+        "sampled_cpu_s": 13.08,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-1",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt1",
+        "wall_s": 129.48836324600006,
+        "exit": 0,
+        "peak_tree_rss_bytes": 534851584,
+        "sampled_cpu_s": 18.29,
+        "peak_processes": 8,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-2",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt2",
+        "wall_s": 129.43794239599993,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1016766464,
+        "sampled_cpu_s": 43.04,
+        "peak_processes": 10,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-3",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt3",
+        "wall_s": 129.42245534899996,
+        "exit": 0,
+        "peak_tree_rss_bytes": 906641408,
+        "sampled_cpu_s": 30.93,
+        "peak_processes": 8,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-4",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt4",
+        "wall_s": 129.46371323800008,
+        "exit": 0,
+        "peak_tree_rss_bytes": 398065664,
+        "sampled_cpu_s": 17.31,
+        "peak_processes": 8,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-5",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt5",
+        "wall_s": 129.40887558999998,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1691942912,
+        "sampled_cpu_s": 94.1,
+        "peak_processes": 8,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      }
+    ],
+    "peak_rss_bytes": 2193252352,
+    "peak_rustc": 6,
+    "sampled_cpu_s": 217.1,
+    "storage": {
+      "allocated": 2853040128,
+      "logical": 2813595140,
+      "files": 14083,
+      "hardlink_aliases": 2157,
+      "unique_inodes": 11926
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "mbx",
+    "phase": "warm1",
+    "wall_s": 0.740358342999798,
+    "jobs": [
+      {
+        "name": "warm1-0",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt0",
+        "wall_s": 0.7218074179997984,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84119552,
+        "sampled_cpu_s": 0.13,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-1",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt1",
+        "wall_s": 0.7221546410000883,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84172800,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-2",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt2",
+        "wall_s": 0.702456299000005,
+        "exit": 0,
+        "peak_tree_rss_bytes": 83124224,
+        "sampled_cpu_s": 0.18000000000000002,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-3",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt3",
+        "wall_s": 0.4702581270000792,
+        "exit": 0,
+        "peak_tree_rss_bytes": 77819904,
+        "sampled_cpu_s": 0.11,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-4",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt4",
+        "wall_s": 0.7242628799999693,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84418560,
+        "sampled_cpu_s": 0.15000000000000002,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-5",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt5",
+        "wall_s": 0.7156637979999232,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84160512,
+        "sampled_cpu_s": 0.15000000000000002,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      }
+    ],
+    "peak_rss_bytes": 406425600,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 0.89,
+    "storage": {
+      "allocated": 2853064704,
+      "logical": 2813605016,
+      "files": 14095,
+      "hardlink_aliases": 2157,
+      "unique_inodes": 11938
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "mbx",
+    "phase": "warm2",
+    "wall_s": 0.7572529629999281,
+    "jobs": [
+      {
+        "name": "warm2-0",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt0",
+        "wall_s": 0.7342141040001025,
+        "exit": 0,
+        "peak_tree_rss_bytes": 83161088,
+        "sampled_cpu_s": 0.15000000000000002,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-1",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt1",
+        "wall_s": 0.7502138730001207,
+        "exit": 0,
+        "peak_tree_rss_bytes": 82108416,
+        "sampled_cpu_s": 0.13,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-2",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt2",
+        "wall_s": 0.7364833509998334,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84078592,
+        "sampled_cpu_s": 0.13,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-3",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt3",
+        "wall_s": 0.7464441569998144,
+        "exit": 0,
+        "peak_tree_rss_bytes": 83156992,
+        "sampled_cpu_s": 0.17,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-4",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt4",
+        "wall_s": 0.5180679740001324,
+        "exit": 0,
+        "peak_tree_rss_bytes": 83132416,
+        "sampled_cpu_s": 0.13,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-5",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial1-mbx/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-mbx/wt5",
+        "wall_s": 0.7230405929999506,
+        "exit": 0,
+        "peak_tree_rss_bytes": 83128320,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      }
+    ],
+    "peak_rss_bytes": 415408128,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 0.92,
+    "storage": {
+      "allocated": 2853089280,
+      "logical": 2813614892,
+      "files": 14107,
+      "hardlink_aliases": 2157,
+      "unique_inodes": 11950
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "combined2",
+    "phase": "cold",
+    "wall_s": 131.25174722299994,
+    "jobs": [
+      {
+        "name": "cold-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt0",
+        "wall_s": 130.55929488099991,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1335091200,
+        "sampled_cpu_s": 82.21000000000001,
+        "peak_processes": 11,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt1",
+        "wall_s": 131.23942975799991,
+        "exit": 0,
+        "peak_tree_rss_bytes": 88305664,
+        "sampled_cpu_s": 0.51,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt2",
+        "wall_s": 130.51528456699998,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1661829120,
+        "sampled_cpu_s": 133.10999999999999,
+        "peak_processes": 13,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt3",
+        "wall_s": 131.1879174159999,
+        "exit": 0,
+        "peak_tree_rss_bytes": 86700032,
+        "sampled_cpu_s": 0.51,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt4",
+        "wall_s": 130.87089917799995,
+        "exit": 0,
+        "peak_tree_rss_bytes": 88367104,
+        "sampled_cpu_s": 0.49,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt5",
+        "wall_s": 130.92889095200007,
+        "exit": 0,
+        "peak_tree_rss_bytes": 88444928,
+        "sampled_cpu_s": 0.5,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 1785896960,
+    "peak_rustc": 4,
+    "sampled_cpu_s": 216.84,
+    "storage": {
+      "allocated": 2418966528,
+      "logical": 2400569679,
+      "files": 6444,
+      "hardlink_aliases": 453,
+      "unique_inodes": 5991
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "combined2",
+    "phase": "warm1",
+    "wall_s": 0.9776393540000754,
+    "jobs": [
+      {
+        "name": "warm1-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt0",
+        "wall_s": 0.9650921669999661,
+        "exit": 0,
+        "peak_tree_rss_bytes": 91222016,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt1",
+        "wall_s": 0.6502834979999079,
+        "exit": 0,
+        "peak_tree_rss_bytes": 87949312,
+        "sampled_cpu_s": 0.12,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt2",
+        "wall_s": 0.6554148000000168,
+        "exit": 0,
+        "peak_tree_rss_bytes": 92483584,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt3",
+        "wall_s": 0.9639048189999357,
+        "exit": 0,
+        "peak_tree_rss_bytes": 86929408,
+        "sampled_cpu_s": 0.15,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt4",
+        "wall_s": 0.3428107600000203,
+        "exit": 0,
+        "peak_tree_rss_bytes": 88088576,
+        "sampled_cpu_s": 0.15,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt5",
+        "wall_s": 0.33707301999993433,
+        "exit": 0,
+        "peak_tree_rss_bytes": 89468928,
+        "sampled_cpu_s": 0.15,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 190091264,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 0.84,
+    "storage": {
+      "allocated": 2418622464,
+      "logical": 2400202689,
+      "files": 6458,
+      "hardlink_aliases": 453,
+      "unique_inodes": 6005
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "combined2",
+    "phase": "warm2",
+    "wall_s": 0.9923194870000316,
+    "jobs": [
+      {
+        "name": "warm2-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt0",
+        "wall_s": 0.3402022709999528,
+        "exit": 0,
+        "peak_tree_rss_bytes": 90439680,
+        "sampled_cpu_s": 0.12,
+        "peak_processes": 4,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt1",
+        "wall_s": 0.6556421069999487,
+        "exit": 0,
+        "peak_tree_rss_bytes": 86966272,
+        "sampled_cpu_s": 0.15000000000000002,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt2",
+        "wall_s": 0.34473974499996984,
+        "exit": 0,
+        "peak_tree_rss_bytes": 90513408,
+        "sampled_cpu_s": 0.17,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt3",
+        "wall_s": 0.9813172310000482,
+        "exit": 0,
+        "peak_tree_rss_bytes": 95313920,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 5,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt4",
+        "wall_s": 0.6695177799999783,
+        "exit": 0,
+        "peak_tree_rss_bytes": 86814720,
+        "sampled_cpu_s": 0.15000000000000002,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined2/wt5",
+        "wall_s": 0.9833353870001247,
+        "exit": 0,
+        "peak_tree_rss_bytes": 88178688,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 195555328,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 0.89,
+    "storage": {
+      "allocated": 2418696192,
+      "logical": 2400256333,
+      "files": 6471,
+      "hardlink_aliases": 453,
+      "unique_inodes": 6018
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "combined4",
+    "phase": "cold",
+    "wall_s": 130.376473647,
+    "jobs": [
+      {
+        "name": "cold-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt0",
+        "wall_s": 129.942387091,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1648410624,
+        "sampled_cpu_s": 129.26000000000002,
+        "peak_processes": 12,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt1",
+        "wall_s": 129.95036334799988,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1039159296,
+        "sampled_cpu_s": 49.19,
+        "peak_processes": 14,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt2",
+        "wall_s": 130.35601050399987,
+        "exit": 0,
+        "peak_tree_rss_bytes": 94515200,
+        "sampled_cpu_s": 0.62,
+        "peak_processes": 5,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt3",
+        "wall_s": 129.9574902679999,
+        "exit": 0,
+        "peak_tree_rss_bytes": 575102976,
+        "sampled_cpu_s": 19.63,
+        "peak_processes": 10,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt4",
+        "wall_s": 130.05103075399984,
+        "exit": 0,
+        "peak_tree_rss_bytes": 710488064,
+        "sampled_cpu_s": 17.21,
+        "peak_processes": 10,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt5",
+        "wall_s": 130.36327937300007,
+        "exit": 0,
+        "peak_tree_rss_bytes": 96530432,
+        "sampled_cpu_s": 0.6499999999999999,
+        "peak_processes": 5,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 1998082048,
+    "peak_rustc": 4,
+    "sampled_cpu_s": 215.9,
+    "storage": {
+      "allocated": 2636079104,
+      "logical": 2607183851,
+      "files": 10270,
+      "hardlink_aliases": 1305,
+      "unique_inodes": 8965
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "combined4",
+    "phase": "warm1",
+    "wall_s": 1.2697747360000449,
+    "jobs": [
+      {
+        "name": "warm1-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt0",
+        "wall_s": 0.6614721960002043,
+        "exit": 0,
+        "peak_tree_rss_bytes": 91168768,
+        "sampled_cpu_s": 0.19,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt1",
+        "wall_s": 0.666371990000016,
+        "exit": 0,
+        "peak_tree_rss_bytes": 91074560,
+        "sampled_cpu_s": 0.17,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt2",
+        "wall_s": 0.6437215870000728,
+        "exit": 0,
+        "peak_tree_rss_bytes": 88301568,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 4,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt3",
+        "wall_s": 0.879703660999894,
+        "exit": 0,
+        "peak_tree_rss_bytes": 104820736,
+        "sampled_cpu_s": 0.29000000000000004,
+        "peak_processes": 6,
+        "compiling_lines": 15,
+        "output": "version-A:entities=1",
+        "fresh": 228,
+        "nonfresh": 15
+      },
+      {
+        "name": "warm1-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt4",
+        "wall_s": 1.1958036189998893,
+        "exit": 0,
+        "peak_tree_rss_bytes": 102285312,
+        "sampled_cpu_s": 0.3,
+        "peak_processes": 5,
+        "compiling_lines": 10,
+        "output": "version-A:entities=1",
+        "fresh": 233,
+        "nonfresh": 10
+      },
+      {
+        "name": "warm1-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt5",
+        "wall_s": 1.2545365999999376,
+        "exit": 0,
+        "peak_tree_rss_bytes": 101715968,
+        "sampled_cpu_s": 0.31,
+        "peak_processes": 5,
+        "compiling_lines": 8,
+        "output": "version-A:entities=1",
+        "fresh": 235,
+        "nonfresh": 8
+      }
+    ],
+    "peak_rss_bytes": 368021504,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 1.3900000000000001,
+    "storage": {
+      "allocated": 2404122624,
+      "logical": 2375237470,
+      "files": 10285,
+      "hardlink_aliases": 1316,
+      "unique_inodes": 8969
+    }
+  },
+  {
+    "trial": 1,
+    "mode": "combined4",
+    "phase": "warm2",
+    "wall_s": 0.89699640799995,
+    "jobs": [
+      {
+        "name": "warm2-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt0",
+        "wall_s": 0.88962893300004,
+        "exit": 0,
+        "peak_tree_rss_bytes": 88940544,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt1",
+        "wall_s": 0.7780696689999331,
+        "exit": 0,
+        "peak_tree_rss_bytes": 102764544,
+        "sampled_cpu_s": 0.28,
+        "peak_processes": 5,
+        "compiling_lines": 11,
+        "output": "version-A:entities=1",
+        "fresh": 232,
+        "nonfresh": 11
+      },
+      {
+        "name": "warm2-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt2",
+        "wall_s": 0.646870386000046,
+        "exit": 0,
+        "peak_tree_rss_bytes": 87691264,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt3",
+        "wall_s": 0.5698055359998762,
+        "exit": 0,
+        "peak_tree_rss_bytes": 90652672,
+        "sampled_cpu_s": 0.18999999999999997,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt4",
+        "wall_s": 0.574171510000042,
+        "exit": 0,
+        "peak_tree_rss_bytes": 89919488,
+        "sampled_cpu_s": 0.13,
+        "peak_processes": 4,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial1-combined4/wt5",
+        "wall_s": 0.8850050949999968,
+        "exit": 0,
+        "peak_tree_rss_bytes": 87838720,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 369270784,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 1.05,
+    "storage": {
+      "allocated": 2404392960,
+      "logical": 2375483435,
+      "files": 10299,
+      "hardlink_aliases": 1317,
+      "unique_inodes": 8982
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "combined4",
+    "phase": "cold",
+    "wall_s": 130.34629691600003,
+    "jobs": [
+      {
+        "name": "cold-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt0",
+        "wall_s": 130.0181676750001,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1043877888,
+        "sampled_cpu_s": 56.69,
+        "peak_processes": 11,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt1",
+        "wall_s": 130.06487572100013,
+        "exit": 0,
+        "peak_tree_rss_bytes": 747118592,
+        "sampled_cpu_s": 38.36,
+        "peak_processes": 11,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt2",
+        "wall_s": 130.01282197700016,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1648676864,
+        "sampled_cpu_s": 104.28,
+        "peak_processes": 10,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt3",
+        "wall_s": 130.32573747700008,
+        "exit": 0,
+        "peak_tree_rss_bytes": 87527424,
+        "sampled_cpu_s": 0.62,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt4",
+        "wall_s": 130.336987271,
+        "exit": 0,
+        "peak_tree_rss_bytes": 88473600,
+        "sampled_cpu_s": 0.6000000000000001,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt5",
+        "wall_s": 130.0044458089999,
+        "exit": 0,
+        "peak_tree_rss_bytes": 665243648,
+        "sampled_cpu_s": 19.09,
+        "peak_processes": 11,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      }
+    ],
+    "peak_rss_bytes": 1984348160,
+    "peak_rustc": 4,
+    "sampled_cpu_s": 219.98,
+    "storage": {
+      "allocated": 2636087296,
+      "logical": 2607185692,
+      "files": 10271,
+      "hardlink_aliases": 1305,
+      "unique_inodes": 8966
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "combined4",
+    "phase": "warm1",
+    "wall_s": 1.1046445699998912,
+    "jobs": [
+      {
+        "name": "warm1-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt0",
+        "wall_s": 0.8805185830001392,
+        "exit": 0,
+        "peak_tree_rss_bytes": 102821888,
+        "sampled_cpu_s": 0.32,
+        "peak_processes": 5,
+        "compiling_lines": 12,
+        "output": "version-A:entities=1",
+        "fresh": 231,
+        "nonfresh": 12
+      },
+      {
+        "name": "warm1-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt1",
+        "wall_s": 0.9679729350000343,
+        "exit": 0,
+        "peak_tree_rss_bytes": 85372928,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt2",
+        "wall_s": 0.7776221639999221,
+        "exit": 0,
+        "peak_tree_rss_bytes": 102367232,
+        "sampled_cpu_s": 0.31,
+        "peak_processes": 5,
+        "compiling_lines": 11,
+        "output": "version-A:entities=1",
+        "fresh": 232,
+        "nonfresh": 11
+      },
+      {
+        "name": "warm1-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt3",
+        "wall_s": 1.0958272309999302,
+        "exit": 0,
+        "peak_tree_rss_bytes": 82030592,
+        "sampled_cpu_s": 0.15000000000000002,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt4",
+        "wall_s": 0.7760728509999808,
+        "exit": 0,
+        "peak_tree_rss_bytes": 101113856,
+        "sampled_cpu_s": 0.29,
+        "peak_processes": 5,
+        "compiling_lines": 9,
+        "output": "version-A:entities=1",
+        "fresh": 234,
+        "nonfresh": 9
+      },
+      {
+        "name": "warm1-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt5",
+        "wall_s": 0.6470524799999566,
+        "exit": 0,
+        "peak_tree_rss_bytes": 100884480,
+        "sampled_cpu_s": 0.27,
+        "peak_processes": 5,
+        "compiling_lines": 15,
+        "output": "version-A:entities=1",
+        "fresh": 228,
+        "nonfresh": 15
+      }
+    ],
+    "peak_rss_bytes": 408080384,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 1.45,
+    "storage": {
+      "allocated": 2399895552,
+      "logical": 2370997000,
+      "files": 10288,
+      "hardlink_aliases": 1318,
+      "unique_inodes": 8970
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "combined4",
+    "phase": "warm2",
+    "wall_s": 0.974310216000049,
+    "jobs": [
+      {
+        "name": "warm2-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt0",
+        "wall_s": 0.6691470150001351,
+        "exit": 0,
+        "peak_tree_rss_bytes": 92106752,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt1",
+        "wall_s": 0.5583548080001037,
+        "exit": 0,
+        "peak_tree_rss_bytes": 90050560,
+        "sampled_cpu_s": 0.12,
+        "peak_processes": 4,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt2",
+        "wall_s": 0.661963151000009,
+        "exit": 0,
+        "peak_tree_rss_bytes": 90705920,
+        "sampled_cpu_s": 0.18,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt3",
+        "wall_s": 0.9638833750000231,
+        "exit": 0,
+        "peak_tree_rss_bytes": 88231936,
+        "sampled_cpu_s": 0.15,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt4",
+        "wall_s": 0.878097820999983,
+        "exit": 0,
+        "peak_tree_rss_bytes": 89448448,
+        "sampled_cpu_s": 0.17,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined4/wt5",
+        "wall_s": 0.6522483440000997,
+        "exit": 0,
+        "peak_tree_rss_bytes": 98484224,
+        "sampled_cpu_s": 0.16999999999999998,
+        "peak_processes": 5,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 373719040,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 0.99,
+    "storage": {
+      "allocated": 2399916032,
+      "logical": 2370989211,
+      "files": 10303,
+      "hardlink_aliases": 1318,
+      "unique_inodes": 8985
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "combined2",
+    "phase": "cold",
+    "wall_s": 128.02486617,
+    "jobs": [
+      {
+        "name": "cold-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt0",
+        "wall_s": 127.70325740600015,
+        "exit": 0,
+        "peak_tree_rss_bytes": 86798336,
+        "sampled_cpu_s": 0.48,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt1",
+        "wall_s": 128.01705300499998,
+        "exit": 0,
+        "peak_tree_rss_bytes": 88072192,
+        "sampled_cpu_s": 0.52,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt2",
+        "wall_s": 127.36397440700011,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1641295872,
+        "sampled_cpu_s": 152.18,
+        "peak_processes": 14,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt3",
+        "wall_s": 127.67496526699983,
+        "exit": 0,
+        "peak_tree_rss_bytes": 86933504,
+        "sampled_cpu_s": 0.48,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt4",
+        "wall_s": 127.38734641600013,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1049075712,
+        "sampled_cpu_s": 55.89,
+        "peak_processes": 11,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt5",
+        "wall_s": 127.98622128900001,
+        "exit": 0,
+        "peak_tree_rss_bytes": 86712320,
+        "sampled_cpu_s": 0.47,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 1769267200,
+    "peak_rustc": 4,
+    "sampled_cpu_s": 210.37,
+    "storage": {
+      "allocated": 2418991104,
+      "logical": 2400568916,
+      "files": 6444,
+      "hardlink_aliases": 453,
+      "unique_inodes": 5991
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "combined2",
+    "phase": "warm1",
+    "wall_s": 1.0788885319998371,
+    "jobs": [
+      {
+        "name": "warm1-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt0",
+        "wall_s": 0.338340609999932,
+        "exit": 0,
+        "peak_tree_rss_bytes": 86945792,
+        "sampled_cpu_s": 0.15000000000000002,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt1",
+        "wall_s": 1.0581809999998768,
+        "exit": 0,
+        "peak_tree_rss_bytes": 87801856,
+        "sampled_cpu_s": 0.16999999999999998,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt2",
+        "wall_s": 0.644655696999962,
+        "exit": 0,
+        "peak_tree_rss_bytes": 90128384,
+        "sampled_cpu_s": 0.15000000000000002,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt3",
+        "wall_s": 1.0695602549999421,
+        "exit": 0,
+        "peak_tree_rss_bytes": 96247808,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 5,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt4",
+        "wall_s": 0.6501692540000477,
+        "exit": 0,
+        "peak_tree_rss_bytes": 90603520,
+        "sampled_cpu_s": 0.13,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt5",
+        "wall_s": 0.33707309900000837,
+        "exit": 0,
+        "peak_tree_rss_bytes": 73363456,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 4,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      }
+    ],
+    "peak_rss_bytes": 200212480,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 0.91,
+    "storage": {
+      "allocated": 2418638848,
+      "logical": 2400194656,
+      "files": 6458,
+      "hardlink_aliases": 453,
+      "unique_inodes": 6005
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "combined2",
+    "phase": "warm2",
+    "wall_s": 1.0230803820002166,
+    "jobs": [
+      {
+        "name": "warm2-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt0",
+        "wall_s": 0.3503475289999187,
+        "exit": 0,
+        "peak_tree_rss_bytes": 89231360,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt1",
+        "wall_s": 1.014943809000215,
+        "exit": 0,
+        "peak_tree_rss_bytes": 95432704,
+        "sampled_cpu_s": 0.15000000000000002,
+        "peak_processes": 5,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt2",
+        "wall_s": 0.6832486769999377,
+        "exit": 0,
+        "peak_tree_rss_bytes": 89739264,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt3",
+        "wall_s": 0.3552930959999685,
+        "exit": 0,
+        "peak_tree_rss_bytes": 93966336,
+        "sampled_cpu_s": 0.13,
+        "peak_processes": 5,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt4",
+        "wall_s": 0.9705462319998333,
+        "exit": 0,
+        "peak_tree_rss_bytes": 91582464,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 4,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-combined2/wt5",
+        "wall_s": 0.6572555949999241,
+        "exit": 0,
+        "peak_tree_rss_bytes": 96894976,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 5,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 192606208,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 0.8400000000000001,
+    "storage": {
+      "allocated": 2418720768,
+      "logical": 2400255631,
+      "files": 6471,
+      "hardlink_aliases": 453,
+      "unique_inodes": 6018
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "mbx",
+    "phase": "cold",
+    "wall_s": 128.77510589000008,
+    "jobs": [
+      {
+        "name": "cold-0",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt0",
+        "wall_s": 128.6822077700001,
+        "exit": 0,
+        "peak_tree_rss_bytes": 454909952,
+        "sampled_cpu_s": 22.37,
+        "peak_processes": 8,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-1",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt1",
+        "wall_s": 128.76709363200007,
+        "exit": 0,
+        "peak_tree_rss_bytes": 588423168,
+        "sampled_cpu_s": 14.1,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-2",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt2",
+        "wall_s": 128.536484148,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1651552256,
+        "sampled_cpu_s": 112.3,
+        "peak_processes": 12,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-3",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt3",
+        "wall_s": 128.58081555700005,
+        "exit": 0,
+        "peak_tree_rss_bytes": 383512576,
+        "sampled_cpu_s": 16.79,
+        "peak_processes": 8,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-4",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt4",
+        "wall_s": 128.74246743100002,
+        "exit": 0,
+        "peak_tree_rss_bytes": 599314432,
+        "sampled_cpu_s": 13.81,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-5",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt5",
+        "wall_s": 128.62653816599982,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1018589184,
+        "sampled_cpu_s": 36.46,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      }
+    ],
+    "peak_rss_bytes": 2166558720,
+    "peak_rustc": 7,
+    "sampled_cpu_s": 215.89,
+    "storage": {
+      "allocated": 2853036032,
+      "logical": 2813595761,
+      "files": 14084,
+      "hardlink_aliases": 2157,
+      "unique_inodes": 11927
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "mbx",
+    "phase": "warm1",
+    "wall_s": 0.7974696050000603,
+    "jobs": [
+      {
+        "name": "warm1-0",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt0",
+        "wall_s": 0.7901702310000474,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84201472,
+        "sampled_cpu_s": 0.17,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-1",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt1",
+        "wall_s": 0.7678880529999788,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84611072,
+        "sampled_cpu_s": 0.15000000000000002,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-2",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt2",
+        "wall_s": 0.7651338379998833,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84529152,
+        "sampled_cpu_s": 0.19999999999999998,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-3",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt3",
+        "wall_s": 0.7623710160000883,
+        "exit": 0,
+        "peak_tree_rss_bytes": 83140608,
+        "sampled_cpu_s": 0.18,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-4",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt4",
+        "wall_s": 0.7773183760000393,
+        "exit": 0,
+        "peak_tree_rss_bytes": 83144704,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-5",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt5",
+        "wall_s": 0.785909151000169,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84160512,
+        "sampled_cpu_s": 0.17,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      }
+    ],
+    "peak_rss_bytes": 500936704,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 1.01,
+    "storage": {
+      "allocated": 2853060608,
+      "logical": 2813605637,
+      "files": 14096,
+      "hardlink_aliases": 2157,
+      "unique_inodes": 11939
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "mbx",
+    "phase": "warm2",
+    "wall_s": 0.8201251350001257,
+    "jobs": [
+      {
+        "name": "warm2-0",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt0",
+        "wall_s": 0.7817387059999419,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84160512,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-1",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt1",
+        "wall_s": 0.8119874139999865,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84168704,
+        "sampled_cpu_s": 0.16999999999999998,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-2",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt2",
+        "wall_s": 0.7888670469999397,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84242432,
+        "sampled_cpu_s": 0.16000000000000003,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-3",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt3",
+        "wall_s": 0.8072884729999714,
+        "exit": 0,
+        "peak_tree_rss_bytes": 83562496,
+        "sampled_cpu_s": 0.18999999999999997,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-4",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt4",
+        "wall_s": 0.7783448140000928,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84295680,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-5",
+        "command": [
+          "/workspace/qa-mbx-state/bin/mbx",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-mbx/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-mbx/wt5",
+        "wall_s": 0.7754361919999155,
+        "exit": 0,
+        "peak_tree_rss_bytes": 84287488,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 2,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      }
+    ],
+    "peak_rss_bytes": 490250240,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 1.04,
+    "storage": {
+      "allocated": 2853085184,
+      "logical": 2813615513,
+      "files": 14108,
+      "hardlink_aliases": 2157,
+      "unique_inodes": 11951
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "buildq2",
+    "phase": "cold",
+    "wall_s": 146.29733631399995,
+    "jobs": [
+      {
+        "name": "cold-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt0",
+        "wall_s": 137.6249603409999,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1626951680,
+        "sampled_cpu_s": 207.61,
+        "peak_processes": 10,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt1",
+        "wall_s": 146.283450399,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206751232,
+        "sampled_cpu_s": 4.29,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt2",
+        "wall_s": 146.08297749899998,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206771712,
+        "sampled_cpu_s": 4.46,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt3",
+        "wall_s": 141.84614483600012,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1205293056,
+        "sampled_cpu_s": 4.43,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "cold-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt4",
+        "wall_s": 137.8255031650001,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1630330880,
+        "sampled_cpu_s": 207.93,
+        "peak_processes": 11,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt5",
+        "wall_s": 142.1585763879998,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206898688,
+        "sampled_cpu_s": 4.5,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 3247796224,
+    "peak_rustc": 4,
+    "sampled_cpu_s": 432.25,
+    "storage": {
+      "allocated": 2291912704,
+      "logical": 2279986461,
+      "files": 3798,
+      "hardlink_aliases": 54,
+      "unique_inodes": 3744
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "buildq2",
+    "phase": "warm1",
+    "wall_s": 13.016157299000042,
+    "jobs": [
+      {
+        "name": "warm1-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt0",
+        "wall_s": 4.457512410999925,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206095872,
+        "sampled_cpu_s": 4.069999999999999,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt1",
+        "wall_s": 12.80527393500006,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1197109248,
+        "sampled_cpu_s": 3.96,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt2",
+        "wall_s": 13.007336926000107,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1207017472,
+        "sampled_cpu_s": 4.140000000000001,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt3",
+        "wall_s": 8.575209050000012,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206095872,
+        "sampled_cpu_s": 3.95,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt4",
+        "wall_s": 8.67828613000006,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1207029760,
+        "sampled_cpu_s": 3.96,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm1-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt5",
+        "wall_s": 4.352331382999864,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206235136,
+        "sampled_cpu_s": 3.9899999999999998,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 2424360960,
+    "peak_rustc": 2,
+    "sampled_cpu_s": 24.1,
+    "storage": {
+      "allocated": 2291912704,
+      "logical": 2279986430,
+      "files": 3798,
+      "hardlink_aliases": 54,
+      "unique_inodes": 3744
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "buildq2",
+    "phase": "warm2",
+    "wall_s": 12.340607995000028,
+    "jobs": [
+      {
+        "name": "warm2-0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt0",
+        "wall_s": 8.61095342900012,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1207140352,
+        "sampled_cpu_s": 3.99,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt1",
+        "wall_s": 0.458377093000081,
+        "exit": 0,
+        "peak_tree_rss_bytes": 78794752,
+        "sampled_cpu_s": 0.14,
+        "peak_processes": 3,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-2",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt2",
+        "wall_s": 8.2901375429999,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1204432896,
+        "sampled_cpu_s": 3.8399999999999994,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-3",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt3",
+        "wall_s": 4.2688050549998025,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1207222272,
+        "sampled_cpu_s": 3.9200000000000004,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-4",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt4",
+        "wall_s": 12.331927084999961,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1207111680,
+        "sampled_cpu_s": 3.87,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      },
+      {
+        "name": "warm2-5",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-buildq2/wt5",
+        "wall_s": 4.487813141000061,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1206849536,
+        "sampled_cpu_s": 3.8200000000000003,
+        "peak_processes": 7,
+        "compiling_lines": 1,
+        "output": "version-A:entities=1",
+        "fresh": 242,
+        "nonfresh": 1
+      }
+    ],
+    "peak_rss_bytes": 2421231616,
+    "peak_rustc": 2,
+    "sampled_cpu_s": 19.62,
+    "storage": {
+      "allocated": 2291912704,
+      "logical": 2279986438,
+      "files": 3798,
+      "hardlink_aliases": 54,
+      "unique_inodes": 3744
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "plain",
+    "phase": "cold",
+    "wall_s": 434.7621433060001,
+    "jobs": [
+      {
+        "name": "cold-0",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt0",
+        "wall_s": 425.05702310800007,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1496301568,
+        "sampled_cpu_s": 255.06,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-1",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt1",
+        "wall_s": 434.7528888889999,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1519210496,
+        "sampled_cpu_s": 256.78,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-2",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt2",
+        "wall_s": 413.6648504770001,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1679302656,
+        "sampled_cpu_s": 256.17,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-3",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt3",
+        "wall_s": 433.5605731019998,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1480577024,
+        "sampled_cpu_s": 257.16,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-4",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt4",
+        "wall_s": 416.97206010900027,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1650880512,
+        "sampled_cpu_s": 257.29,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      },
+      {
+        "name": "cold-5",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt5",
+        "wall_s": 429.3154901700002,
+        "exit": 0,
+        "peak_tree_rss_bytes": 1552429056,
+        "sampled_cpu_s": 256.65,
+        "peak_processes": 9,
+        "compiling_lines": 210,
+        "output": "version-A:entities=1",
+        "fresh": 0,
+        "nonfresh": 243
+      }
+    ],
+    "peak_rss_bytes": 7525117952,
+    "peak_rustc": 13,
+    "sampled_cpu_s": 1538.5,
+    "storage": {
+      "allocated": 6875725824,
+      "logical": 6839869349,
+      "files": 11382,
+      "hardlink_aliases": 162,
+      "unique_inodes": 11220
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "plain",
+    "phase": "warm1",
+    "wall_s": 0.792711516000054,
+    "jobs": [
+      {
+        "name": "warm1-0",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt0",
+        "wall_s": 0.7714341209998565,
+        "exit": 0,
+        "peak_tree_rss_bytes": 71892992,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-1",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt1",
+        "wall_s": 0.7472010920000685,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72912896,
+        "sampled_cpu_s": 0.15,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-2",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt2",
+        "wall_s": 0.7530956619998506,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72503296,
+        "sampled_cpu_s": 0.12,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-3",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt3",
+        "wall_s": 0.751414991999809,
+        "exit": 0,
+        "peak_tree_rss_bytes": 71876608,
+        "sampled_cpu_s": 0.12,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-4",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt4",
+        "wall_s": 0.774818662999678,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72908800,
+        "sampled_cpu_s": 0.13999999999999999,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm1-5",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt5",
+        "wall_s": 0.782356811000227,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72527872,
+        "sampled_cpu_s": 0.24,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      }
+    ],
+    "peak_rss_bytes": 431779840,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 0.9099999999999999,
+    "storage": {
+      "allocated": 6875725824,
+      "logical": 6839869349,
+      "files": 11382,
+      "hardlink_aliases": 162,
+      "unique_inodes": 11220
+    }
+  },
+  {
+    "trial": 2,
+    "mode": "plain",
+    "phase": "warm2",
+    "wall_s": 0.679512534999958,
+    "jobs": [
+      {
+        "name": "warm2-0",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target0"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt0",
+        "wall_s": 0.6497631450001791,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72953856,
+        "sampled_cpu_s": 0.13,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-1",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target1"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt1",
+        "wall_s": 0.6378263840001637,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72196096,
+        "sampled_cpu_s": 0.11,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-2",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target2"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt2",
+        "wall_s": 0.6430267880000429,
+        "exit": 0,
+        "peak_tree_rss_bytes": 71892992,
+        "sampled_cpu_s": 0.11000000000000001,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-3",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target3"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt3",
+        "wall_s": 0.6568254030003118,
+        "exit": 0,
+        "peak_tree_rss_bytes": 73031680,
+        "sampled_cpu_s": 0.13,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-4",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target4"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt4",
+        "wall_s": 0.670068536999679,
+        "exit": 0,
+        "peak_tree_rss_bytes": 72200192,
+        "sampled_cpu_s": 0.15,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      },
+      {
+        "name": "warm2-5",
+        "command": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "build",
+          "--offline",
+          "--locked",
+          "--message-format=json",
+          "--target-dir",
+          "/workspace/qa-bevy-six/trial2-plain/target5"
+        ],
+        "cwd": "/workspace/qa-bevy-six/trial2-plain/wt5",
+        "wall_s": 0.6669778340001358,
+        "exit": 0,
+        "peak_tree_rss_bytes": 73203712,
+        "sampled_cpu_s": 0.16,
+        "peak_processes": 1,
+        "compiling_lines": 0,
+        "output": "version-A:entities=1",
+        "fresh": 243,
+        "nonfresh": 0
+      }
+    ],
+    "peak_rss_bytes": 431767552,
+    "peak_rustc": 0,
+    "sampled_cpu_s": 0.78,
+    "storage": {
+      "allocated": 6875725824,
+      "logical": 6839869349,
+      "files": 11382,
+      "hardlink_aliases": 162,
+      "unique_inodes": 11220
+    }
+  }
+]

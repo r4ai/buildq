@@ -1,0 +1,46 @@
+{
+  "actions": [
+    "evict run dir /workspace/qa-bevy-pressure-191/pool/runs/r0 (over budget) (path footprint 84.9 MiB)",
+    "evict run dir /workspace/qa-bevy-pressure-191/pool/runs/r1 (over budget) (path footprint 84.9 MiB)",
+    "evict wt0-30c61a56/m1 (last used 9m ago, over budget 768.0 MiB) (path footprint 1.1 GiB)"
+  ],
+  "freed": 1353740288,
+  "before": 1353740288,
+  "after": 0,
+  "effective_budget": 805306368,
+  "accounting": "allocated",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "skipped": null,
+  "external": 0,
+  "warnings": [
+    "completed cache member /workspace/qa-bevy-pressure-191/pool/pools/wt0-30c61a56/m1 (1.1 GiB) exceeds the entire cache budget 768.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse"
+  ],
+  "failed_deletions": 0,
+  "dedupe": {
+    "dry_run": false,
+    "accounting": "allocated",
+    "pools": 1,
+    "indexed": 375,
+    "index_ms": 3,
+    "candidates": 0,
+    "compared": 0,
+    "identical": 0,
+    "identical_bytes": 0,
+    "shared": 0,
+    "shared_bytes": 0,
+    "already_shared": 0,
+    "already_shared_bytes": 0,
+    "differing": 0,
+    "skipped_busy": 0,
+    "skipped_changed": 0,
+    "skipped_hardlinked": 0,
+    "skipped_known_different": 0,
+    "read_bytes": 0,
+    "read_limited": false,
+    "unsupported": null,
+    "skipped": null,
+    "errors": []
+  }
+}

@@ -1,0 +1,16 @@
+{"time": 2514.669816563, "kind": "start", "job": "batch-0", "pid": 178562}
+{"time": 2514.685930564, "kind": "start", "job": "batch-3", "pid": 178575}
+{"time": 2514.688671264, "kind": "start", "job": "batch-2", "pid": 178579}
+{"time": 2514.695128317, "kind": "start", "job": "batch-5", "pid": 178577}
+{"time": 2514.790448752, "kind": "end", "job": "batch-0", "pid": 178562}
+{"time": 2514.806496315, "kind": "end", "job": "batch-3", "pid": 178575}
+{"time": 2514.80913252, "kind": "end", "job": "batch-2", "pid": 178579}
+{"time": 2514.815620519, "kind": "end", "job": "batch-5", "pid": 178577}
+{"time": 2514.921803761, "kind": "start", "job": "batch-1", "pid": 178586}
+{"time": 2514.926779958, "kind": "start", "job": "batch-6", "pid": 178590}
+{"time": 2514.935515052, "kind": "start", "job": "batch-7", "pid": 178588}
+{"time": 2515.042378087, "kind": "end", "job": "batch-1", "pid": 178586}
+{"time": 2515.047259313, "kind": "end", "job": "batch-6", "pid": 178590}
+{"time": 2515.056020865, "kind": "end", "job": "batch-7", "pid": 178588}
+{"time": 2515.177745379, "kind": "start", "job": "batch-4", "pid": 178595}
+{"time": 2515.298264882, "kind": "end", "job": "batch-4", "pid": 178595}

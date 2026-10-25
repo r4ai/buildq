@@ -1,0 +1,13 @@
+buildq: target repo-2ce680f7/m0 (new member (full build))
+mbx[setup]: first build on this machine
+mbx[setup]:   cache is /tmp/buildq-qa-mbx-pressure-20261025/mbx/mbx, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
+mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
+   Compiling qa-pressure v0.1.0 (/tmp/buildq-qa-mbx-pressure-20261025/mbx/repo)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 3.8 MiB stored locally
+mbx[cache]: could not look up 3 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: bypassed 3 compilations: 2 compiler-query, 1 standard-input
+mbx[cache]: compiler time: 0s estimated avoided; 161.1ms spent (3 unconsulted in 161.1ms)
+mbx[cache]: slowest uncached crates: build_script_build 138.4ms, qa_pressure 21.7ms, qa-pressure build script 977µs
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 170.2ms, flight_wait 127µs, key 1.9ms, lookup 489µs, permit_wait 426µs, predict 676µs, startup 439µs, store 7.1ms, unattributed 43.2ms
+mbx[cache]: timing: 320.7ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 2.8ms CAS write, 0s materialization

@@ -1,0 +1,29 @@
+buildq: [     0 ms] start
+buildq: [     0 ms] parsed
+buildq: [    65 ms] pool opened (git + toolchain + manifest)
+buildq: all cache members busy and pool at its limit; waiting for one
+buildq: target wt0-09eec5e2/m1 (1 package(s) invalidated: bevy-heavy-probe)
+buildq: [   679 ms] member leased
+buildq: [   684 ms] slot acquired
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling tracing-subscriber v0.3.23
+   Compiling bevy_log v0.16.1
+   Compiling bevy_transform v0.16.1
+   Compiling bevy_mesh v0.16.1
+   Compiling bevy_render v0.16.1
+   Compiling bevy_core_pipeline v0.16.1
+   Compiling bevy_pbr v0.16.1
+   Compiling bevy_internal v0.16.1
+   Compiling bevy v0.16.1
+   Compiling bevy-heavy-probe v0.1.0 (/workspace/qa-bevy-six/trial1-combined4/wt4)
+    Finished `dev` profile [unoptimized] target(s) in 0.40s
+mbx[cache]: 10 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: compiler time: 1m 12s estimated avoided; 0s spent ()
+mbx[cache]: wrapper phases (cumulative, exclusive): blob_transfer 69.9ms, key 53.8ms, lookup 4.2ms, restore 10.3ms, startup 764µs, unattributed 25.0ms
+mbx[cache]: timing: 444.6ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 20.3ms materialization
+mbx[cache]: materialization: 0 outputs (0 B) reflinked, 9 outputs (215.8 MiB) hard linked, 1 outputs (8.5 MiB) copied, 19 outputs (28.3 MiB) already in place
+mbx[savings]: 10 compilations replayed from cache. rustc's services were not required. (1m 12s saved)
+buildq: [  1190 ms] cargo finished
+buildq: [  1192 ms] after-job check
+buildq: [  1192 ms] done

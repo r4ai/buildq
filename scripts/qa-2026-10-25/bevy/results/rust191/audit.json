@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "batches": 9,
+  "checked_executables": 54,
+  "queue_history": [
+    {
+      "trial": 1,
+      "mode": "buildq2",
+      "phase": "warm1",
+      "peak_build_jobs": 2
+    },
+    {
+      "trial": 1,
+      "mode": "buildq2",
+      "phase": "warm2",
+      "peak_build_jobs": 2
+    },
+    {
+      "trial": 1,
+      "mode": "buildq2",
+      "phase": "cold",
+      "peak_build_jobs": 2
+    },
+    {
+      "trial": 1,
+      "mode": "combined2",
+      "phase": "warm1",
+      "peak_build_jobs": 2
+    },
+    {
+      "trial": 1,
+      "mode": "combined2",
+      "phase": "warm2",
+      "peak_build_jobs": 2
+    },
+    {
+      "trial": 1,
+      "mode": "combined2",
+      "phase": "cold",
+      "peak_build_jobs": 2
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+[
+  {
+    "wave": 0,
+    "jobs": [
+      {
+        "name": "wave0-client0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "run",
+          "--offline",
+          "--locked"
+        ],
+        "exit": 0,
+        "output": "version-A:entities=1",
+        "passed": true,
+        "wall_s": 117.50994992300002,
+        "peak_tree_rss_bytes": 1550888960,
+        "sampled_cpu_s": 55.6,
+        "peak_processes": 12,
+        "peak_rustc": 2,
+        "compiling_lines": 210
+      },
+      {
+        "name": "wave0-client1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "run",
+          "--offline",
+          "--locked"
+        ],
+        "exit": 0,
+        "output": "version-A:entities=1",
+        "passed": true,
+        "wall_s": 117.54417452000007,
+        "peak_tree_rss_bytes": 1815707648,
+        "sampled_cpu_s": 138.17,
+        "peak_processes": 11,
+        "peak_rustc": 2,
+        "compiling_lines": 210
+      }
+    ],
+    "jobs_wall_s": 117.54746055100031,
+    "wall_including_collector_settle_s": 118.10847285900036,
+    "collector_settle": {
+      "seconds": 0.5608452210003634,
+      "observed_pids": [],
+      "timed_out": false
+    },
+    "peak_rss_bytes": 1928540160,
+    "sampled_cpu_s": 193.81,
+    "peak_processes": 20,
+    "peak_rustc": 3,
+    "combined_storage": {
+      "allocated": 1619181568,
+      "logical": 1612139064,
+      "files": 2574,
+      "hardlink_aliases": 32,
+      "unique_inodes": 2542
+    },
+    "pool_storage": {
+      "allocated": 1354227712,
+      "logical": 1348254749,
+      "files": 1959,
+      "hardlink_aliases": 27,
+      "unique_inodes": 1932
+    },
+    "mbx_storage": {
+      "allocated": 277065728,
+      "logical": 275989515,
+      "files": 615,
+      "hardlink_aliases": 0,
+      "unique_inodes": 615
+    },
+    "whole_fixture_storage": {
+      "allocated": 1619566592,
+      "logical": 1612364143,
+      "files": 2628,
+      "hardlink_aliases": 32,
+      "unique_inodes": 2596
+    }
+  },
+  {
+    "wave": 1,
+    "jobs": [
+      {
+        "name": "wave1-client0",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "run",
+          "--offline",
+          "--locked"
+        ],
+        "exit": 0,
+        "output": "version-A:entities=1",
+        "passed": true,
+        "wall_s": 89.51840258799984,
+        "peak_tree_rss_bytes": 1842794496,
+        "sampled_cpu_s": 137.18,
+        "peak_processes": 11,
+        "peak_rustc": 2,
+        "compiling_lines": 54
+      },
+      {
+        "name": "wave1-client1",
+        "command": [
+          "/workspace/buildq/target/release/buildq",
+          "cargo",
+          "run",
+          "--offline",
+          "--locked"
+        ],
+        "exit": 0,
+        "output": "version-A:entities=1",
+        "passed": true,
+        "wall_s": 89.46609335699986,
+        "peak_tree_rss_bytes": 1292259328,
+        "sampled_cpu_s": 63.230000000000004,
+        "peak_processes": 11,
+        "peak_rustc": 2,
+        "compiling_lines": 210
+      }
+    ],
+    "jobs_wall_s": 89.51938001899998,
+    "wall_including_collector_settle_s": 90.07647251100025,
+    "collector_settle": {
+      "seconds": 0.5569537260003017,
+      "observed_pids": [],
+      "timed_out": false
+    },
+    "peak_rss_bytes": 2320711680,
+    "sampled_cpu_s": 199.85,
+    "peak_processes": 20,
+    "peak_rustc": 4,
+    "combined_storage": {
+      "allocated": 1382232064,
+      "logical": 1374628014,
+      "files": 2830,
+      "hardlink_aliases": 42,
+      "unique_inodes": 2788
+    },
+    "pool_storage": {
+      "allocated": 1353752576,
+      "logical": 1348254749,
+      "files": 1959,
+      "hardlink_aliases": 27,
+      "unique_inodes": 1932
+    },
+    "mbx_storage": {
+      "allocated": 276574208,
+      "logical": 274446401,
+      "files": 871,
+      "hardlink_aliases": 0,
+      "unique_inodes": 871
+    },
+    "whole_fixture_storage": {
+      "allocated": 1382617088,
+      "logical": 1374854261,
+      "files": 2884,
+      "hardlink_aliases": 42,
+      "unique_inodes": 2842
+    }
+  }
+]

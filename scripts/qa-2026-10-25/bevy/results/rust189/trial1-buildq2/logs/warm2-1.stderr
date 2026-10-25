@@ -1,0 +1,14 @@
+buildq: [     0 ms] start
+buildq: [     0 ms] parsed
+buildq: [    33 ms] pool opened (git + toolchain + manifest)
+buildq: target wt0-0828eaf9/m1 (1 package(s) invalidated: bevy-heavy-probe)
+buildq: [    34 ms] member leased
+buildq: [    36 ms] slot acquired
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling bevy-heavy-probe v0.1.0 (/workspace/qa-bevy-six/trial1-buildq2/wt1)
+    Finished `dev` profile [unoptimized] target(s) in 4.16s
+buildq: [  4254 ms] cargo finished
+buildq: [  4257 ms] after-job check
+buildq: [  4257 ms] done

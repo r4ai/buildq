@@ -1,0 +1,84 @@
+{
+  "pools": [
+    {
+      "name": "repo-f644bda2",
+      "dir": "/workspace/qa-mbx-state/complex/cargo-pool/pools/repo-f644bda2",
+      "info": {
+        "repo": "repo",
+        "repo_key": "/workspace/qa-mbx-state/complex/repo/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792902362902,
+        "last_used_ms": 1792902374073
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-mbx-state/complex/cargo-pool/pools/repo-f644bda2/m0",
+          "busy": false,
+          "size": 36462592,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792902362939,
+            "last_used_ms": 1792902376647,
+            "last_worktree": "/workspace/qa-mbx-state/complex/wt2",
+            "source_root": "/workspace/qa-mbx-state/complex/wt2",
+            "last_head": "35cb0187cbd9667803f6198f57b35984a87aa43e",
+            "last_cmd": "",
+            "jobs": 12,
+            "size_bytes": 36462592,
+            "size_ms": 1792902376692,
+            "size_accounting": "allocated"
+          }
+        },
+        {
+          "id": 1,
+          "dir": "/workspace/qa-mbx-state/complex/cargo-pool/pools/repo-f644bda2/m1",
+          "busy": false,
+          "size": 36474880,
+          "shared": 0,
+          "meta": {
+            "id": 1,
+            "created_ms": 1792902362940,
+            "last_used_ms": 1792902376448,
+            "last_worktree": "/workspace/qa-mbx-state/complex/wt4",
+            "source_root": "/workspace/qa-mbx-state/complex/wt4",
+            "last_head": "35cb0187cbd9667803f6198f57b35984a87aa43e",
+            "last_cmd": "",
+            "jobs": 12,
+            "size_bytes": 36474880,
+            "size_ms": 1792902376694,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [
+    {
+      "dir": "/workspace/qa-mbx-state/complex/cargo-pool/runs/r0",
+      "busy": false,
+      "size": 8577024,
+      "last_used_ms": 1792902376644
+    },
+    {
+      "dir": "/workspace/qa-mbx-state/complex/cargo-pool/runs/r1",
+      "busy": false,
+      "size": 8577024,
+      "last_used_ms": 1792902375750
+    }
+  ],
+  "total": 90091520,
+  "trash_bytes": 0,
+  "budget": 2147483648,
+  "effective_budget": 2147483648,
+  "accounting": "allocated",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "free_disk": 29567041536,
+  "external": [],
+  "external_total": 0
+}

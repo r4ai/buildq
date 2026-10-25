@@ -1,0 +1,91 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> scripts/release.py:3:1
+   |
+ 1 |   """Small release helper; run from the repository root with Python 3.11+."""
+ 2 |
+ 3 | / import hashlib
+ 4 | | from pathlib import Path
+ 5 | | import re
+ 6 | | import sys
+ 7 | | import tarfile
+ 8 | | import tomllib
+ 9 | | import zipfile
+   | |______________^
+10 |
+11 |   TARGETS = (
+   |
+help: Organize imports
+
+E501 Line too long (98 > 88)
+  --> scripts/release.py:28:89
+   |
+26 | def validate(tag):
+27 |     # Restrict tags before passing them to gh, and reject accidental version drift.
+28 |     if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?", tag):
+   |                                                                                         ^^^^^^^^^^
+29 |         raise SystemExit(f"Invalid version tag: {tag!r}")
+30 |     if tag != f"v{VERSION}":
+   |
+
+E501 Line too long (91 > 88)
+  --> scripts/release.py:79:89
+   |
+77 |             checksums()
+78 |         case _:
+79 |             raise SystemExit("Usage: release.py validate TAG | package TARGET | checksums")
+   |                                                                                         ^^^
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> scripts/test_release.py:3:1
+   |
+ 1 |   """Verify release artifact contents and fail-closed publication inputs."""
+ 2 |
+ 3 | / import hashlib
+ 4 | | import os
+ 5 | | from pathlib import Path
+ 6 | | import tarfile
+ 7 | | import tempfile
+ 8 | | import unittest
+ 9 | | import zipfile
+10 | |
+11 | | import release
+   | |______________^
+   |
+help: Organize imports
+
+E501 Line too long (101 > 88)
+  --> scripts/test_release.py:45:89
+   |
+43 |                             self.assertEqual(set(archive.getnames()), expected)
+44 |                             self.assertTrue(archive.getmember(binary).mode & 0o111)
+45 |                             self.assertEqual(archive.extractfile(binary).read(), source.read_bytes())
+   |                                                                                         ^^^^^^^^^^^^^
+46 |                 release.checksums()
+47 |                 for line in Path("dist/SHA256SUMS").read_text().splitlines():
+   |
+
+E501 Line too long (108 > 88)
+  --> scripts/test_release.py:49:89
+   |
+47 |                 for line in Path("dist/SHA256SUMS").read_text().splitlines():
+48 |                     digest, name = line.split("  ")
+49 |                     self.assertEqual(digest, hashlib.sha256((Path("dist") / name).read_bytes()).hexdigest())
+   |                                                                                         ^^^^^^^^^^^^^^^^^^^^
+50 |                 self.assertEqual(len(Path("dist/SHA256SUMS").read_text().splitlines()), 5)
+51 |                 # Extra assets and missing targets must prevent publication.
+   |
+
+E501 Line too long (90 > 88)
+  --> scripts/test_release.py:50:89
+   |
+48 |                     digest, name = line.split("  ")
+49 |                     self.assertEqual(digest, hashlib.sha256((Path("dist") / name).read_bytes()).hexdigest())
+50 |                 self.assertEqual(len(Path("dist/SHA256SUMS").read_text().splitlines()), 5)
+   |                                                                                         ^^
+51 |                 # Extra assets and missing targets must prevent publication.
+52 |                 with self.assertRaises(SystemExit):
+   |
+
+Found 7 errors.
+[*] 2 fixable with the `--fix` option.

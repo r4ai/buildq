@@ -1,0 +1,344 @@
+{
+  "rustc": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+  "mbx": "mbx 1.27.0",
+  "cargo_incremental": "0",
+  "fixed_marker_mtime_ns": 946684800000000000,
+  "results": [
+    {
+      "name": "cargo-initial-0",
+      "backend": "cargo",
+      "phase": "initial-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.32858,
+      "passed": true
+    },
+    {
+      "name": "mbx-initial-0",
+      "backend": "mbx",
+      "phase": "initial-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.357852,
+      "passed": true
+    },
+    {
+      "name": "cargo-initial-1",
+      "backend": "cargo",
+      "phase": "initial-1",
+      "worktree": 1,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt1",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt1/src/absolute.rs",
+        "manifest_marker": "BRAVO",
+        "relative_marker": "BRAVO",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt1"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt1",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt1/src/absolute.rs",
+        "manifest_marker": "BRAVO",
+        "relative_marker": "BRAVO",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt1"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.243019,
+      "passed": true
+    },
+    {
+      "name": "mbx-initial-1",
+      "backend": "mbx",
+      "phase": "initial-1",
+      "worktree": 1,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt1",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt1/src/absolute.rs",
+        "manifest_marker": "BRAVO",
+        "relative_marker": "BRAVO",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt1"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt1",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt1/src/absolute.rs",
+        "manifest_marker": "BRAVO",
+        "relative_marker": "BRAVO",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt1"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.229693,
+      "passed": true
+    },
+    {
+      "name": "cargo-return-0",
+      "backend": "cargo",
+      "phase": "return-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.261725,
+      "passed": true
+    },
+    {
+      "name": "mbx-return-0",
+      "backend": "mbx",
+      "phase": "return-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 1,
+      "seconds": 0.124287,
+      "passed": true
+    },
+    {
+      "name": "cargo-same-root-edit-0",
+      "backend": "cargo",
+      "phase": "same-root-edit-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "DELTA",
+        "relative_marker": "DELTA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "DELTA",
+        "relative_marker": "DELTA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.271258,
+      "passed": true
+    },
+    {
+      "name": "mbx-same-root-edit-0",
+      "backend": "mbx",
+      "phase": "same-root-edit-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "DELTA",
+        "relative_marker": "DELTA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "DELTA",
+        "relative_marker": "DELTA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.24587,
+      "passed": true
+    },
+    {
+      "name": "cargo-return-1",
+      "backend": "cargo",
+      "phase": "return-1",
+      "worktree": 1,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt1",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt1/src/absolute.rs",
+        "manifest_marker": "BRAVO",
+        "relative_marker": "BRAVO",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt1"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt1",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt1/src/absolute.rs",
+        "manifest_marker": "BRAVO",
+        "relative_marker": "BRAVO",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt1"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.345088,
+      "passed": true
+    },
+    {
+      "name": "mbx-return-1",
+      "backend": "mbx",
+      "phase": "return-1",
+      "worktree": 1,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt1",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt1/src/absolute.rs",
+        "manifest_marker": "BRAVO",
+        "relative_marker": "BRAVO",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt1"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt1",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt1/src/absolute.rs",
+        "manifest_marker": "BRAVO",
+        "relative_marker": "BRAVO",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt1"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 1,
+      "seconds": 0.17983,
+      "passed": true
+    },
+    {
+      "name": "cargo-return-edited-0",
+      "backend": "cargo",
+      "phase": "return-edited-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "DELTA",
+        "relative_marker": "DELTA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "DELTA",
+        "relative_marker": "DELTA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.37473,
+      "passed": true
+    },
+    {
+      "name": "mbx-return-edited-0",
+      "backend": "mbx",
+      "phase": "return-edited-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "DELTA",
+        "relative_marker": "DELTA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths189/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs",
+        "manifest_marker": "DELTA",
+        "relative_marker": "DELTA",
+        "cwd": "/workspace/qa-mbx-state/paths189/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.320838,
+      "passed": true
+    }
+  ]
+}

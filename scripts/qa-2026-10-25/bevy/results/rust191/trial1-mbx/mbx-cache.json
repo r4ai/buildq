@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "byte_accounting": "logical",
+  "store": "/workspace/qa-bevy-six-191/trial1-mbx/mbx-cache/actions",
+  "objects": 1758,
+  "object_bytes": 1155742522,
+  "action_results": 274,
+  "action_result_bytes": 101937,
+  "total_bytes": 1155844459,
+  "live_checkouts": 6,
+  "stale_checkouts": 0,
+  "target_directories": 0,
+  "target_bytes": 0,
+  "incremental_directories": 6,
+  "incremental_units": 0,
+  "incremental_bytes": 11985674,
+  "incremental_live_checkouts": 6,
+  "incremental_stale_checkouts": 0,
+  "incremental_untracked_directories": 0,
+  "generated_directories": 4,
+  "generated_bytes": 424,
+  "combined_total_bytes": 1167830557
+}

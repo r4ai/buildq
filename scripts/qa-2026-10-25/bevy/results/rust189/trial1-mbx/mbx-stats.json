@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "store": "/workspace/qa-bevy-six/trial1-mbx/mbx-cache/actions",
+  "savings": {
+    "byte_accounting": "logical",
+    "since_unix_secs": 1792903179,
+    "builds": 6,
+    "cached_compilations": 1240,
+    "estimated_compiler_ns_avoided": 1092138903495,
+    "reflinked_bytes": 5193475585,
+    "pruned_bytes": 0,
+    "pruned_target_bytes": 0,
+    "pruned_store_bytes": 0,
+    "automatically_pruned_bytes": 0,
+    "automatically_pruned_since_unix_secs": 1792903179,
+    "requested_removal_bytes": 0
+  },
+  "cache": {
+    "objects": 1758,
+    "bytes": 1138712216,
+    "managed_targets": 0,
+    "managed_target_bytes": 0
+  },
+  "sharing": {
+    "live_workspaces": 6,
+    "independent_cache_bytes": 6832254168,
+    "shared_store_bytes": 1138712216,
+    "duplicate_cache_bytes_avoided_lower_bound": 5693541952
+  }
+}

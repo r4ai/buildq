@@ -1,0 +1,12 @@
+{
+  "buildq_sha": "3a9e793108ddf1c3bebbd4d1af87cacf0b7ff79f",
+  "buildq_sha256": "a661b53b2744f3ec58a31ad466f62a3a1f473767d6206559a894730fedb63295",
+  "mbx_sha256": "d02159722e826f1ed0729b07abaa5767907b7f5f9d3c2658f832e33da42c1907",
+  "rustc": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+  "cargo": "cargo 1.89.0 (c24e10642 2025-06-23)\n",
+  "mbx": "mbx 1.27.0\n",
+  "fixture_lock_sha256": "493e8ac1f37d172148ffd509eef870cce9f90115ff4723be0e0fb0b662cfb616",
+  "clients": 6,
+  "trials": 2,
+  "started_utc": "2026-10-25T04:26:37Z"
+}

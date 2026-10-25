@@ -1,0 +1,11 @@
+buildq: target repo-d7cb3eaa/m0 (no source differences)
+    Checking qa-lib v0.1.0 (/workspace/qa-mbx-state/functional/repo/lib)
+    Checking qa-app v0.1.0 (/workspace/qa-mbx-state/functional/repo/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 10.6 KiB stored locally
+mbx[cache]: could not look up 4 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: a manifest predicting 2 compilations was loaded, but none matched this build; the compiler or its flags changed since they were recorded (a toolchain update does this)
+mbx[cache]: compiler time: 0s estimated avoided; 143.9ms spent (4 unconsulted in 143.9ms)
+mbx[cache]: slowest uncached crates: qa_app 73.2ms, qa_lib 70.7ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 143.1ms, flight_wait 2.3ms, key 3.6ms, lookup 409µs, permit_wait 2.3ms, predict 1.8ms, startup 635µs, store 8.6ms, unattributed 11.0ms
+mbx[cache]: timing: 115.2ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 2.6ms CAS write, 0s materialization

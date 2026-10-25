@@ -1,0 +1,173 @@
+{
+  "buildq_commit": "3a9e793108ddf1c3bebbd4d1af87cacf0b7ff79f",
+  "measurement": "short Python CPU/IO/sleep jobs, not Rust compilation",
+  "batches": [
+    {
+      "name": "batch-p250-n8",
+      "clients": 8,
+      "slots": 4,
+      "poll_ms": 250,
+      "elapsed_seconds": 0.7242721140000867,
+      "payload_seconds": 0.12,
+      "aggregate_child_cpu_seconds": 0.450515,
+      "exit_codes": [
+        0
+      ],
+      "history_records": 8,
+      "start_events": 8,
+      "end_events": 8,
+      "peak_payload_concurrency": 4,
+      "wait_median_seconds": 0.1265,
+      "wait_max_seconds": 0.501,
+      "status_max_latency_seconds": 0.0047172489998956735,
+      "peak_waiters_sampled": 4,
+      "tickets_after": 0
+    },
+    {
+      "name": "batch-p250-n32",
+      "clients": 32,
+      "slots": 4,
+      "poll_ms": 250,
+      "elapsed_seconds": 3.2253003740001986,
+      "payload_seconds": 0.12,
+      "aggregate_child_cpu_seconds": 1.529213,
+      "exit_codes": [
+        0
+      ],
+      "history_records": 32,
+      "start_events": 32,
+      "end_events": 32,
+      "peak_payload_concurrency": 4,
+      "wait_median_seconds": 1.2605,
+      "wait_max_seconds": 3.01,
+      "status_max_latency_seconds": 0.006847982000181219,
+      "peak_waiters_sampled": 28,
+      "tickets_after": 0
+    },
+    {
+      "name": "batch-p250-n128",
+      "clients": 128,
+      "slots": 4,
+      "poll_ms": 250,
+      "elapsed_seconds": 15.219532767000146,
+      "payload_seconds": 0.12,
+      "aggregate_child_cpu_seconds": 9.623415,
+      "exit_codes": [
+        0
+      ],
+      "history_records": 128,
+      "start_events": 128,
+      "end_events": 128,
+      "peak_payload_concurrency": 4,
+      "wait_median_seconds": 6.829000000000001,
+      "wait_max_seconds": 14.865,
+      "status_max_latency_seconds": 0.03298834799988981,
+      "peak_waiters_sampled": 120,
+      "tickets_after": 0
+    },
+    {
+      "name": "batch-p10-n8",
+      "clients": 8,
+      "slots": 4,
+      "poll_ms": 10,
+      "elapsed_seconds": 0.4124790800001392,
+      "payload_seconds": 0.12,
+      "aggregate_child_cpu_seconds": 0.40898400000000024,
+      "exit_codes": [
+        0
+      ],
+      "history_records": 8,
+      "start_events": 8,
+      "end_events": 8,
+      "peak_payload_concurrency": 4,
+      "wait_median_seconds": 0.0775,
+      "wait_max_seconds": 0.187,
+      "status_max_latency_seconds": 0.0018333319999328523,
+      "peak_waiters_sampled": 4,
+      "tickets_after": 0
+    },
+    {
+      "name": "batch-p10-n32",
+      "clients": 32,
+      "slots": 4,
+      "poll_ms": 10,
+      "elapsed_seconds": 1.4858374610003011,
+      "payload_seconds": 0.12,
+      "aggregate_child_cpu_seconds": 2.025573999999997,
+      "exit_codes": [
+        0
+      ],
+      "history_records": 32,
+      "start_events": 32,
+      "end_events": 32,
+      "peak_payload_concurrency": 4,
+      "wait_median_seconds": 0.6105,
+      "wait_max_seconds": 1.206,
+      "status_max_latency_seconds": 0.0072024559999590565,
+      "peak_waiters_sampled": 28,
+      "tickets_after": 0
+    },
+    {
+      "name": "batch-p10-n128",
+      "clients": 128,
+      "slots": 4,
+      "poll_ms": 10,
+      "elapsed_seconds": 8.484942422000131,
+      "payload_seconds": 0.12,
+      "aggregate_child_cpu_seconds": 13.622205000000001,
+      "exit_codes": [
+        0
+      ],
+      "history_records": 128,
+      "start_events": 128,
+      "end_events": 128,
+      "peak_payload_concurrency": 4,
+      "wait_median_seconds": 5.3055,
+      "wait_max_seconds": 8.078,
+      "status_max_latency_seconds": 0.4919256960001803,
+      "peak_waiters_sampled": 116,
+      "tickets_after": 0
+    }
+  ],
+  "cancellation": {
+    "queued_clients": 32,
+    "queued_cancelled": 16,
+    "cancelled_jobs_started": [],
+    "survivor_exit_codes": [
+      0
+    ],
+    "holder_children_running_after": [],
+    "recovery_exit": 0,
+    "elapsed_after_holder_kill_seconds": 0.7693959950001954,
+    "busy_after": 0,
+    "waiters_after": 0,
+    "tickets_after": 0,
+    "history_records": 17
+  },
+  "priority": {
+    "expected": [
+      "priority-4",
+      "priority-6",
+      "priority-2",
+      "priority-3",
+      "priority-7",
+      "priority-0",
+      "priority-1",
+      "priority-5"
+    ],
+    "actual": [
+      "priority-4",
+      "priority-6",
+      "priority-2",
+      "priority-3",
+      "priority-7",
+      "priority-0",
+      "priority-1",
+      "priority-5"
+    ],
+    "matches_priority_then_fifo": true,
+    "exit_codes": [
+      0
+    ]
+  }
+}

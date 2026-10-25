@@ -1,0 +1,34 @@
+{
+  "classes": [
+    {
+      "class": "build",
+      "holders": [
+        {
+          "busy": false,
+          "job": null,
+          "slot": 0
+        }
+      ],
+      "slots": 1,
+      "waiters": []
+    },
+    {
+      "class": "run",
+      "holders": [
+        {
+          "busy": false,
+          "job": null,
+          "slot": 0
+        },
+        {
+          "busy": false,
+          "job": null,
+          "slot": 1
+        }
+      ],
+      "slots": 2,
+      "waiters": []
+    }
+  ],
+  "hosts": {}
+}

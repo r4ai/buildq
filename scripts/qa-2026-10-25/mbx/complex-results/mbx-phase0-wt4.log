@@ -1,0 +1,15 @@
+beta:build4:source one:rust4:macro one:42
+buildq: all cache members busy and pool at its limit; waiting for one
+buildq: target repo-f644bda2/m0 (3 package(s) invalidated: qa-complex-app, qa-complex-lib, qa-complex-macros)
+   Compiling qa-complex-lib v0.1.0 (/workspace/qa-mbx-state/complex/wt4/lib)
+   Compiling qa-complex-macros v0.1.0 (/workspace/qa-mbx-state/complex/wt4/macros)
+   Compiling qa-complex-app v0.1.0 (/workspace/qa-mbx-state/complex/wt4/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s
+mbx[cache]: 2 hits, 2 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 3.8 MiB stored locally
+mbx[cache]: could not look up 1 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: compiler time: 309.2ms estimated avoided; 171.3ms spent (2 miss in 150.3ms, 1 unconsulted in 21.0ms)
+mbx[cache]: slowest uncached crates: qa_complex_app 110.8ms, qa_complex_lib 39.5ms, qa-complex-lib build script 21.0ms
+mbx[cache]: wrapper phases (cumulative, exclusive): blob_transfer 2.2ms, compiler 149.8ms, flight_wait 1.4ms, key 19.4ms, lookup 5.3ms, permit_wait 543µs, predict 1.0ms, restore 2.1ms, startup 295µs, store 19.9ms, unattributed 33.1ms
+mbx[cache]: timing: 287.6ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 3.1ms CAS write, 3.5ms materialization
+mbx[cache]: materialization: 0 outputs (0 B) reflinked, 0 outputs (0 B) hard linked, 2 outputs (3.8 MiB) copied, 2 outputs (4.5 MiB) already in place
+buildq: copied 8.1 MiB to run dir /workspace/qa-mbx-state/complex/mbx-pool/runs/r0

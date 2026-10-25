@@ -1,0 +1,6 @@
+buildq: [     0 ms] start
+buildq: target ripgrep-ca6e0981/m0 (1 package(s) invalidated: grep)
+   Compiling grep v0.3.2 (/workspace/qa-oss/ripgrep-b/crates/grep)
+   Compiling ripgrep v14.1.1 (/workspace/qa-oss/ripgrep-b)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.19s
+buildq: copied 45.2 MiB to run dir /workspace/qa-oss/cache/runs/r0

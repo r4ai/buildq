@@ -1,0 +1,68 @@
+{
+  "pools": [
+    {
+      "name": "repo-8d450ac9",
+      "dir": "/workspace/qa-mbx-state/functional191/pool/pools/repo-8d450ac9",
+      "info": {
+        "repo": "repo",
+        "repo_key": "/workspace/qa-mbx-state/functional191/repo/.git",
+        "toolchain": "1.91.1",
+        "toolchain_id": "rustc 1.91.1 (ed61e7d7e 2025-11-07)\nbinary: rustc\ncommit-hash: ed61e7d7e242494fb7057f2657300d9e77bb4fcb\ncommit-date: 2025-11-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.91.1\nLLVM version: 21.1.2\n",
+        "created_ms": 1792902638922,
+        "last_used_ms": 1792902656789
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-mbx-state/functional191/pool/pools/repo-8d450ac9/m0",
+          "busy": false,
+          "size": 22814720,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792902639014,
+            "last_used_ms": 1792902657165,
+            "last_worktree": "/workspace/qa-mbx-state/functional191/repo",
+            "source_root": "/workspace/qa-mbx-state/functional191/repo",
+            "last_head": "c402112b67e4b30c2c22e50426aac3c48b687b1f",
+            "last_cmd": "",
+            "jobs": 21,
+            "size_bytes": 22814720,
+            "size_ms": 1792902657187,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [
+    {
+      "dir": "/workspace/qa-mbx-state/functional191/pool/runs/r0",
+      "busy": false,
+      "size": 4091904,
+      "last_used_ms": 1792902655465
+    }
+  ],
+  "total": 26906624,
+  "trash_bytes": 0,
+  "budget": 2147483648,
+  "effective_budget": 2147483648,
+  "accounting": "allocated",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "free_disk": 22922059776,
+  "external": [
+    {
+      "path": "/workspace/qa-mbx-state/functional191/explicit",
+      "last_used_ms": 1792902645437,
+      "last_cwd": "/workspace/qa-mbx-state/functional191/repo",
+      "jobs": 1,
+      "size_bytes": 4104192,
+      "size_ms": 1792902657189,
+      "size_accounting": "allocated"
+    }
+  ],
+  "external_total": 4104192
+}

@@ -1,0 +1,10 @@
+manifest=/workspace/qa-mbx-state/paths-collision191/wt1
+file=src/main.rs
+absolute_file=/workspace/qa-mbx-state/paths-collision191/wt1/src/absolute.rs
+manifest_marker=ALPHA
+relative_marker=ALPHA
+cwd=/workspace/qa-mbx-state/paths-collision191/wt1
+buildq: target wt0-7e4c2fae/m0 (1 package(s) invalidated: qa-embedded-paths)
+   Compiling qa-embedded-paths v0.1.0 (/workspace/qa-mbx-state/paths-collision191/wt1)
+    Finished `dev` profile [unoptimized] target(s) in 0.08s
+buildq: copied 457.7 KiB to run dir /workspace/qa-mbx-state/paths-collision191/cargo-pool/runs/r0

@@ -1,0 +1,31 @@
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test good ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test lib/src/lib.rs - add (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+buildq: target repo-8d450ac9/m0 (no source differences)
+   Compiling qa-app v0.1.0 (/workspace/qa-mbx-state/functional191/repo/app)
+   Compiling qa-lib v0.1.0 (/workspace/qa-mbx-state/functional191/repo/lib)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.52s
+     Running unittests src/main.rs (/workspace/qa-mbx-state/functional191/pool/pools/repo-8d450ac9/m0/debug/deps/qa_app-8c78ef823de0680c)
+     Running unittests src/lib.rs (/workspace/qa-mbx-state/functional191/pool/pools/repo-8d450ac9/m0/debug/deps/qa_lib-d34e0d642a48915b)
+   Doc-tests qa_lib
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 11.8 MiB stored locally
+mbx[cache]: could not look up 2 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: bypassed 1 compilations: 1 rustdoc
+mbx[cache]: compiler time: 0s estimated avoided; 550.5ms spent (2 unconsulted in 550.5ms)
+mbx[cache]: slowest uncached crates: qa_app 298.5ms, qa_lib 252.0ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 548.9ms, flight_wait 1.2ms, key 6.5ms, lookup 4.3ms, permit_wait 3.2ms, predict 33.7ms, startup 124µs, store 129.0ms, unattributed 98.3ms
+mbx[cache]: timing: 1.31s session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 63.1ms CAS write, 0s materialization

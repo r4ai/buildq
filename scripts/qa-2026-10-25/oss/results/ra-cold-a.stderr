@@ -1,0 +1,55 @@
+buildq: [     0 ms] start
+buildq: target rust-analyzer-392e8313/m0 (new member (full build))
+   Compiling proc-macro2 v1.0.95
+   Compiling crossbeam-utils v0.8.21
+   Compiling unicode-ident v1.0.18
+   Compiling libc v0.2.172
+   Compiling quote v1.0.40
+   Compiling once_cell v1.21.3
+   Compiling syn v2.0.103
+   Compiling tracing-core v0.1.34
+   Compiling autocfg v1.4.0
+   Compiling pin-project-lite v0.2.16
+   Compiling either v1.15.0
+   Compiling memoffset v0.9.1
+   Compiling camino v1.1.10
+   Compiling itertools v0.14.0
+   Compiling tracing-attributes v0.1.29
+   Compiling perf-event-open-sys v1.0.1
+   Compiling crossbeam-epoch v0.9.18
+   Compiling crossbeam-channel v0.5.15
+   Compiling rayon-core v1.12.1
+   Compiling tracing v0.1.41
+   Compiling memchr v2.7.5
+   Compiling text-size v1.1.1
+   Compiling unicode-properties v0.1.3
+   Compiling jod-thread v1.0.0
+   Compiling unicode-xid v0.2.6
+   Compiling ra-ap-rustc_lexer v0.122.0
+   Compiling stdx v0.0.0 (/workspace/qa-oss/rust-analyzer/crates/stdx)
+   Compiling crossbeam-deque v0.8.6
+   Compiling perf-event v0.4.7
+   Compiling cfg-if v1.0.1
+   Compiling hashbrown v0.14.5
+   Compiling rustc_apfloat v0.2.3+llvm-462a31f5a5ab
+   Compiling rustc-literal-escaper v0.0.4
+   Compiling drop_bomb v0.1.5
+   Compiling rustc-hash v1.1.0
+   Compiling rustc-hash v2.1.1
+   Compiling countme v3.0.1
+   Compiling dissimilar v1.0.10
+   Compiling edition v0.0.0 (/workspace/qa-oss/rust-analyzer/crates/edition)
+   Compiling parser v0.0.0 (/workspace/qa-oss/rust-analyzer/crates/parser)
+   Compiling rowan v0.15.15
+   Compiling profile v0.0.0 (/workspace/qa-oss/rust-analyzer/crates/profile)
+   Compiling paths v0.0.0 (/workspace/qa-oss/rust-analyzer/crates/paths)
+   Compiling triomphe v0.1.14
+   Compiling smallvec v1.15.1
+   Compiling bitflags v2.9.1
+   Compiling smol_str v0.3.2
+   Compiling syntax v0.0.0 (/workspace/qa-oss/rust-analyzer/crates/syntax)
+   Compiling rayon v1.10.0
+   Compiling test-utils v0.0.0 (/workspace/qa-oss/rust-analyzer/crates/test-utils)
+   Compiling expect-test v1.5.1
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 31.49s
+buildq: copied 18.6 MiB to run dir /workspace/qa-oss/cache/runs/r0

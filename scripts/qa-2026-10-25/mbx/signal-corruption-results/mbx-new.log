@@ -1,0 +1,14 @@
+live-new
+buildq: target repo-4acb417f/m0 (no source differences)
+    Blocking waiting for file lock on build directory
+   Compiling qa-cancelled-output v0.1.0 (/workspace/qa-mbx-state/signal-corruption/mbx/repo)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.18s
+mbx[cache]: 1 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 3.7 MiB stored locally
+mbx[cache]: could not look up 2 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: bypassed 1 compilations: 1 standard-input
+mbx[cache]: compiler time: 0s estimated avoided; 338.9ms spent (2 unconsulted in 338.9ms)
+mbx[cache]: slowest uncached crates: qa_cancelled_output 333.2ms, qa-cancelled-output build script 5.8ms
+mbx[cache]: wrapper phases (cumulative, exclusive): blob_transfer 4.1ms, compiler 332.9ms, flight_wait 142µs, key 50.1ms, lookup 4.7ms, permit_wait 738µs, predict 3.8ms, restore 3.8ms, startup 317µs, store 31.6ms, unattributed 67.1ms
+mbx[cache]: timing: 5.23s session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 4.5ms CAS write, 3.6ms materialization
+mbx[cache]: materialization: 0 outputs (0 B) reflinked, 0 outputs (0 B) hard linked, 1 outputs (3.7 MiB) copied, 1 outputs (352 B) already in place
+buildq: copied 3.6 MiB to run dir /workspace/qa-mbx-state/signal-corruption/mbx/pool/runs/r0

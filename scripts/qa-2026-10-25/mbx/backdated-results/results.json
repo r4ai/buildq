@@ -1,0 +1,1076 @@
+[
+  {
+    "name": "cargo-0",
+    "backend": "cargo",
+    "repetition": 0,
+    "expected": "DELTA",
+    "actual": "ALPHA",
+    "exit": 0,
+    "passed": false,
+    "same_ctime_second": true,
+    "git_false_clean": true,
+    "before": {
+      "marker_content": "ALPHA",
+      "marker_stat": {
+        "ctime_ns": 1792905319006064509,
+        "mtime_ns": 946684800000000000,
+        "inode": 1458147,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905319:6064509\n  mtime: 946684800:0\n  dev: 27\tino: 1458147\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "cd5927f442dec624faffe02e33339b878ee56784\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-98944dbe/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_edit": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905319077809038,
+        "mtime_ns": 946684800000000000,
+        "inode": 1458147,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905319:6064509\n  mtime: 946684800:0\n  dev: 27\tino: 1458147\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-98944dbe/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_job": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905319077809038,
+        "mtime_ns": 946684800000000000,
+        "inode": 1458147,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905319:6064509\n  mtime: 946684800:0\n  dev: 27\tino: 1458147\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-98944dbe/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "recovery": {
+      "exit": 0,
+      "output": "DELTA",
+      "pool_manifest_marker_entries": {
+        "pool/pools/repo-98944dbe/m0.manifest": [
+          "8fdf8f759280b890890bf48af545126e14887aba marker.txt"
+        ]
+      }
+    }
+  },
+  {
+    "name": "cargo-1",
+    "backend": "cargo",
+    "repetition": 1,
+    "expected": "DELTA",
+    "actual": "ALPHA",
+    "exit": 0,
+    "passed": false,
+    "same_ctime_second": true,
+    "git_false_clean": true,
+    "before": {
+      "marker_content": "ALPHA",
+      "marker_stat": {
+        "ctime_ns": 1792905320001358767,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457851,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905320:1358767\n  mtime: 946684800:0\n  dev: 27\tino: 1457851\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "cd5927f442dec624faffe02e33339b878ee56784\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-3a24d3f5/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_edit": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905320079789989,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457851,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905320:1358767\n  mtime: 946684800:0\n  dev: 27\tino: 1457851\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-3a24d3f5/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_job": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905320079789989,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457851,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905320:1358767\n  mtime: 946684800:0\n  dev: 27\tino: 1457851\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-3a24d3f5/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "recovery": {
+      "exit": 0,
+      "output": "DELTA",
+      "pool_manifest_marker_entries": {
+        "pool/pools/repo-3a24d3f5/m0.manifest": [
+          "8fdf8f759280b890890bf48af545126e14887aba marker.txt"
+        ]
+      }
+    }
+  },
+  {
+    "name": "cargo-2",
+    "backend": "cargo",
+    "repetition": 2,
+    "expected": "DELTA",
+    "actual": "ALPHA",
+    "exit": 0,
+    "passed": false,
+    "same_ctime_second": true,
+    "git_false_clean": true,
+    "before": {
+      "marker_content": "ALPHA",
+      "marker_stat": {
+        "ctime_ns": 1792905321003784652,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457716,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905321:3784652\n  mtime: 946684800:0\n  dev: 27\tino: 1457716\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "cd5927f442dec624faffe02e33339b878ee56784\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-730b65fb/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_edit": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905321080063709,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457716,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905321:3784652\n  mtime: 946684800:0\n  dev: 27\tino: 1457716\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-730b65fb/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_job": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905321080063709,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457716,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905321:3784652\n  mtime: 946684800:0\n  dev: 27\tino: 1457716\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-730b65fb/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "recovery": {
+      "exit": 0,
+      "output": "DELTA",
+      "pool_manifest_marker_entries": {
+        "pool/pools/repo-730b65fb/m0.manifest": [
+          "8fdf8f759280b890890bf48af545126e14887aba marker.txt"
+        ]
+      }
+    }
+  },
+  {
+    "name": "mbx-0",
+    "backend": "mbx",
+    "repetition": 0,
+    "expected": "DELTA",
+    "actual": "ALPHA",
+    "exit": 0,
+    "passed": false,
+    "same_ctime_second": true,
+    "git_false_clean": true,
+    "before": {
+      "marker_content": "ALPHA",
+      "marker_stat": {
+        "ctime_ns": 1792905322003727480,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457582,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905322:3727480\n  mtime: 946684800:0\n  dev: 27\tino: 1457582\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "cd5927f442dec624faffe02e33339b878ee56784\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-d101d558/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_edit": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905322076370418,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457582,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905322:3727480\n  mtime: 946684800:0\n  dev: 27\tino: 1457582\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-d101d558/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_job": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905322076370418,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457582,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905322:3727480\n  mtime: 946684800:0\n  dev: 27\tino: 1457582\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-d101d558/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "recovery": {
+      "exit": 0,
+      "output": "DELTA",
+      "pool_manifest_marker_entries": {
+        "pool/pools/repo-d101d558/m0.manifest": [
+          "8fdf8f759280b890890bf48af545126e14887aba marker.txt"
+        ]
+      }
+    }
+  },
+  {
+    "name": "mbx-1",
+    "backend": "mbx",
+    "repetition": 1,
+    "expected": "DELTA",
+    "actual": "ALPHA",
+    "exit": 0,
+    "passed": false,
+    "same_ctime_second": true,
+    "git_false_clean": true,
+    "before": {
+      "marker_content": "ALPHA",
+      "marker_stat": {
+        "ctime_ns": 1792905323007659201,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457292,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905323:7659201\n  mtime: 946684800:0\n  dev: 27\tino: 1457292\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "cd5927f442dec624faffe02e33339b878ee56784\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-964854c6/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_edit": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905323081433643,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457292,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905323:7659201\n  mtime: 946684800:0\n  dev: 27\tino: 1457292\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-964854c6/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_job": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905323081433643,
+        "mtime_ns": 946684800000000000,
+        "inode": 1457292,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905323:7659201\n  mtime: 946684800:0\n  dev: 27\tino: 1457292\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-964854c6/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "recovery": {
+      "exit": 0,
+      "output": "DELTA",
+      "pool_manifest_marker_entries": {
+        "pool/pools/repo-964854c6/m0.manifest": [
+          "8fdf8f759280b890890bf48af545126e14887aba marker.txt"
+        ]
+      }
+    }
+  },
+  {
+    "name": "mbx-2",
+    "backend": "mbx",
+    "repetition": 2,
+    "expected": "DELTA",
+    "actual": "ALPHA",
+    "exit": 0,
+    "passed": false,
+    "same_ctime_second": true,
+    "git_false_clean": true,
+    "before": {
+      "marker_content": "ALPHA",
+      "marker_stat": {
+        "ctime_ns": 1792905324010074438,
+        "mtime_ns": 946684800000000000,
+        "inode": 1456968,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905324:10074438\n  mtime: 946684800:0\n  dev: 27\tino: 1456968\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "cd5927f442dec624faffe02e33339b878ee56784\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-2d89d0cb/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_edit": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905324090204001,
+        "mtime_ns": 946684800000000000,
+        "inode": 1456968,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905324:10074438\n  mtime: 946684800:0\n  dev: 27\tino: 1456968\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-2d89d0cb/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "after_job": {
+      "marker_content": "DELTA",
+      "marker_stat": {
+        "ctime_ns": 1792905324090204001,
+        "mtime_ns": 946684800000000000,
+        "inode": 1456968,
+        "device": 27,
+        "size": 5
+      },
+      "git_status": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_index": {
+        "exit": 0,
+        "stdout": "100644 780c7767876ba2f5b7a8464a2cfcdd2151ca0474 0\tCargo.lock\n100644 1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 0\tCargo.toml\n100644 cd5927f442dec624faffe02e33339b878ee56784 0\tmarker.txt\n100644 85ce1d033393f38e9cfc8818051c08c31e7e21d4 0\tsrc/main.rs\n",
+        "stderr": ""
+      },
+      "git_index_debug": {
+        "exit": 0,
+        "stdout": "marker.txt\n  ctime: 1792905324:10074438\n  mtime: 946684800:0\n  dev: 27\tino: 1456968\n  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n",
+        "stderr": ""
+      },
+      "git_index_flags": {
+        "exit": 0,
+        "stdout": "H marker.txt\n",
+        "stderr": ""
+      },
+      "git_marker_hash": {
+        "exit": 0,
+        "stdout": "8fdf8f759280b890890bf48af545126e14887aba\n",
+        "stderr": ""
+      },
+      "git_source_hash": {
+        "exit": 0,
+        "stdout": "85ce1d033393f38e9cfc8818051c08c31e7e21d4\n",
+        "stderr": ""
+      },
+      "git_core_trustctime": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "git_core_checkstat": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      "pool_manifests": {
+        "pool/pools/repo-2d89d0cb/m0.manifest": "780c7767876ba2f5b7a8464a2cfcdd2151ca0474 Cargo.lock\n1f7dc8121f377c42bce93c9d7a5f4466d29c1a49 Cargo.toml\ncd5927f442dec624faffe02e33339b878ee56784 marker.txt\n85ce1d033393f38e9cfc8818051c08c31e7e21d4 src/main.rs\n"
+      }
+    },
+    "recovery": {
+      "exit": 0,
+      "output": "DELTA",
+      "pool_manifest_marker_entries": {
+        "pool/pools/repo-2d89d0cb/m0.manifest": [
+          "8fdf8f759280b890890bf48af545126e14887aba marker.txt"
+        ]
+      }
+    }
+  }
+]

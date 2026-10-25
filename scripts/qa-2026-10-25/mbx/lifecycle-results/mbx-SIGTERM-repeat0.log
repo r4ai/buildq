@@ -1,0 +1,11 @@
+buildq: target repo-506640a7/m0 (new member (full build))
+mbx[setup]: first build on this machine
+mbx[setup]:   cache is /workspace/qa-mbx-state/lifecycle-final/mbx-SIGTERM-repeat0/mbx, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
+mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
+   Compiling qa-lifecycle v0.1.0 (/workspace/qa-mbx-state/lifecycle-final/mbx-SIGTERM-repeat0/repo)
+error: failed to run custom build command for `qa-lifecycle v0.1.0 (/workspace/qa-mbx-state/lifecycle-final/mbx-SIGTERM-repeat0/repo)`
+
+Caused by:
+  process didn't exit successfully: `/workspace/qa-mbx-state/lifecycle-final/mbx-SIGTERM-repeat0/pool/pools/repo-506640a7/m0/debug/build/qa-lifecycle-ecebc5e351f377ab/build-script-build` (exit status: 137)
+  --- stdout
+  cargo:rerun-if-env-changed=QA_MARKER

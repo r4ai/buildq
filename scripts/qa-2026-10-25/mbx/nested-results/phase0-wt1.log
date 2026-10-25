@@ -1,0 +1,15 @@
+helper0:phase0wt1+helper1:phase0wt1
+buildq: target repo-fa7b25dd/m0 (new member (full build))
+mbx[setup]: first build on this machine
+mbx[setup]:   cache is /workspace/qa-mbx-state/nested/mbx-cache, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
+mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
+   Compiling qa-nested v0.1.0 (/workspace/qa-mbx-state/nested/wt1)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.08s
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 14.8 MiB stored locally
+mbx[cache]: could not look up 5 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: bypassed 13 compilations: 10 compiler-query, 3 standard-input
+mbx[cache]: compiler time: 0s estimated avoided; 3.16s spent (5 unconsulted in 3.16s)
+mbx[cache]: slowest uncached crates: qa-nested build script 1.14s, build_script_build 844.0ms, qa_helper1 414.1ms, qa_nested 400.4ms, qa_helper0 362.0ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 2.09s, flight_wait 4.5ms, key 121.7ms, lookup 13.2ms, permit_wait 432.7ms, predict 11.5ms, startup 1.1ms, store 119.1ms, unattributed 1.40s
+mbx[cache]: timing: 3.13s session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 15.8ms CAS write, 0s materialization
+buildq: copied 3.6 MiB to run dir /workspace/qa-mbx-state/nested/pool/runs/r0

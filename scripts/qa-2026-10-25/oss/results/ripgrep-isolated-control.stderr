@@ -1,0 +1,3 @@
+buildq: target ripgrep-ca6e0981/m1 (no source differences)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running tests/tests.rs (/workspace/qa-oss/cache/pools/ripgrep-ca6e0981/m1/debug/deps/integration-4a031401540a5b06)

@@ -1,0 +1,15 @@
+buildq: target repo-d7cb3eaa/m0 (new member (full build))
+mbx[setup]: first build on this machine
+mbx[setup]:   cache is /workspace/qa-mbx-state/functional/mbx-cache, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
+mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
+    Blocking waiting for file lock on package cache
+   Compiling qa-lib v0.1.0 (/workspace/qa-mbx-state/functional/repo/lib)
+   Compiling qa-app v0.1.0 (/workspace/qa-mbx-state/functional/repo/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.55s
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 3.8 MiB stored locally
+mbx[cache]: could not look up 2 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: bypassed 3 compilations: 2 compiler-query, 1 standard-input
+mbx[cache]: compiler time: 0s estimated avoided; 183.7ms spent (2 unconsulted in 183.7ms)
+mbx[cache]: slowest uncached crates: qa_app 153.0ms, qa_lib 30.7ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 193.5ms, flight_wait 355µs, key 10.5ms, lookup 3.8ms, permit_wait 941µs, predict 1.3ms, startup 322µs, store 7.8ms, unattributed 33.8ms
+mbx[cache]: timing: 3.57s session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 4.7ms CAS write, 0s materialization

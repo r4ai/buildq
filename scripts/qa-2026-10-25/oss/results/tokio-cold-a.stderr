@@ -1,0 +1,89 @@
+buildq: [     0 ms] start
+buildq: target tokio-4c6e1c12/m0 (no source differences)
+   Compiling libc v0.2.191
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling cfg-if v1.0.5
+   Compiling syn v2.0.119
+   Compiling futures-core v0.3.34
+   Compiling pin-project-lite v0.2.17
+   Compiling autocfg v1.5.1
+   Compiling smallvec v1.16.4
+   Compiling rand_core v0.10.1
+   Compiling parking_lot_core v0.9.12
+   Compiling scopeguard v1.2.0
+   Compiling futures-io v0.3.34
+   Compiling getrandom v0.4.3
+   Compiling lock_api v0.4.14
+   Compiling errno v0.3.14
+   Compiling syn v3.0.9
+   Compiling futures-sink v0.3.34
+   Compiling getrandom v0.3.4
+   Compiling zerocopy v0.8.63
+   Compiling bitflags v2.13.2
+   Compiling fastrand v2.5.0
+   Compiling rustix v1.1.5
+   Compiling futures-channel v0.3.34
+   Compiling futures-macro v0.3.34
+   Compiling tokio-macros v2.6.0 (/workspace/qa-oss/tokio/tokio-macros)
+   Compiling signal-hook-registry v1.4.8
+   Compiling parking_lot v0.12.5
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.4
+   Compiling bytes v1.12.1
+   Compiling linux-raw-sys v0.12.1
+   Compiling futures-task v0.3.34
+   Compiling slab v0.4.12
+   Compiling memchr v2.8.3
+   Compiling tokio v1.48.0 (/workspace/qa-oss/tokio/tokio)
+   Compiling futures-util v0.3.34
+   Compiling memoffset v0.9.1
+   Compiling num-traits v0.2.19
+   Compiling predicates-core v1.0.10
+   Compiling once_cell v1.21.4
+   Compiling mockall_derive v0.13.1
+   Compiling cfg_aliases v0.2.2
+   Compiling nix v0.29.0
+   Compiling tempfile v3.27.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling rand_core v0.9.5
+   Compiling pin-project-internal v1.1.13
+   Compiling wait-timeout v0.2.1
+   Compiling parking v2.2.1
+   Compiling termtree v0.5.1
+   Compiling anstyle v1.0.14
+   Compiling bit-vec v0.10.1
+   Compiling quick-error v1.2.3
+   Compiling cpufeatures v0.3.1
+   Compiling fnv v1.0.7
+   Compiling pin-project v1.1.13
+   Compiling rusty-fork v0.3.1
+   Compiling chacha20 v0.10.2
+   Compiling bit-set v0.11.1
+   Compiling predicates v3.1.4
+   Compiling predicates-tree v1.0.13
+   Compiling futures-lite v2.6.1
+   Compiling rand_chacha v0.9.0
+   Compiling tokio-stream v0.1.17 (/workspace/qa-oss/tokio/tokio-stream)
+   Compiling futures-executor v0.3.34
+   Compiling rand v0.10.3
+   Compiling async-stream-impl v0.3.6
+   Compiling rand_xorshift v0.5.0
+   Compiling fragile v2.1.0
+   Compiling pin-utils v0.1.1
+   Compiling core_detect v1.0.0
+   Compiling unarray v0.1.4
+   Compiling fixedbitset v0.5.7
+   Compiling downcast v0.11.0
+   Compiling regex-syntax v0.8.11
+   Compiling futures-concurrency v7.7.1
+   Compiling proptest v1.12.0
+   Compiling mockall v0.13.1
+   Compiling async-stream v0.3.6
+   Compiling futures v0.3.34
+   Compiling tokio-test v0.4.4 (/workspace/qa-oss/tokio/tokio-test)
+   Compiling rand v0.9.5
+   Compiling tokio-util v0.7.16 (/workspace/qa-oss/tokio/tokio-util)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 27.92s
+buildq: copied 53.5 MiB to run dir /workspace/qa-oss/cache/runs/r0

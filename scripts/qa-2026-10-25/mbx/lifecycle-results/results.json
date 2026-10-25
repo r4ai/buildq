@@ -1,0 +1,342 @@
+[
+  {
+    "name": "cargo-SIGTERM-repeat0",
+    "signal": "SIGTERM",
+    "parent_exit": 143,
+    "recorded_descendants": [
+      58895,
+      58896
+    ],
+    "before_signal": [
+      {
+        "pid": 58895,
+        "ppid": 58782,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/cargo-SIGTERM-repeat0/pool/pools/repo-add1ba38/m0/debug/build/qa-lifecycle-98537db2c526cd92/build-script-build"
+      },
+      {
+        "pid": 58896,
+        "ppid": 58895,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "after_signal": [
+      {
+        "pid": 58895,
+        "ppid": 1,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/cargo-SIGTERM-repeat0/pool/pools/repo-add1ba38/m0/debug/build/qa-lifecycle-98537db2c526cd92/build-script-build"
+      },
+      {
+        "pid": 58896,
+        "ppid": 58895,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "living_descendants": [
+      58895,
+      58896
+    ],
+    "busy_holders": 0,
+    "seconds_after_signal": 8.048624,
+    "passed": false
+  },
+  {
+    "name": "cargo-SIGKILL-repeat0",
+    "signal": "SIGKILL",
+    "parent_exit": -9,
+    "recorded_descendants": [
+      59430,
+      59431
+    ],
+    "before_signal": [
+      {
+        "pid": 59430,
+        "ppid": 59311,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/cargo-SIGKILL-repeat0/pool/pools/repo-011be3a8/m0/debug/build/qa-lifecycle-98537db2c526cd92/build-script-build"
+      },
+      {
+        "pid": 59431,
+        "ppid": 59430,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "after_signal": [
+      {
+        "pid": 59430,
+        "ppid": 1,
+        "state": "Z",
+        "command": ""
+      },
+      {
+        "pid": 59431,
+        "ppid": 1,
+        "state": "Z",
+        "command": ""
+      }
+    ],
+    "living_descendants": [],
+    "busy_holders": 0,
+    "seconds_after_signal": 0.134129,
+    "passed": true
+  },
+  {
+    "name": "cargo-SIGTERM-repeat1",
+    "signal": "SIGTERM",
+    "parent_exit": 143,
+    "recorded_descendants": [
+      59554,
+      59555
+    ],
+    "before_signal": [
+      {
+        "pid": 59554,
+        "ppid": 59466,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/cargo-SIGTERM-repeat1/pool/pools/repo-1d83dd17/m0/debug/build/qa-lifecycle-98537db2c526cd92/build-script-build"
+      },
+      {
+        "pid": 59555,
+        "ppid": 59554,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "after_signal": [
+      {
+        "pid": 59554,
+        "ppid": 1,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/cargo-SIGTERM-repeat1/pool/pools/repo-1d83dd17/m0/debug/build/qa-lifecycle-98537db2c526cd92/build-script-build"
+      },
+      {
+        "pid": 59555,
+        "ppid": 59554,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "living_descendants": [
+      59554,
+      59555
+    ],
+    "busy_holders": 0,
+    "seconds_after_signal": 8.097013,
+    "passed": false
+  },
+  {
+    "name": "cargo-SIGKILL-repeat1",
+    "signal": "SIGKILL",
+    "parent_exit": -9,
+    "recorded_descendants": [
+      59993,
+      59994
+    ],
+    "before_signal": [
+      {
+        "pid": 59993,
+        "ppid": 59855,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/cargo-SIGKILL-repeat1/pool/pools/repo-2aad1a79/m0/debug/build/qa-lifecycle-98537db2c526cd92/build-script-build"
+      },
+      {
+        "pid": 59994,
+        "ppid": 59993,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "after_signal": [
+      {
+        "pid": 59993,
+        "ppid": 1,
+        "state": "Z",
+        "command": ""
+      },
+      {
+        "pid": 59994,
+        "ppid": 1,
+        "state": "Z",
+        "command": ""
+      }
+    ],
+    "living_descendants": [],
+    "busy_holders": 0,
+    "seconds_after_signal": 0.140247,
+    "passed": true
+  },
+  {
+    "name": "mbx-SIGTERM-repeat0",
+    "signal": "SIGTERM",
+    "parent_exit": 143,
+    "recorded_descendants": [
+      60173,
+      60174
+    ],
+    "before_signal": [
+      {
+        "pid": 60173,
+        "ppid": 60171,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/mbx-SIGTERM-repeat0/pool/pools/repo-506640a7/m0/debug/build/qa-lifecycle-ecebc5e351f377ab/build_script_build-ecebc5e351f377ab.mbx-real"
+      },
+      {
+        "pid": 60174,
+        "ppid": 60173,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "after_signal": [
+      {
+        "pid": 60173,
+        "ppid": 60171,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/mbx-SIGTERM-repeat0/pool/pools/repo-506640a7/m0/debug/build/qa-lifecycle-ecebc5e351f377ab/build_script_build-ecebc5e351f377ab.mbx-real"
+      },
+      {
+        "pid": 60174,
+        "ppid": 60173,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "living_descendants": [
+      60173,
+      60174
+    ],
+    "busy_holders": 0,
+    "seconds_after_signal": 8.106985,
+    "passed": false
+  },
+  {
+    "name": "mbx-SIGKILL-repeat0",
+    "signal": "SIGKILL",
+    "parent_exit": -9,
+    "recorded_descendants": [
+      61324,
+      61325
+    ],
+    "before_signal": [
+      {
+        "pid": 61324,
+        "ppid": 61321,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/mbx-SIGKILL-repeat0/pool/pools/repo-30d8b23f/m0/debug/build/qa-lifecycle-ecebc5e351f377ab/build_script_build-ecebc5e351f377ab.mbx-real"
+      },
+      {
+        "pid": 61325,
+        "ppid": 61324,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "after_signal": [
+      {
+        "pid": 61324,
+        "ppid": 1,
+        "state": "Z",
+        "command": ""
+      },
+      {
+        "pid": 61325,
+        "ppid": 1,
+        "state": "Z",
+        "command": ""
+      }
+    ],
+    "living_descendants": [],
+    "busy_holders": 0,
+    "seconds_after_signal": 0.202664,
+    "passed": true
+  },
+  {
+    "name": "mbx-SIGTERM-repeat1",
+    "signal": "SIGTERM",
+    "parent_exit": 143,
+    "recorded_descendants": [
+      61532,
+      61533
+    ],
+    "before_signal": [
+      {
+        "pid": 61532,
+        "ppid": 61529,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/mbx-SIGTERM-repeat1/pool/pools/repo-26d509d6/m0/debug/build/qa-lifecycle-ecebc5e351f377ab/build_script_build-ecebc5e351f377ab.mbx-real"
+      },
+      {
+        "pid": 61533,
+        "ppid": 61532,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "after_signal": [
+      {
+        "pid": 61532,
+        "ppid": 61529,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/mbx-SIGTERM-repeat1/pool/pools/repo-26d509d6/m0/debug/build/qa-lifecycle-ecebc5e351f377ab/build_script_build-ecebc5e351f377ab.mbx-real"
+      },
+      {
+        "pid": 61533,
+        "ppid": 61532,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "living_descendants": [
+      61532,
+      61533
+    ],
+    "busy_holders": 0,
+    "seconds_after_signal": 8.106549,
+    "passed": false
+  },
+  {
+    "name": "mbx-SIGKILL-repeat1",
+    "signal": "SIGKILL",
+    "parent_exit": -9,
+    "recorded_descendants": [
+      62390,
+      62392
+    ],
+    "before_signal": [
+      {
+        "pid": 62390,
+        "ppid": 62386,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-final/mbx-SIGKILL-repeat1/pool/pools/repo-39b41a1f/m0/debug/build/qa-lifecycle-ecebc5e351f377ab/build_script_build-ecebc5e351f377ab.mbx-real"
+      },
+      {
+        "pid": 62392,
+        "ppid": 62390,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "after_signal": [
+      {
+        "pid": 62390,
+        "ppid": 1,
+        "state": "Z",
+        "command": ""
+      },
+      {
+        "pid": 62392,
+        "ppid": 1,
+        "state": "Z",
+        "command": ""
+      }
+    ],
+    "living_descendants": [],
+    "busy_holders": 0,
+    "seconds_after_signal": 0.055195,
+    "passed": true
+  }
+]

@@ -1,0 +1,5 @@
+indexed 20 files (20 with copies elsewhere) in 0 ms
+compared 15 files in 1 pools, read 7.1 MiB [allocated accounting]
+identical: 9 files, would share 3.2 MiB
+already shared: 0 files, 0 B
+differing: 6 files; skipped: 0 known different, 0 busy, 0 changed, 0 hard-linked

@@ -1,0 +1,11 @@
+DELTA
+buildq: target repo-d101d558/m0 (1 package(s) invalidated: qa-backdated-input)
+   Compiling qa-backdated-input v0.1.0 (/workspace/qa-mbx-state/backdated-confirm/mbx-0/repo)
+    Finished `dev` profile [unoptimized] target(s) in 0.09s
+mbx[cache]: 0 hits, 1 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: compiler time: 0s estimated avoided; 81.9ms spent (1 miss in 81.9ms)
+mbx[cache]: 1 compilations kept their own incremental state, so they were not stored
+mbx[cache]: slowest uncached crates: qa_backdated_input 81.9ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 81.4ms, key 635µs, lookup 164µs, permit_wait 764µs, restore 1µs, startup 58µs, unattributed 2.6ms
+mbx[cache]: timing: 105.8ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 0s materialization
+buildq: copied 432.5 KiB to run dir /workspace/qa-mbx-state/backdated-confirm/mbx-0/pool/runs/r0

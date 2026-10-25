@@ -1,0 +1,31 @@
+{
+  "buildq_sha": "3a9e793108ddf1c3bebbd4d1af87cacf0b7ff79f",
+  "buildq_sha256": "a661b53b2744f3ec58a31ad466f62a3a1f473767d6206559a894730fedb63295",
+  "mbx_sha256": "d02159722e826f1ed0729b07abaa5767907b7f5f9d3c2658f832e33da42c1907",
+  "rustc": "rustc 1.91.1 (ed61e7d7e 2025-11-07)\nbinary: rustc\ncommit-hash: ed61e7d7e242494fb7057f2657300d9e77bb4fcb\ncommit-date: 2025-11-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.91.1\nLLVM version: 21.1.2\n",
+  "cargo": "cargo 1.91.1 (ea2d97820 2025-10-10)\n",
+  "mbx": "mbx 1.27.0\n",
+  "fixture_lock_sha256": "493e8ac1f37d172148ffd509eef870cce9f90115ff4723be0e0fb0b662cfb616",
+  "clients": 6,
+  "trials": 1,
+  "fixture_source_sha256": "d54f5da80573d123867958d9f2f36df259aca3aad070e0aac3a12ad801bc229f",
+  "modes": [
+    "buildq2",
+    "mbx",
+    "combined2"
+  ],
+  "controlled_environment": {
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_INCREMENTAL": "1",
+    "MBX_TARGET_VIEWS": "0",
+    "MBX_TARGET_LANES": "0",
+    "MBX_GC_AUTO": "0",
+    "MBX_REMOTE_URL": "",
+    "MBX_DISPLAY": "plain",
+    "MBX_SUMMARY": "full",
+    "MBX_SCHEDULER_CPUS": "4",
+    "MBX_SCHEDULER_MEMORY": "12GiB",
+    "CARGO": "/workspace/.buildq-env/cargo/bin/cargo"
+  },
+  "started_utc": "2026-10-25T05:08:52Z"
+}

@@ -1,0 +1,14 @@
+buildq: [     0 ms] start
+buildq: [     0 ms] parsed
+buildq: [   168 ms] pool opened (git + toolchain + manifest)
+buildq: target rust-analyzer-392e8313/m0 (no source differences)
+buildq: [   187 ms] member leased
+buildq: [   206 ms] slot acquired
+   Compiling syntax v0.0.0 (/workspace/qa-oss/rust-analyzer/crates/syntax)
+   Compiling parser v0.0.0 (/workspace/qa-oss/rust-analyzer/crates/parser)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.47s
+     Running unittests src/lib.rs (/workspace/qa-oss/cache/pools/rust-analyzer-392e8313/m0/debug/deps/parser-8967e819d89b362d)
+     Running unittests src/lib.rs (/workspace/qa-oss/cache/pools/rust-analyzer-392e8313/m0/debug/deps/syntax-6cf1a3c07a019f9e)
+buildq: [  7680 ms] cargo finished
+buildq: [  7688 ms] after-job check
+buildq: [  7688 ms] done

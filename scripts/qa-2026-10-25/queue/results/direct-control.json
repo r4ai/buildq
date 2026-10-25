@@ -1,0 +1,9 @@
+{
+  "clients": 128,
+  "direct_workers": 4,
+  "payload_seconds": 0.12,
+  "elapsed_seconds": 5.278879831999802,
+  "aggregate_child_cpu_seconds": 5.1754869999999995,
+  "peak_payload_concurrency": 4,
+  "passed": true
+}

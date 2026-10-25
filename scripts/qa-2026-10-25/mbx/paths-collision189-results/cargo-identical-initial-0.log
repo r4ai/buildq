@@ -1,0 +1,10 @@
+manifest=/workspace/qa-mbx-state/paths-collision189/wt0
+file=src/main.rs
+absolute_file=/workspace/qa-mbx-state/paths-collision189/wt0/src/absolute.rs
+manifest_marker=ALPHA
+relative_marker=ALPHA
+cwd=/workspace/qa-mbx-state/paths-collision189/wt0
+buildq: target wt0-da37997d/m0 (new member (full build))
+   Compiling qa-embedded-paths v0.1.0 (/workspace/qa-mbx-state/paths-collision189/wt0)
+    Finished `dev` profile [unoptimized] target(s) in 0.19s
+buildq: copied 449.3 KiB to run dir /workspace/qa-mbx-state/paths-collision189/cargo-pool/runs/r0

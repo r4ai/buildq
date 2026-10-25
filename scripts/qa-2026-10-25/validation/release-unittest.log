@@ -1,0 +1,10 @@
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.008s
+
+OK
+dist/buildq-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
+dist/buildq-v0.1.0-aarch64-unknown-linux-gnu.tar.gz
+dist/buildq-v0.1.0-x86_64-apple-darwin.tar.gz
+dist/buildq-v0.1.0-aarch64-apple-darwin.tar.gz
+dist/buildq-v0.1.0-x86_64-pc-windows-msvc.zip

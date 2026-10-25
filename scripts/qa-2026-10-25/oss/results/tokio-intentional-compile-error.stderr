@@ -1,0 +1,17 @@
+buildq: [     0 ms] start
+buildq: [     0 ms] parsed
+buildq: [    56 ms] pool opened (git + toolchain + manifest)
+buildq: target tokio-4c6e1c12/m0 (1 package(s) invalidated: tokio)
+buildq: [    64 ms] member leased
+buildq: [    66 ms] slot acquired
+   Compiling tokio v1.48.0 (/workspace/qa-oss/tokio-b/tokio)
+error: intentional buildq QA compile failure
+   --> tokio/src/lib.rs:713:1
+    |
+713 | compile_error!("intentional buildq QA compile failure");
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: could not compile `tokio` (lib) due to 1 previous error
+buildq: [  1282 ms] cargo finished
+buildq: [  1286 ms] after-job check
+buildq: [  1287 ms] done

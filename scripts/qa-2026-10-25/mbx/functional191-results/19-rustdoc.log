@@ -1,0 +1,95 @@
+buildq: target repo-8d450ac9/m0 (no source differences)
+    Checking qa-lib v0.1.0 (/workspace/qa-mbx-state/functional191/repo/lib)
+ Documenting qa-lib v0.1.0 (/workspace/qa-mbx-state/functional191/repo/lib)
+ Documenting qa-app v0.1.0 (/workspace/qa-mbx-state/functional191/repo/app)
+
+thread 'main' (71809) panicked at /rust/deps/scoped-tls-1.0.1/src/lib.rs:168:9:
+cannot access a scoped thread local variable without calling `set` first
+stack backtrace:
+   0:     0x7f3cd7e4c903 - <std::sys::backtrace::BacktraceLock::print::DisplayBacktrace as core::fmt::Display>::fmt::haa87a551a4affa55
+   1:     0x7f3cd8601bd8 - core::fmt::write::h80461e1e45e4fdd2
+   2:     0x7f3cd9c05b6f - std::io::Write::write_fmt::h6e6c69b2d6337d9b
+   3:     0x7f3cd7e11dc2 - std::sys::backtrace::BacktraceLock::print::hf67a46baa621998e
+   4:     0x7f3cd7e17d19 - std::panicking::default_hook::{{closure}}::h391aa815d5e47ec8
+   5:     0x7f3cd7e17843 - std::panicking::default_hook::hd6fdcf2489bb807d
+   6:     0x7f3cd6dfe9a7 - std[868c2b82e02752c5]::panicking::update_hook::<alloc[2f8cfedda7e895ee]::boxed::Box<rustc_driver_impl[8c00ca3c7ff43d1e]::install_ice_hook::{closure#1}>>::{closure#0}
+   7:     0x7f3cd7e1813f - std::panicking::panic_with_hook::h185ddfb86bf14d73
+   8:     0x7f3cd7e176ec - std::panicking::begin_panic::{{closure}}::hf49ace0e1962b6cd
+   9:     0x7f3cd7e11f09 - std::sys::backtrace::__rust_end_short_backtrace::h5e55fad9650cd5ec
+  10:     0x7f3cd5139d4b - std::panicking::begin_panic::h3ae8d44fd2c8c89b
+  11:     0x7f3cd87b183d - <rustc_span[708dd8ee61ad0c72]::symbol::Symbol>::intern
+  12:     0x563da2526ac3 - rustdoc[4c9240845fff430]::html::render::write_shared::write_rendered_cross_crate_info
+  13:     0x563da2522a6a - rustdoc[4c9240845fff430]::html::render::write_shared::write_not_crate_specific
+  14:     0x563da23d263d - rustdoc[4c9240845fff430]::main_args
+  15:     0x563da23ccbc4 - rustdoc[4c9240845fff430]::main
+  16:     0x563da262eae3 - std[868c2b82e02752c5]::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  17:     0x563da262eaf9 - std[868c2b82e02752c5]::rt::lang_start::<()>::{closure#0}
+  18:     0x7f3cd97f0725 - std::rt::lang_start_internal::h6ba36b077a531782
+  19:     0x563da262eb48 - main
+  20:     0x7f3cd3035ca8 - <unknown>
+  21:     0x7f3cd3035d65 - __libc_start_main
+  22:     0x563da20d8764 - <unknown>
+  23:                0x0 - <unknown>
+
+error: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/issues/new?labels=C-bug%2C+I-ICE%2C+T-rustdoc&template=ice.md
+
+note: please make sure that you have updated to the latest nightly
+
+note: please attach the file at `/workspace/qa-mbx-state/functional191/repo/rustc-ice-2026-10-25T04_30_52-71809.txt` to your bug report
+
+note: compiler flags: -Z unstable-options
+
+query stack during panic:
+end of query stack
+
+thread 'main' (71834) panicked at /rust/deps/scoped-tls-1.0.1/src/lib.rs:168:9:
+cannot access a scoped thread local variable without calling `set` first
+stack backtrace:
+   0:     0x7ffa61c4c903 - <std::sys::backtrace::BacktraceLock::print::DisplayBacktrace as core::fmt::Display>::fmt::haa87a551a4affa55
+   1:     0x7ffa62401bd8 - core::fmt::write::h80461e1e45e4fdd2
+   2:     0x7ffa63a05b6f - std::io::Write::write_fmt::h6e6c69b2d6337d9b
+   3:     0x7ffa61c11dc2 - std::sys::backtrace::BacktraceLock::print::hf67a46baa621998e
+   4:     0x7ffa61c17d19 - std::panicking::default_hook::{{closure}}::h391aa815d5e47ec8
+   5:     0x7ffa61c17843 - std::panicking::default_hook::hd6fdcf2489bb807d
+   6:     0x7ffa60bfe9a7 - std[868c2b82e02752c5]::panicking::update_hook::<alloc[2f8cfedda7e895ee]::boxed::Box<rustc_driver_impl[8c00ca3c7ff43d1e]::install_ice_hook::{closure#1}>>::{closure#0}
+   7:     0x7ffa61c1813f - std::panicking::panic_with_hook::h185ddfb86bf14d73
+   8:     0x7ffa61c176ec - std::panicking::begin_panic::{{closure}}::hf49ace0e1962b6cd
+   9:     0x7ffa61c11f09 - std::sys::backtrace::__rust_end_short_backtrace::h5e55fad9650cd5ec
+  10:     0x7ffa5ef39d4b - std::panicking::begin_panic::h3ae8d44fd2c8c89b
+  11:     0x7ffa625b183d - <rustc_span[708dd8ee61ad0c72]::symbol::Symbol>::intern
+  12:     0x55aac062fac3 - rustdoc[4c9240845fff430]::html::render::write_shared::write_rendered_cross_crate_info
+  13:     0x55aac062ba6a - rustdoc[4c9240845fff430]::html::render::write_shared::write_not_crate_specific
+  14:     0x55aac04db63d - rustdoc[4c9240845fff430]::main_args
+  15:     0x55aac04d5bc4 - rustdoc[4c9240845fff430]::main
+  16:     0x55aac0737ae3 - std[868c2b82e02752c5]::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  17:     0x55aac0737af9 - std[868c2b82e02752c5]::rt::lang_start::<()>::{closure#0}
+  18:     0x7ffa635f0725 - std::rt::lang_start_internal::h6ba36b077a531782
+  19:     0x55aac0737b48 - main
+  20:     0x7ffa5ce35ca8 - <unknown>
+  21:     0x7ffa5ce35d65 - __libc_start_main
+  22:     0x55aac01e1764 - <unknown>
+  23:                0x0 - <unknown>
+
+error: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/issues/new?labels=C-bug%2C+I-ICE%2C+T-rustdoc&template=ice.md
+
+note: please make sure that you have updated to the latest nightly
+
+note: please attach the file at `/workspace/qa-mbx-state/functional191/repo/rustc-ice-2026-10-25T04_30_52-71834.txt` to your bug report
+
+note: compiler flags: -Z unstable-options
+
+query stack during panic:
+end of query stack
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.77s
+   Generated /workspace/qa-mbx-state/functional191/pool/pools/repo-8d450ac9/m0/doc/qa_app/index.html and 1 other file
+mbx[cache]: 0 hits, 3 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: bypassed 2 compilations: 2 rustdoc
+mbx[cache]: compiler time: 0s estimated avoided; 2.12s spent (3 miss in 2.12s)
+mbx[cache]: 1 compilations kept their own incremental state, so they were not stored
+mbx[cache]: slowest uncached crates: qa_lib 1.11s, qa_app 1.01s
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 117.7ms, key 29.3ms, lookup 159µs, permit_wait 1.5ms, restore 2µs, startup 65µs, unattributed 9.2ms
+mbx[cache]: timing: 2.81s session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 0s materialization

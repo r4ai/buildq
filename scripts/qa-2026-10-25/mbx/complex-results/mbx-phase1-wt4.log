@@ -1,0 +1,4 @@
+beta:build4:source one:rust4:macro one:42
+buildq: target repo-f644bda2/m0 (no source differences)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.01s
+buildq: copied 8.1 MiB to run dir /workspace/qa-mbx-state/complex/mbx-pool/runs/r0

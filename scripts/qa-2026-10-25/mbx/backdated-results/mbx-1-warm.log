@@ -1,0 +1,15 @@
+ALPHA
+buildq: target repo-964854c6/m0 (new member (full build))
+mbx[setup]: first build on this machine
+mbx[setup]:   cache is /workspace/qa-mbx-state/backdated-confirm/mbx-1/mbx-cache, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
+mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
+   Compiling qa-backdated-input v0.1.0 (/workspace/qa-mbx-state/backdated-confirm/mbx-1/repo)
+    Finished `dev` profile [unoptimized] target(s) in 0.15s
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 436.2 KiB stored locally
+mbx[cache]: could not look up 1 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: bypassed 3 compilations: 2 compiler-query, 1 standard-input
+mbx[cache]: compiler time: 0s estimated avoided; 73.2ms spent (1 unconsulted in 73.2ms)
+mbx[cache]: slowest uncached crates: qa_backdated_input 73.2ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 81.4ms, flight_wait 362µs, key 986µs, lookup 45µs, permit_wait 1.1ms, predict 389µs, startup 222µs, store 5.8ms, unattributed 21.8ms
+mbx[cache]: timing: 173.0ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 4.5ms CAS write, 0s materialization
+buildq: copied 432.3 KiB to run dir /workspace/qa-mbx-state/backdated-confirm/mbx-1/pool/runs/r0

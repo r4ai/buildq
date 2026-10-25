@@ -1,0 +1,66 @@
+{
+  "scenario": "external_collector_lock_blocks_last_post_job_gc",
+  "build_seconds": 0.36263632200007123,
+  "build_exit": 0,
+  "build_stderr": "buildq: target repo-dca9fced/m0 (new member (full build))\n   Compiling gc-contention v0.1.0 (/tmp/buildq-gc-contention-3i0hbjn0/repo)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s\nbuildq: warning: completed cache member /tmp/buildq-gc-contention-3i0hbjn0/cache/pools/repo-dca9fced/m0 (72.3 MiB) exceeds the entire cache budget 32.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse\nbuildq: cache exceeds its effective budget by 40.3 MiB (soft limit): idle artifacts await GC or could not be reclaimed\n",
+  "budget": 33554432,
+  "bytes_while_collector_lock_held": 75849728,
+  "bytes_after_collector_unlock": 75849728,
+  "all_members_idle": true,
+  "post_job_metadata_before_refresh": [
+    {
+      "id": 0,
+      "created_ms": 1792905258370,
+      "last_used_ms": 1792905258690,
+      "last_worktree": "/tmp/buildq-gc-contention-3i0hbjn0/repo",
+      "source_root": "/tmp/buildq-gc-contention-3i0hbjn0/repo",
+      "last_head": "19f638107a444a73ec8c1509d7377682b8c66ef8",
+      "last_cmd": "",
+      "jobs": 1,
+      "size_bytes": 75849728,
+      "size_ms": 1792905258690,
+      "size_accounting": "allocated"
+    }
+  ],
+  "member_size_metadata": [
+    {
+      "id": 0,
+      "created_ms": 1792905258370,
+      "last_used_ms": 1792905258690,
+      "last_worktree": "/tmp/buildq-gc-contention-3i0hbjn0/repo",
+      "source_root": "/tmp/buildq-gc-contention-3i0hbjn0/repo",
+      "last_head": "19f638107a444a73ec8c1509d7377682b8c66ef8",
+      "last_cmd": "",
+      "jobs": 1,
+      "size_bytes": 75849728,
+      "size_ms": 1792905258794,
+      "size_accounting": "allocated"
+    }
+  ],
+  "over_budget": true,
+  "over_budget_reasons": [
+    "idle artifacts await GC or could not be reclaimed"
+  ],
+  "trash_bytes": 0,
+  "manual_gc": {
+    "actions": [
+      "evict repo-dca9fced/m0 (last used 0s ago, over budget 32.0 MiB) (path footprint 72.3 MiB)"
+    ],
+    "freed": 75849728,
+    "before": 75849728,
+    "after": 0,
+    "effective_budget": 33554432,
+    "accounting": "allocated",
+    "over_budget": false,
+    "over_budget_bytes": 0,
+    "over_budget_reasons": [],
+    "skipped": null,
+    "external": 0,
+    "warnings": [
+      "completed cache member /tmp/buildq-gc-contention-3i0hbjn0/cache/pools/repo-dca9fced/m0 (72.3 MiB) exceeds the entire cache budget 32.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse"
+    ],
+    "failed_deletions": 0,
+    "dedupe": null
+  },
+  "scope": "Deterministic lock-contention model; not a real concurrent-collector trace"
+}

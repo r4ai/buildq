@@ -1,0 +1,16 @@
+manifest=/workspace/qa-mbx-state/paths189/wt0
+file=src/main.rs
+absolute_file=/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs
+manifest_marker=DELTA
+relative_marker=DELTA
+cwd=/workspace/qa-mbx-state/paths189/wt0
+buildq: target wt0-fdf2bb46/m0 (1 package(s) invalidated: qa-embedded-paths)
+   Compiling qa-embedded-paths v0.1.0 (/workspace/qa-mbx-state/paths189/wt0)
+mbx[warning]: incremental state was not reused: compiler environment input changed: CARGO_MANIFEST_DIR
+    Finished `dev` profile [unoptimized] target(s) in 0.17s
+mbx[cache]: 0 hits, 1 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 452.8 KiB stored locally
+mbx[cache]: compiler time: 0s estimated avoided; 145.4ms spent (1 miss in 145.4ms)
+mbx[cache]: slowest uncached crates: qa_embedded_paths 145.4ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 145.1ms, flight_wait 109µs, key 1.2ms, lookup 74µs, permit_wait 764µs, predict 554µs, restore 1µs, startup 65µs, store 2.9ms, unattributed 2.6ms
+mbx[cache]: timing: 195.7ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 989µs CAS write, 0s materialization
+buildq: copied 449.3 KiB to run dir /workspace/qa-mbx-state/paths189/mbx-pool/runs/r0

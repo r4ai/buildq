@@ -1,0 +1,212 @@
+   Compiling buildq v0.1.0 (/workspace/buildq)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 21.92s
+     Running unittests src/lib.rs (target/debug/deps/buildq-ba2cb5391615462e)
+
+running 36 tests
+test cargo::tests::alias_expansion_keeps_args ... ok
+test cargo::tests::target_dir_config_is_rerooted ... ok
+test cargo::tests::routes_heavy_and_passthrough ... ok
+test cargo::tests::aliases_from_config_files ... ok
+test cargo_config::tests::merges_fields_and_retains_value_origin ... ok
+test cargo_config::tests::discovery_legacy_precedence_and_cli_overrides ... ok
+test cargo_config::tests::relative_values_follow_the_running_cargos_rule ... ok
+test dedupe::tests::shareable_bytes_stop_at_the_logical_range ... ok
+test job::tests::artifacts_from_messages ... ok
+test git::tests::porcelain_parse ... ok
+test external::tests::records_measures_and_forgets ... ok
+test job::tests::build_dirs_cover_deps_for_bins_and_examples ... ok
+test job::tests::mbx_args_move_cargo_globals_after_the_subcommand ... ok
+test job::tests::mbx_launcher_refuses_loops_and_explicit_wrappers ... ok
+test job::tests::sync_copies_only_changes ... ok
+test pool::tests::fingerprints_include_rerooted_sub_dirs ... ok
+test pool::tests::invalidate_removes_only_named_packages ... ok
+test job::tests::package_ids ... ok
+test pool::tests::lease_prefers_two_leaves_over_a_shared_foundation ... ok
+test pool::tests::owners_from_manifests ... ok
+test pool::tests::path_deps_outside_the_manifest_are_reported ... ok
+test pool::tests::plan_groups_by_package ... ok
+test pool::tests::rebuild_graph_counts_transitive_union_and_handles_cycles_and_unknowns ... ok
+test pool::tests::unit_names ... ok
+test remote::tests::host_choice ... ok
+test pool::tests::outside_touches_only_include_manifest_differences ... ok
+test pool::tests::empty_manifest_needs_no_outside_touches ... ok
+test remote::tests::probes_validate_load_and_required_rust_release ... ok
+test remote::tests::quoting ... ok
+test util::tests::hardlinks_are_counted_once_per_tree ... ok
+test exec::tests::a_terminated_unreaped_child_is_not_running ... ok
+test util::tests::hash_is_stable ... ok
+test util::tests::sizes_parse ... ok
+test remote::tests::unreachable_candidates_do_not_fall_back_outside_the_requested_list ... ok
+test util::tests::sparse_file_allocation_is_distinct_from_logical_length ... ok
+test remote::tests::probe_capture_has_a_deadline ... ok
+
+test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running unittests src/main.rs (target/debug/deps/buildq-3e734fc20b2c3647)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli.rs (target/debug/deps/cli-85835ab962e3c7ee)
+
+running 24 tests
+test a_member_cap_below_effective_slots_is_reported ... ok
+test cached_member_sizes_refresh_before_gc_budget_decisions ... ok
+test automatic_host_selection_uses_live_remote_load ... ok
+test a_guarded_process_tree_stops_before_pressure_failure_returns ... ok
+test caller_temp_directories_isolate_otherwise_colliding_concurrent_jobs ... ok
+buildq: definitely-not-a-command-xyz: No such file or directory (os error 2)
+test exit_code_passes_through ... ok
+test failed_gc_deletions_stay_counted_and_do_not_claim_reclamation ... ok
+test gc_budget_removes_recent_run_copies_but_preserves_locked_runs ... ok
+test explicit_target_dir_is_announced_and_counted ... ok
+test disabled_worktree_cap_keeps_fifo_across_worktrees ... ok
+test mbx_backend_wraps_queued_jobs_and_keeps_target_ownership ... ok
+test nested_calls_do_not_deadlock ... ok
+test killed_holder_releases_its_slot ... ok
+test shim_inside_a_held_job_is_passthrough ... ok
+test pool_explicit_reroots_target_dirs_inside_the_worktree ... ok
+test shim_passes_light_commands_straight_through ... ok
+test shim_routes_heavy_commands_through_queue_and_pool ... ok
+test shim_touches_only_changed_outside_files_in_built_members ... ok
+test worktree_cap_allows_idle_slots_without_competitors ... ok
+test worktree_cap_configuration_and_environment_override ... ok
+test top_snapshot_shows_a_running_job_and_a_waiter_without_terminal_codes ... ok
+test concurrency_never_exceeds_slots_across_processes ... ok
+test worktree_cap_defers_extra_jobs_and_preserves_fifo ... ok
+test priority_overtakes_waiting_jobs ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.46s
+
+     Running tests/dedupe.rs (target/debug/deps/dedupe-55b0a20746cb65f4)
+
+running 31 tests
+test a_rewritten_canonical_starts_a_new_group ... ok
+test a_failed_eviction_keeps_its_shared_blocks_charged ... ok
+test a_replaced_alias_does_not_keep_a_pruned_copy_alive ... ok
+test busy_members_are_skipped ... ok
+test concurrent_passes_do_not_overlap ... ok
+test an_alias_still_matches_a_different_counterpart ... ok
+test an_interrupted_relink_is_restored ... ok
+test a_surviving_hard_link_keeps_a_pruned_copy_shared ... ok
+test cross_pool_sharing_is_charged_once_and_survives_retiring_a_pool ... ok
+test differing_files_and_leftover_clones ... ok
+test copies_that_differ_from_the_first_are_compared_with_each_other ... ok
+test dry_runs_project_revoked_discounts_of_removed_pools ... ok
+test dry_runs_replan_copies_whose_aliases_pruning_removes ... ok
+test dry_run_projects_eviction_after_pruning_like_a_real_run ... ok
+test eviction_frees_only_bytes_no_other_member_shares ... ok
+test dry_run_counts_identical_copies_beyond_the_first_without_changes ... ok
+test gc_without_dedupe_leaves_files_alone ... ok
+test groups_with_several_contents_share_within_each ... ok
+test index_scale ... ignored, benchmark
+test gc_shares_before_budget_eviction_and_throttles_automatic_passes ... ok
+test hard_links_are_kept_together ... ok
+test known_different_copies_are_skipped_until_either_changes ... ok
+test hard_linked_names_count_once ... ok
+test passes_stopped_by_the_read_limit_resume_at_the_next_pair ... ok
+test private_state_small_files_and_other_pools_are_not_candidates ... ok
+test pruning_a_copy_another_member_shares_frees_only_its_own_bytes ... ok
+test projected_passes_skip_excluded_files ... ok
+test pools_on_one_toolchain_group_and_other_toolchains_never_do ... ok
+test sharing_keeps_content_mode_and_mtime_and_shrinks_usage ... ok
+test the_read_limit_stops_the_pass ... ok
+test timestamp_preserving_rewrites_revoke_the_discount ... ok
+
+test result: ok. 30 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/e2e.rs (target/debug/deps/e2e-a864582c4b95d214)
+
+running 18 tests
+test a_real_cargo_target_fitting_the_disk_budget_stays_warm_after_gc ... ok
+test edits_during_a_slot_wait_reach_the_member_manifest ... ok
+test member_wait_does_not_hold_the_only_build_slot ... ok
+test copied_runs_honor_cargo_runner_config_environment_and_cli ... ok
+test ambiguous_runs_do_not_build_or_launch_an_arbitrary_workspace_binary ... ok
+test member_waits_do_not_hold_any_build_slot ... ok
+test native_runtime_leases_survive_gc_while_queued_and_during_late_loading ... ok
+test oversized_builds_warn_before_gc_discards_their_reusable_artifacts ... ok
+test path_dependencies_outside_the_repository_are_reported ... ok
+test pooled_builds_refuse_an_unavailable_reserve_and_retry_cleanly ... ok
+test nested_helper_workspaces_do_not_inherit_the_parent_pool_target ... ok
+test run_applies_effective_cargo_config_environment ... ok
+test project_cache_clean_is_explicit_scoped_and_respects_live_leases ... ok
+test run_starts_a_dylib_linked_binary ... ignored, compiles a tiny real workspace; run with --ignored
+test two_worktrees_share_a_pool_member ... ignored, compiles a small real workspace; run with --ignored
+test pooled_compile_time_paths_follow_the_current_worktree ... ok
+test run_manifest_path_selects_the_requested_member_instead_of_the_cwd_package ... ok
+test pooled_builds_follow_each_worktrees_submodule_sources ... ok
+
+test result: ok. 16 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 19.14s
+
+     Running tests/gc.rs (target/debug/deps/gc-891c074d2314e1a1)
+
+running 20 tests
+test a_hardlinked_member_that_fits_the_budget_keeps_its_cache ... ok
+test actual_auto_gc_refreshes_both_under_and_overestimates ... ok
+test auto_gc_detects_growth_when_estimate_expires_despite_recent_gc ... ok
+test automatic_gc_preflight_skips_recent_usage_but_never_budget_pressure ... ok
+test budget_shrinks_with_free_disk ... ok
+test allocated_accounting_and_mode_changes_refresh_member_estimates ... ok
+test budget_evicts_recent_idle_runs_lru_before_members ... ok
+test budget_cannot_evict_busy_runs ... ok
+test dry_run_does_not_count_age_evicted_runs_twice ... ok
+test busy_overflow_reports_why_gc_cannot_meet_the_soft_budget ... ok
+test completed_member_warning_reuses_and_expires_the_size_estimate ... ok
+test dry_run_does_not_count_pruned_artifacts_again_when_evicting ... ok
+test evicts_lru_members_over_budget_and_skips_busy ... ok
+test idle_pool_retirement_defers_to_an_active_leasing_section ... ok
+test prunes_incremental_and_stale_variants ... ok
+test scans_never_publish_metadata_for_a_busy_member ... ok
+test size_estimates_survive_builds_and_expire ... ok
+test pruning_one_hardlink_does_not_claim_the_retained_inodes_bytes ... ok
+test eviction_preserves_open_member_and_pool_lock_identities ... ok
+test dry_run_trash_does_not_hide_budget_eviction ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/pool.rs (target/debug/deps/pool-a82093385c9044eb)
+
+running 2 tests
+test lease_prefers_closest_member_and_grows_only_when_busy ... ok
+test lease_waits_when_full ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/queue.rs (target/debug/deps/queue-c882a1848145ed38)
+
+running 3 tests
+test status_reports_holder ... ok
+test fifo_and_priority_order ... ok
+test concurrency_never_exceeds_slots ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/reaping.rs (target/debug/deps/reaping-42bd4a03be690d74)
+
+running 1 test
+test inline_gc_and_recent_background_gc_leave_no_adopted_collectors ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.18s
+
+     Running tests/remote.rs (target/debug/deps/remote-a2739adeb8be51c7)
+
+running 1 test
+test sync_run_fetch_roundtrip ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/rsync.rs (target/debug/deps/rsync-ba679baa2d311ad4)
+
+running 1 test
+test rsync_sends_ignored_sources_preserves_incremental_builds_and_fetches ... ignored, requires POSIX rsync; CI runs this on Linux and macOS
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests buildq
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

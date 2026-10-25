@@ -1,0 +1,15 @@
+buildq: [     0 ms] start
+buildq: [     0 ms] parsed
+buildq: [    27 ms] pool opened (git + toolchain + manifest)
+buildq: target wt0-09eec5e2/m1 (no source differences)
+buildq: [    28 ms] member leased
+buildq: waiting for a build slot: 0/4 busy, position 3 of 3
+buildq: got build slot 2 after 0s
+buildq: [    57 ms] slot acquired
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Finished `dev` profile [unoptimized] target(s) in 0.41s
+buildq: [   564 ms] cargo finished
+buildq: [   566 ms] after-job check
+buildq: [   566 ms] done

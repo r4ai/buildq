@@ -1,0 +1,95 @@
+
+running 90 tests
+test async_send_recv_many_with_buffer ... ok
+test async_send_recv_unbounded ... ok
+test async_send_recv_with_buffer ... ok
+test blocking_recv_async - should panic ... ok
+test blocking_recv ... ok
+test blocking_send_async - should panic ... ok
+test buffer_gteq_one - should panic ... ok
+test drop_all_elements_during_panic ... ok
+test drop_permit_iterator_releases_permits ... ok
+test drop_permit_releases_permit ... ok
+test dropping_rx_closes_channel ... ok
+test dropping_rx_closes_channel_for_try ... ok
+test no_t_bounds_buffer ... ok
+test no_t_bounds_unbounded ... ok
+test permit_available_not_acquired_close ... ok
+test ready_close_cancel_bounded ... ok
+test recv_close_gets_none_idle ... ok
+test recv_close_gets_none_reserved ... ok
+test recv_timeout ... ok
+test recv_timeout_panic - should panic ... ok
+test reserve_disarm ... ok
+test reserve_many_above_cap ... ok
+test reserve_many_and_send ... ok
+test reserve_many_on_closed_channel ... ok
+test reserve_many_zero ... ok
+test send_recv_buffer_limited ... ok
+test send_recv_many_bounded_capacity ... ok
+test send_recv_many_unbounded ... ok
+test send_recv_many_unbounded_capacity ... ok
+test send_recv_stream_unbounded ... ok
+test send_recv_stream_with_buffer ... ok
+test send_recv_unbounded ... ok
+test send_recv_with_buffer ... ok
+test start_send_past_cap ... ok
+test blocking_send ... ok
+test test_is_empty_32_msgs ... ok
+test test_rx_is_closed_when_calling_close_with_sender ... ok
+test test_rx_is_closed_when_dropping_all_senders ... ok
+test test_rx_is_closed_when_there_are_messages_and_close_is_called ... ok
+test test_rx_is_closed_when_there_are_no_senders_and_there_are_messages ... ok
+test test_rx_is_empty_all_senders_are_dropped_and_messages_consumed ... ok
+test test_rx_is_empty_when_all_messages_are_consumed ... ok
+test test_rx_is_empty_when_no_messages_were_sent ... ok
+test test_rx_is_not_closed_when_there_are_permits_but_not_senders ... ok
+test test_rx_is_not_closed_when_there_are_senders ... ok
+test test_rx_is_not_closed_when_there_are_senders_and_buffer_filled ... ok
+test test_rx_is_not_empty_when_all_but_one_messages_are_consumed ... ok
+test test_rx_is_not_empty_when_the_buffer_is_full ... ok
+test test_rx_is_not_empty_when_there_are_messages_in_the_buffer ... ok
+test test_rx_len_on_empty_channel ... ok
+test test_rx_len_on_empty_channel_without_senders ... ok
+test test_rx_len_on_filled_channel ... ok
+test test_rx_len_on_filled_channel_without_senders ... ok
+test test_rx_len_when_close_is_called ... ok
+test test_rx_len_when_close_is_called_after_dropping_sender ... ok
+test test_rx_len_when_close_is_called_before_dropping_sender ... ok
+test test_rx_len_when_consuming_all_messages ... ok
+test test_rx_unbounded_is_closed_when_calling_close_with_sender ... ok
+test test_rx_unbounded_is_closed_when_dropping_all_senders ... ok
+test test_rx_unbounded_is_closed_when_there_are_messages_and_close_is_called ... ok
+test test_rx_unbounded_is_closed_when_there_are_no_senders_and_there_are_messages ... ok
+test test_rx_unbounded_is_empty_all_senders_are_dropped_and_messages_consumed ... ok
+test test_rx_unbounded_is_empty_when_all_messages_are_consumed ... ok
+test test_rx_unbounded_is_empty_when_no_messages_were_sent ... ok
+test test_rx_unbounded_is_not_closed_when_there_are_senders ... ok
+test test_rx_unbounded_is_not_empty_when_all_but_one_messages_are_consumed ... ok
+test test_rx_unbounded_is_not_empty_when_there_are_messages_in_the_buffer ... ok
+test test_rx_unbounded_len_on_empty_channel ... ok
+test test_rx_unbounded_len_on_empty_channel_without_senders ... ok
+test test_rx_unbounded_len_when_close_is_called ... ok
+test test_rx_unbounded_len_when_close_is_called_after_dropping_sender ... ok
+test test_rx_unbounded_len_when_close_is_called_before_dropping_sender ... ok
+test test_rx_unbounded_len_when_consuming_all_messages ... ok
+test test_rx_unbounded_len_with_multiple_messages ... ok
+test test_rx_unbounded_len_with_multiple_messages_and_dropped_senders ... ok
+test test_tx_capacity ... ok
+test try_recv_bounded ... ok
+test try_recv_close_while_empty_bounded ... ok
+test try_recv_close_while_empty_unbounded ... ok
+test try_recv_unbounded ... ok
+test try_reserve_fails ... ok
+test try_reserve_many_and_send ... ok
+test try_reserve_many_edge_cases ... ok
+test try_reserve_many_on_closed_channel ... ok
+test try_reserve_many_zero ... ok
+test try_send_fail ... ok
+test try_send_fail_with_try_recv ... ok
+test tx_close_gets_none ... ok
+test unconsumed_messages_are_dropped ... ok
+test try_reserve_many_full ... ok
+
+test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+

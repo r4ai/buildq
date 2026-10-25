@@ -1,0 +1,8 @@
+beta:build4:source one:rust4:macro one:42
+buildq: target repo-f644bda2/m1 (new member (full build))
+    Blocking waiting for file lock on package cache
+   Compiling qa-complex-lib v0.1.0 (/workspace/qa-mbx-state/complex/wt4/lib)
+   Compiling qa-complex-macros v0.1.0 (/workspace/qa-mbx-state/complex/wt4/macros)
+   Compiling qa-complex-app v0.1.0 (/workspace/qa-mbx-state/complex/wt4/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.72s
+buildq: copied 8.2 MiB to run dir /workspace/qa-mbx-state/complex/cargo-pool/runs/r0

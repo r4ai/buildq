@@ -1,0 +1,10 @@
+manifest=/workspace/qa-mbx-state/paths189/wt0
+file=src/main.rs
+absolute_file=/workspace/qa-mbx-state/paths189/wt0/src/absolute.rs
+manifest_marker=DELTA
+relative_marker=DELTA
+cwd=/workspace/qa-mbx-state/paths189/wt0
+buildq: target wt0-fdf2bb46/m0 (1 package(s) invalidated: qa-embedded-paths)
+   Compiling qa-embedded-paths v0.1.0 (/workspace/qa-mbx-state/paths189/wt0)
+    Finished `dev` profile [unoptimized] target(s) in 0.17s
+buildq: copied 449.3 KiB to run dir /workspace/qa-mbx-state/paths189/cargo-pool/runs/r0

@@ -1,0 +1,4 @@
+{"pass": 0, "compared": 0, "read_bytes": 0, "read_limited": true, "resume": [["p", 0], ["p", 1]]}
+{"pass": 1, "compared": 0, "read_bytes": 0, "read_limited": true, "resume": [["p", 0], ["p", 1]]}
+{"pass": 2, "compared": 0, "read_bytes": 0, "read_limited": true, "resume": [["p", 0], ["p", 1]]}
+{"override": {"dry_run": true, "accounting": "allocated", "pools": 1, "indexed": 4, "index_ms": 0, "candidates": 4, "compared": 2, "identical": 2, "identical_bytes": 679936, "shared": 0, "shared_bytes": 0, "already_shared": 0, "already_shared_bytes": 0, "differing": 0, "skipped_busy": 0, "skipped_changed": 0, "skipped_hardlinked": 0, "skipped_known_different": 0, "read_bytes": 1359872, "read_limited": false, "unsupported": null, "skipped": null, "errors": []}}

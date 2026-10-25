@@ -1,0 +1,30 @@
+
+running 2 tests
+test intentionally_failing ... FAILED
+test good ... ok
+
+failures:
+
+---- intentionally_failing stdout ----
+
+thread 'intentionally_failing' (71465) panicked at lib/src/lib.rs:9:36:
+intentional test failure
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    intentionally_failing
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+buildq: target repo-8d450ac9/m0 (1 package(s) invalidated: qa-lib)
+   Compiling qa-lib v0.1.0 (/workspace/qa-mbx-state/functional191/repo/lib)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.49s
+     Running unittests src/lib.rs (/workspace/qa-mbx-state/functional191/pool/pools/repo-8d450ac9/m0/debug/deps/qa_lib-d34e0d642a48915b)
+error: test failed, to rerun pass `-p qa-lib --lib`
+mbx[cache]: 0 hits, 2 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: compiler time: 0s estimated avoided; 519.4ms spent (2 miss in 519.4ms)
+mbx[cache]: 2 compilations kept their own incremental state, so they were not stored
+mbx[cache]: slowest uncached crates: qa_lib 519.4ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 517.1ms, key 84.2ms, lookup 6.8ms, permit_wait 2.7ms, restore 4µs, startup 166µs, unattributed 39.4ms
+mbx[cache]: timing: 576.8ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 0s materialization

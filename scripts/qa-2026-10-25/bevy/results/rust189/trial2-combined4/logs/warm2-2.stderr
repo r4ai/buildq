@@ -1,0 +1,21 @@
+buildq: [     0 ms] start
+buildq: [     0 ms] parsed
+buildq: [    43 ms] pool opened (git + toolchain + manifest)
+buildq: target wt0-4c4a1a73/m1 (1 package(s) invalidated: bevy-heavy-probe)
+buildq: [    44 ms] member leased
+buildq: [    49 ms] slot acquired
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling bevy-heavy-probe v0.1.0 (/workspace/qa-bevy-six/trial2-combined4/wt2)
+    Finished `dev` profile [unoptimized] target(s) in 0.45s
+mbx[cache]: 1 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: compiler time: 3.72s estimated avoided; 0s spent ()
+mbx[cache]: wrapper phases (cumulative, exclusive): blob_transfer 2.6ms, key 1.9ms, lookup 314µs, restore 1.8ms, startup 75µs, unattributed 3.7ms
+mbx[cache]: timing: 509.4ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 1.7ms materialization
+mbx[cache]: materialization: 0 outputs (0 B) reflinked, 0 outputs (0 B) hard linked, 1 outputs (8.5 MiB) copied, 1 outputs (267 B) already in place
+mbx[savings]: 797 compilations on file. the box remembers.
+buildq: [   656 ms] cargo finished
+buildq: [   659 ms] after-job check
+buildq: [   659 ms] done

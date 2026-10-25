@@ -1,0 +1,17 @@
+buildq: [     0 ms] start
+buildq: all cache members busy and pool at its limit; waiting for one
+buildq: target ripgrep-ca6e0981/m0 (10 package(s) invalidated: globset, grep, grep-cli, grep-matcher, grep-pcre2, grep-printer +4)
+buildq: waiting for a build slot: 1/2 busy, position 3 of 3
+buildq: waiting for a build slot: 2/2 busy, position 2 of 2
+buildq: got build slot 1 after 19s
+   Compiling grep-matcher v0.1.7 (/workspace/qa-oss/ripgrep-b/crates/matcher)
+   Compiling globset v0.4.15 (/workspace/qa-oss/ripgrep-b/crates/globset)
+   Compiling grep-searcher v0.1.14 (/workspace/qa-oss/ripgrep-b/crates/searcher)
+   Compiling grep-cli v0.1.11 (/workspace/qa-oss/ripgrep-b/crates/cli)
+   Compiling grep-printer v0.2.2 (/workspace/qa-oss/ripgrep-b/crates/printer)
+   Compiling grep-regex v0.1.13 (/workspace/qa-oss/ripgrep-b/crates/regex)
+   Compiling ripgrep v14.1.1 (/workspace/qa-oss/ripgrep-b)
+   Compiling grep v0.3.2 (/workspace/qa-oss/ripgrep-b/crates/grep)
+   Compiling ignore v0.4.23 (/workspace/qa-oss/ripgrep-b/crates/ignore)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 19.34s
+buildq: copied 45.2 MiB to run dir /workspace/qa-oss/cache/runs/r0

@@ -1,0 +1,36 @@
+[
+  {
+    "backend": "cargo",
+    "cancelled_exit": 143,
+    "old_pid": 68744,
+    "new_pid": 68929,
+    "old_out": "/workspace/qa-mbx-state/signal-corruption/cargo/pool/pools/repo-c13271a9/m0/debug/build/qa-cancelled-output-8052271f30465527/out",
+    "new_out": "/workspace/qa-mbx-state/signal-corruption/cargo/pool/pools/repo-c13271a9/m0/debug/build/qa-cancelled-output-8052271f30465527/out",
+    "same_out_dir": true,
+    "second_exit": 0,
+    "second_stdout": "live-new",
+    "second_seconds": 1.491794,
+    "old_finished_after_cancellation": true,
+    "generated_file_after_old_finished": "cancelled-old",
+    "third_exit": 0,
+    "third_stdout": "cancelled-old",
+    "passed": false
+  },
+  {
+    "backend": "mbx",
+    "cancelled_exit": 143,
+    "old_pid": 69552,
+    "new_pid": 69815,
+    "old_out": "/workspace/qa-mbx-state/signal-corruption/mbx/pool/pools/repo-4acb417f/m0/debug/build/qa-cancelled-output-f16f4fd3fe817246/out",
+    "new_out": "/workspace/qa-mbx-state/signal-corruption/mbx/pool/pools/repo-4acb417f/m0/debug/build/qa-cancelled-output-f16f4fd3fe817246/out",
+    "same_out_dir": true,
+    "second_exit": 0,
+    "second_stdout": "live-new",
+    "second_seconds": 5.541054,
+    "old_finished_after_cancellation": true,
+    "generated_file_after_old_finished": "live-new",
+    "third_exit": 0,
+    "third_stdout": "live-new",
+    "passed": true
+  }
+]

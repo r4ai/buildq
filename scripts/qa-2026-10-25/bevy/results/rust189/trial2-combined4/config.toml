@@ -1,0 +1,11 @@
+slots = 4
+poll_ms = 25
+[cache]
+max_members = 4
+budget = "16G"
+min_free = "1G"
+gc_after_job = false
+[cargo]
+jobs = 2
+backend = "mbx"
+mbx = "/workspace/qa-mbx-state/bin/mbx"

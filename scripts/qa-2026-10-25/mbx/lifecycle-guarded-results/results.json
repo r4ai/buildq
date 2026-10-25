@@ -1,0 +1,92 @@
+[
+  {
+    "name": "cargo-SIGTERM-repeat0",
+    "signal": "SIGTERM",
+    "min_free": "1",
+    "parent_exit": 143,
+    "recorded_descendants": [
+      116626,
+      116627
+    ],
+    "before_signal": [
+      {
+        "pid": 116626,
+        "ppid": 116551,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-guarded/cargo-SIGTERM-repeat0/pool/pools/repo-e4be4a3a/m0/debug/build/qa-lifecycle-98537db2c526cd92/build-script-build"
+      },
+      {
+        "pid": 116627,
+        "ppid": 116626,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "after_signal": [
+      {
+        "pid": 116626,
+        "ppid": 1,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-guarded/cargo-SIGTERM-repeat0/pool/pools/repo-e4be4a3a/m0/debug/build/qa-lifecycle-98537db2c526cd92/build-script-build"
+      },
+      {
+        "pid": 116627,
+        "ppid": 116626,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "living_descendants": [
+      116626,
+      116627
+    ],
+    "busy_holders": 0,
+    "seconds_after_signal": 8.118202,
+    "passed": false
+  },
+  {
+    "name": "mbx-SIGTERM-repeat0",
+    "signal": "SIGTERM",
+    "min_free": "1",
+    "parent_exit": 143,
+    "recorded_descendants": [
+      116772,
+      116773
+    ],
+    "before_signal": [
+      {
+        "pid": 116772,
+        "ppid": 116770,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-guarded/mbx-SIGTERM-repeat0/pool/pools/repo-59a2e148/m0/debug/build/qa-lifecycle-ecebc5e351f377ab/build_script_build-ecebc5e351f377ab.mbx-real"
+      },
+      {
+        "pid": 116773,
+        "ppid": 116772,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "after_signal": [
+      {
+        "pid": 116772,
+        "ppid": 116770,
+        "state": "S",
+        "command": "/workspace/qa-mbx-state/lifecycle-guarded/mbx-SIGTERM-repeat0/pool/pools/repo-59a2e148/m0/debug/build/qa-lifecycle-ecebc5e351f377ab/build_script_build-ecebc5e351f377ab.mbx-real"
+      },
+      {
+        "pid": 116773,
+        "ppid": 116772,
+        "state": "S",
+        "command": "sleep 45"
+      }
+    ],
+    "living_descendants": [
+      116772,
+      116773
+    ],
+    "busy_holders": 0,
+    "seconds_after_signal": 8.166457,
+    "passed": false
+  }
+]

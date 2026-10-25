@@ -1,0 +1,71 @@
+{
+  "pools": [
+    {
+      "name": "wt0-a341f450",
+      "dir": "/workspace/qa-bevy-six-191/trial1-combined2/pool/pools/wt0-a341f450",
+      "info": {
+        "repo": "wt0",
+        "repo_key": "/workspace/qa-bevy-six-191/trial1-combined2/wt0/.git",
+        "toolchain": "1.91.1",
+        "toolchain_id": "rustc 1.91.1 (ed61e7d7e 2025-11-07)\nbinary: rustc\ncommit-hash: ed61e7d7e242494fb7057f2657300d9e77bb4fcb\ncommit-date: 2025-11-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.91.1\nLLVM version: 21.1.2\n",
+        "created_ms": 1792905190131,
+        "last_used_ms": 1792905310900
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-bevy-six-191/trial1-combined2/pool/pools/wt0-a341f450/m0",
+          "busy": false,
+          "size": 1175785472,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792905190147,
+            "last_used_ms": 1792905311771,
+            "last_worktree": "/workspace/qa-bevy-six-191/trial1-combined2/wt2",
+            "source_root": "/workspace/qa-bevy-six-191/trial1-combined2/wt2",
+            "last_head": "f6d08ab4fa4c52ef9f2d0f1d5d5bb8b400925f22",
+            "last_cmd": "",
+            "jobs": 9,
+            "size_bytes": 1175785472,
+            "size_ms": 1792905311871,
+            "size_accounting": "allocated"
+          }
+        },
+        {
+          "id": 1,
+          "dir": "/workspace/qa-bevy-six-191/trial1-combined2/pool/pools/wt0-a341f450/m1",
+          "busy": false,
+          "size": 1176223744,
+          "shared": 0,
+          "meta": {
+            "id": 1,
+            "created_ms": 1792905190152,
+            "last_used_ms": 1792905311741,
+            "last_worktree": "/workspace/qa-bevy-six-191/trial1-combined2/wt4",
+            "source_root": "/workspace/qa-bevy-six-191/trial1-combined2/wt4",
+            "last_head": "f6d08ab4fa4c52ef9f2d0f1d5d5bb8b400925f22",
+            "last_cmd": "",
+            "jobs": 9,
+            "size_bytes": 1176223744,
+            "size_ms": 1792905311878,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [],
+  "total": 2352009216,
+  "trash_bytes": 0,
+  "budget": 17179869184,
+  "effective_budget": 17179869184,
+  "accounting": "allocated",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "free_disk": 22199963648,
+  "external": [],
+  "external_total": 0
+}

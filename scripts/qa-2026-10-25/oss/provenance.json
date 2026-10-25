@@ -1,0 +1,23 @@
+{
+  "tokio": {
+    "head": "556820ff84030b37e74e11b86b7733f5795770ea",
+    "tracked_files": 800,
+    "rust_files": 733,
+    "rust_lines": 162611,
+    "cargo_lock_sha256": "0090971f6f232e3a454923c7dbcddf55427cba09d40a5674f64baaa56fea21f3"
+  },
+  "ripgrep": {
+    "head": "4649aa9700619f94cf9c66876e9549d83420e16c",
+    "tracked_files": 213,
+    "rust_files": 98,
+    "rust_lines": 50283,
+    "cargo_lock_sha256": "1a99f2f04d96411238379485e36623a19b0158d9446796e6d85d58746023f441"
+  },
+  "rust-analyzer": {
+    "head": "db02cdc7fc8b0e0b9aa1be4110a74620bbac1f98",
+    "tracked_files": 2094,
+    "rust_files": 1313,
+    "rust_lines": 487273,
+    "cargo_lock_sha256": "aa4c881a8f09031185b73e690fe01db625594b08b231911300d008e6719c9a79"
+  }
+}

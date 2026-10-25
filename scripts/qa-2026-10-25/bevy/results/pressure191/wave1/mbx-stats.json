@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "store": "/workspace/qa-bevy-pressure-191/mbx-cache/actions",
+  "savings": {
+    "byte_accounting": "logical",
+    "since_unix_secs": 1792904840,
+    "builds": 4,
+    "cached_compilations": 303,
+    "estimated_compiler_ns_avoided": 327692047462,
+    "reflinked_bytes": 1675992481,
+    "pruned_bytes": 1784531236,
+    "pruned_target_bytes": 848,
+    "pruned_store_bytes": 1784530388,
+    "automatically_pruned_bytes": 1784531236,
+    "automatically_pruned_since_unix_secs": 1792904840,
+    "requested_removal_bytes": 0
+  },
+  "cache": {
+    "objects": 75,
+    "bytes": 261056491,
+    "managed_targets": 0,
+    "managed_target_bytes": 0
+  },
+  "sharing": {
+    "live_workspaces": 2,
+    "independent_cache_bytes": 477983134,
+    "shared_store_bytes": 261056491,
+    "duplicate_cache_bytes_avoided_lower_bound": 216926643
+  }
+}

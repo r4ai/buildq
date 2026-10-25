@@ -1,0 +1,98 @@
+[
+  {
+    "check": "ruff-qa",
+    "command": [
+      "scripts/.venv/bin/ruff",
+      "check",
+      "scripts/qa-2026-10-25"
+    ],
+    "exit": 0,
+    "baseline_issue": null
+  },
+  {
+    "check": "format-qa",
+    "command": [
+      "scripts/.venv/bin/ruff",
+      "format",
+      "--check",
+      "scripts/qa-2026-10-25"
+    ],
+    "exit": 0,
+    "baseline_issue": null
+  },
+  {
+    "check": "ruff-project",
+    "command": [
+      "scripts/.venv/bin/ruff",
+      "check",
+      "scripts"
+    ],
+    "exit": 1,
+    "baseline_issue": 114
+  },
+  {
+    "check": "format-project",
+    "command": [
+      "scripts/.venv/bin/ruff",
+      "format",
+      "--check",
+      "scripts"
+    ],
+    "exit": 1,
+    "baseline_issue": 114
+  },
+  {
+    "check": "pytest",
+    "command": [
+      "scripts/.venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "scripts/tests"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "release-unittest",
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "scripts",
+      "-p",
+      "test_release.py"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "compileall",
+    "command": [
+      "python3",
+      "-m",
+      "compileall",
+      "-q",
+      "scripts/qa-2026-10-25"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "bevy189-audit",
+    "command": [
+      "python3",
+      "scripts/qa-2026-10-25/bevy/verify.py",
+      "/workspace/qa-bevy-six"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "bevy191-audit",
+    "command": [
+      "python3",
+      "scripts/qa-2026-10-25/bevy/verify.py",
+      "/workspace/qa-bevy-six-191"
+    ],
+    "exit": 0
+  }
+]

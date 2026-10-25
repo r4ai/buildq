@@ -1,0 +1,4 @@
+# Preserve terminal transcripts, including blank lines emitted by test runners.
+*.stdout whitespace=-blank-at-eof
+*.stderr whitespace=-blank-at-eof
+*.log whitespace=-blank-at-eof

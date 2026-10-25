@@ -1,0 +1,111 @@
+{
+  "pools": [
+    {
+      "name": "wt0-09eec5e2",
+      "dir": "/workspace/qa-bevy-six/trial1-combined4/pool/pools/wt0-09eec5e2",
+      "info": {
+        "repo": "wt0",
+        "repo_key": "/workspace/qa-bevy-six/trial1-combined4/wt0/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792903415194,
+        "last_used_ms": 1792903547099
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-bevy-six/trial1-combined4/pool/pools/wt0-09eec5e2/m0",
+          "busy": false,
+          "size": 1159237632,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792903415216,
+            "last_used_ms": 1792903547977,
+            "last_worktree": "/workspace/qa-bevy-six/trial1-combined4/wt0",
+            "source_root": "/workspace/qa-bevy-six/trial1-combined4/wt0",
+            "last_head": "7e5c8a60eb3b9022cf6c5009bc534516803284f7",
+            "last_cmd": "",
+            "jobs": 4,
+            "size_bytes": 1159237632,
+            "size_ms": 1792903548119,
+            "size_accounting": "allocated"
+          }
+        },
+        {
+          "id": 1,
+          "dir": "/workspace/qa-bevy-six/trial1-combined4/pool/pools/wt0-09eec5e2/m1",
+          "busy": false,
+          "size": 1159237632,
+          "shared": 0,
+          "meta": {
+            "id": 1,
+            "created_ms": 1792903415216,
+            "last_used_ms": 1792903547975,
+            "last_worktree": "/workspace/qa-bevy-six/trial1-combined4/wt5",
+            "source_root": "/workspace/qa-bevy-six/trial1-combined4/wt5",
+            "last_head": "7e5c8a60eb3b9022cf6c5009bc534516803284f7",
+            "last_cmd": "",
+            "jobs": 6,
+            "size_bytes": 1159237632,
+            "size_ms": 1792903548127,
+            "size_accounting": "allocated"
+          }
+        },
+        {
+          "id": 2,
+          "dir": "/workspace/qa-bevy-six/trial1-combined4/pool/pools/wt0-09eec5e2/m2",
+          "busy": false,
+          "size": 1159245824,
+          "shared": 0,
+          "meta": {
+            "id": 2,
+            "created_ms": 1792903415222,
+            "last_used_ms": 1792903547732,
+            "last_worktree": "/workspace/qa-bevy-six/trial1-combined4/wt2",
+            "source_root": "/workspace/qa-bevy-six/trial1-combined4/wt2",
+            "last_head": "7e5c8a60eb3b9022cf6c5009bc534516803284f7",
+            "last_cmd": "",
+            "jobs": 5,
+            "size_bytes": 1159245824,
+            "size_ms": 1792903548133,
+            "size_accounting": "allocated"
+          }
+        },
+        {
+          "id": 3,
+          "dir": "/workspace/qa-bevy-six/trial1-combined4/pool/pools/wt0-09eec5e2/m3",
+          "busy": false,
+          "size": 1159237632,
+          "shared": 0,
+          "meta": {
+            "id": 3,
+            "created_ms": 1792903415229,
+            "last_used_ms": 1792903547867,
+            "last_worktree": "/workspace/qa-bevy-six/trial1-combined4/wt1",
+            "source_root": "/workspace/qa-bevy-six/trial1-combined4/wt1",
+            "last_head": "7e5c8a60eb3b9022cf6c5009bc534516803284f7",
+            "last_cmd": "",
+            "jobs": 3,
+            "size_bytes": 1159237632,
+            "size_ms": 1792903548140,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [],
+  "total": 4636958720,
+  "trash_bytes": 0,
+  "budget": 17179869184,
+  "effective_budget": 17179869184,
+  "accounting": "allocated",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "free_disk": 23700525056,
+  "external": [],
+  "external_total": 0
+}

@@ -1,0 +1,10 @@
+buildq: target repo-d7cb3eaa/m0 (no source differences)
+    Checking qa-app v0.1.0 (/workspace/qa-mbx-state/functional/repo/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: could not look up 1 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: compiler time: 0s estimated avoided; 26.1ms spent (1 unconsulted in 26.1ms)
+mbx[cache]: 1 compilations kept their own incremental state, so they were not stored
+mbx[cache]: slowest uncached crates: qa_app 26.1ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 25.8ms, key 432µs, lookup 66µs, permit_wait 574µs, startup 64µs, unattributed 1.5ms
+mbx[cache]: timing: 49.3ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 0s materialization

@@ -1,0 +1,13 @@
+version two args=["edited"] cwd=/workspace/qa-mbx-state/functional/repo env=qa inherited value
+buildq: target repo-d7cb3eaa/m0 (1 package(s) invalidated: qa-lib)
+   Compiling qa-lib v0.1.0 (/workspace/qa-mbx-state/functional/repo/lib)
+   Compiling qa-app v0.1.0 (/workspace/qa-mbx-state/functional/repo/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.26s
+mbx[cache]: 0 hits, 1 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: could not look up 1 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: compiler time: 0s estimated avoided; 231.8ms spent (1 miss in 25.9ms, 1 unconsulted in 205.9ms)
+mbx[cache]: 2 compilations kept their own incremental state, so they were not stored
+mbx[cache]: slowest uncached crates: qa_app 205.9ms, qa_lib 25.9ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 231.3ms, key 10.1ms, lookup 294µs, permit_wait 827µs, restore 1µs, startup 137µs, unattributed 3.8ms
+mbx[cache]: timing: 272.5ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 0s materialization
+buildq: copied 3.8 MiB to run dir /workspace/qa-mbx-state/functional/pool/runs/r0

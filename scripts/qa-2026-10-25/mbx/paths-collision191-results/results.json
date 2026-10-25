@@ -1,0 +1,177 @@
+{
+  "rustc": "rustc 1.91.1 (ed61e7d7e 2025-11-07)\nbinary: rustc\ncommit-hash: ed61e7d7e242494fb7057f2657300d9e77bb4fcb\ncommit-date: 2025-11-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.91.1\nLLVM version: 21.1.2\n",
+  "mbx": "mbx 1.27.0",
+  "cargo_incremental": "0",
+  "fixed_marker_mtime_ns": 946684800000000000,
+  "same_marker_only": true,
+  "results": [
+    {
+      "name": "cargo-identical-initial-0",
+      "backend": "cargo",
+      "phase": "identical-initial-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.191939,
+      "passed": true
+    },
+    {
+      "name": "mbx-identical-initial-0",
+      "backend": "mbx",
+      "phase": "identical-initial-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.26148,
+      "passed": true
+    },
+    {
+      "name": "cargo-identical-other-root-1",
+      "backend": "cargo",
+      "phase": "identical-other-root-1",
+      "worktree": 1,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt1",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt1/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt1"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt1",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt1/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt1"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.16781,
+      "passed": true
+    },
+    {
+      "name": "mbx-identical-other-root-1",
+      "backend": "mbx",
+      "phase": "identical-other-root-1",
+      "worktree": 1,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt1",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt1/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt1"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt1",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt1/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt1"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.189237,
+      "passed": true
+    },
+    {
+      "name": "cargo-identical-return-0",
+      "backend": "cargo",
+      "phase": "identical-return-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 0,
+      "seconds": 0.177406,
+      "passed": true
+    },
+    {
+      "name": "mbx-identical-return-0",
+      "backend": "mbx",
+      "phase": "identical-return-0",
+      "worktree": 0,
+      "exit": 0,
+      "expected": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt0",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt0"
+      },
+      "actual": {
+        "manifest": "/workspace/qa-mbx-state/paths-collision191/wt0",
+        "file": "src/main.rs",
+        "absolute_file": "/workspace/qa-mbx-state/paths-collision191/wt0/src/absolute.rs",
+        "manifest_marker": "ALPHA",
+        "relative_marker": "ALPHA",
+        "cwd": "/workspace/qa-mbx-state/paths-collision191/wt0"
+      },
+      "file_macro_correct": true,
+      "marker_mtime_ns": 946684800000000000,
+      "marker_bytes": 5,
+      "cache_hits": 1,
+      "seconds": 0.162429,
+      "passed": true
+    }
+  ]
+}

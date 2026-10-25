@@ -1,0 +1,13 @@
+default:build5:source one:rust5:macro one:42
+buildq: all cache members busy and pool at its limit; waiting for one
+buildq: target repo-f644bda2/m0 (3 package(s) invalidated: qa-complex-app, qa-complex-lib, qa-complex-macros)
+   Compiling qa-complex-lib v0.1.0 (/workspace/qa-mbx-state/complex/wt5/lib)
+   Compiling qa-complex-macros v0.1.0 (/workspace/qa-mbx-state/complex/wt5/macros)
+   Compiling qa-complex-app v0.1.0 (/workspace/qa-mbx-state/complex/wt5/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.09s
+mbx[cache]: 5 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: compiler time: 473.8ms estimated avoided; 0s spent ()
+mbx[cache]: wrapper phases (cumulative, exclusive): blob_transfer 4.7ms, key 5.5ms, lookup 3.8ms, restore 3.9ms, startup 374µs, unattributed 20.3ms
+mbx[cache]: timing: 110.4ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 5.6ms materialization
+mbx[cache]: materialization: 0 outputs (0 B) reflinked, 1 outputs (63.7 KiB) hard linked, 5 outputs (7.4 MiB) copied, 6 outputs (4.5 MiB) already in place
+buildq: copied 8.1 MiB to run dir /workspace/qa-mbx-state/complex/mbx-pool/runs/r0

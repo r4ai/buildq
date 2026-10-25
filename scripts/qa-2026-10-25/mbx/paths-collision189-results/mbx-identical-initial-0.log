@@ -1,0 +1,20 @@
+manifest=/workspace/qa-mbx-state/paths-collision189/wt0
+file=src/main.rs
+absolute_file=/workspace/qa-mbx-state/paths-collision189/wt0/src/absolute.rs
+manifest_marker=ALPHA
+relative_marker=ALPHA
+cwd=/workspace/qa-mbx-state/paths-collision189/wt0
+buildq: target wt0-da37997d/m0 (new member (full build))
+mbx[setup]: first build on this machine
+mbx[setup]:   cache is /workspace/qa-mbx-state/paths-collision189/mbx-cache, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
+mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
+   Compiling qa-embedded-paths v0.1.0 (/workspace/qa-mbx-state/paths-collision189/wt0)
+    Finished `dev` profile [unoptimized] target(s) in 0.21s
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 453.7 KiB stored locally
+mbx[cache]: could not look up 1 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: bypassed 3 compilations: 2 compiler-query, 1 standard-input
+mbx[cache]: compiler time: 0s estimated avoided; 117.3ms spent (1 unconsulted in 117.3ms)
+mbx[cache]: slowest uncached crates: qa_embedded_paths 117.3ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 129.5ms, flight_wait 84µs, key 8.2ms, lookup 99µs, permit_wait 508µs, predict 331µs, startup 222µs, store 2.0ms, unattributed 24.5ms
+mbx[cache]: timing: 243.9ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 1.0ms CAS write, 0s materialization
+buildq: copied 449.3 KiB to run dir /workspace/qa-mbx-state/paths-collision189/mbx-pool/runs/r0

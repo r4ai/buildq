@@ -1,0 +1,15 @@
+manifest=/workspace/qa-mbx-state/paths-collision191/wt1
+file=src/main.rs
+absolute_file=/workspace/qa-mbx-state/paths-collision191/wt1/src/absolute.rs
+manifest_marker=ALPHA
+relative_marker=ALPHA
+cwd=/workspace/qa-mbx-state/paths-collision191/wt1
+buildq: target wt0-7e4c2fae/m0 (1 package(s) invalidated: qa-embedded-paths)
+   Compiling qa-embedded-paths v0.1.0 (/workspace/qa-mbx-state/paths-collision191/wt1)
+    Finished `dev` profile [unoptimized] target(s) in 0.08s
+mbx[cache]: 0 hits, 1 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 461.2 KiB stored locally
+mbx[cache]: compiler time: 0s estimated avoided; 67.6ms spent (1 miss in 67.6ms)
+mbx[cache]: slowest uncached crates: qa_embedded_paths 67.6ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 67.3ms, flight_wait 47µs, key 1.2ms, lookup 119µs, permit_wait 250µs, predict 389µs, restore 1µs, startup 62µs, store 1.2ms, unattributed 1.8ms
+mbx[cache]: timing: 92.3ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 547µs CAS write, 0s materialization
+buildq: copied 457.7 KiB to run dir /workspace/qa-mbx-state/paths-collision191/mbx-pool/runs/r0

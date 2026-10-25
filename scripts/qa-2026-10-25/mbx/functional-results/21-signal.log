@@ -1,0 +1,65 @@
+version two args=["sleep"] cwd=/workspace/qa-mbx-state/functional/repo env=qa inherited value
+buildq: target repo-d7cb3eaa/m0 (no source differences)
+   Compiling qa-app v0.1.0 (/workspace/qa-mbx-state/functional/repo/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.11s
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: could not look up 1 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: compiler time: 0s estimated avoided; 103.8ms spent (1 unconsulted in 103.8ms)
+mbx[cache]: 1 compilations kept their own incremental state, so they were not stored
+mbx[cache]: slowest uncached crates: qa_app 103.8ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 103.5ms, key 483µs, lookup 122µs, permit_wait 550µs, startup 53µs, unattributed 2.1ms
+mbx[cache]: timing: 127.3ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 0s materialization
+buildq: copied 3.8 MiB to run dir /workspace/qa-mbx-state/functional/pool/runs/r0
+
+status during run:
+{
+  "classes": [
+    {
+      "class": "build",
+      "holders": [
+        {
+          "busy": false,
+          "job": null,
+          "slot": 0
+        },
+        {
+          "busy": false,
+          "job": null,
+          "slot": 1
+        }
+      ],
+      "slots": 2,
+      "waiters": []
+    },
+    {
+      "class": "run",
+      "holders": [
+        {
+          "busy": true,
+          "job": {
+            "class": "run",
+            "cmd": "qa-app sleep",
+            "cwd": "/workspace/qa-mbx-state/functional/repo",
+            "enqueued_ms": 1792902288499,
+            "label": null,
+            "pid": 3985,
+            "priority": 0,
+            "seq": 1792902288499,
+            "started_ms": 1792902288499,
+            "target": null,
+            "worktree": "/workspace/qa-mbx-state/functional/repo"
+          },
+          "slot": 0
+        },
+        {
+          "busy": false,
+          "job": null,
+          "slot": 1
+        }
+      ],
+      "slots": 2,
+      "waiters": []
+    }
+  ],
+  "hosts": {}
+}

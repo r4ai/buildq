@@ -1,0 +1,15 @@
+buildq: target repo-8d450ac9/m0 (1 package(s) invalidated: qa-lib)
+   Compiling qa-lib v0.1.0 (/workspace/qa-mbx-state/functional191/repo/lib)
+error: intentional QA error
+ --> lib/src/lib.rs:9:1
+  |
+9 | compile_error!("intentional QA error");
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: could not compile `qa-lib` (lib) due to 1 previous error
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: compiler time: 0s estimated avoided; 32.4ms spent (1 unconsulted in 32.4ms)
+mbx[cache]: 1 compilations kept their own incremental state, so they were not stored
+mbx[cache]: slowest uncached crates: qa_lib 32.4ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 31.9ms, key 8.2ms, permit_wait 3.8ms, startup 65µs, unattributed 1.5ms
+mbx[cache]: timing: 201.0ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 0s materialization

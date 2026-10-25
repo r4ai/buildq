@@ -1,0 +1,102 @@
+[
+  {
+    "number": 118,
+    "title": "Pool: Git stat-cache false-clean results can bypass content invalidation after backdated edits",
+    "url": "https://github.com/r4ai/buildq/issues/118",
+    "labels": [
+      "bug",
+      "priority: high"
+    ]
+  },
+  {
+    "number": 117,
+    "title": "GC: retry deferred automatic collection after collector contention clears",
+    "url": "https://github.com/r4ai/buildq/issues/117",
+    "labels": [
+      "enhancement",
+      "priority: medium"
+    ]
+  },
+  {
+    "number": 116,
+    "title": "Queue: reduce polling and ticket-scan overhead for bursts of short cached jobs",
+    "url": "https://github.com/r4ai/buildq/issues/116",
+    "labels": [
+      "enhancement",
+      "priority: medium"
+    ]
+  },
+  {
+    "number": 115,
+    "title": "Dedupe: bound index memory within a single large toolchain scope",
+    "url": "https://github.com/r4ai/buildq/issues/115",
+    "labels": [
+      "enhancement",
+      "priority: low"
+    ]
+  },
+  {
+    "number": 114,
+    "title": "Development: documented Ruff checks fail on the release helpers",
+    "url": "https://github.com/r4ai/buildq/issues/114",
+    "labels": [
+      "bug",
+      "documentation",
+      "priority: low"
+    ]
+  },
+  {
+    "number": 113,
+    "title": "Pool: retain separate warm members for alternating worktrees when spare capacity exists",
+    "url": "https://github.com/r4ai/buildq/issues/113",
+    "labels": [
+      "enhancement",
+      "priority: medium"
+    ]
+  },
+  {
+    "number": 112,
+    "title": "Dedupe: expose filesystem sharing capability alongside dry-run candidate savings",
+    "url": "https://github.com/r4ai/buildq/issues/112",
+    "labels": [
+      "enhancement",
+      "priority: low"
+    ]
+  },
+  {
+    "number": 111,
+    "title": "Processes: SIGTERM leaves build scripts alive and can corrupt a reused pool member",
+    "url": "https://github.com/r4ai/buildq/issues/111",
+    "labels": [
+      "bug",
+      "priority: high"
+    ]
+  },
+  {
+    "number": 110,
+    "title": "Dedupe: avoid quadratic first-pass comparisons for same-size divergent artifacts",
+    "url": "https://github.com/r4ai/buildq/issues/110",
+    "labels": [
+      "enhancement",
+      "priority: medium"
+    ]
+  },
+  {
+    "number": 109,
+    "title": "GC: warm member growth within the size TTL bypasses post-job collection and oversize warning",
+    "url": "https://github.com/r4ai/buildq/issues/109",
+    "labels": [
+      "bug",
+      "priority: medium"
+    ]
+  },
+  {
+    "number": 108,
+    "title": "Dedupe: an over-budget file pair permanently blocks smaller candidates",
+    "url": "https://github.com/r4ai/buildq/issues/108",
+    "labels": [
+      "bug",
+      "priority: medium"
+    ]
+  }
+]

@@ -1,0 +1,15 @@
+manifest=/workspace/qa-mbx-state/paths191/wt1
+file=src/main.rs
+absolute_file=/workspace/qa-mbx-state/paths191/wt1/src/absolute.rs
+manifest_marker=BRAVO
+relative_marker=BRAVO
+cwd=/workspace/qa-mbx-state/paths191/wt1
+buildq: target wt0-cb3f17b5/m0 (1 package(s) invalidated: qa-embedded-paths)
+   Compiling qa-embedded-paths v0.1.0 (/workspace/qa-mbx-state/paths191/wt1)
+    Finished `dev` profile [unoptimized] target(s) in 0.06s
+mbx[cache]: 0 hits, 1 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 461.2 KiB stored locally
+mbx[cache]: compiler time: 0s estimated avoided; 48.4ms spent (1 miss in 48.4ms)
+mbx[cache]: slowest uncached crates: qa_embedded_paths 48.4ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 48.1ms, flight_wait 72µs, key 1.4ms, lookup 172µs, permit_wait 284µs, predict 351µs, restore 1µs, startup 65µs, store 5.7ms, unattributed 1.9ms
+mbx[cache]: timing: 79.1ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 653µs CAS write, 0s materialization
+buildq: copied 457.7 KiB to run dir /workspace/qa-mbx-state/paths191/mbx-pool/runs/r0

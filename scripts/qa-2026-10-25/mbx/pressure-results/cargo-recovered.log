@@ -1,0 +1,3 @@
+buildq: target repo-bccbf82d/m0 (no source differences)
+   Compiling qa-pressure v0.1.0 (/tmp/buildq-qa-mbx-pressure-20261025/cargo/repo)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s

@@ -1,0 +1,33 @@
+buildq: [     0 ms] start
+buildq: [     0 ms] parsed
+buildq: [    34 ms] pool opened (git + toolchain + manifest)
+buildq: target wt0-4c4a1a73/m2 (1 package(s) invalidated: bevy-heavy-probe)
+buildq: [    34 ms] member leased
+buildq: waiting for a build slot: 0/4 busy, position 2 of 2
+buildq: got build slot 1 after 0s
+buildq: [    62 ms] slot acquired
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling matchers v0.2.0
+   Compiling tracing-subscriber v0.3.23
+   Compiling bevy_log v0.16.1
+   Compiling bevy_transform v0.16.1
+   Compiling bevy_mesh v0.16.1
+   Compiling bevy_render v0.16.1
+   Compiling bevy_core_pipeline v0.16.1
+   Compiling bevy_pbr v0.16.1
+   Compiling bevy_internal v0.16.1
+   Compiling bevy v0.16.1
+   Compiling bevy-heavy-probe v0.1.0 (/workspace/qa-bevy-six/trial2-combined4/wt2)
+    Finished `dev` profile [unoptimized] target(s) in 0.62s
+mbx[cache]: 11 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: compiler time: 1m 13s estimated avoided; 0s spent ()
+mbx[cache]: wrapper phases (cumulative, exclusive): blob_transfer 78.9ms, key 83.8ms, lookup 7.5ms, restore 20.5ms, startup 815µs, unattributed 30.2ms
+mbx[cache]: timing: 667.4ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 40.3ms materialization
+mbx[cache]: materialization: 0 outputs (0 B) reflinked, 10 outputs (215.8 MiB) hard linked, 1 outputs (8.5 MiB) copied, 21 outputs (28.4 MiB) already in place
+mbx[savings]: every checkout believes it owns 3.6 GiB of outputs. the disk keeps one copy and says nothing.
+buildq: [   772 ms] cargo finished
+buildq: [   774 ms] after-job check
+buildq: [   774 ms] done

@@ -1,0 +1,6 @@
+indexed 20 files (20 with copies elsewhere) in 0 ms
+compared 1 files in 1 pools, read 128.0 KiB [allocated accounting]
+shared: 0 files, 0 B
+already shared: 0 files, 0 B
+differing: 0 files; skipped: 0 known different, 0 busy, 0 changed, 0 hard-linked
+unsupported: FIDEDUPERANGE: Invalid argument (os error 22)

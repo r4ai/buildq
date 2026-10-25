@@ -1,0 +1,5 @@
+buildq: target repo-39b41a1f/m0 (new member (full build))
+mbx[setup]: first build on this machine
+mbx[setup]:   cache is /workspace/qa-mbx-state/lifecycle-final/mbx-SIGKILL-repeat1/mbx, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
+mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
+   Compiling qa-lifecycle v0.1.0 (/workspace/qa-mbx-state/lifecycle-final/mbx-SIGKILL-repeat1/repo)

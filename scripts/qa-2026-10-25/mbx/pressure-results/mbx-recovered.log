@@ -1,0 +1,12 @@
+buildq: target repo-2ce680f7/m0 (no source differences)
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling qa-pressure v0.1.0 (/tmp/buildq-qa-mbx-pressure-20261025/mbx/repo)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.29s
+mbx[cache]: 0 hits, 2 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 2.6 KiB stored locally
+mbx[cache]: compiler time: 0s estimated avoided; 29.6ms spent (2 miss in 29.6ms)
+mbx[cache]: slowest uncached crates: qa_pressure 28.6ms, qa-pressure build script 1.1ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 27.8ms, flight_wait 57µs, key 1.2ms, lookup 507µs, permit_wait 275µs, predict 591µs, restore 1µs, startup 131µs, store 971µs, unattributed 14.3ms
+mbx[cache]: timing: 310.7ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 140µs CAS write, 0s materialization

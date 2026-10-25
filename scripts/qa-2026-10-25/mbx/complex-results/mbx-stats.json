@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "store": "/workspace/qa-mbx-state/complex/mbx-cache/actions",
+  "savings": {
+    "byte_accounting": "logical",
+    "since_unix_secs": 1792902366,
+    "builds": 23,
+    "cached_compilations": 60,
+    "estimated_compiler_ns_avoided": 6632794990,
+    "reflinked_bytes": 326020,
+    "pruned_bytes": 0,
+    "pruned_target_bytes": 0,
+    "pruned_store_bytes": 0,
+    "automatically_pruned_bytes": 0,
+    "automatically_pruned_since_unix_secs": 1792902366,
+    "requested_removal_bytes": 0
+  },
+  "cache": {
+    "objects": 128,
+    "bytes": 40205219,
+    "managed_targets": 0,
+    "managed_target_bytes": 0
+  },
+  "sharing": {
+    "live_workspaces": 6,
+    "independent_cache_bytes": 170149758,
+    "shared_store_bytes": 40205219,
+    "duplicate_cache_bytes_avoided_lower_bound": 129944539
+  }
+}

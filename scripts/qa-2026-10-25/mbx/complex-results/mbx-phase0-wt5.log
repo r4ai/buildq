@@ -1,0 +1,17 @@
+default:build5:source one:rust5:macro one:42
+buildq: target repo-f644bda2/m0 (new member (full build))
+mbx[setup]: first build on this machine
+mbx[setup]:   cache is /workspace/qa-mbx-state/complex/mbx-cache, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
+mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
+   Compiling qa-complex-lib v0.1.0 (/workspace/qa-mbx-state/complex/wt5/lib)
+   Compiling qa-complex-macros v0.1.0 (/workspace/qa-mbx-state/complex/wt5/macros)
+   Compiling qa-complex-app v0.1.0 (/workspace/qa-mbx-state/complex/wt5/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.52s
+mbx[cache]: 0 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 12.0 MiB stored locally
+mbx[cache]: could not look up 5 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: bypassed 3 compilations: 2 compiler-query, 1 standard-input
+mbx[cache]: compiler time: 0s estimated avoided; 471.7ms spent (5 unconsulted in 471.7ms)
+mbx[cache]: slowest uncached crates: build_script_build 150.0ms, qa_complex_macros 146.3ms, qa_complex_app 105.8ms, qa_complex_lib 44.8ms, qa-complex-lib build script 24.7ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 463.3ms, flight_wait 18.8ms, key 26.3ms, lookup 633µs, permit_wait 1.9ms, predict 1.5ms, startup 554µs, store 22.1ms, unattributed 108.7ms
+mbx[cache]: timing: 548.0ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 10.4ms CAS write, 0s materialization
+buildq: copied 8.1 MiB to run dir /workspace/qa-mbx-state/complex/mbx-pool/runs/r0

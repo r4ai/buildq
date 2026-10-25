@@ -1,0 +1,19 @@
+{
+  "parallel_requests": 8,
+  "parallel_correct": 8,
+  "parallel_max_seconds": 99.6321,
+  "parallel_median_seconds": 76.47485,
+  "peak_build_jobs_from_completed_history": 2,
+  "upstream_tests": {
+    "rust-analyzer-parser": 291,
+    "rust-analyzer-syntax": 49,
+    "tokio-sync-mpsc": 90,
+    "ripgrep-initial": {
+      "passed": 298,
+      "environment_failures": 1
+    },
+    "ripgrep-isolated-failed-test": {
+      "passed": 1
+    }
+  }
+}

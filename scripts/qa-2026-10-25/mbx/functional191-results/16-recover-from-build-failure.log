@@ -1,0 +1,11 @@
+version two args=["recovered"] cwd=/workspace/qa-mbx-state/functional191/repo env=qa inherited value
+buildq: target repo-8d450ac9/m0 (1 package(s) invalidated: qa-lib)
+   Compiling qa-lib v0.1.0 (/workspace/qa-mbx-state/functional191/repo/lib)
+   Compiling qa-app v0.1.0 (/workspace/qa-mbx-state/functional191/repo/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.54s
+mbx[cache]: 0 hits, 2 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 3.9 MiB stored locally
+mbx[cache]: compiler time: 0s estimated avoided; 420.3ms spent (2 miss in 420.3ms)
+mbx[cache]: slowest uncached crates: qa_app 322.1ms, qa_lib 98.2ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 419.0ms, flight_wait 92µs, key 10.6ms, lookup 165µs, permit_wait 2.3ms, predict 6.0ms, restore 2µs, startup 137µs, store 45.9ms, unattributed 10.8ms
+mbx[cache]: timing: 664.5ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 9.9ms CAS write, 0s materialization
+buildq: copied 3.8 MiB to run dir /workspace/qa-mbx-state/functional191/pool/runs/r0

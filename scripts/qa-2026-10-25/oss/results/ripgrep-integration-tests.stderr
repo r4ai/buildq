@@ -1,0 +1,18 @@
+buildq: [     0 ms] start
+buildq: [     0 ms] parsed
+buildq: [    29 ms] pool opened (git + toolchain + manifest)
+buildq: target ripgrep-ca6e0981/m1 (no source differences)
+buildq: [    33 ms] member leased
+buildq: [    35 ms] slot acquired
+   Compiling proc-macro2 v1.0.86
+   Compiling unicode-ident v1.0.12
+   Compiling quote v1.0.37
+   Compiling syn v2.0.77
+   Compiling serde_derive v1.0.210
+   Compiling ripgrep v14.1.1 (/workspace/qa-oss/ripgrep)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.77s
+     Running tests/tests.rs (/workspace/qa-oss/cache/pools/ripgrep-ca6e0981/m1/debug/deps/integration-4a031401540a5b06)
+error: test failed, to rerun pass `-p ripgrep --test integration`
+buildq: [ 13336 ms] cargo finished
+buildq: [ 13355 ms] after-job check
+buildq: [ 13355 ms] done

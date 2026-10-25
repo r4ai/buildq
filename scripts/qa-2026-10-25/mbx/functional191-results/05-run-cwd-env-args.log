@@ -1,0 +1,4 @@
+version one args=["hello world", "--color", "always"] cwd=/workspace/qa-mbx-state/functional191/repo env=qa inherited value
+buildq: target repo-8d450ac9/m0 (no source differences)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+buildq: copied 3.8 MiB to run dir /workspace/qa-mbx-state/functional191/pool/runs/r0

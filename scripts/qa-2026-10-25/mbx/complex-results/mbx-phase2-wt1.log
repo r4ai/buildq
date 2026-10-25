@@ -1,0 +1,18 @@
+beta:changed1:source one:edited1:macro one:42
+buildq: target repo-f644bda2/m1 (3 package(s) invalidated: qa-complex-app, qa-complex-lib, qa-complex-macros)
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling qa-complex-lib v0.1.0 (/workspace/qa-mbx-state/complex/wt1/lib)
+   Compiling qa-complex-macros v0.1.0 (/workspace/qa-mbx-state/complex/wt1/macros)
+mbx[warning]: incremental state was not reused: compiler environment input changed: OUT_DIR
+   Compiling qa-complex-app v0.1.0 (/workspace/qa-mbx-state/complex/wt1/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s
+mbx[cache]: 2 hits, 2 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 2.1 KiB stored locally
+mbx[cache]: could not look up 1 compilations: no usable dep-info from an earlier build and no prediction to derive an action key from
+mbx[cache]: compiler time: 309.2ms estimated avoided; 241.4ms spent (2 miss in 91.6ms, 1 unconsulted in 149.9ms)
+mbx[cache]: 2 compilations kept their own incremental state, so they were not stored
+mbx[cache]: slowest uncached crates: qa_complex_app 149.9ms, qa_complex_lib 75.4ms, qa-complex-lib build script 16.1ms
+mbx[cache]: wrapper phases (cumulative, exclusive): blob_transfer 2.7ms, compiler 224.6ms, key 9.0ms, lookup 6.3ms, permit_wait 905µs, restore 2.9ms, startup 321µs, unattributed 40.6ms
+mbx[cache]: timing: 328.5ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 519µs CAS write, 5.2ms materialization
+mbx[cache]: materialization: 0 outputs (0 B) reflinked, 0 outputs (0 B) hard linked, 1 outputs (3.8 MiB) copied, 3 outputs (4.5 MiB) already in place
+buildq: copied 8.2 MiB to run dir /workspace/qa-mbx-state/complex/mbx-pool/runs/r0

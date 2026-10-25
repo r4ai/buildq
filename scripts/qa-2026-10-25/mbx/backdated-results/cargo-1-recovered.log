@@ -1,0 +1,5 @@
+DELTA
+buildq: target repo-3a24d3f5/m0 (1 package(s) invalidated: qa-backdated-input)
+   Compiling qa-backdated-input v0.1.0 (/workspace/qa-mbx-state/backdated-confirm/cargo-1/repo)
+    Finished `dev` profile [unoptimized] target(s) in 0.14s
+buildq: copied 432.3 KiB to run dir /workspace/qa-mbx-state/backdated-confirm/cargo-1/pool/runs/r0

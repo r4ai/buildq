@@ -1,0 +1,13 @@
+helper0:phase2wt1+helper1:phase2wt1
+buildq: target repo-fa7b25dd/m0 (no source differences)
+   Compiling qa-nested v0.1.0 (/workspace/qa-mbx-state/nested/wt1)
+mbx[warning]: incremental state was not reused: compiler environment input changed: QA_NESTED_VALUE
+mbx[warning]: incremental state was not reused: compiler environment input changed: OUT_DIR
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.75s
+mbx[cache]: 0 hits, 4 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 7.3 MiB stored locally
+mbx[cache]: compiler time: 0s estimated avoided; 2.37s spent (4 miss in 2.37s)
+mbx[cache]: 1 compilations kept their own incremental state, so they were not stored
+mbx[cache]: slowest uncached crates: qa-nested build script 1.02s, qa_helper1 590.2ms, qa_nested 491.9ms, qa_helper0 269.8ms
+mbx[cache]: wrapper phases (cumulative, exclusive): compiler 1.35s, flight_wait 129µs, key 115.1ms, lookup 11.2ms, permit_wait 278.9ms, predict 4.8ms, restore 4µs, startup 252µs, store 67.2ms, unattributed 1.13s
+mbx[cache]: timing: 1.85s session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 18.2ms CAS write, 0s materialization
+buildq: copied 3.7 MiB to run dir /workspace/qa-mbx-state/nested/pool/runs/r0

@@ -1,0 +1,11 @@
+
+running 1 test
+test feature::f1414_no_require_git ... FAILED
+
+failures:
+
+failures:
+    feature::f1414_no_require_git
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 298 filtered out; finished in 0.01s
+

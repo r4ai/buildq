@@ -1,0 +1,8 @@
+alpha:changed3:source two:edited3:macro two:42
+buildq: all cache members busy and pool at its limit; waiting for one
+buildq: target repo-f644bda2/m1 (3 package(s) invalidated: qa-complex-app, qa-complex-lib, qa-complex-macros)
+   Compiling qa-complex-lib v0.1.0 (/workspace/qa-mbx-state/complex/wt3/lib)
+   Compiling qa-complex-macros v0.1.0 (/workspace/qa-mbx-state/complex/wt3/macros)
+   Compiling qa-complex-app v0.1.0 (/workspace/qa-mbx-state/complex/wt3/app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.79s
+buildq: copied 8.2 MiB to run dir /workspace/qa-mbx-state/complex/cargo-pool/runs/r0

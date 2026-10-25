@@ -1,0 +1,66 @@
+{
+  "pools": [
+    {
+      "name": "wt0-30c61a56",
+      "dir": "/workspace/qa-bevy-pressure-191/pool/pools/wt0-30c61a56",
+      "info": {
+        "repo": "wt0",
+        "repo_key": "/workspace/qa-bevy-pressure-191/wt0/.git",
+        "toolchain": "1.91.1",
+        "toolchain_id": "rustc 1.91.1 (ed61e7d7e 2025-11-07)\nbinary: rustc\ncommit-hash: ed61e7d7e242494fb7057f2657300d9e77bb4fcb\ncommit-date: 2025-11-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.91.1\nLLVM version: 21.1.2\n",
+        "created_ms": 1792904723081,
+        "last_used_ms": 1792904723086
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-bevy-pressure-191/pool/pools/wt0-30c61a56/m0",
+          "busy": false,
+          "size": 1176182784,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792904723097,
+            "last_used_ms": 1792904840490,
+            "last_worktree": "/workspace/qa-bevy-pressure-191/wt0",
+            "source_root": "/workspace/qa-bevy-pressure-191/wt0",
+            "last_head": "1236bb16ea2c222d50729bcaabbc8fb2942643fc",
+            "last_cmd": "",
+            "jobs": 1,
+            "size_bytes": 1176182784,
+            "size_ms": 1792904841159,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [
+    {
+      "dir": "/workspace/qa-bevy-pressure-191/pool/runs/r0",
+      "busy": false,
+      "size": 89010176,
+      "last_used_ms": 1792904840433
+    },
+    {
+      "dir": "/workspace/qa-bevy-pressure-191/pool/runs/r1",
+      "busy": false,
+      "size": 89010176,
+      "last_used_ms": 1792904840480
+    }
+  ],
+  "total": 1354203136,
+  "trash_bytes": 0,
+  "budget": 805306368,
+  "effective_budget": 805306368,
+  "accounting": "allocated",
+  "over_budget": true,
+  "over_budget_bytes": 548896768,
+  "over_budget_reasons": [
+    "idle artifacts await GC or could not be reclaimed"
+  ],
+  "free_disk": 24446226432,
+  "external": [],
+  "external_total": 0
+}

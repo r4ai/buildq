@@ -1,0 +1,19 @@
+buildq: [     0 ms] start
+buildq: [     0 ms] parsed
+buildq: [    31 ms] pool opened (git + toolchain + manifest)
+buildq: target wt0-8725ee4e/m1 (1 package(s) invalidated: bevy-heavy-probe)
+buildq: [    32 ms] member leased
+buildq: [    34 ms] slot acquired
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling bevy-heavy-probe v0.1.0 (/workspace/qa-bevy-six/trial1-combined2/wt4)
+    Finished `dev` profile [unoptimized] target(s) in 0.25s
+mbx[cache]: 1 hits, 0 misses, 0 prefetched; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[cache]: compiler time: 3.70s estimated avoided; 0s spent ()
+mbx[cache]: wrapper phases (cumulative, exclusive): blob_transfer 2.7ms, key 1.4ms, lookup 345µs, restore 1.7ms, startup 58µs, unattributed 3.4ms
+mbx[cache]: timing: 286.2ms session, 0s prefetch; cumulative 0s remote lookup, 0s blob transfer, 0s CAS write, 1.6ms materialization
+mbx[cache]: materialization: 0 outputs (0 B) reflinked, 0 outputs (0 B) hard linked, 1 outputs (8.5 MiB) copied, 1 outputs (267 B) already in place
+mbx[savings]: 254 compilations. rustc did each once; mbx did the rest of the showing up.
+buildq: [   337 ms] cargo finished
+buildq: [   339 ms] after-job check
+buildq: [   339 ms] done

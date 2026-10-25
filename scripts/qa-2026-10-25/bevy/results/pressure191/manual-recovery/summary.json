@@ -1,0 +1,22 @@
+{
+  "before_total": 1353740288,
+  "after_total": 0,
+  "budget": 805306368,
+  "all_idle_before": true,
+  "reported_freed": 1353740288,
+  "combined_unique_before": {
+    "allocated": 1382244352,
+    "logical": 1374628014,
+    "files": 2830,
+    "hardlink_aliases": 42,
+    "unique_inodes": 2788
+  },
+  "combined_unique_after": {
+    "allocated": 276594688,
+    "logical": 274446836,
+    "files": 883,
+    "hardlink_aliases": 0,
+    "unique_inodes": 883
+  },
+  "combined_unique_blocks_reclaimed": 1105649664
+}

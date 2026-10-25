@@ -1,0 +1,40 @@
+[
+  {
+    "backend": "cargo",
+    "free_before": 9427779584,
+    "reserve": 9402613760,
+    "free_after_abort": 9401544704,
+    "max_fixture_write_bytes": 67108864,
+    "actual_write_bytes": 26214400,
+    "exit": 125,
+    "seconds": 1.435989,
+    "recorded_descendants": [
+      106608,
+      106609
+    ],
+    "living_descendants": [],
+    "busy_holders": 0,
+    "recovery_exit": 0,
+    "same_member": true,
+    "passed": true
+  },
+  {
+    "backend": "mbx",
+    "free_before": 9403682816,
+    "reserve": 9378516992,
+    "free_after_abort": 9377439744,
+    "max_fixture_write_bytes": 67108864,
+    "actual_write_bytes": 26214400,
+    "exit": 125,
+    "seconds": 1.344615,
+    "recorded_descendants": [
+      106803,
+      106804
+    ],
+    "living_descendants": [],
+    "busy_holders": 0,
+    "recovery_exit": 0,
+    "same_member": true,
+    "passed": true
+  }
+]
