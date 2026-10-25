@@ -28,6 +28,7 @@ min_free = "25G"         # Minimum free disk space to preserve on volume (defaul
 rustc_wrapper = "none"   # Disable global sccache per job ("none" | "keep" | "/path")
 # jobs = 8               # CARGO_BUILD_JOBS per build (default: cores / slots)
 # backend = "mbx"        # Run queued jobs through mr-boxington ("cargo" | "mbx", default: "cargo")
+# nested_mbx = true      # With backend = "mbx", also run plain `cargo` nested inside a job through mbx (default: false; env BUILDQ_NESTED_MBX)
 ```
 
 `cache.max_members` must be at least the effective `slots` value, including
@@ -160,6 +161,11 @@ Responsibilities stay split:
   named like an mbx command (`gc`, `cache`, `doctor`, ...) still runs Cargo.
 - Only queued jobs use mbx. Light commands, nested Cargo inside a job, and
   buildq's own `cargo metadata` probes run the real Cargo directly.
+- With `nested_mbx = true`, a plain `cargo` that a held job runs from `PATH`
+  (the buildq shim) goes through mbx too, still without queueing and with
+  mbx's managed targets off, so helper workspaces built that way are cached
+  across worktrees. Build scripts that run `$CARGO` call Cargo directly and
+  bypass both buildq and mbx.
 
 buildq refuses a combination that would loop or silently stop caching:
 `cargo.rustc_wrapper` set to a path (mbx would defer to it), a real Cargo that

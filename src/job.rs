@@ -951,6 +951,13 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
         exec::run(&mut c, false).map_err(|e| format!("{}: {e}", real.display()))
     };
     if is_held("build") {
+        // Nested Cargo never queues; with `nested_mbx` it still caches.
+        if cfg.nested_mbx
+            && let Ok(launcher @ Launcher::Mbx(_)) = Launcher::resolve(cfg, &real)
+        {
+            let mut c = launcher.command(&real, args);
+            return exec::run(&mut c, false).map_err(|e| format!("{e}"));
+        }
         return passthrough(args);
     }
     let here = cwd();

@@ -28,6 +28,7 @@ min_free = "25G"         # ドライブ上に最低限残す空き容量 (デフ
 rustc_wrapper = "none"   # ジョブごとにグローバルな sccache 等を無効化 ("none" | "keep" | "/path")
 # jobs = 8               # 1ビルドあたりの CARGO_BUILD_JOBS (デフォルト: コア数 / slots)
 # backend = "mbx"        # キューのジョブを mr-boxington 経由で実行 ("cargo" | "mbx"、デフォルト: "cargo")
+# nested_mbx = true      # backend = "mbx" のとき、ジョブ内でネストして実行される素の `cargo` も mbx 経由にする (デフォルト: false、環境変数 BUILDQ_NESTED_MBX)
 ```
 
 `cache.max_members` の最小値は、環境変数の上書きを含む有効な `slots` の値である。
@@ -153,6 +154,8 @@ backend = "mbx"
   そのため、mbx のコマンドと同じ名前のエイリアス（`gc`、`cache`、`doctor` など）でも Cargo が実行される。
 - mbx を使うのはキューを通るジョブだけである。
   軽いコマンド、ジョブ内のネストした Cargo、buildq 自身の `cargo metadata` による調査は、本物の Cargo を直接実行する。
+- `nested_mbx = true` では、ジョブが `PATH` から実行する素の `cargo`（buildq の shim）も、キューに入らず mbx の管理ターゲットを無効にしたまま mbx を経由する。こうしてビルドされる補助ワークスペースは worktree 間でキャッシュされる。
+  `$CARGO` を実行するビルドスクリプトは Cargo を直接呼ぶため、buildq も mbx も経由しない。
 
 ループする構成や、キャッシュが黙って無効になる構成は拒否する。
 具体的には、`cargo.rustc_wrapper` にパスを指定した場合（mbx はそのラッパーに処理を委ね、キャッシュしない）、本物の Cargo が mbx かその Cargo shim に解決される場合、`mbx` のパスが buildq 自身を指す場合である。
