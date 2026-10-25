@@ -62,6 +62,9 @@ pub struct CacheFile {
     /// Also pool jobs whose explicit `--target-dir`/`CARGO_TARGET_DIR` lies
     /// inside the worktree (default false: such jobs build there, outside the budget).
     pub pool_explicit: Option<bool>,
+    /// When the pool cannot be used (Git or toolchain failure), build into
+    /// Cargo's own target dir with a warning instead of failing (default false).
+    pub pool_fallback: Option<bool>,
     /// Members per pool (default = slots + 1; minimum = slots).
     pub max_members: Option<usize>,
     /// Upper bound for everything under the pool root, e.g. "60G".
@@ -201,6 +204,7 @@ pub struct Config {
     pub kill_tree: bool,
     pub pool: bool,
     pub pool_explicit: bool,
+    pub pool_fallback: bool,
     pub max_members: usize,
     pub budget: u64,
     pub accounting: CacheAccounting,
@@ -330,6 +334,9 @@ impl Config {
             pool: env_bool("BUILDQ_POOL").or(f.cache.pool).unwrap_or(true),
             pool_explicit: env_bool("BUILDQ_POOL_EXPLICIT")
                 .or(f.cache.pool_explicit)
+                .unwrap_or(false),
+            pool_fallback: env_bool("BUILDQ_POOL_FALLBACK")
+                .or(f.cache.pool_fallback)
                 .unwrap_or(false),
             max_members: f.cache.max_members.unwrap_or(slots + 1).max(slots),
             budget,

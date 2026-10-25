@@ -279,7 +279,7 @@ fn busy_overflow_reports_why_gc_cannot_meet_the_soft_budget() {
 }
 
 #[test]
-fn completed_member_warning_reuses_and_expires_the_size_estimate() {
+fn completed_member_warning_measures_every_finished_build() {
     let temp = tempfile::tempdir().unwrap();
     let mut c = cfg(temp.path());
     c.budget = 1000;
@@ -288,10 +288,8 @@ fn completed_member_warning_reuses_and_expires_the_size_estimate() {
     let warning = completed_member_warning(&c, &dir, &mut meta).unwrap();
     assert!(warning.contains("next build will be cold"));
     assert_eq!(meta.size_bytes, 4000);
+    // A warm build within the size TTL may still have grown the member.
     file(&dir.join("new-artifact"), 4000, 0);
-    completed_member_warning(&c, &dir, &mut meta);
-    assert_eq!(meta.size_bytes, 4000, "warm jobs must reuse the estimate");
-    meta.size_ms = now_ms() - SIZE_CACHE_MS - 1;
     completed_member_warning(&c, &dir, &mut meta);
     assert_eq!(meta.size_bytes, 8000);
     c.budget = 9000;
@@ -609,4 +607,45 @@ fn budget_shrinks_with_free_disk() {
     assert_eq!(effective_budget(100, 30, 50, Some(20)), 40);
     assert_eq!(effective_budget(100, 30, 0, Some(10)), 0);
     assert_eq!(effective_budget(100, 30, 50, None), 100);
+}
+
+/// A job that finishes while another collector holds `gc.lock` leaves a
+/// request instead of being dropped; the collector runs one bounded follow-up
+/// pass for it after releasing the lock.
+#[test]
+fn contended_automatic_gc_leaves_a_request_for_a_follow_up_pass() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut c = cfg(temp.path());
+    c.budget = 1;
+    member(&c.cache_dir, "p", 0, now_ms(), 100);
+    let auto = Options {
+        auto: true,
+        ..Default::default()
+    };
+    let pending = c.cache_dir.join("gc.pending");
+    let collector = lock::try_lock(&c.cache_dir.join("gc.lock"))
+        .unwrap()
+        .unwrap();
+    let report = gc(&c, &auto);
+    assert!(
+        report
+            .skipped
+            .as_deref()
+            .is_some_and(|s| s.contains("run again")),
+        "{report:?}"
+    );
+    assert!(pending.exists());
+    assert!(c.cache_dir.join("pools/p/m0").exists());
+    // A manual run neither leaves a request nor promises a retry.
+    fs::remove_file(&pending).unwrap();
+    let report = gc(&c, &Options::default());
+    assert_eq!(report.skipped.as_deref(), Some("another gc is running"));
+    assert!(!pending.exists());
+
+    let _ = gc(&c, &auto);
+    drop(collector);
+    let report = gc(&c, &auto);
+    assert!(!c.cache_dir.join("pools/p/m0").exists());
+    assert_eq!(report.follow_ups, 1, "{report:?}");
+    assert!(!pending.exists());
 }

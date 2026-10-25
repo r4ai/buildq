@@ -20,6 +20,7 @@ max_members = 3          # 最大 target/ 数 (最小: slots、デフォルト: 
 budget = "45G"           # BUILDQ_CACHE 全体の最大ディスク使用量 (デフォルト: "60G")
 min_free = "25G"         # ドライブ上に最低限残す空き容量 (デフォルト: "20G")
 # pool_explicit = true   # worktree 内を指す --target-dir / CARGO_TARGET_DIR もプールする (デフォルト: false)
+# pool_fallback = true   # プールを開けない (Git やツールチェーンの失敗) とき、失敗せず警告してプール外でビルドする (デフォルト: false、環境変数 BUILDQ_POOL_FALLBACK)
 # dedupe = "off"         # GC でメンバー間の同一ファイルを共有する ("auto" | "off"、デフォルト: "auto")
 
 [cargo]
@@ -51,6 +52,11 @@ Unix の切り離された GC 子プロセスには、引き取った子を回�
 子を回収しない PID 1 では終了済み GC がゾンビとして蓄積しうる。
 これらは実行中のコンパイラではなく、スロットも保持しない。
 `buildq config` は有効なモードと init の要件を表示する。
+
+GC は同時に一つだけ実行される。
+ほかの GC の実行中にジョブ後の GC が起動すると、要求を捨てずにキャッシュディレクトリへ `gc.pending` を残す。
+実行中の GC はロックを解放した後、この要求に対して最大3回の追加パスを実行するため、そのパスの間ビジーだったメンバーもジョブ終了後に再検討される。
+`gc --auto --json` はこれを `follow_ups` として報告する。
 
 子を回収する init がない環境では、ジョブのプロセス内で回収する設定を選べる。
 
@@ -151,6 +157,11 @@ backend = "mbx"
 具体的には、`cargo.rustc_wrapper` にパスを指定した場合（mbx はそのラッパーに処理を委ね、キャッシュしない）、本物の Cargo が mbx かその Cargo shim に解決される場合、`mbx` のパスが buildq 自身を指す場合である。
 `rustc_wrapper` は `"none"`（デフォルト）か `"keep"` にする。
 `"keep"` の場合でも、環境変数に `RUSTC_WRAPPER` が設定されていれば mbx はキャッシュしない。
+
+PATH 上の Cargo 自体が mbx を実行する場合（mbx の Cargo shim、ラッパースクリプト、それらを指す mise の shim）、mbx は自分自身をラップしてしまう。
+buildq 自身の Cargo の調査も mbx を経由し、mbx が worktree に管理用の `target` ビューを作ってしまう。
+そのため buildq は、ジョブと調査の両方に `rustup which cargo` が返すツールチェーンの cargo を使い、その旨を表示する。
+rustup がない場合や、`cargo.real` / `BUILDQ_REAL_CARGO` がそのような Cargo を明示している場合は、これらの設定名を示してジョブを止める。
 
 mbx は、ストア、非共有のインクリメンタル状態、コレクタを独自に持ち、これらは `cache.budget` の対象外である。
 ボリュームの容量は両方を見込んで確保するか、`MBX_GC_AUTO` と mbx の予算を明示的に設定する。

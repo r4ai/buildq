@@ -195,11 +195,35 @@ pub fn run_command(cfg: &Config, opts: &Opts, argv: &[String]) -> Result<i32, St
 }
 
 fn real_cargo(cfg: &Config) -> Result<PathBuf, String> {
-    cargo::find_real_cargo(
+    let found = cargo::find_real_cargo(
         cfg.real_cargo.as_deref(),
         crate::shim::shim_dir().as_deref(),
     )
-    .ok_or_else(|| "cannot find the real cargo on PATH (set BUILDQ_REAL_CARGO)".to_string())
+    .ok_or_else(|| "cannot find the real cargo on PATH (set BUILDQ_REAL_CARGO)".to_string())?;
+    if cfg.backend == CargoBackend::Mbx && cfg.real_cargo.is_none() {
+        return Ok(unwrapped_cargo(found, &toolchain_cargo));
+    }
+    Ok(found)
+}
+
+/// A cargo found on PATH that runs mbx (mbx's Cargo shim, a mise wrapper)
+/// would make mbx wrap itself, and would route buildq's own probes through
+/// mbx: the toolchain's cargo stands in when `toolchain_cargo` finds one.
+fn unwrapped_cargo(found: PathBuf, toolchain_cargo: &dyn Fn() -> Option<PathBuf>) -> PathBuf {
+    if !runs_mbx(&found) {
+        return found;
+    }
+    match toolchain_cargo().filter(|c| !runs_mbx(c)) {
+        Some(cargo) => {
+            note(&format!(
+                "cargo.backend = \"mbx\": {} runs mbx, so buildq uses the toolchain's cargo {} (set cargo.real or BUILDQ_REAL_CARGO to choose another)",
+                found.display(),
+                cargo.display()
+            ));
+            cargo
+        }
+        None => found,
+    }
 }
 
 /// What a queued cargo job runs. Passthrough commands, nested cargo and
@@ -341,16 +365,65 @@ fn mbx_launcher(mbx: PathBuf, real: &Path, wrapper: &WrapperMode) -> Result<Laun
             mbx.display()
         ));
     }
-    // Only the resolved name: multiplexing shims (mise) canonicalize both
-    // cargo and mbx to the same binary without forming a loop.
-    let resolved = crate::util::canonical(real);
-    if crate::util::file_stem_lower(&resolved.to_string_lossy()) == "mbx" {
+    if runs_mbx(real) {
         return Err(format!(
-            "the real cargo {} resolves to mbx; set cargo.real or BUILDQ_REAL_CARGO to the toolchain's cargo",
+            "the real cargo {} runs mbx, which would wrap itself; set cargo.real or BUILDQ_REAL_CARGO to the toolchain's cargo",
             real.display()
         ));
     }
     Ok(Launcher::Mbx(mbx))
+}
+
+/// Whether running `cargo` ends up in mbx: mbx itself or a link to it, a
+/// wrapper script that calls it (mbx's Cargo shim), or a mise shim whose
+/// cargo is one of those. Only resolved names count: multiplexing shims
+/// canonicalize both cargo and mbx to the same binary without a loop.
+fn runs_mbx(cargo: &Path) -> bool {
+    let resolved = crate::util::canonical(cargo);
+    match crate::util::file_stem_lower(&resolved.to_string_lossy()).as_str() {
+        "mbx" => true,
+        "mise" => mise_cargo(&resolved).is_some_and(|c| {
+            let c = crate::util::canonical(&c);
+            crate::util::file_stem_lower(&c.to_string_lossy()) == "mbx" || script_runs_mbx(&c)
+        }),
+        _ => script_runs_mbx(&resolved),
+    }
+}
+
+/// A small script (`#!`) that names mbx as a command word.
+fn script_runs_mbx(path: &Path) -> bool {
+    use std::io::Read;
+    let mut head = Vec::new();
+    let Ok(f) = std::fs::File::open(path) else {
+        return false;
+    };
+    if f.take(64 * 1024).read_to_end(&mut head).is_err() || !head.starts_with(b"#!") {
+        return false;
+    }
+    String::from_utf8_lossy(&head)
+        .split(|c: char| !(c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.')))
+        .any(|w| w == "mbx" || w == "mbx.exe")
+}
+
+/// The cargo a mise shim would run here; `mise` is the binary it resolves to.
+fn mise_cargo(mise: &Path) -> Option<PathBuf> {
+    which_cargo(Command::new(mise).args(["which", "cargo"]))
+}
+
+/// The active toolchain's own cargo, as rustup resolves it here.
+fn toolchain_cargo() -> Option<PathBuf> {
+    which_cargo(Command::new("rustup").args(["which", "cargo"]))
+}
+
+fn which_cargo(c: &mut Command) -> Option<PathBuf> {
+    let out = c
+        .stdin(Stdio::null())
+        .stderr(Stdio::null())
+        .output()
+        .ok()
+        .filter(|o| o.status.success())?;
+    let p = PathBuf::from(String::from_utf8_lossy(&out.stdout).trim());
+    p.is_file().then_some(p)
 }
 
 pub struct Toolchain {
@@ -544,8 +617,37 @@ fn inside_worktree(dir: &Path, wt: &Worktree) -> Option<String> {
 }
 
 /// The pool to build in, or else the explicit target dir the job uses
-/// outside the pool (which is then announced and recorded).
-fn open_pool(cfg: &Config, real: &Path, parsed: &Parsed) -> (Option<PoolCtx>, Option<PathBuf>) {
+/// outside the pool (which is then announced and recorded). A worktree whose
+/// pool cannot be opened fails the job unless `cache.pool_fallback` is set:
+/// Cargo would otherwise quietly build into a `target/` of its own.
+fn open_pool(
+    cfg: &Config,
+    real: &Path,
+    parsed: &Parsed,
+) -> Result<(Option<PoolCtx>, Option<PathBuf>), String> {
+    let (ctx, explicit) = pool_or_explicit(cfg, real, parsed);
+    match ctx {
+        Some(Ok(c)) => Ok((Some(c), None)),
+        None => Ok((None, explicit)),
+        Some(Err(e)) if cfg.pool_fallback => {
+            note(&format!(
+                "pool unavailable, building outside the pool and the disk budget (cache.pool_fallback): {e}"
+            ));
+            Ok((None, explicit))
+        }
+        Some(Err(e)) => Err(format!(
+            "pool unavailable: {e}\n(set [cache] pool_fallback = true or BUILDQ_POOL_FALLBACK=1 to build outside the pool instead)"
+        )),
+    }
+}
+
+/// The pool context when the job is in a worktree, and the explicit target
+/// dir it would use outside the pool.
+fn pool_or_explicit(
+    cfg: &Config,
+    real: &Path,
+    parsed: &Parsed,
+) -> (Option<Result<PoolCtx, String>>, Option<PathBuf>) {
     if !cfg.pool {
         return (None, None);
     }
@@ -565,11 +667,8 @@ fn open_pool(cfg: &Config, real: &Path, parsed: &Parsed) -> (Option<PoolCtx>, Op
             return (None, Some(note_unpooled(dir, hint)));
         }
     };
-    let ctx = wt.and_then(|wt| pool_ctx(real, parsed, cfg, wt, explicit.clone()));
-    match (ctx, explicit) {
-        (Some(c), _) => (Some(c), None),
-        (None, explicit) => (None, explicit.map(|(dir, _)| dir)),
-    }
+    let ctx = wt.map(|wt| pool_ctx(real, parsed, cfg, wt, explicit.clone()));
+    (ctx, explicit.map(|(dir, _)| dir))
 }
 
 /// One line on stderr: this job's target dir is outside the pool and the budget.
@@ -592,12 +691,16 @@ fn pool_ctx(
     cfg: &Config,
     wt: Worktree,
     explicit: Option<(PathBuf, String)>,
-) -> Option<PoolCtx> {
-    let tc = probe_toolchain(real, parsed.toolchain.as_deref())?;
+) -> Result<PoolCtx, String> {
+    let tc = probe_toolchain(real, parsed.toolchain.as_deref())
+        .ok_or_else(|| format!("cannot identify the Rust toolchain of {}", real.display()))?;
     let dir = pool::pool_dir(&cfg.cache_dir, &wt, &tc.id);
-    let name = dir.file_name()?.to_string_lossy().to_string();
+    let name = dir
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_default();
     let pool = Pool::open(
-        dir,
+        dir.clone(),
         PoolInfo {
             repo: wt.repo_name(),
             repo_key: wt.repo_key(),
@@ -607,7 +710,7 @@ fn pool_ctx(
             last_used_ms: now_ms(),
         },
     )
-    .ok()?;
+    .map_err(|e| format!("pool {}: {e}", dir.display()))?;
     let manifest = git::manifest(&wt)?;
     let metadata = workspace_metadata(real, parsed);
     let uncovered = metadata
@@ -621,7 +724,7 @@ fn pool_ctx(
             names.join(", ")
         ));
     }
-    Some(PoolCtx {
+    Ok(PoolCtx {
         manifest,
         rebuild_graph: metadata
             .as_ref()
@@ -888,7 +991,7 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     // member, so this order cannot deadlock.
     // Edits after the manifest snapshot must reach the after-job check.
     let snapshot = now_ms();
-    let (mut ctx, external) = open_pool(cfg, &real, &parsed);
+    let (mut ctx, external) = open_pool(cfg, &real, &parsed)?;
     trace("pool opened (git + toolchain + manifest)");
     let mut lease = match ctx.as_mut() {
         Some(c) => Some(lease_member(cfg, c)?),
@@ -1363,7 +1466,7 @@ fn cargo_run(
 
     // Member first, then slot (see `cargo_cached`).
     let snapshot = now_ms();
-    let (mut ctx, external) = open_pool(cfg, real, &build_parsed);
+    let (mut ctx, external) = open_pool(cfg, real, &build_parsed)?;
     let mut lease = match ctx.as_mut() {
         Some(c) => Some(lease_member(cfg, c)?),
         None => None,
@@ -1838,7 +1941,7 @@ mod tests {
 
     #[test]
     fn mbx_launcher_refuses_loops_and_explicit_wrappers() {
-        use super::{Launcher, WrapperMode, mbx_launcher};
+        use super::{Launcher, WrapperMode, mbx_launcher, unwrapped_cargo};
         let t = tempfile::tempdir().unwrap();
         let bin = t.path().join("bin");
         std::fs::create_dir_all(&bin).unwrap();
@@ -1846,16 +1949,17 @@ mod tests {
         let cargo = bin.join("cargo");
         std::fs::write(&mbx, "").unwrap();
         std::fs::write(&cargo, "").unwrap();
+        let launch = |real: &Path, wrapper: &WrapperMode| mbx_launcher(mbx.clone(), real, wrapper);
         assert_eq!(
-            mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Disable),
+            launch(&cargo, &WrapperMode::Disable),
             Ok(Launcher::Mbx(mbx.clone()))
         );
-        assert!(mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Keep).is_ok());
-        let err = mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Path("sccache".into()));
+        assert!(launch(&cargo, &WrapperMode::Keep).is_ok());
+        let err = launch(&cargo, &WrapperMode::Path("sccache".into()));
         assert!(err.unwrap_err().contains("rustc_wrapper"));
         // A real cargo that is mbx (or mbx's Cargo shim linked to it) loops.
         assert!(
-            mbx_launcher(mbx.clone(), &mbx, &WrapperMode::Disable)
+            launch(&mbx, &WrapperMode::Disable)
                 .unwrap_err()
                 .contains("BUILDQ_REAL_CARGO")
         );
@@ -1863,12 +1967,31 @@ mod tests {
         {
             let linked = t.path().join("cargo");
             std::os::unix::fs::symlink(&mbx, &linked).unwrap();
-            assert!(mbx_launcher(mbx.clone(), &linked, &WrapperMode::Disable).is_err());
+            assert!(launch(&linked, &WrapperMode::Disable).is_err());
         }
+        // So does a wrapper script that runs mbx; the toolchain's cargo
+        // stands in for one found on PATH, when there is one.
+        let script = t.path().join("wrapped").join("cargo");
+        std::fs::create_dir_all(script.parent().unwrap()).unwrap();
+        std::fs::write(&script, "#!/bin/sh\nexec mbx \"$@\"\n").unwrap();
+        assert!(
+            launch(&script, &WrapperMode::Disable)
+                .unwrap_err()
+                .contains("would wrap itself")
+        );
+        assert_eq!(
+            unwrapped_cargo(script.clone(), &|| Some(cargo.clone())),
+            cargo
+        );
+        assert_eq!(unwrapped_cargo(script.clone(), &|| None), script);
+        assert_eq!(unwrapped_cargo(cargo.clone(), &|| Some(mbx.clone())), cargo);
+        // Scripts that merely mention a longer name are not mbx.
+        std::fs::write(&script, "#!/bin/sh\nexec mbxtool \"$@\"\n").unwrap();
+        assert!(launch(&script, &WrapperMode::Disable).is_ok());
         // mbx inside a buildq shim dir would re-enter buildq.
         std::fs::write(bin.join(crate::shim::MARKER), "").unwrap();
         assert!(
-            mbx_launcher(mbx, &cargo, &WrapperMode::Disable)
+            launch(&cargo, &WrapperMode::Disable)
                 .unwrap_err()
                 .contains("buildq itself")
         );

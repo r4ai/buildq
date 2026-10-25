@@ -1,12 +1,12 @@
 """Small release helper; run from the repository root with Python 3.11+."""
 
 import hashlib
-from pathlib import Path
 import re
 import sys
 import tarfile
 import tomllib
 import zipfile
+from pathlib import Path
 
 TARGETS = (
     "x86_64-unknown-linux-gnu",
@@ -25,7 +25,9 @@ def archive_name(target):
 
 def validate(tag):
     # Restrict tags before passing them to gh, and reject accidental version drift.
-    if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?", tag):
+    if not re.fullmatch(
+        r"v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?", tag
+    ):
         raise SystemExit(f"Invalid version tag: {tag!r}")
     if tag != f"v{VERSION}":
         raise SystemExit(f"Tag must match Cargo.toml: v{VERSION}")
@@ -76,4 +78,6 @@ if __name__ == "__main__":
         case ["checksums"]:
             checksums()
         case _:
-            raise SystemExit("Usage: release.py validate TAG | package TARGET | checksums")
+            raise SystemExit(
+                "Usage: release.py validate TAG | package TARGET | checksums"
+            )
