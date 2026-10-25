@@ -164,6 +164,7 @@ Before starting a build on member `m<i>`:
 1. **Snapshot worktree state**
    - Computes the worktree manifest via `git ls-files -s` and `git status`
    - Hashes modified and untracked files with `git hash-object` (ignoring gitignored files)
+   - Also hashes tracked files whose ctime, mtime, inode or size (at nanosecond precision) differ from the stat data the index cached, because Git compares whole seconds and can report a same-size edit with a preserved mtime as clean
    - Replaces each initialized submodule's gitlink with the submodule's own manifest, recursively, so path dependencies inside submodules are compared by content
    - Path dependencies outside the worktree (or in Git-ignored directories) are not in the manifest: their freshness relies on Cargo's mtime checks only, and each job lists them in a note
 2. **Diff against member**

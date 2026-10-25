@@ -160,6 +160,7 @@ sequenceDiagram
 1. **現在の Worktree 状態をスナップショット**
    - `git ls-files -s` と `git status` を実行
    - 変更ファイル・未追跡ファイルを `git hash-object` でハッシュ化（gitignore 対象は除外）
+   - index がキャッシュした stat 情報と ctime・mtime・inode・サイズ（ナノ秒精度）が異なる追跡ファイルもハッシュ化する。Git は秒単位で比較するため、mtime を保ったままのサイズが同じ編集を clean と判定することがある
    - 初期化済みサブモジュールは gitlink の代わりにサブモジュール自身のマニフェストを再帰的に展開し、サブモジュール内の path 依存も内容で比較
    - Worktree の外（または Git が無視するディレクトリ）にある path 依存はマニフェストに含まれず、鮮度判定は Cargo の mtime 比較だけに頼る。ジョブはそれらを note で列挙する
 2. **メンバーのマニフェストと差分比較**
