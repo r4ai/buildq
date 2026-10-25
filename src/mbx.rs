@@ -1,5 +1,9 @@
-//! mbx's own storage next to buildq's pool (`backend = "mbx"`), reported by
-//! `cache ls`. Informational only: GC decisions ignore it.
+//! mbx's own storage next to buildq's pool (`backend = "mbx"`). buildq never
+//! deletes mbx's entries, but the bytes mbx holds beyond what it shares with
+//! the pool count against `cache.budget`, so GC leaves room for them by
+//! evicting pool members. The `min_free` reserve also guards the store's
+//! volume when it differs from the cache volume. mbx's own GC limits stay the
+//! user's (mbx's config or `MBX_GC_*`).
 
 use std::collections::BTreeSet;
 use std::io::Read;
@@ -10,11 +14,13 @@ use std::time::{Duration, Instant};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{CacheAccounting, Config};
-use crate::gc::Usage;
 use crate::util::{self, human_bytes};
 
-/// How long `mbx cache stats` may run before `cache ls` gives up on it.
+/// How long `mbx cache stats` may run before buildq gives up on it.
 const STATS_TIMEOUT: Duration = Duration::from_secs(30);
+/// How long a measurement (or a failure to get one) is reused by GC and
+/// admission. `cache ls` always measures afresh.
+pub const CACHE_TTL_MS: u64 = 5 * 60_000;
 
 /// The fields of `mbx cache stats --json` that buildq reads (version 1);
 /// everything else is ignored. mbx counts logical bytes.
@@ -29,7 +35,7 @@ struct Stats {
     combined_total_bytes: u64,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MbxUsage {
     /// mbx's action-result store.
     pub store: PathBuf,
@@ -46,20 +52,76 @@ pub struct MbxUsage {
     pub combined_unique_bytes: u64,
 }
 
+impl MbxUsage {
+    /// mbx's bytes that the pool does not already count: what the budget
+    /// reserves for mbx.
+    pub fn counted_bytes(&self) -> u64 {
+        self.combined_bytes
+            .saturating_sub(self.shared_with_mbx_bytes)
+    }
+}
+
+/// The last measurement, shared by every buildq process (`mbx-usage.json`).
+#[derive(Debug, Serialize, Deserialize)]
+struct Cached {
+    at_ms: u64,
+    usage: Result<MbxUsage, String>,
+}
+
+fn cache_path(cfg: &Config) -> PathBuf {
+    cfg.cache_dir.join("mbx-usage.json")
+}
+
+/// mbx's usage for a pool of `pool_total` bytes in `members`, reusing a
+/// measurement younger than `max_age_ms`. Failures are cached too, so a
+/// broken mbx is not spawned on every scan.
+pub fn usage(
+    cfg: &Config,
+    members: &[&Path],
+    pool_total: u64,
+    max_age_ms: u64,
+) -> Result<MbxUsage, String> {
+    let path = cache_path(cfg);
+    let cached = util::read_json::<Cached>(&path)
+        .filter(|c| util::now_ms().saturating_sub(c.at_ms) < max_age_ms);
+    let usage = match cached {
+        Some(c) => c.usage,
+        None => {
+            let usage = scan(cfg, members);
+            let _ = util::write_json(
+                &path,
+                &Cached {
+                    at_ms: util::now_ms(),
+                    usage: usage.clone(),
+                },
+            );
+            usage
+        }
+    };
+    usage.map(|mut m| {
+        m.combined_unique_bytes =
+            (pool_total + m.combined_bytes).saturating_sub(m.shared_with_mbx_bytes);
+        m
+    })
+}
+
+/// The store of the last successful measurement, without running mbx.
+pub fn cached_store(cfg: &Config) -> Option<PathBuf> {
+    util::read_json::<Cached>(&cache_path(cfg))?
+        .usage
+        .ok()
+        .map(|m| m.store)
+}
+
 /// Runs `mbx cache stats --json` and measures what the pool shares with the
-/// store. Errors become a note in `cache ls`, never a failure.
-pub fn scan(cfg: &Config, u: &Usage) -> Result<MbxUsage, String> {
+/// store. Errors become a note, never a failure. `combined_unique_bytes` is
+/// left for `usage` to fill.
+fn scan(cfg: &Config, members: &[&Path]) -> Result<MbxUsage, String> {
     let mbx = crate::job::find_mbx(cfg)?;
     let stats = parse_stats(&run_stats(&mbx)?)?;
-    let members: Vec<&Path> = u
-        .pools
-        .iter()
-        .flat_map(|p| &p.members)
-        .map(|m| m.dir.as_path())
-        .collect();
-    let shared = shared_bytes(&stats.store, &members, cfg.accounting);
+    let shared = shared_bytes(&stats.store, members, cfg.accounting);
     Ok(MbxUsage {
-        combined_unique_bytes: (u.total + stats.combined_total_bytes).saturating_sub(shared),
+        combined_unique_bytes: 0,
         store: stats.store,
         store_bytes: stats.total_bytes,
         target_bytes: stats.target_bytes,

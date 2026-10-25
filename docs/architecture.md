@@ -296,6 +296,10 @@ The effective budget adapts to available volume space:
 \text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})
 ```
 
+With `backend = "mbx"`, `budget` is first reduced by mbx's bytes that the pool
+does not share (`mbx_budget_bytes`). buildq never deletes mbx's entries, so
+only pool members make room for them.
+
 ### Size Accounting
 
 `[cache] accounting = "allocated"` is the default. Unix uses allocated file

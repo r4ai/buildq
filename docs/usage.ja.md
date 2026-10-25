@@ -167,15 +167,21 @@ buildq 自身の Cargo の調査も mbx を経由し、mbx が worktree に管�
 そのため buildq は、ジョブと調査の両方に `rustup which cargo` が返すツールチェーンの cargo を使い、その旨を表示する。
 rustup がない場合や、`cargo.real` / `BUILDQ_REAL_CARGO` がそのような Cargo を明示している場合は、これらの設定名を示してジョブを止める。
 
-mbx は、ストア、非共有のインクリメンタル状態、コレクタを独自に持ち、これらは `cache.budget` の対象外である。
-ボリュームの容量は両方を見込んで確保するか、`MBX_GC_AUTO` と mbx の予算を明示的に設定する。
-`buildq gc` が回収するのは buildq のプールだけである。
+mbx は、ストア、非共有のインクリメンタル状態、コレクタを独自に持つ。
+buildq は mbx のエントリを削除しないが、`cache.budget` には計上する。
+mbx が報告するバイト数のうちプールと共有していない分（後述）を予算から差し引き、GC はその分だけプールのメンバーを追い出す。
+mbx 自身の上限（mbx の設定、`MBX_GC_AUTO`、予算の環境変数）は利用者が設定する。
+mbx だけで `cache.budget` を超える場合、GC はアイドルなプールを空にして警告する。
+計測は `mbx cache stats` の実行とストアの走査を伴うため、GC と受け入れ判定は結果を 5 分間再利用する（`<cache>/mbx-usage.json`）。
+mbx の実行に失敗した場合、その間は予算に計上しない。
+キャッシュと同じボリューム上の mbx は、`min_free` の予約で既に考慮されている。
+ストアが別のボリュームにある場合は、そのボリュームの空きが `min_free` 以下のときもビルドを拒否（または停止）する。そこを空けられるのは mbx の GC だけである。
 
 `buildq cache ls`（`--json` では任意の `mbx` オブジェクト）は `mbx cache stats --json` も実行し、mbx のストア・ターゲット・インクリメンタル・生成物のバイト数、プールのうち mbx ストアのファイルとハードリンクされている分（デバイスと inode で一度だけ計上）、重複を除いた合計を報告する。
 mbx は論理バイトで数えるため、`accounting = "allocated"` では合計は推定値になる。
 reflink は共有として検出できず、ストアが別のファイルシステムにある場合は共有 0 になる。
 mbx を実行できない場合は、代わりに注記（JSON では `mbx_note`）を表示する。
-GC の協調は別途扱う。
+`mbx_budget_bytes` は予算のうち mbx に充てた分であり、`cache ls` は常に計測し直す。
 
 ## Cache Budget
 
