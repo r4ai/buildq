@@ -2,11 +2,11 @@
 
 import hashlib
 import os
-from pathlib import Path
 import tarfile
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 import release
 
@@ -42,12 +42,19 @@ class ReleaseTests(unittest.TestCase):
                         with tarfile.open(output) as archive:
                             self.assertEqual(set(archive.getnames()), expected)
                             self.assertTrue(archive.getmember(binary).mode & 0o111)
-                            self.assertEqual(archive.extractfile(binary).read(), source.read_bytes())
+                            self.assertEqual(
+                                archive.extractfile(binary).read(), source.read_bytes()
+                            )
                 release.checksums()
                 for line in Path("dist/SHA256SUMS").read_text().splitlines():
                     digest, name = line.split("  ")
-                    self.assertEqual(digest, hashlib.sha256((Path("dist") / name).read_bytes()).hexdigest())
-                self.assertEqual(len(Path("dist/SHA256SUMS").read_text().splitlines()), 5)
+                    self.assertEqual(
+                        digest,
+                        hashlib.sha256((Path("dist") / name).read_bytes()).hexdigest(),
+                    )
+                self.assertEqual(
+                    len(Path("dist/SHA256SUMS").read_text().splitlines()), 5
+                )
                 # Extra assets and missing targets must prevent publication.
                 with self.assertRaises(SystemExit):
                     release.checksums()
