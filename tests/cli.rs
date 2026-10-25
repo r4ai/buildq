@@ -1384,3 +1384,63 @@ test -d "$TMPDIR/fixed-fixture"
         );
     }
 }
+
+#[test]
+#[cfg(unix)]
+fn cache_ls_reports_mbx_storage_without_double_counting() {
+    use std::os::unix::fs::PermissionsExt;
+    let e = Env::new();
+    let store = e.root.join("mbxstore/actions");
+    fs::create_dir_all(&store).unwrap();
+    fs::write(store.join("blob"), vec![1; 4096]).unwrap();
+    let member = e.root.join("cache/pools/p/m0");
+    fs::create_dir_all(&member).unwrap();
+    fs::hard_link(store.join("blob"), member.join("blob")).unwrap();
+    fs::write(member.join("own"), vec![2; 1000]).unwrap();
+    let mbx = e.root.join("mbxbin/mbx");
+    fs::create_dir_all(mbx.parent().unwrap()).unwrap();
+    let report = format!(
+        r#"{{"version":1,"byte_accounting":"logical","store":"{}","total_bytes":4096,"target_bytes":10,"incremental_bytes":20,"generated_bytes":30,"combined_total_bytes":5000,"future":true}}"#,
+        store.display()
+    );
+    let script = format!(
+        "#!/bin/sh\n[ \"$1 $2 $3\" = \"cache stats --json\" ] || exit 2\ncat <<'JSON'\n{report}\nJSON\n"
+    );
+    fs::write(&mbx, script).unwrap();
+    fs::set_permissions(&mbx, fs::Permissions::from_mode(0o755)).unwrap();
+
+    let ls = |e: &Env| {
+        let out = e.cmd(1).args(["cache", "ls", "--json"]).output().unwrap();
+        assert!(out.status.success());
+        serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()
+    };
+    // The default backend neither runs mbx nor reports it.
+    assert!(ls(&e).get("mbx").is_none());
+
+    let config = e.root.join("q/config.toml");
+    let base = fs::read_to_string(&config).unwrap();
+    fs::write(
+        &config,
+        format!("{base}[cargo]\nbackend = \"mbx\"\nmbx = {:?}\n", mbx),
+    )
+    .unwrap();
+    let u = ls(&e);
+    let total = u["total"].as_u64().unwrap();
+    assert_eq!(total, 4096 + 1000);
+    assert_eq!(u["mbx"]["combined_bytes"], 5000);
+    assert_eq!(u["mbx"]["generated_bytes"], 30);
+    assert_eq!(u["mbx"]["shared_with_mbx_bytes"], 4096);
+    assert_eq!(u["mbx"]["combined_unique_bytes"], total + 5000 - 4096);
+    let out = e.cmd(1).args(["cache", "ls"]).output().unwrap();
+    assert!(
+        String::from_utf8_lossy(&out.stdout).contains("mbx store"),
+        "{}",
+        String::from_utf8_lossy(&out.stdout)
+    );
+
+    // A failing mbx only leaves a note.
+    fs::write(&mbx, "#!/bin/sh\necho boom >&2\nexit 3\n").unwrap();
+    let u = ls(&e);
+    assert!(u.get("mbx").is_none());
+    assert!(u["mbx_note"].as_str().unwrap().contains("boom"));
+}

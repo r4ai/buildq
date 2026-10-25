@@ -23,10 +23,11 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
-use crate::config::{CacheAccounting, Config};
+use crate::config::{CacheAccounting, CargoBackend, Config};
 use crate::dedupe;
 use crate::external::{self, ExternalDir};
 use crate::lock::{self, LockFile};
+use crate::mbx::{self, MbxUsage};
 use crate::pool::{self, MemberMeta, PoolInfo};
 use crate::util::{self, human_bytes, newest_mtime, now_ms, read_json, write_json};
 
@@ -100,6 +101,12 @@ pub struct Usage {
     /// Explicit target dirs jobs used outside the pool (filled by `scan_all`).
     pub external: Vec<ExternalDir>,
     pub external_total: u64,
+    /// mbx's own storage and the combined footprint (`backend = "mbx"`, `scan_all` only).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mbx: Option<MbxUsage>,
+    /// Why `mbx` is missing although the backend is mbx.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mbx_note: Option<String>,
 }
 
 impl Usage {
@@ -188,6 +195,12 @@ pub fn scan_all(cfg: &Config, refresh: bool) -> Usage {
     let mut u = scan(cfg, refresh);
     u.external = external::scan(cfg, refresh);
     u.external_total = u.external.iter().map(|e| e.size_bytes).sum();
+    if cfg.backend == CargoBackend::Mbx {
+        match mbx::scan(cfg, &u) {
+            Ok(m) => u.mbx = Some(m),
+            Err(e) => u.mbx_note = Some(format!("mbx storage not reported: {e}")),
+        }
+    }
     u
 }
 
@@ -317,6 +330,8 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
         free_disk,
         external: Vec::new(),
         external_total: 0,
+        mbx: None,
+        mbx_note: None,
     };
     usage.budget_state();
     usage
@@ -1271,6 +1286,12 @@ pub fn render(u: &Usage) -> String {
     }
     if let Some(w) = external_warning(u.total, u.external_total, u.effective_budget) {
         s.push_str(&format!("warning: {w}\n"));
+    }
+    if let Some(m) = &u.mbx {
+        s.push_str(&mbx::render(m, u.total, u.accounting));
+    }
+    if let Some(note) = &u.mbx_note {
+        s.push_str(&format!("note: {note}\n"));
     }
     s
 }

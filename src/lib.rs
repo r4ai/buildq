@@ -12,6 +12,7 @@ pub mod git;
 pub mod history;
 pub mod job;
 pub mod lock;
+pub mod mbx;
 pub mod pool;
 pub mod queue;
 pub mod remote;
