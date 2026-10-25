@@ -992,3 +992,34 @@ fn a_replaced_alias_does_not_keep_a_pruned_copy_alive() {
         assert_eq!(r.freed, 10_010, "dry_run={dry_run} {r:?}");
     }
 }
+
+/// A copy larger than the whole read limit is skipped, not retried forever
+/// in front of the smaller copies that fit.
+#[test]
+fn an_over_budget_pair_does_not_block_smaller_ones() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    for id in [0, 1] {
+        put(
+            &c,
+            "p",
+            id,
+            "debug/deps/libaaa-large.rlib",
+            &vec![1; 600 << 10],
+        );
+        put(
+            &c,
+            "p",
+            id,
+            "debug/deps/libzzz-small.rlib",
+            &vec![2; 64 << 10],
+        );
+    }
+    let mut o = opts(&c, true);
+    o.max_read = 1 << 20;
+    let r = dedupe::run(&c, &o);
+    assert_eq!((r.compared, r.identical), (1, 1), "{r:?}");
+    assert_eq!(r.skipped_over_budget, 1, "{r:?}");
+    assert!(r.read_bytes <= o.max_read, "{r:?}");
+    assert!(!r.read_limited, "{r:?}");
+}
