@@ -509,9 +509,13 @@ impl ChildGuard {
                 );
             }
             let pid = child.id() as i32;
+            // The watchdog is forked (pre_exec) and keeps every descriptor
+            // open at that moment: start the tracker, whose `ps` pipes are
+            // briefly inheritable on macOS, only once the fork is done.
+            let watchdog = nix::spawn_watchdog(child.id(), kill_tree);
             ChildGuard {
                 tracker: kill_tree.then(|| nix::Tracker::start(pid)).flatten(),
-                watchdog: nix::spawn_watchdog(child.id(), kill_tree),
+                watchdog,
                 child: pid,
             }
         }
