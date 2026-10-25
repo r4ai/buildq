@@ -22,6 +22,7 @@ min_free = "25G"         # Minimum free disk space to preserve on volume (defaul
 # pool_explicit = true   # Also pool explicit --target-dir / CARGO_TARGET_DIR inside the worktree (default: false)
 # pool_fallback = true   # If the pool cannot be opened (Git/toolchain failure), build outside it with a warning instead of failing (default: false; env BUILDQ_POOL_FALLBACK)
 # dedupe = "off"         # Share identical files between members during GC ("auto" | "off", default: "auto")
+# seed_members = true    # Start a new member as a copy-on-write clone of the closest built one (APFS, Btrfs, XFS; experimental; default: false; env BUILDQ_SEED_MEMBERS)
 
 [cargo]
 rustc_wrapper = "none"   # Disable global sccache per job ("none" | "keep" | "/path")
@@ -186,3 +187,129 @@ counts logical bytes, so under `accounting = "allocated"` the combined figure
 is an estimate. Reflinks cannot be seen as shared, and a store on another
 filesystem shares nothing. If mbx cannot be run, `cache ls` prints a note
 (`mbx_note` in JSON) instead. Coordinated collection is tracked separately.
+
+## Cache Budget
+
+The default `accounting = "allocated"` counts file allocation and deduplicates
+hardlinks within each cache member/run/trash item. Sparse holes are excluded.
+Choose `[cache] accounting = "logical"` to budget unique logical file lengths
+instead. `cache ls`, `gc`, `top`, and `config` label the basis; JSON includes
+`accounting`. Allocation excludes directory metadata and conservatively counts
+sharing across separate cache items.
+
+`[cache] budget` controls cache retention, rather than the maximum size of a
+running build. Busy artifacts are protected. Use `buildq cache ls --refresh`
+or `buildq gc --json` to see remaining overflow and its reason. GC can exit
+successfully while still over budget when busy artifacts prevent reclamation.
+
+A completed member larger than the entire budget warns that GC may remove it,
+causing another cold build next time. Increase `budget` to fit the working set
+or reduce build artifacts. Oversized idle members have no retention exemption.
+The separate `min_free` guard still refuses or stops pooled builds under disk
+pressure; increasing `budget` does not disable it. See
+[Disk Budget & Garbage Collection](architecture.md#4-disk-budget--garbage-collection) for details.
+
+`cargo run` reports when native runtime dependencies keep a target member
+leased while queued or running. GC protects that member and reports remaining
+overflow. A long-running native application can therefore reduce build capacity;
+allow enough `cache.max_members` for its retained member, or stop the application
+to release it. Compilations still release their build slots before execution.
+
+## Member Deduplication
+
+GC shares byte-identical build outputs between idle members, including members
+of other repositories on the same toolchain. Shared files keep their content,
+mode, and mtime, so Cargo still treats them as fresh. `cache ls` shows the
+shared bytes per pool, and the budget counts them once. `buildq gc --dry-run`
+compares files the same way (within `dedupe_max_read`) and projects evictions
+from the deduplicated usage.
+
+```sh
+buildq cache dedupe --dry-run   # Measure duplication without changing files
+buildq cache dedupe             # Share now, regardless of `[cache] dedupe`
+```
+
+| Setting | Default | Description |
+| :--- | :--- | :--- |
+| `dedupe` | `"auto"` | `"off"` disables passes during GC |
+| `dedupe_min_size` | `"64KiB"` | Smaller files are not compared |
+| `dedupe_max_read` | `"8G"` | Bytes one pass may read for comparisons |
+
+Sharing needs reflinks: btrfs, XFS with `reflink=1`, or bcachefs on Linux, and
+APFS on macOS. Elsewhere a pass reports `unsupported` and changes nothing; a
+dry run still measures duplication. See
+[Cross-Member Deduplication](architecture.md#cross-member-deduplication).
+
+## Project Cache Cleanup
+
+`cargo clean` keeps Cargo's normal selection: `-p`, `--release`, `--profile`,
+`--target`, and `--manifest-path` affect its local/explicit target only. buildq
+prints a notice that pooled caches remain unchanged. Explicit target directories
+and Cargo target-dir settings retain their normal precedence; paths overlapping
+managed cache storage are refused so live leases cannot be bypassed.
+
+To remove this Git repository's pooled targets across all worktrees and toolchains:
+
+```sh
+buildq cache clean --dry-run
+buildq cache clean
+buildq cache clean --json
+```
+
+Run this from the intended repository, including when the previous clean used
+`--manifest-path` elsewhere. The command clears whole idle target members, rather
+than accepting Cargo's package/profile selectors. If any member or leasing section
+in a pool is busy or inaccessible, that pool is skipped and the command exits `1`;
+other idle toolchain pools may already have been cleaned. Stop/wait for those
+jobs and retry. Stable lock files remain.
+
+To remove idle pooled targets of every repository at once, from any directory:
+
+```sh
+buildq cache clean --all --dry-run
+buildq cache clean --all
+```
+
+Busy pools are skipped the same way.
+
+Without `--all`, other repositories are preserved. Run copies and external
+target directories are always preserved.
+GC handles eligible run copies; use ordinary Cargo clean on an external directory
+you own. Report before/after totals cover the managed cache, while actions identify
+this repository's removed members. Failed deletions also exit nonzero.
+
+## Live Monitoring
+
+`buildq top` refreshes running jobs, waiters and wait durations, remote queues,
+and target pool usage every second. Use `--interval N` to change the interval
+in seconds, or `--no-hosts` to monitor locally. Remote status runs in the
+background so a slow host does not freeze local updates; probes start at most
+once every five seconds and each request has a five-second deadline.
+Press Ctrl+C to stop. Use `--once` for a full snapshot of all rows.
+Redirected output also prints one plain-text snapshot without terminal codes.
+Pool sizes use the same cached estimates as `cache ls`.
+
+## Remote Builds (SSH)
+
+Add remote hosts to `config.toml` to offload builds over SSH and Git:
+
+```toml
+auto_hosts = ["local", "box"]
+
+[hosts.box]
+# transport = "rsync"    # Optional: sync ignored generated files too
+ssh = "box"              # Host alias from ~/.ssh/config
+slots = 4                # Max concurrent jobs sent to this host
+# buildq = "buildq"      # Probe remote queue load before automatic selection
+# rustc_release = "1.99.0" # Optional required remote rustc release
+```
+
+Run commands on a specific host or let `buildq` pick one automatically:
+
+```sh
+buildq run --host box -- cargo test
+buildq run --host auto -- cargo clippy --all-targets
+buildq run --host box --fetch target/debug/app -- cargo build --bin app
+```
+
+See [Remote Execution Protocol](architecture.md#5-remote-execution-protocol-ssh) for host selection and transport details.
