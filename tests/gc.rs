@@ -630,7 +630,10 @@ fn contended_automatic_gc_leaves_a_request_for_a_follow_up_pass() {
         .unwrap();
     let report = gc(&c, &auto);
     assert!(
-        report.skipped.as_deref().is_some_and(|s| s.contains("run again")),
+        report
+            .skipped
+            .as_deref()
+            .is_some_and(|s| s.contains("run again")),
         "{report:?}"
     );
     assert!(pending.exists());
