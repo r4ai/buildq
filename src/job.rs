@@ -207,9 +207,13 @@ fn real_cargo(cfg: &Config) -> Result<PathBuf, String> {
 #[derive(Debug, PartialEq, Eq)]
 enum Launcher {
     Cargo,
-    /// mbx wraps the real cargo (`CARGO`) and its compilers. buildq keeps
+    /// mbx wraps `cargo` (its `CARGO`) and the compilers. buildq keeps
     /// owning target placement, so mbx's views and check lanes stay off.
-    Mbx(PathBuf),
+    /// `cargo` is the real cargo unless that one runs mbx itself.
+    Mbx {
+        mbx: PathBuf,
+        cargo: PathBuf,
+    },
 }
 
 impl Launcher {
@@ -233,12 +237,18 @@ impl Launcher {
             )
             .ok_or("cargo.backend = \"mbx\": cannot find mbx on PATH (set cargo.mbx)")?,
         };
-        mbx_launcher(mbx, real, &cfg.wrapper)
+        mbx_launcher(
+            mbx,
+            real,
+            &cfg.wrapper,
+            cfg.real_cargo.is_some(),
+            &toolchain_cargo,
+        )
     }
 
     /// The job's command with `args`, whose aliases are expanded.
     fn command(&self, real: &Path, args: &[String]) -> Command {
-        let Launcher::Mbx(mbx) = self else {
+        let Launcher::Mbx { mbx, cargo } = self else {
             let mut c = Command::new(real);
             c.args(args);
             return c;
@@ -247,13 +257,13 @@ impl Launcher {
             note(
                 "cargo.backend = \"mbx\": mbx cannot forward this command line to Cargo; running cargo without mbx",
             );
-            let mut c = Command::new(real);
+            let mut c = Command::new(cargo);
             c.args(args);
             return c;
         };
         let mut c = Command::new(mbx);
         c.args(args)
-            .env("CARGO", real)
+            .env("CARGO", cargo)
             .env("MBX_TARGET_VIEWS", "0")
             .env("MBX_TARGET_LANES", "0");
         c
@@ -324,8 +334,16 @@ fn mbx_args(args: &[String]) -> Option<Vec<String>> {
 }
 
 /// Refuses chains that would loop (mbx -> buildq, cargo -> mbx) or silently
-/// stop caching (an explicit rustc wrapper, which mbx defers to).
-fn mbx_launcher(mbx: PathBuf, real: &Path, wrapper: &WrapperMode) -> Result<Launcher, String> {
+/// stop caching (an explicit rustc wrapper, which mbx defers to). A cargo
+/// found on PATH that runs mbx (mbx's Cargo shim, a mise wrapper) is replaced
+/// by the toolchain's own cargo when `toolchain_cargo` finds one.
+fn mbx_launcher(
+    mbx: PathBuf,
+    real: &Path,
+    wrapper: &WrapperMode,
+    configured: bool,
+    toolchain_cargo: &dyn Fn() -> Option<PathBuf>,
+) -> Result<Launcher, String> {
     if let WrapperMode::Path(p) = wrapper {
         return Err(format!(
             "cargo.rustc_wrapper = {p:?} conflicts with cargo.backend = \"mbx\": mbx sets RUSTC_WRAPPER itself and would not cache; use \"none\" or \"keep\""
@@ -341,16 +359,82 @@ fn mbx_launcher(mbx: PathBuf, real: &Path, wrapper: &WrapperMode) -> Result<Laun
             mbx.display()
         ));
     }
-    // Only the resolved name: multiplexing shims (mise) canonicalize both
-    // cargo and mbx to the same binary without forming a loop.
-    let resolved = crate::util::canonical(real);
-    if crate::util::file_stem_lower(&resolved.to_string_lossy()) == "mbx" {
-        return Err(format!(
-            "the real cargo {} resolves to mbx; set cargo.real or BUILDQ_REAL_CARGO to the toolchain's cargo",
-            real.display()
-        ));
+    if !runs_mbx(real) {
+        return Ok(Launcher::Mbx {
+            mbx,
+            cargo: real.to_path_buf(),
+        });
     }
-    Ok(Launcher::Mbx(mbx))
+    let fix = "set cargo.real or BUILDQ_REAL_CARGO to the toolchain's cargo";
+    if configured {
+        return Err(format!("the real cargo {} runs mbx; {fix}", real.display()));
+    }
+    match toolchain_cargo().filter(|c| !runs_mbx(c)) {
+        Some(cargo) => {
+            note(&format!(
+                "cargo.backend = \"mbx\": {} runs mbx, so mbx gets the toolchain's cargo {} ({fix} to choose another)",
+                real.display(),
+                cargo.display()
+            ));
+            Ok(Launcher::Mbx { mbx, cargo })
+        }
+        None => Err(format!(
+            "the real cargo {} runs mbx, which would wrap itself; {fix}",
+            real.display()
+        )),
+    }
+}
+
+/// Whether running `cargo` ends up in mbx: mbx itself or a link to it, a
+/// wrapper script that calls it (mbx's Cargo shim), or a mise shim whose
+/// cargo is one of those. Only resolved names count: multiplexing shims
+/// canonicalize both cargo and mbx to the same binary without a loop.
+fn runs_mbx(cargo: &Path) -> bool {
+    let resolved = crate::util::canonical(cargo);
+    match crate::util::file_stem_lower(&resolved.to_string_lossy()).as_str() {
+        "mbx" => true,
+        "mise" => mise_cargo(&resolved).is_some_and(|c| {
+            let c = crate::util::canonical(&c);
+            crate::util::file_stem_lower(&c.to_string_lossy()) == "mbx" || script_runs_mbx(&c)
+        }),
+        _ => script_runs_mbx(&resolved),
+    }
+}
+
+/// A small script (`#!`) that names mbx as a command word.
+fn script_runs_mbx(path: &Path) -> bool {
+    use std::io::Read;
+    let mut head = Vec::new();
+    let Ok(f) = std::fs::File::open(path) else {
+        return false;
+    };
+    if f.take(64 * 1024).read_to_end(&mut head).is_err() || !head.starts_with(b"#!") {
+        return false;
+    }
+    String::from_utf8_lossy(&head)
+        .split(|c: char| !(c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.')))
+        .any(|w| w == "mbx" || w == "mbx.exe")
+}
+
+/// The cargo a mise shim would run here; `mise` is the binary it resolves to.
+fn mise_cargo(mise: &Path) -> Option<PathBuf> {
+    which_cargo(Command::new(mise).args(["which", "cargo"]))
+}
+
+/// The active toolchain's own cargo, as rustup resolves it here.
+fn toolchain_cargo() -> Option<PathBuf> {
+    which_cargo(Command::new("rustup").args(["which", "cargo"]))
+}
+
+fn which_cargo(c: &mut Command) -> Option<PathBuf> {
+    let out = c
+        .stdin(Stdio::null())
+        .stderr(Stdio::null())
+        .output()
+        .ok()
+        .filter(|o| o.status.success())?;
+    let p = PathBuf::from(String::from_utf8_lossy(&out.stdout).trim());
+    p.is_file().then_some(p)
 }
 
 pub struct Toolchain {
@@ -904,7 +988,7 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     // mbx parses the subcommand itself, so it gets the expanded alias.
     let source = match launcher {
         Launcher::Cargo => args.to_vec(),
-        Launcher::Mbx(_) => with_toolchain(&parsed, parsed.args.clone()),
+        Launcher::Mbx { .. } => with_toolchain(&parsed, parsed.args.clone()),
     };
     let (cmd_args, target) = cargo_args(&source, &parsed, lease.as_ref(), ctx.as_ref());
     if let (Some(l), Some(c)) = (&lease, &ctx) {
@@ -1846,16 +1930,23 @@ mod tests {
         let cargo = bin.join("cargo");
         std::fs::write(&mbx, "").unwrap();
         std::fs::write(&cargo, "").unwrap();
+        let none = || None;
+        let launch = |real: &Path, wrapper: &WrapperMode| {
+            mbx_launcher(mbx.clone(), real, wrapper, false, &none)
+        };
         assert_eq!(
-            mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Disable),
-            Ok(Launcher::Mbx(mbx.clone()))
+            launch(&cargo, &WrapperMode::Disable),
+            Ok(Launcher::Mbx {
+                mbx: mbx.clone(),
+                cargo: cargo.clone()
+            })
         );
-        assert!(mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Keep).is_ok());
-        let err = mbx_launcher(mbx.clone(), &cargo, &WrapperMode::Path("sccache".into()));
+        assert!(launch(&cargo, &WrapperMode::Keep).is_ok());
+        let err = launch(&cargo, &WrapperMode::Path("sccache".into()));
         assert!(err.unwrap_err().contains("rustc_wrapper"));
         // A real cargo that is mbx (or mbx's Cargo shim linked to it) loops.
         assert!(
-            mbx_launcher(mbx.clone(), &mbx, &WrapperMode::Disable)
+            launch(&mbx, &WrapperMode::Disable)
                 .unwrap_err()
                 .contains("BUILDQ_REAL_CARGO")
         );
@@ -1863,12 +1954,49 @@ mod tests {
         {
             let linked = t.path().join("cargo");
             std::os::unix::fs::symlink(&mbx, &linked).unwrap();
-            assert!(mbx_launcher(mbx.clone(), &linked, &WrapperMode::Disable).is_err());
+            assert!(launch(&linked, &WrapperMode::Disable).is_err());
         }
+        // A wrapper script that runs mbx loops too, unless the toolchain's
+        // cargo can stand in; an explicitly configured cargo is not replaced.
+        let script = t.path().join("wrapped").join("cargo");
+        std::fs::create_dir_all(script.parent().unwrap()).unwrap();
+        std::fs::write(&script, "#!/bin/sh\nexec mbx cargo \"$@\"\n").unwrap();
+        assert!(
+            launch(&script, &WrapperMode::Disable)
+                .unwrap_err()
+                .contains("would wrap itself")
+        );
+        let toolchain = || Some(cargo.clone());
+        assert_eq!(
+            mbx_launcher(
+                mbx.clone(),
+                &script,
+                &WrapperMode::Disable,
+                false,
+                &toolchain
+            ),
+            Ok(Launcher::Mbx {
+                mbx: mbx.clone(),
+                cargo: cargo.clone()
+            })
+        );
+        assert!(
+            mbx_launcher(
+                mbx.clone(),
+                &script,
+                &WrapperMode::Disable,
+                true,
+                &toolchain
+            )
+            .is_err()
+        );
+        // Scripts that merely mention a longer name are not mbx.
+        std::fs::write(&script, "#!/bin/sh\nexec mbxtool cargo \"$@\"\n").unwrap();
+        assert!(launch(&script, &WrapperMode::Disable).is_ok());
         // mbx inside a buildq shim dir would re-enter buildq.
         std::fs::write(bin.join(crate::shim::MARKER), "").unwrap();
         assert!(
-            mbx_launcher(mbx, &cargo, &WrapperMode::Disable)
+            launch(&cargo, &WrapperMode::Disable)
                 .unwrap_err()
                 .contains("buildq itself")
         );
