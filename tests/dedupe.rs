@@ -1049,6 +1049,7 @@ fn fingerprints_count_against_the_read_limit() {
     assert!(r.read_limited && r.read_bytes <= c.dedupe_max_read, "{r:?}");
 }
 
+#[cfg(unix)]
 #[test]
 fn settled_groups_read_nothing_on_the_next_pass() {
     let temp = tempfile::tempdir().unwrap();
