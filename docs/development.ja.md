@@ -67,6 +67,22 @@ Unix では別テストの fork が exec 前に一時的にロックを継承し
 cargo test --test e2e -- --ignored --nocapture
 ```
 
+### 実 mbx に対する mbx バックエンド
+
+`mbx_backend_runs_against_a_real_mbx` は、2つの worktree を持つ小さなワークスペースで、実際の
+[mbx](https://github.com/jdx/mr-boxington) を介して `[cargo] backend = "mbx"` を実行する。`build`、2段階の `run`、`test`、
+`check`、`clippy`（未導入ならスキップ）、`+<toolchain> build`（rustup がなければスキップ）が成功し、どちらの worktree にも
+`target` エントリが現れず、2つ目の worktree のビルドが `mbx[cache]: N hits`（`N > 0`）を報告することを検証する。
+mbx は `BUILDQ_TEST_MBX`、なければ `PATH` から探す（mise の shim は `mise which mbx` で実体に解決する）。見つからなければ
+メッセージを出して成功扱いにする。
+
+```sh
+cargo test --test e2e mbx_backend_runs_against_a_real_mbx -- --ignored --nocapture
+```
+
+mbx の呼び出しはすべて、テスト用一時ディレクトリ内の `MBX_CACHE_DIR` と `MBX_GC_AUTO=0` で実行する。
+手元の mbx キャッシュを読み書きしたり GC したりすることはない。
+
 ### Code Coverage
 
 リポジトリで固定したツールチェーン用の LLVM ツールと `cargo-llvm-cov` を導入する。
