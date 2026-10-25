@@ -20,6 +20,7 @@ max_members = 3          # Max target/ dirs per repo+toolchain (minimum: slots; 
 budget = "45G"           # Max disk usage under BUILDQ_CACHE (default: "60G")
 min_free = "25G"         # Minimum free disk space to preserve on volume (default: "20G")
 # pool_explicit = true   # Also pool explicit --target-dir / CARGO_TARGET_DIR inside the worktree (default: false)
+# pool_fallback = true   # If the pool cannot be opened (Git/toolchain failure), build outside it with a warning instead of failing (default: false; env BUILDQ_POOL_FALLBACK)
 # dedupe = "off"         # Share identical files between members during GC ("auto" | "off", default: "auto")
 
 [cargo]
@@ -51,6 +52,12 @@ collectors require an init that reaps adopted children. In containers, use Docke
 `--init`, or run `tini` / `dumb-init` as PID 1. A non-reaping PID 1 can accumulate
 terminated collectors; these zombies are not running compilers or held slots.
 `buildq config` displays the effective mode and its init requirement.
+
+Only one collector runs at a time. A post-job GC that finds another collector
+working leaves a request (`gc.pending` in the cache directory) instead of being
+dropped; that collector runs up to three follow-up passes for such requests after
+releasing its lock, so members that were busy during its pass are reconsidered
+once their jobs finish. `gc --auto --json` reports them as `follow_ups`.
 
 Without a reaping init, collect within the job process instead:
 

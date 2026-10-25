@@ -93,6 +93,8 @@ pub struct Report {
     pub skipped_hardlinked: usize,
     /// Copies an earlier pass found different, with both files unchanged since.
     pub skipped_known_different: usize,
+    /// Copies too large for the whole read limit: they are never compared.
+    pub skipped_over_budget: usize,
     pub read_bytes: u64,
     /// The read limit stopped the pass before every candidate was compared.
     pub read_limited: bool,
@@ -1139,9 +1141,15 @@ fn share_pair(work: &[Work], opts: &Options, ledger: &mut Ledger, report: &mut R
     let mut held: Option<PairLock> = None;
     for (n, w) in work.iter().enumerate() {
         let len = w.other.md.len();
+        if 2 * len > opts.max_read {
+            report.skipped_over_budget += 1;
+            continue;
+        }
         if report.read_bytes.saturating_add(2 * len) > opts.max_read {
+            // Too large for what is left: a later pass retries it, while
+            // smaller copies may still fit.
             report.read_limited = true;
-            return;
+            continue;
         }
         if held.as_ref().is_none_or(PairLock::expired) {
             // Release first: a second handle cannot take a lock this process holds.
@@ -1633,12 +1641,13 @@ pub fn render(r: &Report) -> String {
         human_bytes(r.already_shared_bytes)
     ));
     s.push_str(&format!(
-        "differing: {} files; skipped: {} known different, {} busy, {} changed, {} hard-linked\n",
+        "differing: {} files; skipped: {} known different, {} busy, {} changed, {} hard-linked, {} over the read limit\n",
         r.differing,
         r.skipped_known_different,
         r.skipped_busy,
         r.skipped_changed,
-        r.skipped_hardlinked
+        r.skipped_hardlinked,
+        r.skipped_over_budget
     ));
     if r.read_limited {
         s.push_str("stopped at the read limit; the next pass resumes here\n");

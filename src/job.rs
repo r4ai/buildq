@@ -544,8 +544,37 @@ fn inside_worktree(dir: &Path, wt: &Worktree) -> Option<String> {
 }
 
 /// The pool to build in, or else the explicit target dir the job uses
-/// outside the pool (which is then announced and recorded).
-fn open_pool(cfg: &Config, real: &Path, parsed: &Parsed) -> (Option<PoolCtx>, Option<PathBuf>) {
+/// outside the pool (which is then announced and recorded). A worktree whose
+/// pool cannot be opened fails the job unless `cache.pool_fallback` is set:
+/// Cargo would otherwise quietly build into a `target/` of its own.
+fn open_pool(
+    cfg: &Config,
+    real: &Path,
+    parsed: &Parsed,
+) -> Result<(Option<PoolCtx>, Option<PathBuf>), String> {
+    let (ctx, explicit) = pool_or_explicit(cfg, real, parsed);
+    match ctx {
+        Some(Ok(c)) => Ok((Some(c), None)),
+        None => Ok((None, explicit)),
+        Some(Err(e)) if cfg.pool_fallback => {
+            note(&format!(
+                "pool unavailable, building outside the pool and the disk budget (cache.pool_fallback): {e}"
+            ));
+            Ok((None, explicit))
+        }
+        Some(Err(e)) => Err(format!(
+            "pool unavailable: {e}\n(set [cache] pool_fallback = true or BUILDQ_POOL_FALLBACK=1 to build outside the pool instead)"
+        )),
+    }
+}
+
+/// The pool context when the job is in a worktree, and the explicit target
+/// dir it would use outside the pool.
+fn pool_or_explicit(
+    cfg: &Config,
+    real: &Path,
+    parsed: &Parsed,
+) -> (Option<Result<PoolCtx, String>>, Option<PathBuf>) {
     if !cfg.pool {
         return (None, None);
     }
@@ -565,11 +594,8 @@ fn open_pool(cfg: &Config, real: &Path, parsed: &Parsed) -> (Option<PoolCtx>, Op
             return (None, Some(note_unpooled(dir, hint)));
         }
     };
-    let ctx = wt.and_then(|wt| pool_ctx(real, parsed, cfg, wt, explicit.clone()));
-    match (ctx, explicit) {
-        (Some(c), _) => (Some(c), None),
-        (None, explicit) => (None, explicit.map(|(dir, _)| dir)),
-    }
+    let ctx = wt.map(|wt| pool_ctx(real, parsed, cfg, wt, explicit.clone()));
+    (ctx, explicit.map(|(dir, _)| dir))
 }
 
 /// One line on stderr: this job's target dir is outside the pool and the budget.
@@ -592,12 +618,16 @@ fn pool_ctx(
     cfg: &Config,
     wt: Worktree,
     explicit: Option<(PathBuf, String)>,
-) -> Option<PoolCtx> {
-    let tc = probe_toolchain(real, parsed.toolchain.as_deref())?;
+) -> Result<PoolCtx, String> {
+    let tc = probe_toolchain(real, parsed.toolchain.as_deref())
+        .ok_or_else(|| format!("cannot identify the Rust toolchain of {}", real.display()))?;
     let dir = pool::pool_dir(&cfg.cache_dir, &wt, &tc.id);
-    let name = dir.file_name()?.to_string_lossy().to_string();
+    let name = dir
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_default();
     let pool = Pool::open(
-        dir,
+        dir.clone(),
         PoolInfo {
             repo: wt.repo_name(),
             repo_key: wt.repo_key(),
@@ -607,7 +637,7 @@ fn pool_ctx(
             last_used_ms: now_ms(),
         },
     )
-    .ok()?;
+    .map_err(|e| format!("pool {}: {e}", dir.display()))?;
     let manifest = git::manifest(&wt)?;
     let metadata = workspace_metadata(real, parsed);
     let uncovered = metadata
@@ -621,7 +651,7 @@ fn pool_ctx(
             names.join(", ")
         ));
     }
-    Some(PoolCtx {
+    Ok(PoolCtx {
         manifest,
         rebuild_graph: metadata
             .as_ref()
@@ -888,7 +918,7 @@ pub fn run_cargo(cfg: &Config, opts: &Opts, args: &[String]) -> Result<i32, Stri
     // member, so this order cannot deadlock.
     // Edits after the manifest snapshot must reach the after-job check.
     let snapshot = now_ms();
-    let (mut ctx, external) = open_pool(cfg, &real, &parsed);
+    let (mut ctx, external) = open_pool(cfg, &real, &parsed)?;
     trace("pool opened (git + toolchain + manifest)");
     let mut lease = match ctx.as_mut() {
         Some(c) => Some(lease_member(cfg, c)?),
@@ -1363,7 +1393,7 @@ fn cargo_run(
 
     // Member first, then slot (see `cargo_cached`).
     let snapshot = now_ms();
-    let (mut ctx, external) = open_pool(cfg, real, &build_parsed);
+    let (mut ctx, external) = open_pool(cfg, real, &build_parsed)?;
     let mut lease = match ctx.as_mut() {
         Some(c) => Some(lease_member(cfg, c)?),
         None => None,
