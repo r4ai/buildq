@@ -1123,3 +1123,68 @@ fn an_over_budget_pair_does_not_block_smaller_ones() {
     assert!(r.read_bytes <= o.max_read, "{r:?}");
     assert!(!r.read_limited, "{r:?}");
 }
+
+#[test]
+fn a_dry_run_without_a_ledger_reports_unknown_sharing() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    put(&c, "p", 0, RLIB, &[7; 3000]);
+    put(&c, "p", 1, RLIB, &[7; 3000]);
+
+    let r = dedupe::run(&c, &opts(&c, true));
+    if cfg!(any(target_os = "linux", target_os = "macos")) {
+        assert_eq!(r.sharing.state, dedupe::State::Unknown);
+        assert!(dedupe::render(&r).contains("this filesystem: unknown"));
+    }
+    assert!(
+        !c.cache_dir.join("dedupe.json").exists(),
+        "dry runs never write"
+    );
+    let json = serde_json::to_value(&r).unwrap();
+    assert!(json["sharing"]["state"].is_string());
+}
+
+#[cfg(unix)]
+#[test]
+fn a_dry_run_reports_the_unsupported_state_a_real_pass_recorded() {
+    use std::os::unix::fs::MetadataExt;
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    put(&c, "p", 0, RLIB, &[7; 3000]);
+    put(&c, "p", 1, RLIB, &[7; 3000]);
+    let dev = fs::metadata(c.cache_dir.join("pools")).unwrap().dev();
+    let reason = "FIDEDUPERANGE: Invalid argument (os error 22)";
+    fs::write(
+        c.cache_dir.join("dedupe.json"),
+        format!(
+            r#"{{"groups":[],"volumes":{{"{dev}":{{"state":"unsupported","reason":"{reason}","checked_ms":1}}}}}}"#
+        ),
+    )
+    .unwrap();
+
+    let r = dedupe::run(&c, &opts(&c, true));
+    assert_eq!(r.sharing.state, dedupe::State::Unsupported);
+    assert_eq!(r.sharing.reason.as_deref(), Some(reason));
+    let text = dedupe::render(&r);
+    assert!(
+        text.contains("this filesystem cannot share: FIDEDUPERANGE"),
+        "{text}"
+    );
+    assert_eq!(dedupe::Ledger::load(&c.cache_dir).volumes.len(), 1, "kept");
+}
+
+#[cfg(unix)]
+#[test]
+fn a_real_pass_records_that_the_volume_shares() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    put(&c, "p", 0, RLIB, &[7; 3000]);
+    put(&c, "p", 1, RLIB, &[7; 3000]);
+    let Some(r) = share(&c) else { return };
+    assert!(r.shared > 0, "{r:?}");
+    assert_eq!(r.sharing.state, dedupe::State::Supported);
+
+    let dry = dedupe::run(&c, &opts(&c, true));
+    assert_eq!(dry.sharing.state, dedupe::State::Supported);
+    assert!(dedupe::render(&dry).contains("this filesystem can share"));
+}
