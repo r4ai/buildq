@@ -276,6 +276,9 @@ GC は未使用になったメンバーを、唯一のメンバーでも回収�
 \text{effective\_budget} = \min(\text{budget}, \text{used} + \text{free} - \text{min\_free})
 ```
 
+`backend = "mbx"` では、まず `budget` からプールと共有していない mbx のバイト数（`mbx_budget_bytes`）を差し引く。
+buildq は mbx のエントリを削除しないため、その分の空きはプールのメンバーだけで確保する。
+
 ### Size Accounting
 
 `[cache] accounting = "allocated"` がデフォルトである。

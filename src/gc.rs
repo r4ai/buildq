@@ -13,7 +13,9 @@
 //! 5. while over budget: idle run copies, then whole members, each LRU first.
 //!
 //! The budget is `min(budget, used + free - min_free)`, so a disk that fills
-//! up for other reasons shrinks the pool too. Busy members are never touched.
+//! up for other reasons shrinks the pool too. With `backend = "mbx"`, mbx's
+//! bytes that the pool does not share come off `budget` first (`mbx.rs`);
+//! buildq never deletes them. Busy members are never touched.
 //! Explicit target dirs that jobs used outside the pool (`external.rs`) are
 //! reported next to the budget but never pruned.
 
@@ -101,9 +103,11 @@ pub struct Usage {
     /// Explicit target dirs jobs used outside the pool (filled by `scan_all`).
     pub external: Vec<ExternalDir>,
     pub external_total: u64,
-    /// mbx's own storage and the combined footprint (`backend = "mbx"`, `scan_all` only).
+    /// mbx's own storage and the combined footprint (`backend = "mbx"`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mbx: Option<MbxUsage>,
+    /// mbx's bytes counted against `budget` (`MbxUsage::counted_bytes`).
+    pub mbx_budget_bytes: u64,
     /// Why `mbx` is missing although the backend is mbx.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mbx_note: Option<String>,
@@ -128,7 +132,14 @@ impl Usage {
                 "pending trash still consumes space; resolve deletion errors and retry GC".into(),
             );
         }
-        if self.effective_budget < self.budget {
+        if self.mbx_budget_bytes > 0 {
+            self.over_budget_reasons.push(format!(
+                "mbx's store takes {} of the budget and buildq never deletes it; \
+                 tighten mbx's own GC limits or raise [cache].budget",
+                human_bytes(self.mbx_budget_bytes)
+            ));
+        }
+        if self.effective_budget < self.budget.saturating_sub(self.mbx_budget_bytes) {
             self.over_budget_reasons
                 .push("the volume free-space reserve reduces the effective budget".into());
         }
@@ -190,17 +201,12 @@ pub fn runs_dir(cfg: &Config) -> PathBuf {
     cfg.cache_dir.join("runs")
 }
 
-/// `scan` plus the explicit target dirs outside the pool (slower: measures them).
+/// `scan` plus the explicit target dirs outside the pool (slower: measures
+/// them), with mbx's usage measured afresh.
 pub fn scan_all(cfg: &Config, refresh: bool) -> Usage {
-    let mut u = scan(cfg, refresh);
+    let mut u = scan_with(cfg, refresh, 0);
     u.external = external::scan(cfg, refresh);
     u.external_total = u.external.iter().map(|e| e.size_bytes).sum();
-    if cfg.backend == CargoBackend::Mbx {
-        match mbx::scan(cfg, &u) {
-            Ok(m) => u.mbx = Some(m),
-            Err(e) => u.mbx_note = Some(format!("mbx storage not reported: {e}")),
-        }
-    }
     u
 }
 
@@ -221,6 +227,10 @@ pub fn external_warning(pool: u64, external: u64, budget: u64) -> Option<String>
 /// Reuse member size estimates for up to a minute, even across builds.
 /// `refresh` bypasses this cache; real GC passes always refresh before pruning.
 pub fn scan(cfg: &Config, refresh: bool) -> Usage {
+    scan_with(cfg, refresh, mbx::CACHE_TTL_MS)
+}
+
+fn scan_with(cfg: &Config, refresh: bool, mbx_max_age_ms: u64) -> Usage {
     let sharing = dedupe::Sharing::load(cfg);
     let mut pools = Vec::new();
     if let Ok(rd) = fs::read_dir(cfg.cache_dir.join("pools")) {
@@ -316,11 +326,33 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
         + runs.iter().map(|r| r.size).sum::<u64>()
         + trash_bytes;
     let free_disk = util::free_disk_bytes(&cfg.cache_dir);
+    let (mbx, mbx_note) = if cfg.backend == CargoBackend::Mbx {
+        let members: Vec<&Path> = pools
+            .iter()
+            .flat_map(|p| &p.members)
+            .map(|m| m.dir.as_path())
+            .collect();
+        match mbx::usage(cfg, &members, total, mbx_max_age_ms) {
+            Ok(m) => (Some(m), None),
+            Err(e) => (
+                None,
+                Some(format!("mbx storage not reported or budgeted: {e}")),
+            ),
+        }
+    } else {
+        (None, None)
+    };
+    let mbx_budget_bytes = mbx.as_ref().map_or(0, MbxUsage::counted_bytes);
     let mut usage = Usage {
         over_budget: false,
         over_budget_bytes: 0,
         over_budget_reasons: Vec::new(),
-        effective_budget: effective_budget(cfg.budget, cfg.min_free, total, free_disk),
+        effective_budget: effective_budget(
+            cfg.budget.saturating_sub(mbx_budget_bytes),
+            cfg.min_free,
+            total,
+            free_disk,
+        ),
         pools,
         runs,
         total,
@@ -330,8 +362,9 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
         free_disk,
         external: Vec::new(),
         external_total: 0,
-        mbx: None,
-        mbx_note: None,
+        mbx,
+        mbx_budget_bytes,
+        mbx_note,
     };
     usage.budget_state();
     usage
@@ -1253,8 +1286,13 @@ pub fn render(u: &Usage) -> String {
             u.runs.len()
         ));
     }
+    let mbx_part = if u.mbx_budget_bytes > 0 {
+        format!(" - mbx {}", human_bytes(u.mbx_budget_bytes))
+    } else {
+        String::new()
+    };
     s.push_str(&format!(
-        "total {} / budget {} (effective {}), free disk {} [{} accounting]\n",
+        "total {} / budget {}{mbx_part} (effective {}), free disk {} [{} accounting]\n",
         human_bytes(u.total),
         human_bytes(u.budget),
         human_bytes(u.effective_budget),

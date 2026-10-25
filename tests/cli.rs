@@ -1451,6 +1451,8 @@ fn cache_ls_reports_mbx_storage_without_double_counting() {
     assert_eq!(u["mbx"]["generated_bytes"], 30);
     assert_eq!(u["mbx"]["shared_with_mbx_bytes"], 4096);
     assert_eq!(u["mbx"]["combined_unique_bytes"], total + 5000 - 4096);
+    // Only mbx's bytes outside the pool come off the budget.
+    assert_eq!(u["mbx_budget_bytes"], 5000 - 4096);
     let out = e.cmd(1).args(["cache", "ls"]).output().unwrap();
     assert!(
         String::from_utf8_lossy(&out.stdout).contains("mbx store"),
@@ -1463,4 +1465,81 @@ fn cache_ls_reports_mbx_storage_without_double_counting() {
     let u = ls(&e);
     assert!(u.get("mbx").is_none());
     assert!(u["mbx_note"].as_str().unwrap().contains("boom"));
+    assert_eq!(u["mbx_budget_bytes"], 0);
+}
+
+#[cfg(unix)]
+#[test]
+fn gc_leaves_room_in_the_budget_for_mbx_without_running_it_each_time() {
+    use std::os::unix::fs::PermissionsExt;
+    let e = Env::new();
+    let now = buildq::util::now_ms();
+    let pool = e.root.join("cache/pools/p");
+    for (id, used) in [(0, now - 1000), (1, now)] {
+        let dir = pool.join(format!("m{id}"));
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(dir.join("own"), vec![1; 3000]).unwrap();
+        let meta = serde_json::json!({ "id": id, "created_ms": used, "last_used_ms": used });
+        fs::write(pool.join(format!("m{id}.json")), meta.to_string()).unwrap();
+    }
+    let info = serde_json::json!({ "created_ms": now, "last_used_ms": now });
+    fs::write(pool.join("pool.json"), info.to_string()).unwrap();
+    let store = e.root.join("mbxstore/actions");
+    fs::create_dir_all(&store).unwrap();
+    let mbx = e.root.join("mbxbin/mbx");
+    fs::create_dir_all(mbx.parent().unwrap()).unwrap();
+    let report = format!(
+        r#"{{"version":1,"store":"{}","total_bytes":4000,"combined_total_bytes":5000}}"#,
+        store.display()
+    );
+    fs::write(&mbx, format!("#!/bin/sh\ncat <<'JSON'\n{report}\nJSON\n")).unwrap();
+    fs::set_permissions(&mbx, fs::Permissions::from_mode(0o755)).unwrap();
+    let config = e.root.join("q/config.toml");
+    let base = "[cache]\nmin_free='0'\naccounting='logical'\nbudget='8K'\n";
+    fs::write(&config, base).unwrap();
+    let gc = |e: &Env, dry: bool| {
+        let mut cmd = e.cmd(1);
+        cmd.args(["gc", "--json"]);
+        if dry {
+            cmd.arg("--dry-run");
+        }
+        let out = cmd.output().unwrap();
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()
+    };
+
+    // 6000 pool bytes fit 8K on their own.
+    let r = gc(&e, true);
+    assert_eq!(r["effective_budget"], 8192);
+    assert_eq!(r["freed"], 0);
+
+    // mbx's 5000 bytes leave 3192 for the pool: one member goes, mbx's store stays.
+    fs::write(
+        &config,
+        format!("{base}[cargo]\nbackend = \"mbx\"\nmbx = {:?}\n", mbx),
+    )
+    .unwrap();
+    let r = gc(&e, false);
+    assert_eq!(r["effective_budget"], 8192 - 5000);
+    assert_eq!(r["after"], 3000);
+    assert!(!r["over_budget"].as_bool().unwrap());
+    assert!(!pool.join("m0").exists() && pool.join("m1").is_dir());
+    assert!(store.is_dir());
+
+    // GC reuses the measurement instead of spawning mbx again.
+    let ran = e.root.join("ran");
+    fs::write(&mbx, format!("#!/bin/sh\ntouch {:?}\nexit 3\n", ran)).unwrap();
+    let r = gc(&e, true);
+    assert_eq!(r["effective_budget"], 8192 - 5000);
+    assert!(!ran.exists());
+    // `cache ls` measures afresh; a failing mbx is then not budgeted.
+    let out = e.cmd(1).args(["cache", "ls", "--json"]).output().unwrap();
+    let u: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert!(ran.exists());
+    assert_eq!(u["mbx_budget_bytes"], 0);
+    assert_eq!(u["effective_budget"], 8192);
 }
