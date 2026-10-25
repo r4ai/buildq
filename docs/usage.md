@@ -237,7 +237,11 @@ buildq cache dedupe             # Share now, regardless of `[cache] dedupe`
 
 Sharing needs reflinks: btrfs, XFS with `reflink=1`, or bcachefs on Linux, and
 APFS on macOS. Elsewhere a pass reports `unsupported` and changes nothing; a
-dry run still measures duplication. See
+dry run still measures duplication. A dry run's "would share" is content-based
+potential, not reclaimable capacity: it reports `sharing` as `supported`,
+`unsupported` (with the reason) or `unknown`, from what the last real pass on
+this volume observed, and never probes by writing. Run `buildq cache dedupe`
+once to find out. See
 [Cross-Member Deduplication](architecture.md#cross-member-deduplication).
 
 ## Project Cache Cleanup

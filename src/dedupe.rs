@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::{CacheAccounting, Config};
 use crate::lock::{self, LockFile};
 use crate::pool;
-use crate::util::{self, human_bytes, read_json, write_json};
+use crate::util::{self, human_bytes, now_ms, read_json, write_json};
 
 /// Release member locks at least this often so leases are not starved.
 const BATCH_BYTES: u64 = 1 << 30;
@@ -38,6 +38,7 @@ const TMP_PREFIX: &str = ".buildq-dedupe-";
 /// which would split a hard-link pair.
 const KEEPS_INODE: bool = cfg!(target_os = "linux");
 const SUPPORTED: bool = cfg!(any(target_os = "linux", target_os = "macos"));
+const UNSUPPORTED_PLATFORM: &str = "buildq shares files only on Linux and macOS";
 
 #[derive(Debug, Clone)]
 pub struct Options {
@@ -100,8 +101,56 @@ pub struct Report {
     pub read_limited: bool,
     /// The platform or volume cannot share data; the pass stopped.
     pub unsupported: Option<String>,
+    /// Whether the cache volume can share data. A dry run only reports what
+    /// an earlier real pass recorded; its identical bytes are content-based.
+    pub sharing: Capability,
     pub skipped: Option<String>,
     pub errors: Vec<String>,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum State {
+    Supported,
+    Unsupported,
+    #[default]
+    Unknown,
+}
+
+/// What a real pass last observed about sharing on one volume.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Capability {
+    pub state: State,
+    /// The error text of an unsupported attempt.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    /// When a real pass observed it (ms since the epoch); none if never.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub checked_ms: Option<u64>,
+}
+
+impl Capability {
+    fn observed(state: State, reason: Option<String>) -> Capability {
+        Capability {
+            state,
+            reason,
+            checked_ms: Some(now_ms()),
+        }
+    }
+
+    /// How a dry run's identical bytes relate to this volume.
+    pub fn note(&self) -> String {
+        match (self.state, &self.reason) {
+            (State::Supported, _) => "identical content; this filesystem can share".into(),
+            (State::Unsupported, Some(why)) => {
+                format!("identical content; this filesystem cannot share: {why}")
+            }
+            (State::Unsupported, None) => "identical content; this filesystem cannot share".into(),
+            (State::Unknown, _) => "identical content; this filesystem: unknown, \
+                 run `buildq cache dedupe` to check"
+                .into(),
+        }
+    }
 }
 
 impl Report {
@@ -149,6 +198,9 @@ pub struct Ledger {
     /// next pass starts there so later pairs are not starved.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub resume: Option<[(String, usize); 2]>,
+    /// Sharing capability a real pass observed, by the cache volume's device.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub volumes: BTreeMap<String, Capability>,
 }
 
 /// A copy's fingerprint, valid while the file identity matches.
@@ -692,10 +744,21 @@ pub fn run_projected(
         return (report, Ledger::load(&cfg.cache_dir));
     };
     if !opts.dry_run && !SUPPORTED {
-        report.unsupported = Some("buildq shares files only on Linux and macOS".into());
+        report.unsupported = Some(UNSUPPORTED_PLATFORM.into());
+        report.sharing = Capability::observed(State::Unsupported, report.unsupported.clone());
         return (report, Ledger::load(&cfg.cache_dir));
     }
     let mut ledger = Ledger::load(&cfg.cache_dir);
+    let volume = volume_key(&cfg.cache_dir);
+    report.sharing = match ledger.volumes.get(&volume) {
+        Some(known) => known.clone(),
+        None if !SUPPORTED => Capability {
+            state: State::Unsupported,
+            reason: Some(UNSUPPORTED_PLATFORM.into()),
+            checked_ms: None,
+        },
+        None => Capability::default(),
+    };
     ledger.forget(&cfg.cache_dir, excluded);
     let opts = &Options {
         project: opts.dry_run && can_share(&cfg.cache_dir.join("pools")),
@@ -727,12 +790,34 @@ pub fn run_projected(
         ledger.resume = None;
     }
     if !opts.dry_run {
+        record_capability(&report, &volume, &mut ledger);
+        report.sharing = ledger.volumes.get(&volume).cloned().unwrap_or_default();
         ledger.retain_current(&cfg.cache_dir);
         if let Err(e) = ledger.save(&cfg.cache_dir) {
             report.errors.push(format!("write ledger: {e}"));
         }
     }
     (report, ledger)
+}
+
+/// Records what a real pass observed: a failed attempt, or a success.
+/// A pass that shared nothing and failed nothing leaves the cache alone.
+fn record_capability(report: &Report, volume: &str, ledger: &mut Ledger) {
+    let seen = match (&report.unsupported, report.shared) {
+        (Some(why), _) => Capability::observed(State::Unsupported, Some(why.clone())),
+        (None, 0) => return,
+        (None, _) => Capability::observed(State::Supported, None),
+    };
+    ledger.volumes.insert(volume.into(), seen);
+}
+
+/// Names the volume holding the cache by device, so another mount does not
+/// inherit this volume's state.
+fn volume_key(cache_dir: &Path) -> String {
+    let md = fs::metadata(cache_dir.join("pools")).or_else(|_| fs::metadata(cache_dir));
+    md.ok()
+        .and_then(|md| file_id(&md))
+        .map_or_else(|| "-".into(), |(dev, _)| dev.to_string())
 }
 
 /// Compares and shares one scope's groups. Copies that differ from a
@@ -1606,9 +1691,7 @@ mod platform {
     use super::{Failure, Outcome};
 
     pub(super) fn share(_: &Path, _: &Path, _: &[PathBuf], _: &Path) -> Result<Outcome, Failure> {
-        Err(Failure::Unsupported(
-            "buildq shares files only on Linux and macOS".into(),
-        ))
+        Err(Failure::Unsupported(super::UNSUPPORTED_PLATFORM.into()))
     }
 }
 
@@ -1631,9 +1714,10 @@ pub fn render(r: &Report) -> String {
     ));
     if r.dry_run {
         s.push_str(&format!(
-            "identical: {} files, would share {}\n",
+            "identical: {} files, would share {} ({})\n",
             r.identical,
-            human_bytes(r.identical_bytes)
+            human_bytes(r.identical_bytes),
+            r.sharing.note()
         ));
     } else {
         s.push_str(&format!(

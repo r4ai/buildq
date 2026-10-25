@@ -381,6 +381,13 @@ fn print_gc_report(r: &gc::Report, dry_run: bool, json: bool, auto: bool) -> Exi
         if let Some(d) = &r.dedupe {
             match &d.unsupported {
                 Some(why) => println!("dedupe: unsupported ({why})"),
+                None if dry_run => println!(
+                    "dedupe: would share {} files ({}; {}); {} already shared",
+                    d.identical,
+                    human_bytes(d.identical_bytes),
+                    d.sharing.note(),
+                    d.already_shared
+                ),
                 None => println!(
                     "dedupe: shared {} files ({}); {} already shared",
                     d.shared,

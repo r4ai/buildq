@@ -222,6 +222,9 @@ buildq cache dedupe             # `[cache] dedupe` に関係なく今すぐ共�
 共有には reflink が必要である。
 Linux では btrfs・`reflink=1` の XFS・bcachefs、macOS では APFS が対応する。
 それ以外では `unsupported` と報告して何も変更しない。dry-run での計測は可能である。
+dry-run の "would share" は内容が同一というだけの見込みであり、実際に回収できる容量ではない。
+同じボリュームで最後に実行した実パスの結果から、`sharing` を `supported`・`unsupported`（理由つき）・`unknown` で報告する。
+dry-run は書き込みによる確認をしない。確認するには `buildq cache dedupe` を一度実行する。
 詳細は [Cross-Member Deduplication](architecture.ja.md#cross-member-deduplication) を参照する。
 
 ## Project Cache Cleanup
