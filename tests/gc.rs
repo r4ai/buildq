@@ -610,3 +610,41 @@ fn budget_shrinks_with_free_disk() {
     assert_eq!(effective_budget(100, 30, 0, Some(10)), 0);
     assert_eq!(effective_budget(100, 30, 50, None), 100);
 }
+
+/// A job that finishes while another collector holds `gc.lock` leaves a
+/// request instead of being dropped; the collector runs one bounded follow-up
+/// pass for it after releasing the lock.
+#[test]
+fn contended_automatic_gc_leaves_a_request_for_a_follow_up_pass() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut c = cfg(temp.path());
+    c.budget = 1;
+    member(&c.cache_dir, "p", 0, now_ms(), 100);
+    let auto = Options {
+        auto: true,
+        ..Default::default()
+    };
+    let pending = c.cache_dir.join("gc.pending");
+    let collector = lock::try_lock(&c.cache_dir.join("gc.lock"))
+        .unwrap()
+        .unwrap();
+    let report = gc(&c, &auto);
+    assert!(
+        report.skipped.as_deref().is_some_and(|s| s.contains("run again")),
+        "{report:?}"
+    );
+    assert!(pending.exists());
+    assert!(c.cache_dir.join("pools/p/m0").exists());
+    // A manual run neither leaves a request nor promises a retry.
+    fs::remove_file(&pending).unwrap();
+    let report = gc(&c, &Options::default());
+    assert_eq!(report.skipped.as_deref(), Some("another gc is running"));
+    assert!(!pending.exists());
+
+    let _ = gc(&c, &auto);
+    drop(collector);
+    let report = gc(&c, &auto);
+    assert!(!c.cache_dir.join("pools/p/m0").exists());
+    assert_eq!(report.follow_ups, 1, "{report:?}");
+    assert!(!pending.exists());
+}

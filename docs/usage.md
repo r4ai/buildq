@@ -52,6 +52,12 @@ collectors require an init that reaps adopted children. In containers, use Docke
 terminated collectors; these zombies are not running compilers or held slots.
 `buildq config` displays the effective mode and its init requirement.
 
+Only one collector runs at a time. A post-job GC that finds another collector
+working leaves a request (`gc.pending` in the cache directory) instead of being
+dropped; that collector runs up to three follow-up passes for such requests after
+releasing its lock, so members that were busy during its pass are reconsidered
+once their jobs finish. `gc --auto --json` reports them as `follow_ups`.
+
 Without a reaping init, collect within the job process instead:
 
 ```toml
