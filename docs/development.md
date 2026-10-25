@@ -68,6 +68,22 @@ Runs real `cargo` builds across two Git worktrees on `tests/fixtures/sample-ws` 
 cargo test --test e2e -- --ignored --nocapture
 ```
 
+### mbx backend against a real mbx
+
+`mbx_backend_runs_against_a_real_mbx` runs `[cargo] backend = "mbx"` through a real
+[mbx](https://github.com/jdx/mr-boxington) in a tiny workspace with two worktrees: `build`, staged `run`, `test`,
+`check`, `clippy` (skipped when not installed) and `+<toolchain> build` (skipped without rustup) must succeed, no
+`target` entry may appear in either worktree, and the second worktree's build must report `mbx[cache]: N hits` with
+`N > 0`. It finds mbx in `BUILDQ_TEST_MBX`, else on `PATH` (a mise shim is resolved with `mise which mbx`), and
+prints a note and passes when there is none.
+
+```sh
+cargo test --test e2e mbx_backend_runs_against_a_real_mbx -- --ignored --nocapture
+```
+
+Every mbx call runs with `MBX_CACHE_DIR` inside the test's temporary directory and `MBX_GC_AUTO=0`, so your own mbx
+cache is never read, written, or collected.
+
 ### Code Coverage
 
 Install `cargo-llvm-cov` and the LLVM tools for the repository's pinned toolchain:
