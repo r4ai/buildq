@@ -141,10 +141,20 @@ pub struct Ledger {
     /// Pairs a comparison found different, skipped until either file changes.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub differing: Vec<[Entry; 2]>,
+    /// Fingerprints of copies in groups of more than two, until the file changes.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub prints: Vec<Print>,
     /// The member pair at which the read limit stopped the last pass; the
     /// next pass starts there so later pairs are not starved.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub resume: Option<[(String, usize); 2]>,
+}
+
+/// A copy's fingerprint, valid while the file identity matches.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Print {
+    pub entry: Entry,
+    pub print: u64,
 }
 
 type Key = (String, usize, String);
@@ -251,6 +261,17 @@ impl Ledger {
     /// Records that `other` now shares data with `canonical`.
     fn record(&mut self, canonical: Entry, other: Entry) {
         let (ck, ok) = (canonical.key(), other.key());
+        // The copy now holds the canonical copy's bytes: keep its fingerprint.
+        self.prints.retain(|p| p.entry.key() != ok);
+        let shared = self
+            .prints
+            .iter()
+            .rfind(|p| p.entry.key() == ck && p.entry.same_file(&canonical))
+            .map(|p| p.print);
+        self.prints.extend(shared.map(|print| Print {
+            entry: other.clone(),
+            print,
+        }));
         for group in &mut self.groups {
             // A different file at the canonical path shared other data: its
             // group must not adopt the new copy.
@@ -287,6 +308,7 @@ impl Ledger {
         }
         self.groups.retain(|g| g.entries.len() > 1);
         self.differing.retain(|pair| pair.iter().all(kept));
+        self.prints.retain(|p| kept(&p.entry));
     }
 
     /// Drops entries whose path no longer holds the recorded file.
@@ -303,6 +325,11 @@ impl Ledger {
                 && pair.iter().all(|e| e.current(cache_dir).is_some())
         });
         self.differing.reverse();
+        let mut seen = BTreeSet::new();
+        self.prints.reverse();
+        self.prints
+            .retain(|p| seen.insert(p.entry.key()) && p.entry.current(cache_dir).is_some());
+        self.prints.reverse();
     }
 
     /// Records that a comparison found the two indexed files different.
@@ -557,8 +584,61 @@ struct Planned {
     inodes: BTreeSet<(Inode, Inode)>,
 }
 
-/// Content fingerprints of the copies in groups of more than two, by path.
-type Fingerprints = BTreeMap<Key, u64>;
+/// Fingerprints of copies, read lazily for the groups a pass must compare.
+struct Prints {
+    known: BTreeMap<Key, Print>,
+    fresh: Vec<Print>,
+    /// Bytes read since the last charge to the report.
+    read: u64,
+    /// Bytes the read limit still allows.
+    room: u64,
+    limited: bool,
+}
+
+impl Prints {
+    fn new(ledger: &Ledger) -> Prints {
+        Prints {
+            known: ledger
+                .prints
+                .iter()
+                .map(|p| (p.entry.key(), p.clone()))
+                .collect(),
+            fresh: Vec::new(),
+            read: 0,
+            room: 0,
+            limited: false,
+        }
+    }
+
+    /// The copy's fingerprint, read if no current one is recorded. `None`
+    /// when the read limit or a read error leaves it out.
+    fn of(&mut self, c: &Candidate, errors: &mut Vec<String>) -> Option<u64> {
+        if let Some(p) = self.known.get(&c.key()).filter(|p| p.entry.matches(&c.md)) {
+            return Some(p.print);
+        }
+        let cost = c.md.len().min(2 * FINGERPRINT_BLOCK);
+        if cost > self.room - self.read.min(self.room) {
+            self.limited = true;
+            return None;
+        }
+        self.read += cost;
+        match fingerprint(&c.path, c.md.len()) {
+            Ok(print) => {
+                let p = Print {
+                    entry: Entry::of(c, &c.md)?,
+                    print,
+                };
+                self.known.insert(c.key(), p.clone());
+                self.fresh.push(p);
+                Some(print)
+            }
+            Err(e) => {
+                errors.push(format!("fingerprint {}: {e}", c.path.display()));
+                None
+            }
+        }
+    }
+}
 
 /// A member's file identity.
 type Inode = (String, usize, (u64, u64));
@@ -659,12 +739,26 @@ fn share_scope(
     report: &mut Report,
 ) {
     let mut planned = Planned::default();
-    let prints = fingerprints(groups, opts, report);
+    let mut prints = Prints::new(ledger);
     let mut first = true;
     while !report.stopped() {
         let mut scratch = Report::default();
+        prints.room = opts.max_read.saturating_sub(report.read_bytes);
         let counts = if first { &mut *report } else { &mut scratch };
-        let work = plan(groups, &prints, ledger, resume, &mut planned, counts);
+        let mut errors = Vec::new();
+        let work = plan(
+            groups,
+            &mut prints,
+            &mut errors,
+            ledger,
+            resume,
+            &mut planned,
+            counts,
+        );
+        report.read_bytes += std::mem::take(&mut prints.read);
+        report.errors.append(&mut errors);
+        ledger.prints.append(&mut prints.fresh);
+        report.read_limited |= prints.limited;
         first = false;
         if work.is_empty() {
             break;
@@ -692,10 +786,12 @@ fn share_scope(
 /// that differs too, so groups with several contents share within each.
 /// `planned` holds the pairs this pass already planned, which are not
 /// planned again. Copies of a group of more than two are only paired within
-/// the same fingerprint; one without a fingerprint is left out.
+/// the same fingerprint, read only for the copies that still need a comparison;
+/// one without a fingerprint is left out.
 fn plan<'a>(
     groups: &'a BTreeMap<GroupKey, Vec<Candidate>>,
-    prints: &Fingerprints,
+    prints: &mut Prints,
+    errors: &mut Vec<String>,
     ledger: &Ledger,
     resume: Option<&[(String, usize); 2]>,
     planned: &mut Planned,
@@ -718,6 +814,12 @@ fn plan<'a>(
             .filter(|(_, e)| e.matches(&c.md))
             .map(|(g, _)| *g)
     };
+    // A pair needing no comparison: one inode, one shared group, or known
+    // to differ.
+    let settled = |a: &Candidate, b: &Candidate| {
+        let same = |x: &Candidate, y: &Candidate| matches!((file_id(&x.md), file_id(&y.md)), (Some(i), Some(j)) if i == j && x.member_key() == y.member_key());
+        same(a, b) || group_of(a).is_some_and(|g| group_of(b) == Some(g)) || known_different(a, b)
+    };
     let mut work: Vec<Work> = Vec::new();
     // Hard-linked names of one inode are one copy: count each inode once,
     // and compare each pair of inodes once, through whichever names come
@@ -726,7 +828,10 @@ fn plan<'a>(
     let inode = |c: &Candidate| -> Option<Inode> {
         file_id(&c.md).map(|id| (c.pool.clone(), c.member, id))
     };
-    for copies in groups.values().flat_map(|c| partitions(c, prints)) {
+    for copies in groups
+        .values()
+        .flat_map(|c| partitions(c, &settled, prints, errors))
+    {
         // Keep sharing with the copy an earlier pass chose, if still intact.
         let canonical = copies
             .iter()
@@ -783,56 +888,43 @@ fn plan<'a>(
 }
 
 /// Splits a group by fingerprint into the runs worth comparing. A pair has
-/// nothing to narrow down and keeps its single comparison.
-fn partitions<'a>(copies: &'a [Candidate], prints: &Fingerprints) -> Vec<Vec<&'a Candidate>> {
-    if copies.len() <= 2 {
-        return if copies.len() == 2 {
+/// nothing to narrow down and keeps its single comparison, and so does a
+/// group where at most two copies still lack a verdict against another.
+/// Copies with a verdict against every other follow a mate to its run.
+fn partitions<'a>(
+    copies: &'a [Candidate],
+    settled: &dyn Fn(&Candidate, &Candidate) -> bool,
+    prints: &mut Prints,
+    errors: &mut Vec<String>,
+) -> Vec<Vec<&'a Candidate>> {
+    let open = |c: &Candidate| copies.iter().any(|d| !std::ptr::eq(c, d) && !settled(c, d));
+    let pending: Vec<bool> = copies.iter().map(open).collect();
+    if copies.len() <= 2 || pending.iter().filter(|p| **p).count() <= 2 {
+        return if copies.len() > 1 {
             vec![copies.iter().collect()]
         } else {
             vec![]
         };
     }
-    let mut parts: BTreeMap<u64, Vec<&Candidate>> = BTreeMap::new();
-    for c in copies {
-        if let Some(print) = prints.get(&c.key()) {
-            parts.entry(*print).or_default().push(c);
+    let mut runs: BTreeMap<u64, Vec<&Candidate>> = BTreeMap::new();
+    for (c, _) in copies.iter().zip(&pending).filter(|(_, p)| **p) {
+        if let Some(print) = prints.of(c, errors) {
+            runs.entry(print).or_default().push(c);
         }
     }
-    parts.into_values().filter(|p| p.len() > 1).collect()
-}
-
-/// Fingerprints every copy of the groups of more than two, charging the
-/// bytes read to the read limit. Hard-linked names of one inode share one.
-fn fingerprints(
-    groups: &BTreeMap<GroupKey, Vec<Candidate>>,
-    opts: &Options,
-    report: &mut Report,
-) -> Fingerprints {
-    let mut prints = Fingerprints::new();
-    let mut by_inode: BTreeMap<Inode, u64> = BTreeMap::new();
-    for c in groups.values().filter(|c| c.len() > 2).flatten() {
-        let id = file_id(&c.md).map(|id| (c.pool.clone(), c.member, id));
-        if let Some(print) = id.as_ref().and_then(|id| by_inode.get(id)) {
-            prints.insert(c.key(), *print);
-            continue;
-        }
-        let cost = c.md.len().min(2 * FINGERPRINT_BLOCK);
-        if report.read_bytes.saturating_add(cost) > opts.max_read {
-            report.read_limited = true;
-            break;
-        }
-        report.read_bytes += cost;
-        match fingerprint(&c.path, c.md.len()) {
-            Ok(print) => {
-                prints.insert(c.key(), print);
-                by_inode.extend(id.map(|id| (id, print)));
-            }
-            Err(e) => report
-                .errors
-                .push(format!("fingerprint {}: {e}", c.path.display())),
+    for (c, _) in copies.iter().zip(&pending).filter(|(_, p)| !**p) {
+        let mate = runs.values().position(|r| r.iter().any(|d| settled(c, d)));
+        if let Some(run) = runs.values_mut().nth(mate.unwrap_or(0)) {
+            run.push(c);
         }
     }
-    prints
+    runs.into_values()
+        .map(|mut r| {
+            r.sort_by_key(|c| copies.iter().position(|d| std::ptr::eq(*c, d)));
+            r
+        })
+        .filter(|r| r.len() > 1)
+        .collect()
 }
 
 /// Hashes the first and last `FINGERPRINT_BLOCK` bytes; copies of equal

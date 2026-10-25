@@ -334,7 +334,7 @@ them as reflinks:
    - Works through one toolchain at a time, keeping only files with copies elsewhere, so a pass holds one toolchain's metadata at once; reports indexed files and indexing time
 2. **Share each copy** with its group's first copy under both member locks
    - Rechecks the indexed inode, length, and mtime
-   - A group of more than two copies is first split by a hash of its first and last 4 KiB, counted against `dedupe_max_read`; only copies with the same hash are compared, so divergent copies cost no pairwise comparisons
+   - A group of more than two copies is first split by a hash of its first and last 4 KiB, read only for copies still needing a comparison, counted against `dedupe_max_read`, and kept in `dedupe.json` until the file changes; only copies with the same hash are compared, so divergent copies cost no pairwise comparisons
    - A copy that differs from the first is compared with the next differing copy, so a group with several contents shares within each
    - Releases the locks every 1 GiB or second so leases are not starved
    - Linux: `FIDEDUPERANGE`; the kernel compares bytes and keeps the inode

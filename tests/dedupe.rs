@@ -1048,3 +1048,45 @@ fn fingerprints_count_against_the_read_limit() {
     let r = dedupe::run(&c, &opts(&c, true));
     assert!(r.read_limited && r.read_bytes <= c.dedupe_max_read, "{r:?}");
 }
+
+#[test]
+fn settled_groups_read_nothing_on_the_next_pass() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    divergent(&c, 12, 4);
+    let Some(first) = share(&c) else { return };
+    assert!(first.read_bytes > 0, "{first:?}");
+    let r = share(&c).unwrap();
+    assert_eq!((r.compared, r.read_bytes), (0, 0), "{r:?}");
+}
+
+#[test]
+fn passes_limited_while_fingerprinting_still_cover_every_group() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut c = cfg(temp.path());
+    for g in 0..6 {
+        let rel = format!("debug/deps/libdep{g}-0123456789abcdef.rlib");
+        for id in 0..4 {
+            let mut data = vec![9u8; 20_000];
+            data[0] = id as u8;
+            put(&c, "p", id, &rel, &data);
+        }
+    }
+    // Room for three fingerprints per pass, far fewer than the 24 copies.
+    c.dedupe_max_read = 3 * 8192;
+    let mut passes = 0;
+    loop {
+        let r = dedupe::run(&c, &opts(&c, false));
+        if r.unsupported.is_some() {
+            return;
+        }
+        assert!(r.read_bytes <= c.dedupe_max_read, "{r:?}");
+        passes += 1;
+        assert!(passes <= 12, "no progress: {r:?}");
+        if !r.read_limited {
+            break;
+        }
+    }
+    let prints = buildq::dedupe::Ledger::load(&c.cache_dir).prints.len();
+    assert_eq!(prints, 24);
+}
