@@ -1,0 +1,26 @@
+{
+  "pools": [],
+  "runs": [],
+  "total": 0,
+  "trash_bytes": 0,
+  "budget": 1024,
+  "effective_budget": 0,
+  "accounting": "logical",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "free_disk": 28835110912,
+  "external": [],
+  "external_total": 0,
+  "mbx": {
+    "store": "/workspace/qa-root/accounting/mbx-a/actions",
+    "store_bytes": 3827620,
+    "target_bytes": 0,
+    "incremental_bytes": 1077,
+    "generated_bytes": 0,
+    "combined_bytes": 3828697,
+    "shared_with_mbx_bytes": 0,
+    "combined_unique_bytes": 3828697
+  },
+  "mbx_budget_bytes": 3828697
+}

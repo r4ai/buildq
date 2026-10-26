@@ -1,0 +1,5 @@
+buildq: target a-82a44d0c/m0 (2 package(s) invalidated: nested-app, nested-codegen)
+   Compiling nested-app v0.1.0 (/workspace/qa-root/nested-mbx-learned-off/mbx/b)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s
+mbx[cache]: 3 hits, 0 misses; 0 B downloaded, 0 B uploaded, 0 B stored locally
+buildq: copied 3.6 MiB to run dir /workspace/qa-root/nested-mbx-learned-off/mbx/cache/runs/r0

@@ -1,0 +1,17 @@
+{
+  "actions": [],
+  "freed": 0,
+  "before": 0,
+  "after": 0,
+  "effective_budget": 0,
+  "accounting": "logical",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "skipped": null,
+  "follow_ups": 0,
+  "external": 0,
+  "warnings": [],
+  "failed_deletions": 0,
+  "dedupe": null
+}
