@@ -1,0 +1,5 @@
+buildq: target repo-c580933c/m2 (new member (full build))
+buildq: waiting for a build slot: 2/2 busy, position 1 of 1
+buildq: got build slot 1 after 0s
+   Compiling part0000 v0.1.0 (/workspace/qa-storage/metadata/repo/parts/part0000)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.46s

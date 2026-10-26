@@ -1,0 +1,152 @@
+[
+  {
+    "backend": "cargo",
+    "name": "A",
+    "cwd": "/workspace/qa-root/nested-incremental-off/cargo/a",
+    "command": [
+      "cargo",
+      "run",
+      "--offline"
+    ],
+    "wall_s": 2.617,
+    "exit": 0,
+    "output": "generated=A",
+    "expected": "generated=A",
+    "passed": true
+  },
+  {
+    "backend": "cargo",
+    "name": "B",
+    "cwd": "/workspace/qa-root/nested-incremental-off/cargo/b",
+    "command": [
+      "cargo",
+      "run",
+      "--offline"
+    ],
+    "wall_s": 2.486,
+    "exit": 0,
+    "output": "generated=A",
+    "expected": "generated=B",
+    "passed": false
+  },
+  {
+    "backend": "cargo",
+    "name": "A-again",
+    "cwd": "/workspace/qa-root/nested-incremental-off/cargo/a",
+    "command": [
+      "cargo",
+      "run",
+      "--offline"
+    ],
+    "wall_s": 2.133,
+    "exit": 0,
+    "output": "generated=A",
+    "expected": "generated=A",
+    "passed": true
+  },
+  {
+    "backend": "cargo",
+    "name": "clean",
+    "cwd": "/workspace/qa-root/nested-incremental-off/cargo/a",
+    "command": [
+      "cache",
+      "clean",
+      "--all"
+    ],
+    "wall_s": 0.01,
+    "exit": 0,
+    "output": "accounting: allocated\nremove member a-e61bb76e/m0 (path footprint 11.2 MiB)\nfreed 11.2 MiB; cache 14.8 MiB -> 3.6 MiB (budget 1.0 GiB)",
+    "expected": null,
+    "passed": true
+  },
+  {
+    "backend": "cargo",
+    "name": "B-clean",
+    "cwd": "/workspace/qa-root/nested-incremental-off/cargo/b",
+    "command": [
+      "cargo",
+      "run",
+      "--offline"
+    ],
+    "wall_s": 3.358,
+    "exit": 0,
+    "output": "generated=B",
+    "expected": "generated=B",
+    "passed": true
+  },
+  {
+    "backend": "mbx",
+    "name": "A",
+    "cwd": "/workspace/qa-root/nested-incremental-off/mbx/a",
+    "command": [
+      "cargo",
+      "run",
+      "--offline"
+    ],
+    "wall_s": 4.005,
+    "exit": 0,
+    "output": "generated=A",
+    "expected": "generated=A",
+    "passed": true
+  },
+  {
+    "backend": "mbx",
+    "name": "B",
+    "cwd": "/workspace/qa-root/nested-incremental-off/mbx/b",
+    "command": [
+      "cargo",
+      "run",
+      "--offline"
+    ],
+    "wall_s": 1.68,
+    "exit": 0,
+    "output": "generated=A",
+    "expected": "generated=B",
+    "passed": false
+  },
+  {
+    "backend": "mbx",
+    "name": "A-again",
+    "cwd": "/workspace/qa-root/nested-incremental-off/mbx/a",
+    "command": [
+      "cargo",
+      "run",
+      "--offline"
+    ],
+    "wall_s": 0.807,
+    "exit": 0,
+    "output": "generated=A",
+    "expected": "generated=A",
+    "passed": true
+  },
+  {
+    "backend": "mbx",
+    "name": "clean",
+    "cwd": "/workspace/qa-root/nested-incremental-off/mbx/a",
+    "command": [
+      "cache",
+      "clean",
+      "--all"
+    ],
+    "wall_s": 0.014,
+    "exit": 0,
+    "output": "accounting: allocated\nremove member a-3f354f8a/m0 (path footprint 29.9 MiB)\nfreed 29.9 MiB; cache 33.5 MiB -> 3.6 MiB (budget 1005.6 MiB)",
+    "expected": null,
+    "passed": true
+  },
+  {
+    "backend": "mbx",
+    "name": "B-clean",
+    "cwd": "/workspace/qa-root/nested-incremental-off/mbx/b",
+    "command": [
+      "cargo",
+      "run",
+      "--offline"
+    ],
+    "wall_s": 0.991,
+    "exit": 0,
+    "output": "generated=A",
+    "expected": "generated=B",
+    "passed": false
+  }
+]

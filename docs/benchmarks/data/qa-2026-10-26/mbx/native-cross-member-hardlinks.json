@@ -1,0 +1,335 @@
+{
+  "count": 66,
+  "examples": [
+    {
+      "inode": [
+        27,
+        1186967
+      ],
+      "size": 5159197,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libserde-805af0e17b885cc1.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libserde-805af0e17b885cc1.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186882
+      ],
+      "size": 1089506,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libencoding_rs-79ad79d9e839651c.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libencoding_rs-79ad79d9e839651c.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1185249
+      ],
+      "size": 329114,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/liblog-d31a820804a8ed9b.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/liblog-d31a820804a8ed9b.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1187582
+      ],
+      "size": 1191422,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libwalkdir-742d7f303f7cfcda.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libwalkdir-742d7f303f7cfcda.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1185934
+      ],
+      "size": 13723776,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libregex_syntax-56149cfd4432cd7c.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libregex_syntax-56149cfd4432cd7c.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1180997
+      ],
+      "size": 1451890,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_regex-daffffdb0e07e6ef.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_regex-daffffdb0e07e6ef.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186725
+      ],
+      "size": 1276446,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libserde_json-094fa92987f8b1cc.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libserde_json-094fa92987f8b1cc.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1184295
+      ],
+      "size": 1273932,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libmemchr-3cee6db17bbe0dde.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libmemchr-3cee6db17bbe0dde.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186660
+      ],
+      "size": 511059,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libignore-ec9668a2441d4077.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libignore-ec9668a2441d4077.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186727
+      ],
+      "size": 4260178,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libserde_json-094fa92987f8b1cc.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libserde_json-094fa92987f8b1cc.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1184366
+      ],
+      "size": 3332376,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/liblibc-96a9935079032de1.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/liblibc-96a9935079032de1.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186820
+      ],
+      "size": 4109955,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libregex_automata-7295c6cdebc23f9d.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libregex_automata-7295c6cdebc23f9d.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1187356
+      ],
+      "size": 178324,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libcrossbeam_deque-ea11fe804ac72653.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libcrossbeam_deque-ea11fe804ac72653.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1187809
+      ],
+      "size": 222514,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libsame_file-82920d733726b0a3.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libsame_file-82920d733726b0a3.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186902
+      ],
+      "size": 167920,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libencoding_rs_io-02043998810986b8.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libencoding_rs_io-02043998810986b8.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186804
+      ],
+      "size": 349732,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libmemmap2-6b70d4fd1d61fcdf.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libmemmap2-6b70d4fd1d61fcdf.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186757
+      ],
+      "size": 405496,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_searcher-b90e9dbf759dd060.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_searcher-b90e9dbf759dd060.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1180370
+      ],
+      "size": 745516,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_printer-620813a388c7d3e2.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_printer-620813a388c7d3e2.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1185231
+      ],
+      "size": 10431326,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libaho_corasick-4faf1ab2f37c32c1.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libaho_corasick-4faf1ab2f37c32c1.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186577
+      ],
+      "size": 1541338,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libanyhow-f0d8ca215f7bd3fa.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libanyhow-f0d8ca215f7bd3fa.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1180642
+      ],
+      "size": 171810,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_cli-3a59562a7bd059d7.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_cli-3a59562a7bd059d7.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186792
+      ],
+      "size": 310786,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libryu-06f37ed5945aa699.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libryu-06f37ed5945aa699.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1180866
+      ],
+      "size": 94397,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libjobserver-7874e96da74a0963.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libjobserver-7874e96da74a0963.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186837
+      ],
+      "size": 103835,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libitoa-a4e015144ec6a903.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libitoa-a4e015144ec6a903.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1187604
+      ],
+      "size": 959988,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libpkg_config-5e14bc71a9f8e5aa.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libpkg_config-5e14bc71a9f8e5aa.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186526
+      ],
+      "size": 176400,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libtextwrap-9795af0285001018.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libtextwrap-9795af0285001018.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186766
+      ],
+      "size": 1076738,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libtermcolor-76102a3ec9c9bba2.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libtermcolor-76102a3ec9c9bba2.rlib"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1187483
+      ],
+      "size": 428747,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libcc-78677ce965aea174.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libcc-78677ce965aea174.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1186576
+      ],
+      "size": 422790,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libanyhow-f0d8ca215f7bd3fa.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libanyhow-f0d8ca215f7bd3fa.rmeta"
+      ]
+    },
+    {
+      "inode": [
+        27,
+        1187040
+      ],
+      "size": 3522918,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libbstr-a80abfd415c932d5.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libbstr-a80abfd415c932d5.rlib"
+      ]
+    }
+  ]
+}

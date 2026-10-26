@@ -1,0 +1,162 @@
+{
+  "at_unix": 1792995237.989969,
+  "cwd": "/workspace/qa-mbx/member-wait-proof/ws",
+  "submitted": 8,
+  "alive": 8,
+  "busy_build_holders": 2,
+  "pool_member_waiters_from_stderr": 6,
+  "visible_queue_waiters": 0,
+  "jobs": [
+    {
+      "pid": 536001,
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline"
+      ],
+      "poll": null,
+      "stderr": "buildq: [     0 ms] start\nbuildq: [     0 ms] parsed\nbuildq: [   256 ms] pool opened (git + toolchain + manifest)\nbuildq: all cache members busy and pool at its limit; waiting for one\n"
+    },
+    {
+      "pid": 536004,
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline"
+      ],
+      "poll": null,
+      "stderr": "buildq: [     0 ms] start\nbuildq: [     0 ms] parsed\nbuildq: [   227 ms] pool opened (git + toolchain + manifest)\nbuildq: all cache members busy and pool at its limit; waiting for one\n"
+    },
+    {
+      "pid": 536012,
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline"
+      ],
+      "poll": null,
+      "stderr": "buildq: [     0 ms] start\nbuildq: [     0 ms] parsed\nbuildq: [   205 ms] pool opened (git + toolchain + manifest)\nbuildq: target ws-2a8d8970/m0 (new member (full build))\nbuildq: [   206 ms] member leased\nbuildq: [   212 ms] slot acquired\n"
+    },
+    {
+      "pid": 536018,
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline"
+      ],
+      "poll": null,
+      "stderr": "buildq: [     0 ms] start\nbuildq: [     0 ms] parsed\nbuildq: [   274 ms] pool opened (git + toolchain + manifest)\nbuildq: all cache members busy and pool at its limit; waiting for one\n"
+    },
+    {
+      "pid": 536020,
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline"
+      ],
+      "poll": null,
+      "stderr": "buildq: [     0 ms] start\nbuildq: [     0 ms] parsed\nbuildq: [   230 ms] pool opened (git + toolchain + manifest)\nbuildq: all cache members busy and pool at its limit; waiting for one\n"
+    },
+    {
+      "pid": 536025,
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline"
+      ],
+      "poll": null,
+      "stderr": "buildq: [     0 ms] start\nbuildq: [     0 ms] parsed\nbuildq: [   241 ms] pool opened (git + toolchain + manifest)\nbuildq: all cache members busy and pool at its limit; waiting for one\n"
+    },
+    {
+      "pid": 536028,
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline"
+      ],
+      "poll": null,
+      "stderr": "buildq: [     0 ms] start\nbuildq: [     0 ms] parsed\nbuildq: [   205 ms] pool opened (git + toolchain + manifest)\nbuildq: target ws-2a8d8970/m1 (new member (full build))\nbuildq: [   205 ms] member leased\nbuildq: [   213 ms] slot acquired\n"
+    },
+    {
+      "pid": 536033,
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline"
+      ],
+      "poll": null,
+      "stderr": "buildq: [     0 ms] start\nbuildq: [     0 ms] parsed\nbuildq: [   210 ms] pool opened (git + toolchain + manifest)\nbuildq: all cache members busy and pool at its limit; waiting for one\n"
+    }
+  ],
+  "status": {
+    "classes": [
+      {
+        "class": "build",
+        "holders": [
+          {
+            "busy": true,
+            "job": {
+              "class": "build",
+              "cmd": "cargo build --offline",
+              "cwd": "/workspace/qa-mbx/member-wait-proof/ws",
+              "enqueued_ms": 1792995237849,
+              "label": null,
+              "pid": 536012,
+              "priority": 0,
+              "seq": 1792995237849,
+              "started_ms": 1792995237849,
+              "target": "ws-2a8d8970/m0",
+              "worktree": "/workspace/qa-mbx/member-wait-proof/ws"
+            },
+            "slot": 0
+          },
+          {
+            "busy": true,
+            "job": {
+              "class": "build",
+              "cmd": "cargo build --offline",
+              "cwd": "/workspace/qa-mbx/member-wait-proof/ws",
+              "enqueued_ms": 1792995237858,
+              "label": null,
+              "pid": 536028,
+              "priority": 0,
+              "seq": 1792995237858,
+              "started_ms": 1792995237859,
+              "target": "ws-2a8d8970/m1",
+              "worktree": "/workspace/qa-mbx/member-wait-proof/ws"
+            },
+            "slot": 1
+          }
+        ],
+        "slots": 2,
+        "waiters": []
+      },
+      {
+        "class": "run",
+        "holders": [
+          {
+            "busy": false,
+            "job": null,
+            "slot": 0
+          },
+          {
+            "busy": false,
+            "job": null,
+            "slot": 1
+          }
+        ],
+        "slots": 2,
+        "waiters": []
+      }
+    ],
+    "hosts": {}
+  }
+}

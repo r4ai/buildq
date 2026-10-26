@@ -1,0 +1,15 @@
+{
+  "buildq_source_revision": "1391d00",
+  "buildq_binary_sha256": "b7053faaa13d1f614809396a135ed88c38cd214fe6cf9c5e2daf0f1f6d4951a1",
+  "rust_version": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+  "platform": "Linux x86_64 / overlayfs",
+  "cpu_cgroup": "400000 100000",
+  "memory_cgroup_bytes": "17179869184",
+  "clock_timezone": "UTC raw logs; user-facing JST",
+  "notes": [
+    "CPU/filesystem shared with other QA agents",
+    "Every experiment uses isolated BUILDQ_DIR and BUILDQ_CACHE",
+    "No third-party issues or PRs were created",
+    "Reaping supervision supplied by subreaper.py for supported runs"
+  ]
+}

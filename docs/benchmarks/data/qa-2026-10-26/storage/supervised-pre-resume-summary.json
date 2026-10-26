@@ -1,0 +1,81 @@
+{
+  "actions": 1079,
+  "actions_by_kind": {
+    "build": 191,
+    "build_features": 114,
+    "build_release": 106,
+    "burst": 60,
+    "cancel": 55,
+    "edit": 74,
+    "gc": 135,
+    "gc_pressure": 134,
+    "revert": 74,
+    "test": 136
+  },
+  "elapsed_s": 1100.8,
+  "ended": 1792995006.3267756,
+  "gc_runs": 269,
+  "interrupted": true,
+  "invariants": {
+    "accounting_matches_disk": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "cancellation_cleanup": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "correct_outputs": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "exit_codes": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "gc_errors": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "no_orphan_processes": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "no_stranded_tickets": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "slot_limit": {
+      "examples": [
+        "t=1792993966.2184653: 5 cargo processes for 2 slots"
+      ],
+      "passed": false,
+      "violations": 1
+    },
+    "storage_policy": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    }
+  },
+  "max_du_bytes": 70844416,
+  "max_trash_bytes": 10866688,
+  "max_tree_rss_kb": 2828744,
+  "min_free_disk_bytes": 15309611008,
+  "passed": false,
+  "queue_wait": {
+    "jobs": 1531,
+    "max_wait_s": 1.599,
+    "p95_wait_s": 0.785
+  },
+  "samples": 219,
+  "seed": 26027,
+  "started": 1792993905.5100632
+}

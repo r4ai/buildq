@@ -1,0 +1,16 @@
+{
+  "pools": [],
+  "runs": [],
+  "total": 0,
+  "trash_bytes": 0,
+  "budget": 2147483648,
+  "effective_budget": 0,
+  "accounting": "allocated",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "free_disk": 24812347392,
+  "external": [],
+  "external_total": 0,
+  "mbx_budget_bytes": 0
+}

@@ -1,0 +1,26 @@
+{
+  "seconds": 1800.2282224360001,
+  "jobs": 8235,
+  "bad_jobs": 0,
+  "passed": true,
+  "action_counts": {
+    "buildq_gc": 60,
+    "cached_usage": 119,
+    "final_buildq_gc": 1,
+    "final_inventory": 1,
+    "final_mbx_gc": 1,
+    "final_status": 1,
+    "fresh_inventory": 15,
+    "job": 8235,
+    "mbx_gc": 20,
+    "mbx_stats": 120,
+    "status": 120
+  },
+  "environment": {
+    "MBX_GC_AUTO": "1",
+    "MBX_GC_INTERVAL": "1s",
+    "MBX_GC_MAX_SIZE": "16MiB",
+    "MBX_GC_MAX_TOTAL_SIZE": "24MiB",
+    "MBX_GC_INCREMENTAL_MAX_SIZE": "4MiB"
+  }
+}

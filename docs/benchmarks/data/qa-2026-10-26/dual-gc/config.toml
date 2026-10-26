@@ -1,0 +1,13 @@
+slots=2
+[cache]
+budget="32M"
+min_free="0"
+max_members=2
+gc_mode="inline"
+seed_members=true
+[cargo]
+backend="mbx"
+mbx="/workspace/qa-mbx/mbx"
+nested_mbx=true
+jobs=1
+mirror_bins=false

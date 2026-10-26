@@ -1,0 +1,19 @@
+{
+  "actions": [
+    "evict repo-4f3bf408/m0 (last used 0s ago, over budget 2.3 MiB) (path footprint 3.8 MiB)"
+  ],
+  "freed": 3939315,
+  "before": 3939315,
+  "after": 0,
+  "effective_budget": 2462726,
+  "accounting": "logical",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "skipped": null,
+  "follow_ups": 0,
+  "external": 0,
+  "warnings": [],
+  "failed_deletions": 0,
+  "dedupe": null
+}

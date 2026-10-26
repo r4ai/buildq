@@ -1,0 +1,61 @@
+{
+  "actions": [
+    "evict run dir /workspace/qa-oss/cache/runs/r0 (over budget) (path footprint 45.2 MiB)",
+    "evict tokio-8301c862/m1 (last used 11m ago, over budget 1.0 GiB) (path footprint 7.6 MiB)",
+    "evict tokio-8301c862/m2 (last used 11m ago, over budget 1.0 GiB) (path footprint 7.6 MiB)",
+    "evict rust-analyzer-e644142e/m0 (last used 11m ago, over budget 1.0 GiB) (path footprint 174.6 MiB)",
+    "evict rust-analyzer-e644142e/m2 (last used 9m ago, over budget 1.0 GiB) (path footprint 174.6 MiB)",
+    "evict bevy-fa4906ee/m2 (last used 7m ago, over budget 1.0 GiB) (path footprint 614.7 MiB)",
+    "evict bevy-fa4906ee/m1 (last used 6m ago, over budget 1.0 GiB) (path footprint 613.4 MiB)",
+    "evict bevy-fa4906ee/m0 (last used 5m ago, over budget 1.0 GiB) (path footprint 614.5 MiB)"
+  ],
+  "freed": 2361716736,
+  "before": 6302781440,
+  "after": 1946968064,
+  "effective_budget": 1073741824,
+  "accounting": "allocated",
+  "over_budget": true,
+  "over_budget_bytes": 873226240,
+  "over_budget_reasons": [
+    "busy artifacts are protected; retry GC after jobs finish"
+  ],
+  "skipped": null,
+  "follow_ups": 0,
+  "external": 0,
+  "warnings": [
+    "cache exceeds its effective budget by 832.8 MiB (soft limit): busy artifacts are protected; retry GC after jobs finish"
+  ],
+  "failed_deletions": 0,
+  "dedupe": {
+    "dry_run": false,
+    "accounting": "allocated",
+    "pools": 4,
+    "indexed": 500,
+    "index_ms": 65,
+    "index_batches": 1,
+    "candidates": 499,
+    "compared": 1,
+    "identical": 0,
+    "identical_bytes": 0,
+    "shared": 0,
+    "shared_bytes": 0,
+    "already_shared": 0,
+    "already_shared_bytes": 0,
+    "differing": 0,
+    "skipped_busy": 5,
+    "skipped_changed": 0,
+    "skipped_hardlinked": 0,
+    "skipped_known_different": 0,
+    "skipped_over_budget": 0,
+    "read_bytes": 10779488,
+    "read_limited": false,
+    "unsupported": "FIDEDUPERANGE: Invalid argument (os error 22)",
+    "sharing": {
+      "state": "unsupported",
+      "reason": "FIDEDUPERANGE: Invalid argument (os error 22)",
+      "checked_ms": 1792994748965
+    },
+    "skipped": null,
+    "errors": []
+  }
+}

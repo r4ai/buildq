@@ -1,0 +1,5 @@
+slots=2
+[cache]
+max_members=2
+budget="1G"
+min_free="0"

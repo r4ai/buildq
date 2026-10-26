@@ -1,0 +1,200 @@
+{
+  "t_ms": 1792994836772,
+  "member_metadata_before": {
+    "cache/pools/rust-analyzer-e644142e/m1.json": {
+      "id": 1,
+      "created_ms": 1792993865914,
+      "last_used_ms": 1792994137125,
+      "last_worktree": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+      "source_root": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+      "last_head": "2a388d1103450d814a84eda98efe89c01b158343",
+      "last_cmd": "",
+      "jobs": 2,
+      "size_bytes": 183111680,
+      "size_ms": 1792994104571,
+      "size_accounting": "allocated"
+    },
+    "cache/pools/ripgrep-b273e1b5/m1.json": {
+      "id": 1,
+      "created_ms": 1792993865417,
+      "last_used_ms": 1792994761427,
+      "last_worktree": "/workspace/qa-oss/worktrees/ripgrep-1",
+      "source_root": "/workspace/qa-oss/worktrees/ripgrep-1",
+      "last_head": "4649aa9700619f94cf9c66876e9549d83420e16c",
+      "last_cmd": "",
+      "jobs": 4,
+      "size_bytes": 499511296,
+      "size_ms": 1792994761381,
+      "size_accounting": "allocated"
+    },
+    "cache/pools/ripgrep-b273e1b5/m2.json": {
+      "id": 2,
+      "created_ms": 1792993865445,
+      "last_used_ms": 1792994559320,
+      "last_worktree": "/workspace/qa-oss/worktrees/ripgrep-0",
+      "source_root": "/workspace/qa-oss/worktrees/ripgrep-0",
+      "last_head": "4649aa9700619f94cf9c66876e9549d83420e16c",
+      "last_cmd": "",
+      "jobs": 4,
+      "size_bytes": 488554496,
+      "size_ms": 1792994559083,
+      "size_accounting": "allocated"
+    },
+    "cache/pools/ripgrep-b273e1b5/m0.json": {
+      "id": 0,
+      "created_ms": 1792993865379,
+      "last_used_ms": 1792994542620,
+      "last_worktree": "/workspace/qa-oss/worktrees/ripgrep-1",
+      "source_root": "/workspace/qa-oss/worktrees/ripgrep-1",
+      "last_head": "4649aa9700619f94cf9c66876e9549d83420e16c",
+      "last_cmd": "",
+      "jobs": 3,
+      "size_bytes": 339804160,
+      "size_ms": 1792994542563,
+      "size_accounting": "allocated"
+    },
+    "cache/pools/tokio-8301c862/m0.json": {
+      "id": 0,
+      "created_ms": 1792993865462,
+      "last_used_ms": 1792994558847,
+      "last_worktree": "/workspace/qa-oss/worktrees/tokio-edit-3",
+      "source_root": "/workspace/qa-oss/worktrees/tokio-edit-3",
+      "last_head": "3768696d92d403d98b7d559934617890f882ec02",
+      "last_cmd": "",
+      "jobs": 6,
+      "size_bytes": 595693568,
+      "size_ms": 1792994558724,
+      "size_accounting": "allocated"
+    }
+  },
+  "cached_listing": {
+    "start_ms": 1792994836784,
+    "end_ms": 1792994836822,
+    "command": [
+      "/workspace/qa-bin/buildq",
+      "cache",
+      "ls",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"pools\": [\n    {\n      \"name\": \"rust-analyzer-e644142e\",\n      \"dir\": \"/workspace/qa-oss/cache/pools/rust-analyzer-e644142e\",\n      \"info\": {\n        \"repo\": \"rust-analyzer\",\n        \"repo_key\": \"/workspace/qa-oss/repos/rust-analyzer/.git\",\n        \"toolchain\": \"1.89.0\",\n        \"toolchain_id\": \"rustc 1.89.0 (29483883e 2025-08-04)\\nbinary: rustc\\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\\ncommit-date: 2025-08-04\\nhost: x86_64-unknown-linux-gnu\\nrelease: 1.89.0\\nLLVM version: 20.1.7\\n\",\n        \"created_ms\": 1792993865173,\n        \"last_used_ms\": 1792994137019\n      },\n      \"members\": [\n        {\n          \"id\": 1,\n          \"dir\": \"/workspace/qa-oss/cache/pools/rust-analyzer-e644142e/m1\",\n          \"busy\": true,\n          \"size\": 183111680,\n          \"shared\": 0,\n          \"meta\": {\n            \"id\": 1,\n            \"created_ms\": 1792993865914,\n            \"last_used_ms\": 1792994137125,\n            \"last_worktree\": \"/workspace/qa-oss/worktrees/rust-analyzer-0\",\n            \"source_root\": \"/workspace/qa-oss/worktrees/rust-analyzer-0\",\n            \"last_head\": \"2a388d1103450d814a84eda98efe89c01b158343\",\n            \"last_cmd\": \"\",\n            \"jobs\": 2,\n            \"size_bytes\": 183111680,\n            \"size_ms\": 1792994104571,\n            \"size_accounting\": \"allocated\"\n          }\n        }\n      ],\n      \"shared\": 0\n    },\n    {\n      \"name\": \"ripgrep-b273e1b5\",\n      \"dir\": \"/workspace/qa-oss/cache/pools/ripgrep-b273e1b5\",\n      \"info\": {\n        \"repo\": \"ripgrep\",\n        \"repo_key\": \"/workspace/qa-oss/repos/ripgrep/.git\",\n        \"toolchain\": \"1.89.0\",\n        \"toolchain_id\": \"rustc 1.89.0 (29483883e 2025-08-04)\\nbinary: rustc\\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\\ncommit-date: 2025-08-04\\nhost: x86_64-unknown-linux-gnu\\nrelease: 1.89.0\\nLLVM version: 20.1.7\\n\",\n        \"created_ms\": 1792993865155,\n        \"last_used_ms\": 1792994559353\n      },\n      \"members\": [\n        {\n          \"id\": 0,\n          \"dir\": \"/workspace/qa-oss/cache/pools/ripgrep-b273e1b5/m0\",\n          \"busy\": true,\n          \"size\": 339804160,\n          \"shared\": 0,\n          \"meta\": {\n            \"id\": 0,\n            \"created_ms\": 1792993865379,\n            \"last_used_ms\": 1792994542620,\n            \"last_worktree\": \"/workspace/qa-oss/worktrees/ripgrep-1\",\n            \"source_root\": \"/workspace/qa-oss/worktrees/ripgrep-1\",\n            \"last_head\": \"4649aa9700619f94cf9c66876e9549d83420e16c\",\n            \"last_cmd\": \"\",\n            \"jobs\": 3,\n            \"size_bytes\": 339804160,\n            \"size_ms\": 1792994542563,\n            \"size_accounting\": \"allocated\"\n          }\n        },\n        {\n          \"id\": 1,\n          \"dir\": \"/workspace/qa-oss/cache/pools/ripgrep-b273e1b5/m1\",\n          \"busy\": true,\n          \"size\": 499511296,\n          \"shared\": 0,\n          \"meta\": {\n            \"id\": 1,\n            \"created_ms\": 1792993865417,\n            \"last_used_ms\": 1792994761427,\n            \"last_worktree\": \"/workspace/qa-oss/worktrees/ripgrep-1\",\n            \"source_root\": \"/workspace/qa-oss/worktrees/ripgrep-1\",\n            \"last_head\": \"4649aa9700619f94cf9c66876e9549d83420e16c\",\n            \"last_cmd\": \"\",\n            \"jobs\": 4,\n            \"size_bytes\": 499511296,\n            \"size_ms\": 1792994761381,\n            \"size_accounting\": \"allocated\"\n          }\n        },\n        {\n          \"id\": 2,\n          \"dir\": \"/workspace/qa-oss/cache/pools/ripgrep-b273e1b5/m2\",\n          \"busy\": true,\n          \"size\": 488554496,\n          \"shared\": 0,\n          \"meta\": {\n            \"id\": 2,\n            \"created_ms\": 1792993865445,\n            \"last_used_ms\": 1792994559320,\n            \"last_worktree\": \"/workspace/qa-oss/worktrees/ripgrep-0\",\n            \"source_root\": \"/workspace/qa-oss/worktrees/ripgrep-0\",\n            \"last_head\": \"4649aa9700619f94cf9c66876e9549d83420e16c\",\n            \"last_cmd\": \"\",\n            \"jobs\": 4,\n            \"size_bytes\": 488554496,\n            \"size_ms\": 1792994559083,\n            \"size_accounting\": \"allocated\"\n          }\n        }\n      ],\n      \"shared\": 0\n    },\n    {\n      \"name\": \"tokio-8301c862\",\n      \"dir\": \"/workspace/qa-oss/cache/pools/tokio-8301c862\",\n      \"info\": {\n        \"repo\": \"tokio\",\n        \"repo_key\": \"/workspace/qa-oss/repos/tokio/.git\",\n        \"toolchain\": \"1.89.0\",\n        \"toolchain_id\": \"rustc 1.89.0 (29483883e 2025-08-04)\\nbinary: rustc\\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\\ncommit-date: 2025-08-04\\nhost: x86_64-unknown-linux-gnu\\nrelease: 1.89.0\\nLLVM version: 20.1.7\\n\",\n        \"created_ms\": 1792993865159,\n        \"last_used_ms\": 1792994558741\n      },\n      \"members\": [\n        {\n          \"id\": 0,\n          \"dir\": \"/workspace/qa-oss/cache/pools/tokio-8301c862/m0\",\n          \"busy\": true,\n          \"size\": 595693568,\n          \"shared\": 0,\n          \"meta\": {\n            \"id\": 0,\n            \"created_ms\": 1792993865462,\n            \"last_used_ms\": 1792994558847,\n            \"last_worktree\": \"/workspace/qa-oss/worktrees/tokio-edit-3\",\n            \"source_root\": \"/workspace/qa-oss/worktrees/tokio-edit-3\",\n            \"last_head\": \"3768696d92d403d98b7d559934617890f882ec02\",\n            \"last_cmd\": \"\",\n            \"jobs\": 6,\n            \"size_bytes\": 595693568,\n            \"size_ms\": 1792994558724,\n            \"size_accounting\": \"allocated\"\n          }\n        }\n      ],\n      \"shared\": 0\n    }\n  ],\n  \"runs\": [],\n  \"total\": 2106675200,\n  \"trash_bytes\": 0,\n  \"budget\": 5368709120,\n  \"effective_budget\": 5368709120,\n  \"accounting\": \"allocated\",\n  \"over_budget\": false,\n  \"over_budget_bytes\": 0,\n  \"over_budget_reasons\": [],\n  \"free_disk\": 16881016832,\n  \"external\": [],\n  \"external_total\": 0,\n  \"mbx_budget_bytes\": 0\n}\n",
+    "stderr": ""
+  },
+  "status": {
+    "start_ms": 1792994836811,
+    "end_ms": 1792994836829,
+    "command": [
+      "/workspace/qa-bin/buildq",
+      "status",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"classes\": [\n    {\n      \"class\": \"build\",\n      \"holders\": [\n        {\n          \"busy\": true,\n          \"job\": {\n            \"class\": \"build\",\n            \"cmd\": \"cargo build -p rust-analyzer\",\n            \"cwd\": \"/workspace/qa-oss/worktrees/rust-analyzer-0\",\n            \"enqueued_ms\": 1792994137127,\n            \"label\": \"qa-full-rust-analyzer\",\n            \"pid\": 95861,\n            \"priority\": 0,\n            \"seq\": 1792994137127,\n            \"started_ms\": 1792994305814,\n            \"target\": \"rust-analyzer-e644142e/m1\",\n            \"worktree\": \"/workspace/qa-oss/worktrees/rust-analyzer-0\"\n          },\n          \"slot\": 0\n        },\n        {\n          \"busy\": true,\n          \"job\": {\n            \"class\": \"build\",\n            \"cmd\": \"cargo build -p ripgrep --release\",\n            \"cwd\": \"/workspace/qa-oss/worktrees/ripgrep-1\",\n            \"enqueued_ms\": 1792994542621,\n            \"label\": \"soak-6-5\",\n            \"pid\": 175788,\n            \"priority\": 0,\n            \"seq\": 1792994542621,\n            \"started_ms\": 1792994761383,\n            \"target\": \"ripgrep-b273e1b5/m0\",\n            \"worktree\": \"/workspace/qa-oss/worktrees/ripgrep-1\"\n          },\n          \"slot\": 1\n        }\n      ],\n      \"slots\": 2,\n      \"waiters\": [\n        {\n          \"class\": \"build\",\n          \"cmd\": \"cargo test -p tokio@1.45.1 --test buildq_qa_marker -- --nocapture\",\n          \"cwd\": \"/workspace/qa-oss/worktrees/tokio-edit-3\",\n          \"enqueued_ms\": 1792994558850,\n          \"label\": \"qa-real-edit-4\",\n          \"pid\": 208903,\n          \"priority\": 0,\n          \"seq\": 1792994558850,\n          \"started_ms\": 0,\n          \"target\": null,\n          \"worktree\": \"/workspace/qa-oss/worktrees/tokio-edit-3\"\n        },\n        {\n          \"class\": \"build\",\n          \"cmd\": \"cargo test -p ripgrep\",\n          \"cwd\": \"/workspace/qa-oss/worktrees/ripgrep-0\",\n          \"enqueued_ms\": 1792994559328,\n          \"label\": \"soak-6-7\",\n          \"pid\": 175783,\n          \"priority\": 0,\n          \"seq\": 1792994559328,\n          \"started_ms\": 0,\n          \"target\": null,\n          \"worktree\": \"/workspace/qa-oss/worktrees/ripgrep-0\"\n        },\n        {\n          \"class\": \"build\",\n          \"cmd\": \"cargo run -p ripgrep -- -c ^needle /workspace/qa-oss/search-input.txt\",\n          \"cwd\": \"/workspace/qa-oss/worktrees/ripgrep-1\",\n          \"enqueued_ms\": 1792994761429,\n          \"label\": \"qa-ripgrep-run\",\n          \"pid\": 209058,\n          \"priority\": 0,\n          \"seq\": 1792994761429,\n          \"started_ms\": 0,\n          \"target\": null,\n          \"wait_reason\": \"worktree cap\",\n          \"worktree\": \"/workspace/qa-oss/worktrees/ripgrep-1\"\n        }\n      ]\n    },\n    {\n      \"class\": \"run\",\n      \"holders\": [\n        {\n          \"busy\": false,\n          \"job\": null,\n          \"slot\": 0\n        },\n        {\n          \"busy\": false,\n          \"job\": null,\n          \"slot\": 1\n        }\n      ],\n      \"slots\": 2,\n      \"waiters\": []\n    }\n  ],\n  \"hosts\": {}\n}\n",
+    "stderr": ""
+  },
+  "du": {
+    "start_ms": 1792994836811,
+    "end_ms": 1792994836865,
+    "command": [
+      "du",
+      "-sk",
+      "/workspace/qa-oss/cache"
+    ],
+    "exit": 0,
+    "stdout": "4303436\t/workspace/qa-oss/cache\n",
+    "stderr": ""
+  },
+  "fresh_listing": {
+    "start_ms": 1792994836865,
+    "end_ms": 1792994837020,
+    "command": [
+      "/workspace/qa-bin/buildq",
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n  \"pools\": [\n    {\n      \"name\": \"rust-analyzer-e644142e\",\n      \"dir\": \"/workspace/qa-oss/cache/pools/rust-analyzer-e644142e\",\n      \"info\": {\n        \"repo\": \"rust-analyzer\",\n        \"repo_key\": \"/workspace/qa-oss/repos/rust-analyzer/.git\",\n        \"toolchain\": \"1.89.0\",\n        \"toolchain_id\": \"rustc 1.89.0 (29483883e 2025-08-04)\\nbinary: rustc\\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\\ncommit-date: 2025-08-04\\nhost: x86_64-unknown-linux-gnu\\nrelease: 1.89.0\\nLLVM version: 20.1.7\\n\",\n        \"created_ms\": 1792993865173,\n        \"last_used_ms\": 1792994137019\n      },\n      \"members\": [\n        {\n          \"id\": 1,\n          \"dir\": \"/workspace/qa-oss/cache/pools/rust-analyzer-e644142e/m1\",\n          \"busy\": true,\n          \"size\": 2405343232,\n          \"shared\": 0,\n          \"meta\": {\n            \"id\": 1,\n            \"created_ms\": 1792993865914,\n            \"last_used_ms\": 1792994137125,\n            \"last_worktree\": \"/workspace/qa-oss/worktrees/rust-analyzer-0\",\n            \"source_root\": \"/workspace/qa-oss/worktrees/rust-analyzer-0\",\n            \"last_head\": \"2a388d1103450d814a84eda98efe89c01b158343\",\n            \"last_cmd\": \"\",\n            \"jobs\": 2,\n            \"size_bytes\": 2405343232,\n            \"size_ms\": 1792994836946,\n            \"size_accounting\": \"allocated\"\n          }\n        }\n      ],\n      \"shared\": 0\n    },\n    {\n      \"name\": \"ripgrep-b273e1b5\",\n      \"dir\": \"/workspace/qa-oss/cache/pools/ripgrep-b273e1b5\",\n      \"info\": {\n        \"repo\": \"ripgrep\",\n        \"repo_key\": \"/workspace/qa-oss/repos/ripgrep/.git\",\n        \"toolchain\": \"1.89.0\",\n        \"toolchain_id\": \"rustc 1.89.0 (29483883e 2025-08-04)\\nbinary: rustc\\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\\ncommit-date: 2025-08-04\\nhost: x86_64-unknown-linux-gnu\\nrelease: 1.89.0\\nLLVM version: 20.1.7\\n\",\n        \"created_ms\": 1792993865155,\n        \"last_used_ms\": 1792994559353\n      },\n      \"members\": [\n        {\n          \"id\": 0,\n          \"dir\": \"/workspace/qa-oss/cache/pools/ripgrep-b273e1b5/m0\",\n          \"busy\": true,\n          \"size\": 412573696,\n          \"shared\": 0,\n          \"meta\": {\n            \"id\": 0,\n            \"created_ms\": 1792993865379,\n            \"last_used_ms\": 1792994542620,\n            \"last_worktree\": \"/workspace/qa-oss/worktrees/ripgrep-1\",\n            \"source_root\": \"/workspace/qa-oss/worktrees/ripgrep-1\",\n            \"last_head\": \"4649aa9700619f94cf9c66876e9549d83420e16c\",\n            \"last_cmd\": \"\",\n            \"jobs\": 3,\n            \"size_bytes\": 412573696,\n            \"size_ms\": 1792994836962,\n            \"size_accounting\": \"allocated\"\n          }\n        },\n        {\n          \"id\": 1,\n          \"dir\": \"/workspace/qa-oss/cache/pools/ripgrep-b273e1b5/m1\",\n          \"busy\": true,\n          \"size\": 499511296,\n          \"shared\": 0,\n          \"meta\": {\n            \"id\": 1,\n            \"created_ms\": 1792993865417,\n            \"last_used_ms\": 1792994761427,\n            \"last_worktree\": \"/workspace/qa-oss/worktrees/ripgrep-1\",\n            \"source_root\": \"/workspace/qa-oss/worktrees/ripgrep-1\",\n            \"last_head\": \"4649aa9700619f94cf9c66876e9549d83420e16c\",\n            \"last_cmd\": \"\",\n            \"jobs\": 4,\n            \"size_bytes\": 499511296,\n            \"size_ms\": 1792994836981,\n            \"size_accounting\": \"allocated\"\n          }\n        },\n        {\n          \"id\": 2,\n          \"dir\": \"/workspace/qa-oss/cache/pools/ripgrep-b273e1b5/m2\",\n          \"busy\": true,\n          \"size\": 488554496,\n          \"shared\": 0,\n          \"meta\": {\n            \"id\": 2,\n            \"created_ms\": 1792993865445,\n            \"last_used_ms\": 1792994559320,\n            \"last_worktree\": \"/workspace/qa-oss/worktrees/ripgrep-0\",\n            \"source_root\": \"/workspace/qa-oss/worktrees/ripgrep-0\",\n            \"last_head\": \"4649aa9700619f94cf9c66876e9549d83420e16c\",\n            \"last_cmd\": \"\",\n            \"jobs\": 4,\n            \"size_bytes\": 488554496,\n            \"size_ms\": 1792994837009,\n            \"size_accounting\": \"allocated\"\n          }\n        }\n      ],\n      \"shared\": 0\n    },\n    {\n      \"name\": \"tokio-8301c862\",\n      \"dir\": \"/workspace/qa-oss/cache/pools/tokio-8301c862\",\n      \"info\": {\n        \"repo\": \"tokio\",\n        \"repo_key\": \"/workspace/qa-oss/repos/tokio/.git\",\n        \"toolchain\": \"1.89.0\",\n        \"toolchain_id\": \"rustc 1.89.0 (29483883e 2025-08-04)\\nbinary: rustc\\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\\ncommit-date: 2025-08-04\\nhost: x86_64-unknown-linux-gnu\\nrelease: 1.89.0\\nLLVM version: 20.1.7\\n\",\n        \"created_ms\": 1792993865159,\n        \"last_used_ms\": 1792994558741\n      },\n      \"members\": [\n        {\n          \"id\": 0,\n          \"dir\": \"/workspace/qa-oss/cache/pools/tokio-8301c862/m0\",\n          \"busy\": true,\n          \"size\": 595607552,\n          \"shared\": 0,\n          \"meta\": {\n            \"id\": 0,\n            \"created_ms\": 1792993865462,\n            \"last_used_ms\": 1792994558847,\n            \"last_worktree\": \"/workspace/qa-oss/worktrees/tokio-edit-3\",\n            \"source_root\": \"/workspace/qa-oss/worktrees/tokio-edit-3\",\n            \"last_head\": \"3768696d92d403d98b7d559934617890f882ec02\",\n            \"last_cmd\": \"\",\n            \"jobs\": 6,\n            \"size_bytes\": 595607552,\n            \"size_ms\": 1792994837019,\n            \"size_accounting\": \"allocated\"\n          }\n        }\n      ],\n      \"shared\": 0\n    }\n  ],\n  \"runs\": [],\n  \"total\": 4401590272,\n  \"trash_bytes\": 0,\n  \"budget\": 5368709120,\n  \"effective_budget\": 5368709120,\n  \"accounting\": \"allocated\",\n  \"over_budget\": false,\n  \"over_budget_bytes\": 0,\n  \"over_budget_reasons\": [],\n  \"free_disk\": 16891371520,\n  \"external\": [],\n  \"external_total\": 0,\n  \"mbx_budget_bytes\": 0\n}\n",
+    "stderr": ""
+  },
+  "du_after_refresh": {
+    "start_ms": 1792994837020,
+    "end_ms": 1792994837064,
+    "command": [
+      "du",
+      "-sk",
+      "/workspace/qa-oss/cache"
+    ],
+    "exit": 0,
+    "stdout": "4303820\t/workspace/qa-oss/cache\n",
+    "stderr": ""
+  },
+  "member_metadata_after": {
+    "cache/pools/rust-analyzer-e644142e/m1.json": {
+      "id": 1,
+      "created_ms": 1792993865914,
+      "last_used_ms": 1792994137125,
+      "last_worktree": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+      "source_root": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+      "last_head": "2a388d1103450d814a84eda98efe89c01b158343",
+      "last_cmd": "",
+      "jobs": 2,
+      "size_bytes": 183111680,
+      "size_ms": 1792994104571,
+      "size_accounting": "allocated"
+    },
+    "cache/pools/ripgrep-b273e1b5/m1.json": {
+      "id": 1,
+      "created_ms": 1792993865417,
+      "last_used_ms": 1792994761427,
+      "last_worktree": "/workspace/qa-oss/worktrees/ripgrep-1",
+      "source_root": "/workspace/qa-oss/worktrees/ripgrep-1",
+      "last_head": "4649aa9700619f94cf9c66876e9549d83420e16c",
+      "last_cmd": "",
+      "jobs": 4,
+      "size_bytes": 499511296,
+      "size_ms": 1792994761381,
+      "size_accounting": "allocated"
+    },
+    "cache/pools/ripgrep-b273e1b5/m2.json": {
+      "id": 2,
+      "created_ms": 1792993865445,
+      "last_used_ms": 1792994559320,
+      "last_worktree": "/workspace/qa-oss/worktrees/ripgrep-0",
+      "source_root": "/workspace/qa-oss/worktrees/ripgrep-0",
+      "last_head": "4649aa9700619f94cf9c66876e9549d83420e16c",
+      "last_cmd": "",
+      "jobs": 4,
+      "size_bytes": 488554496,
+      "size_ms": 1792994559083,
+      "size_accounting": "allocated"
+    },
+    "cache/pools/ripgrep-b273e1b5/m0.json": {
+      "id": 0,
+      "created_ms": 1792993865379,
+      "last_used_ms": 1792994542620,
+      "last_worktree": "/workspace/qa-oss/worktrees/ripgrep-1",
+      "source_root": "/workspace/qa-oss/worktrees/ripgrep-1",
+      "last_head": "4649aa9700619f94cf9c66876e9549d83420e16c",
+      "last_cmd": "",
+      "jobs": 3,
+      "size_bytes": 339804160,
+      "size_ms": 1792994542563,
+      "size_accounting": "allocated"
+    },
+    "cache/pools/tokio-8301c862/m0.json": {
+      "id": 0,
+      "created_ms": 1792993865462,
+      "last_used_ms": 1792994558847,
+      "last_worktree": "/workspace/qa-oss/worktrees/tokio-edit-3",
+      "source_root": "/workspace/qa-oss/worktrees/tokio-edit-3",
+      "last_head": "3768696d92d403d98b7d559934617890f882ec02",
+      "last_cmd": "",
+      "jobs": 6,
+      "size_bytes": 595693568,
+      "size_ms": 1792994558724,
+      "size_accounting": "allocated"
+    }
+  }
+}

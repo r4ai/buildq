@@ -1,0 +1,14 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running unittests src/lib.rs (/workspace/qa-root/test-target/debug/deps/buildq-ba2cb5391615462e)
+     Running unittests src/main.rs (/workspace/qa-root/test-target/debug/deps/buildq-3e734fc20b2c3647)
+     Running tests/cli.rs (/workspace/qa-root/test-target/debug/deps/cli-85835ab962e3c7ee)
+buildq: definitely-not-a-command-xyz: No such file or directory (os error 2)
+     Running tests/dedupe.rs (/workspace/qa-root/test-target/debug/deps/dedupe-55b0a20746cb65f4)
+     Running tests/e2e.rs (/workspace/qa-root/test-target/debug/deps/e2e-a864582c4b95d214)
+     Running tests/gc.rs (/workspace/qa-root/test-target/debug/deps/gc-891c074d2314e1a1)
+     Running tests/pool.rs (/workspace/qa-root/test-target/debug/deps/pool-a82093385c9044eb)
+     Running tests/queue.rs (/workspace/qa-root/test-target/debug/deps/queue-c882a1848145ed38)
+     Running tests/reaping.rs (/workspace/qa-root/test-target/debug/deps/reaping-42bd4a03be690d74)
+     Running tests/remote.rs (/workspace/qa-root/test-target/debug/deps/remote-a2739adeb8be51c7)
+     Running tests/rsync.rs (/workspace/qa-root/test-target/debug/deps/rsync-ba679baa2d311ad4)
+   Doc-tests buildq

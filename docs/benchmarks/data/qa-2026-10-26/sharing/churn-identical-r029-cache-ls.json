@@ -1,0 +1,105 @@
+{
+  "pools": [
+    {
+      "name": "repo-447cbbca",
+      "dir": "/workspace/qa-sharing/churn-identical/cache/pools/repo-447cbbca",
+      "info": {
+        "repo": "repo",
+        "repo_key": "/workspace/qa-sharing/churn-identical/repo/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792994212832,
+        "last_used_ms": 1792994517225
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-sharing/churn-identical/cache/pools/repo-447cbbca/m0",
+          "busy": false,
+          "size": 136704000,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792994212879,
+            "last_used_ms": 1792994520137,
+            "last_worktree": "/workspace/qa-sharing/churn-identical/wt1",
+            "source_root": "/workspace/qa-sharing/churn-identical/wt1",
+            "last_head": "928adf66a792c79b22c74cfca4e9856347ebbf37",
+            "last_cmd": "",
+            "jobs": 62,
+            "size_bytes": 136704000,
+            "size_ms": 1792994521830,
+            "size_accounting": "allocated"
+          }
+        },
+        {
+          "id": 1,
+          "dir": "/workspace/qa-sharing/churn-identical/cache/pools/repo-447cbbca/m1",
+          "busy": false,
+          "size": 136708096,
+          "shared": 0,
+          "meta": {
+            "id": 1,
+            "created_ms": 1792994212930,
+            "last_used_ms": 1792994521518,
+            "last_worktree": "/workspace/qa-sharing/churn-identical/wt2",
+            "source_root": "/workspace/qa-sharing/churn-identical/wt2",
+            "last_head": "928adf66a792c79b22c74cfca4e9856347ebbf37",
+            "last_cmd": "",
+            "jobs": 63,
+            "size_bytes": 136708096,
+            "size_ms": 1792994521831,
+            "size_accounting": "allocated"
+          }
+        },
+        {
+          "id": 2,
+          "dir": "/workspace/qa-sharing/churn-identical/cache/pools/repo-447cbbca/m2",
+          "busy": false,
+          "size": 136704000,
+          "shared": 0,
+          "meta": {
+            "id": 2,
+            "created_ms": 1792994212955,
+            "last_used_ms": 1792994521351,
+            "last_worktree": "/workspace/qa-sharing/churn-identical/wt4",
+            "source_root": "/workspace/qa-sharing/churn-identical/wt4",
+            "last_head": "928adf66a792c79b22c74cfca4e9856347ebbf37",
+            "last_cmd": "",
+            "jobs": 55,
+            "size_bytes": 136704000,
+            "size_ms": 1792994521832,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [
+    {
+      "dir": "/workspace/qa-sharing/churn-identical/cache/runs/r0",
+      "busy": false,
+      "size": 2809856,
+      "last_used_ms": 1792994521510
+    },
+    {
+      "dir": "/workspace/qa-sharing/churn-identical/cache/runs/r1",
+      "busy": false,
+      "size": 19099648,
+      "last_used_ms": 1792994504479
+    }
+  ],
+  "total": 432025600,
+  "trash_bytes": 0,
+  "budget": 3221225472,
+  "effective_budget": 3221225472,
+  "accounting": "allocated",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "free_disk": 19256471552,
+  "external": [],
+  "external_total": 0,
+  "mbx_budget_bytes": 0
+}

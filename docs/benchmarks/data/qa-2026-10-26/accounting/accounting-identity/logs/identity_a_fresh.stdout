@@ -1,0 +1,64 @@
+{
+  "pools": [
+    {
+      "name": "repo-4f3bf408",
+      "dir": "/workspace/qa-root/accounting-identity/cache/pools/repo-4f3bf408",
+      "info": {
+        "repo": "repo",
+        "repo_key": "/workspace/qa-root/accounting-identity/repo/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792994040429,
+        "last_used_ms": 1792994041360
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-root/accounting-identity/cache/pools/repo-4f3bf408/m0",
+          "busy": false,
+          "size": 3939315,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792994041446,
+            "last_used_ms": 1792994042038,
+            "last_worktree": "/workspace/qa-root/accounting-identity/repo",
+            "source_root": "/workspace/qa-root/accounting-identity/repo",
+            "last_head": "e4ab6899a8e6040a110f16a6f3f968688e918560",
+            "last_cmd": "",
+            "jobs": 1,
+            "size_bytes": 3939315,
+            "size_ms": 1792994042040,
+            "size_accounting": "logical"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [],
+  "total": 3939315,
+  "trash_bytes": 0,
+  "budget": 6291456,
+  "effective_budget": 2462726,
+  "accounting": "logical",
+  "over_budget": true,
+  "over_budget_bytes": 1476589,
+  "over_budget_reasons": [
+    "mbx's store takes 3.7 MiB of the budget and buildq never deletes it; tighten mbx's own GC limits or raise [cache].budget"
+  ],
+  "free_disk": 26301370368,
+  "external": [],
+  "external_total": 0,
+  "mbx": {
+    "store": "/workspace/qa-root/accounting-identity/mbx-a/actions",
+    "store_bytes": 3827628,
+    "target_bytes": 0,
+    "incremental_bytes": 1102,
+    "generated_bytes": 0,
+    "combined_bytes": 3828730,
+    "shared_with_mbx_bytes": 0,
+    "combined_unique_bytes": 7768045
+  },
+  "mbx_budget_bytes": 3828730
+}

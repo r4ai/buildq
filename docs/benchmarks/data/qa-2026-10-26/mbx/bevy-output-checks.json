@@ -1,0 +1,56 @@
+[
+  {
+    "name": "bevy-mbx-marker-A",
+    "expected": "version-A:entities=1",
+    "actual": "version-A:entities=1",
+    "passed": true
+  },
+  {
+    "name": "bevy-changed-C",
+    "expected": "version-C:entities=1",
+    "actual": "version-C:entities=1",
+    "passed": true
+  },
+  {
+    "name": "bevy-back-A",
+    "expected": "version-A:entities=1",
+    "actual": "version-A:entities=1",
+    "passed": true
+  },
+  {
+    "name": "bevy-burst-0",
+    "expected": "version-A:entities=1",
+    "actual": "version-A:entities=1",
+    "passed": true
+  },
+  {
+    "name": "bevy-burst-1",
+    "expected": "version-A:entities=1",
+    "actual": "version-A:entities=1",
+    "passed": true
+  },
+  {
+    "name": "bevy-burst-2",
+    "expected": "version-C:entities=1",
+    "actual": "version-C:entities=1",
+    "passed": true
+  },
+  {
+    "name": "bevy-burst-3",
+    "expected": "version-A:entities=1",
+    "actual": "version-A:entities=1",
+    "passed": true
+  },
+  {
+    "name": "bevy-burst-4",
+    "expected": "version-A:entities=1",
+    "actual": "version-A:entities=1",
+    "passed": true
+  },
+  {
+    "name": "bevy-burst-5",
+    "expected": "version-C:entities=1",
+    "actual": "version-C:entities=1",
+    "passed": true
+  }
+]

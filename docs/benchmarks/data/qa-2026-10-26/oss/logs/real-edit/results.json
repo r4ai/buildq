@@ -1,0 +1,146 @@
+[
+  {
+    "index": 0,
+    "cwd": "/workspace/qa-oss/worktrees/tokio-edit-3",
+    "command": [
+      "/workspace/qa-bin/buildq",
+      "cargo",
+      "test",
+      "-p",
+      "tokio@1.45.1",
+      "--test",
+      "buildq_qa_marker",
+      "--",
+      "--nocapture"
+    ],
+    "exit": 0,
+    "duration_s": 389.746
+  },
+  {
+    "index": 1,
+    "cwd": "/workspace/qa-oss/worktrees/tokio-edit-4",
+    "command": [
+      "/workspace/qa-bin/buildq",
+      "cargo",
+      "test",
+      "-p",
+      "tokio@1.45.1",
+      "--test",
+      "buildq_qa_marker",
+      "--",
+      "--nocapture"
+    ],
+    "exit": 0,
+    "duration_s": 69.85
+  },
+  {
+    "index": 2,
+    "cwd": "/workspace/qa-oss/worktrees/tokio-edit-3",
+    "command": [
+      "/workspace/qa-bin/buildq",
+      "cargo",
+      "test",
+      "-p",
+      "tokio@1.45.1",
+      "--test",
+      "buildq_qa_marker",
+      "--features",
+      "full",
+      "--",
+      "--nocapture"
+    ],
+    "exit": 0,
+    "duration_s": 45.08
+  },
+  {
+    "index": 3,
+    "cwd": "/workspace/qa-oss/worktrees/tokio-edit-4",
+    "command": [
+      "/workspace/qa-bin/buildq",
+      "cargo",
+      "test",
+      "-p",
+      "tokio@1.45.1",
+      "--test",
+      "buildq_qa_marker",
+      "--features",
+      "full",
+      "--",
+      "--nocapture"
+    ],
+    "exit": 0,
+    "duration_s": 99.723
+  },
+  {
+    "index": 4,
+    "cwd": "/workspace/qa-oss/worktrees/tokio-edit-3",
+    "command": [
+      "/workspace/qa-bin/buildq",
+      "cargo",
+      "test",
+      "-p",
+      "tokio@1.45.1",
+      "--test",
+      "buildq_qa_marker",
+      "--",
+      "--nocapture"
+    ],
+    "exit": 0,
+    "duration_s": 352.803
+  },
+  {
+    "index": 5,
+    "cwd": "/workspace/qa-oss/worktrees/tokio-edit-4",
+    "command": [
+      "/workspace/qa-bin/buildq",
+      "cargo",
+      "test",
+      "-p",
+      "tokio@1.45.1",
+      "--test",
+      "buildq_qa_marker",
+      "--",
+      "--nocapture"
+    ],
+    "exit": 0,
+    "duration_s": 16.344
+  },
+  {
+    "index": 6,
+    "cwd": "/workspace/qa-oss/worktrees/tokio-edit-3",
+    "command": [
+      "/workspace/qa-bin/buildq",
+      "cargo",
+      "test",
+      "-p",
+      "tokio@1.45.1",
+      "--test",
+      "buildq_qa_marker",
+      "--features",
+      "full",
+      "--",
+      "--nocapture"
+    ],
+    "exit": 0,
+    "duration_s": 45.832
+  },
+  {
+    "index": 7,
+    "cwd": "/workspace/qa-oss/worktrees/tokio-edit-4",
+    "command": [
+      "/workspace/qa-bin/buildq",
+      "cargo",
+      "test",
+      "-p",
+      "tokio@1.45.1",
+      "--test",
+      "buildq_qa_marker",
+      "--features",
+      "full",
+      "--",
+      "--nocapture"
+    ],
+    "exit": 0,
+    "duration_s": 18.371
+  }
+]

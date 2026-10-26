@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="656.39952pt" height="369.239479pt" viewBox="0 0 656.39952 369.239479" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 369.239479 
+L 656.39952 369.239479 
+L 656.39952 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 159.061406 314.507645 
+L 649.19952 314.507645 
+L 649.19952 23.229937 
+L 159.061406 23.229937 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 159.061406 36.469833 
+L 567.509834 36.469833 
+L 567.509834 112.126381 
+L 159.061406 112.126381 
+z
+" clip-path="url(#p23e695b67f)" style="fill: #8ca7bc"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 159.061406 131.040518 
+L 393.462496 131.040518 
+L 393.462496 206.697065 
+L 159.061406 206.697065 
+z
+" clip-path="url(#p23e695b67f)" style="fill: #497ca8"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 159.061406 225.611202 
+L 396.631096 225.611202 
+L 396.631096 301.267749 
+L 159.061406 301.267749 
+z
+" clip-path="url(#p23e695b67f)" style="fill: #d25057"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="m81e3300603" d="M 0 0 
+L 0 3.5 
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m81e3300603" x="159.061406" y="314.507645" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle" x="159.061406" y="329.865926" transform="rotate(-0 159.061406 329.865926)">0</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#m81e3300603" x="222.433398" y="314.507645" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle" x="222.433398" y="329.865926" transform="rotate(-0 222.433398 329.865926)">20</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3">
+      <g>
+       <use xlink:href="#m81e3300603" x="285.80539" y="314.507645" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle" x="285.80539" y="329.865926" transform="rotate(-0 285.80539 329.865926)">40</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m81e3300603" x="349.177381" y="314.507645" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle" x="349.177381" y="329.865926" transform="rotate(-0 349.177381 329.865926)">60</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#m81e3300603" x="412.549373" y="314.507645" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle" x="412.549373" y="329.865926" transform="rotate(-0 412.549373 329.865926)">80</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m81e3300603" x="475.921365" y="314.507645" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle" x="475.921365" y="329.865926" transform="rotate(-0 475.921365 329.865926)">100</text>
+     </g>
+    </g>
+    <g id="xtick_7">
+     <g id="line2d_7">
+      <g>
+       <use xlink:href="#m81e3300603" x="539.293356" y="314.507645" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle" x="539.293356" y="329.865926" transform="rotate(-0 539.293356 329.865926)">120</text>
+     </g>
+    </g>
+    <g id="xtick_8">
+     <g id="line2d_8">
+      <g>
+       <use xlink:href="#m81e3300603" x="602.665348" y="314.507645" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_8">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle" x="602.665348" y="329.865926" transform="rotate(-0 602.665348 329.865926)">140</text>
+     </g>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle" x="404.130463" y="344.511864" transform="rotate(-0 404.130463 344.511864)">Bytes available / retained (MiB)</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_9">
+      <defs>
+       <path id="mf93e3dd7d3" d="M 0 0 
+L -3.5 0 
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#mf93e3dd7d3" x="159.061406" y="74.298107" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_10">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end" x="152.061406" y="78.477248" transform="rotate(-0 152.061406 78.477248)">GC cached pool allowance</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#mf93e3dd7d3" x="159.061406" y="168.868791" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end" x="152.061406" y="173.047932" transform="rotate(-0 152.061406 173.047932)">Fresh pool allowance</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_11">
+      <g>
+       <use xlink:href="#mf93e3dd7d3" x="159.061406" y="263.439476" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end" x="152.061406" y="267.618616" transform="rotate(-0 152.061406 267.618616)">Retained private member</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_6">
+    <path d="M 159.061406 314.507645 
+L 159.061406 23.229937 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 159.061406 314.507645 
+L 649.19952 314.507645 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start" x="570.044714" y="77.333419" transform="rotate(-0 570.044714 77.333419)">128.91 MiB</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start" x="395.997376" y="171.904104" transform="rotate(-0 395.997376 171.904104)">73.98 MiB</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start" x="399.165975" y="266.474788" transform="rotate(-0 399.165975 266.474788)">74.98 MiB</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 13.2px; font-family: 'DejaVu Sans'; text-anchor: middle" x="404.130463" y="17.229937" transform="rotate(-0 404.130463 17.229937)">Eviction invalidates the sharing rebate, but GC keeps using it</text>
+   </g>
+  </g>
+  <g id="text_17">
+   <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: start" x="20.39976" y="360.16776" transform="rotate(-0 20.39976 360.16776)">Real mbx store unchanged before/after GC: 76,782,744 bytes. Refreshed overflow: exactly 1 MiB. Issue #151.</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p23e695b67f">
+   <rect x="159.061406" y="23.229937" width="490.138114" height="291.277707"/>
+  </clipPath>
+ </defs>
+</svg>

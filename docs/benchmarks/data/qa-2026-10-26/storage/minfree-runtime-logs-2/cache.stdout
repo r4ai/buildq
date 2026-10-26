@@ -1,0 +1,54 @@
+{
+  "pools": [
+    {
+      "name": "repo-2f7dca59",
+      "dir": "/workspace/qa-storage/guard-runtime/cache/pools/repo-2f7dca59",
+      "info": {
+        "repo": "repo",
+        "repo_key": "/workspace/qa-storage/guard-runtime/repo/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792994149091,
+        "last_used_ms": 1792994149091
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-storage/guard-runtime/cache/pools/repo-2f7dca59/m0",
+          "busy": false,
+          "size": 172691456,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792994149151,
+            "last_used_ms": 1792994152217,
+            "last_worktree": "/workspace/qa-storage/guard-runtime/repo",
+            "source_root": "/workspace/qa-storage/guard-runtime/repo",
+            "last_head": "aef2a1e1106a6f5bd9131dbe871a88609eb48d64",
+            "last_cmd": "",
+            "jobs": 1,
+            "size_bytes": 172691456,
+            "size_ms": 1792994152228,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [],
+  "total": 172691456,
+  "trash_bytes": 0,
+  "budget": 2147483648,
+  "effective_budget": 170217472,
+  "accounting": "allocated",
+  "over_budget": true,
+  "over_budget_bytes": 2473984,
+  "over_budget_reasons": [
+    "the volume free-space reserve reduces the effective budget"
+  ],
+  "free_disk": 24132960256,
+  "external": [],
+  "external_total": 0,
+  "mbx_budget_bytes": 0
+}

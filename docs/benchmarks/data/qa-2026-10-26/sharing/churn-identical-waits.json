@@ -1,0 +1,14 @@
+{
+  "build": {
+    "jobs": 180,
+    "median_wait_seconds": 0.1315,
+    "p95_wait_seconds": 2.104,
+    "max_wait_seconds": 45.459
+  },
+  "run": {
+    "jobs": 180,
+    "median_wait_seconds": 0.0,
+    "p95_wait_seconds": 0.001,
+    "max_wait_seconds": 0.019
+  }
+}

@@ -1,0 +1,803 @@
+{
+  "members": 1000,
+  "jobs": 12,
+  "slots": 2,
+  "max_cargos": 12,
+  "max_compilers": 0,
+  "exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "samples": [
+    {
+      "t": 1792994202.0330813,
+      "cargos": [
+        {
+          "pid": 119542,
+          "ppid": 119349,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119569,
+          "ppid": 119350,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119550,
+          "ppid": 119352,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119585,
+          "ppid": 119355,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119580,
+          "ppid": 119360,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119556,
+          "ppid": 119367,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119567,
+          "ppid": 119374,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119566,
+          "ppid": 119377,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119598,
+          "ppid": 119383,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119619,
+          "ppid": 119387,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119605,
+          "ppid": 119394,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119604,
+          "ppid": 119395,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        }
+      ],
+      "compilers": [],
+      "status": {
+        "classes": [
+          {
+            "class": "build",
+            "holders": [
+              {
+                "busy": false,
+                "job": null,
+                "slot": 0
+              },
+              {
+                "busy": false,
+                "job": null,
+                "slot": 1
+              }
+            ],
+            "slots": 2,
+            "waiters": []
+          },
+          {
+            "class": "run",
+            "holders": [
+              {
+                "busy": false,
+                "job": null,
+                "slot": 0
+              },
+              {
+                "busy": false,
+                "job": null,
+                "slot": 1
+              }
+            ],
+            "slots": 2,
+            "waiters": []
+          }
+        ],
+        "hosts": {}
+      }
+    },
+    {
+      "t": 1792994202.2227776,
+      "cargos": [
+        {
+          "pid": 119542,
+          "ppid": 119349,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119569,
+          "ppid": 119350,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119550,
+          "ppid": 119352,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119585,
+          "ppid": 119355,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119580,
+          "ppid": 119360,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119556,
+          "ppid": 119367,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119567,
+          "ppid": 119374,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119566,
+          "ppid": 119377,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119598,
+          "ppid": 119383,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119619,
+          "ppid": 119387,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119605,
+          "ppid": 119394,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119604,
+          "ppid": 119395,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        }
+      ],
+      "compilers": [],
+      "status": {
+        "classes": [
+          {
+            "class": "build",
+            "holders": [
+              {
+                "busy": false,
+                "job": null,
+                "slot": 0
+              },
+              {
+                "busy": false,
+                "job": null,
+                "slot": 1
+              }
+            ],
+            "slots": 2,
+            "waiters": []
+          },
+          {
+            "class": "run",
+            "holders": [
+              {
+                "busy": false,
+                "job": null,
+                "slot": 0
+              },
+              {
+                "busy": false,
+                "job": null,
+                "slot": 1
+              }
+            ],
+            "slots": 2,
+            "waiters": []
+          }
+        ],
+        "hosts": {}
+      }
+    },
+    {
+      "t": 1792994202.442946,
+      "cargos": [
+        {
+          "pid": 119542,
+          "ppid": 119349,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119569,
+          "ppid": 119350,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119550,
+          "ppid": 119352,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119585,
+          "ppid": 119355,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119580,
+          "ppid": 119360,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119556,
+          "ppid": 119367,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119567,
+          "ppid": 119374,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119566,
+          "ppid": 119377,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119598,
+          "ppid": 119383,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119619,
+          "ppid": 119387,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119605,
+          "ppid": 119394,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119604,
+          "ppid": 119395,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        }
+      ],
+      "compilers": [],
+      "status": {
+        "classes": [
+          {
+            "class": "build",
+            "holders": [
+              {
+                "busy": false,
+                "job": null,
+                "slot": 0
+              },
+              {
+                "busy": false,
+                "job": null,
+                "slot": 1
+              }
+            ],
+            "slots": 2,
+            "waiters": []
+          },
+          {
+            "class": "run",
+            "holders": [
+              {
+                "busy": false,
+                "job": null,
+                "slot": 0
+              },
+              {
+                "busy": false,
+                "job": null,
+                "slot": 1
+              }
+            ],
+            "slots": 2,
+            "waiters": []
+          }
+        ],
+        "hosts": {}
+      }
+    },
+    {
+      "t": 1792994202.6612322,
+      "cargos": [
+        {
+          "pid": 119542,
+          "ppid": 119349,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119550,
+          "ppid": 119352,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119585,
+          "ppid": 119355,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119556,
+          "ppid": 119367,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119567,
+          "ppid": 119374,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        },
+        {
+          "pid": 119604,
+          "ppid": 119395,
+          "comm": "cargo",
+          "argv": [
+            "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--offline"
+          ],
+          "state": "running"
+        }
+      ],
+      "compilers": [],
+      "status": {
+        "classes": [
+          {
+            "class": "build",
+            "holders": [
+              {
+                "busy": true,
+                "job": {
+                  "class": "build",
+                  "cmd": "cargo build --offline -p part0000",
+                  "cwd": "/workspace/qa-storage/metadata/repo",
+                  "enqueued_ms": 1792994202583,
+                  "label": null,
+                  "pid": 119360,
+                  "priority": 0,
+                  "seq": 1792994202583,
+                  "started_ms": 1792994202583,
+                  "target": null,
+                  "worktree": "/workspace/qa-storage/metadata/repo"
+                },
+                "slot": 0
+              },
+              {
+                "busy": false,
+                "job": null,
+                "slot": 1
+              }
+            ],
+            "slots": 2,
+            "waiters": []
+          },
+          {
+            "class": "run",
+            "holders": [
+              {
+                "busy": false,
+                "job": null,
+                "slot": 0
+              },
+              {
+                "busy": false,
+                "job": null,
+                "slot": 1
+              }
+            ],
+            "slots": 2,
+            "waiters": []
+          }
+        ],
+        "hosts": {}
+      }
+    }
+  ]
+}

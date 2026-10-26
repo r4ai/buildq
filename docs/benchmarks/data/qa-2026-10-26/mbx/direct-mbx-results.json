@@ -1,0 +1,14 @@
+[
+  {
+    "worktree": "a",
+    "exit": 1,
+    "stdout": "",
+    "stderr_tail": "mbx[setup]: first build on this machine\nmbx[setup]:   cache is /workspace/qa-mbx/direct-mbx/mbx-cache, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it\nmbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit\n   Compiling nested-app v0.1.0 (/workspace/qa-mbx/nested-portable/mbx/a)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.90s\n     Running `mbx-launch /workspace/qa-mbx/direct-mbx/target-a/debug/nested-app`\nmbx[error]: failed to capture Cargo launch: File exists (os error 17)\nmbx[cache]: 0 hits, 0 misses, 4 not looked up; 0 B downloaded, 0 B uploaded, 11.1 MiB stored locally\n"
+  },
+  {
+    "worktree": "b",
+    "exit": 1,
+    "stdout": "",
+    "stderr_tail": "   Compiling nested-app v0.1.0 (/workspace/qa-mbx/nested-portable/mbx/b)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.52s\n     Running `mbx-launch /workspace/qa-mbx/direct-mbx/target-b/debug/nested-app`\nmbx[error]: failed to capture Cargo launch: File exists (os error 17)\nmbx[cache]: 1 hits, 3 misses; 0 B downloaded, 0 B uploaded, 7.3 MiB stored locally\n"
+  }
+]

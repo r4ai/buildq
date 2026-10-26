@@ -1,0 +1,1826 @@
+{
+  "start_ms": 1792995191932,
+  "end_ms": 1792995191972,
+  "runner_pid": 462962,
+  "owned_direct_children": [
+    {
+      "pid": 463050,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463074,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463103,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463106,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463134,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463147,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463149,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463157,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463173,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463207,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463225,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463232,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463237,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463247,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463273,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463285,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463308,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463320,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463329,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463342,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463359,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463375,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463378,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463389,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463411,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463423,
+      "ppid": 462962,
+      "status": "running",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463432,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463443,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463447,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463469,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463496,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463508,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463536,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463556,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463566,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463572,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463581,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463607,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463618,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463643,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463674,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463684,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463688,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463692,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463704,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463721,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463737,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463738,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463763,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463802,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463808,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463814,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463815,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463826,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463842,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463848,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    }
+  ],
+  "queue_status": {
+    "classes": [
+      {
+        "class": "build",
+        "holders": [
+          {
+            "busy": true,
+            "job": {
+              "class": "build",
+              "cmd": "cargo build -p bevy_ecs",
+              "cwd": "/workspace/qa-oss/worktrees/bevy-1",
+              "enqueued_ms": 1792995101336,
+              "label": "qa-burst64-bevy-1-28",
+              "pid": 463359,
+              "priority": 0,
+              "seq": 1792995101336,
+              "started_ms": 1792995166690,
+              "target": "bevy-fa4906ee/m1",
+              "worktree": "/workspace/qa-oss/worktrees/bevy-1"
+            },
+            "slot": 0
+          },
+          {
+            "busy": true,
+            "job": {
+              "class": "build",
+              "cmd": "cargo build -p bevy_ecs",
+              "cwd": "/workspace/qa-oss/worktrees/bevy-0",
+              "enqueued_ms": 1792995101283,
+              "label": "qa-burst64-bevy-0-00",
+              "pid": 463050,
+              "priority": 0,
+              "seq": 1792995101283,
+              "started_ms": 1792995155031,
+              "target": "bevy-fa4906ee/m0",
+              "worktree": "/workspace/qa-oss/worktrees/bevy-0"
+            },
+            "slot": 1
+          }
+        ],
+        "slots": 2,
+        "waiters": [
+          {
+            "class": "build",
+            "cmd": "cargo build -p ripgrep",
+            "cwd": "/workspace/qa-oss/worktrees/ripgrep-2",
+            "enqueued_ms": 1792995101571,
+            "label": "qa-burst64-ripgrep-2-46",
+            "pid": 463618,
+            "priority": 0,
+            "seq": 1792995101571,
+            "started_ms": 0,
+            "target": null,
+            "worktree": "/workspace/qa-oss/worktrees/ripgrep-2"
+          },
+          {
+            "class": "build",
+            "cmd": "cargo build -p tokio@1.45.1",
+            "cwd": "/workspace/qa-oss/worktrees/tokio-2",
+            "enqueued_ms": 1792995102358,
+            "label": "qa-burst64-tokio-2-33",
+            "pid": 463423,
+            "priority": 0,
+            "seq": 1792995102365,
+            "started_ms": 0,
+            "target": null,
+            "worktree": "/workspace/qa-oss/worktrees/tokio-2"
+          },
+          {
+            "class": "build",
+            "cmd": "cargo build -p ripgrep",
+            "cwd": "/workspace/qa-oss/worktrees/ripgrep-0",
+            "enqueued_ms": 1792995102730,
+            "label": "qa-burst64-ripgrep-0-38",
+            "pid": 463496,
+            "priority": 0,
+            "seq": 1792995102730,
+            "started_ms": 0,
+            "target": null,
+            "worktree": "/workspace/qa-oss/worktrees/ripgrep-0"
+          },
+          {
+            "class": "build",
+            "cmd": "cargo build -p tokio@1.45.1",
+            "cwd": "/workspace/qa-oss/worktrees/tokio-2",
+            "enqueued_ms": 1792995105128,
+            "label": "qa-burst64-tokio-2-57",
+            "pid": 463802,
+            "priority": 0,
+            "seq": 1792995105128,
+            "started_ms": 0,
+            "target": null,
+            "worktree": "/workspace/qa-oss/worktrees/tokio-2"
+          },
+          {
+            "class": "build",
+            "cmd": "cargo build -p tokio@1.45.1",
+            "cwd": "/workspace/qa-oss/worktrees/tokio-2",
+            "enqueued_ms": 1792995105564,
+            "label": "qa-burst64-tokio-2-09",
+            "pid": 463106,
+            "priority": 0,
+            "seq": 1792995105564,
+            "started_ms": 0,
+            "target": null,
+            "worktree": "/workspace/qa-oss/worktrees/tokio-2"
+          },
+          {
+            "class": "build",
+            "cmd": "cargo build -p ripgrep",
+            "cwd": "/workspace/qa-oss/worktrees/ripgrep-2",
+            "enqueued_ms": 1792995107475,
+            "label": "qa-burst64-ripgrep-2-34",
+            "pid": 463432,
+            "priority": 0,
+            "seq": 1792995107475,
+            "started_ms": 0,
+            "target": null,
+            "worktree": "/workspace/qa-oss/worktrees/ripgrep-2"
+          },
+          {
+            "class": "build",
+            "cmd": "cargo build -p syntax",
+            "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+            "enqueued_ms": 1792995121775,
+            "label": "qa-burst64-rust-analyzer-2-47",
+            "pid": 463643,
+            "priority": 0,
+            "seq": 1792995121775,
+            "started_ms": 0,
+            "target": null,
+            "worktree": "/workspace/qa-oss/worktrees/rust-analyzer-2"
+          },
+          {
+            "class": "build",
+            "cmd": "cargo build -p syntax",
+            "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-1",
+            "enqueued_ms": 1792995155059,
+            "label": "qa-burst64-rust-analyzer-1-19",
+            "pid": 463232,
+            "priority": 0,
+            "seq": 1792995155059,
+            "started_ms": 0,
+            "target": null,
+            "worktree": "/workspace/qa-oss/worktrees/rust-analyzer-1"
+          },
+          {
+            "class": "build",
+            "cmd": "cargo build -p syntax",
+            "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+            "enqueued_ms": 1792995166744,
+            "label": "qa-burst64-rust-analyzer-2-35",
+            "pid": 463443,
+            "priority": 0,
+            "seq": 1792995166744,
+            "started_ms": 0,
+            "target": null,
+            "worktree": "/workspace/qa-oss/worktrees/rust-analyzer-2"
+          },
+          {
+            "class": "build",
+            "cmd": "cargo build -p bevy_ecs",
+            "cwd": "/workspace/qa-oss/worktrees/bevy-0",
+            "enqueued_ms": 1792995101438,
+            "label": "qa-burst64-bevy-0-12",
+            "pid": 463147,
+            "priority": 0,
+            "seq": 1792995101438,
+            "started_ms": 0,
+            "target": null,
+            "wait_reason": "worktree cap",
+            "worktree": "/workspace/qa-oss/worktrees/bevy-0"
+          }
+        ]
+      },
+      {
+        "class": "run",
+        "holders": [
+          {
+            "busy": false,
+            "job": null,
+            "slot": 0
+          },
+          {
+            "busy": false,
+            "job": null,
+            "slot": 1
+          }
+        ],
+        "slots": 2,
+        "waiters": []
+      }
+    ],
+    "hosts": {}
+  },
+  "cache": {
+    "pools": [
+      {
+        "name": "rust-analyzer-e644142e",
+        "dir": "/workspace/qa-oss/cache/pools/rust-analyzer-e644142e",
+        "info": {
+          "repo": "rust-analyzer",
+          "repo_key": "/workspace/qa-oss/repos/rust-analyzer/.git",
+          "toolchain": "1.89.0",
+          "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+          "created_ms": 1792993865173,
+          "last_used_ms": 1792995100982
+        },
+        "members": [
+          {
+            "id": 0,
+            "dir": "/workspace/qa-oss/cache/pools/rust-analyzer-e644142e/m0",
+            "busy": true,
+            "size": 183111680,
+            "shared": 0,
+            "meta": {
+              "id": 0,
+              "created_ms": 1792995100861,
+              "last_used_ms": 1792995166742,
+              "last_worktree": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+              "source_root": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+              "last_head": "2a388d1103450d814a84eda98efe89c01b158343",
+              "last_cmd": "",
+              "jobs": 2,
+              "size_bytes": 183111680,
+              "size_ms": 1792995166682,
+              "size_accounting": "allocated"
+            }
+          },
+          {
+            "id": 1,
+            "dir": "/workspace/qa-oss/cache/pools/rust-analyzer-e644142e/m1",
+            "busy": true,
+            "size": 2965045248,
+            "shared": 0,
+            "meta": {
+              "id": 1,
+              "created_ms": 1792993865914,
+              "last_used_ms": 1792995121767,
+              "last_worktree": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+              "source_root": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+              "last_head": "2a388d1103450d814a84eda98efe89c01b158343",
+              "last_cmd": "",
+              "jobs": 8,
+              "size_bytes": 2965045248,
+              "size_ms": 1792995121743,
+              "size_accounting": "allocated"
+            }
+          },
+          {
+            "id": 2,
+            "dir": "/workspace/qa-oss/cache/pools/rust-analyzer-e644142e/m2",
+            "busy": true,
+            "size": 183111680,
+            "shared": 0,
+            "meta": {
+              "id": 2,
+              "created_ms": 1792995100932,
+              "last_used_ms": 1792995155041,
+              "last_worktree": "/workspace/qa-oss/worktrees/rust-analyzer-1",
+              "source_root": "/workspace/qa-oss/worktrees/rust-analyzer-1",
+              "last_head": "2a388d1103450d814a84eda98efe89c01b158343",
+              "last_cmd": "",
+              "jobs": 2,
+              "size_bytes": 183111680,
+              "size_ms": 1792995155023,
+              "size_accounting": "allocated"
+            }
+          }
+        ],
+        "shared": 0
+      },
+      {
+        "name": "ripgrep-b273e1b5",
+        "dir": "/workspace/qa-oss/cache/pools/ripgrep-b273e1b5",
+        "info": {
+          "repo": "ripgrep",
+          "repo_key": "/workspace/qa-oss/repos/ripgrep/.git",
+          "toolchain": "1.89.0",
+          "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+          "created_ms": 1792993865155,
+          "last_used_ms": 1792995105447
+        },
+        "members": [
+          {
+            "id": 0,
+            "dir": "/workspace/qa-oss/cache/pools/ripgrep-b273e1b5/m0",
+            "busy": true,
+            "size": 648261632,
+            "shared": 0,
+            "meta": {
+              "id": 0,
+              "created_ms": 1792993865379,
+              "last_used_ms": 1792995102727,
+              "last_worktree": "/workspace/qa-oss/worktrees/ripgrep-0",
+              "source_root": "/workspace/qa-oss/worktrees/ripgrep-0",
+              "last_head": "4649aa9700619f94cf9c66876e9549d83420e16c",
+              "last_cmd": "",
+              "jobs": 7,
+              "size_bytes": 648261632,
+              "size_ms": 1792995102692,
+              "size_accounting": "allocated"
+            }
+          },
+          {
+            "id": 1,
+            "dir": "/workspace/qa-oss/cache/pools/ripgrep-b273e1b5/m1",
+            "busy": true,
+            "size": 499683328,
+            "shared": 0,
+            "meta": {
+              "id": 1,
+              "created_ms": 1792993865417,
+              "last_used_ms": 1792995101567,
+              "last_worktree": "/workspace/qa-oss/worktrees/ripgrep-2",
+              "source_root": "/workspace/qa-oss/worktrees/ripgrep-2",
+              "last_head": "4649aa9700619f94cf9c66876e9549d83420e16c",
+              "last_cmd": "",
+              "jobs": 6,
+              "size_bytes": 499683328,
+              "size_ms": 1792995101549,
+              "size_accounting": "allocated"
+            }
+          },
+          {
+            "id": 2,
+            "dir": "/workspace/qa-oss/cache/pools/ripgrep-b273e1b5/m2",
+            "busy": true,
+            "size": 487841792,
+            "shared": 0,
+            "meta": {
+              "id": 2,
+              "created_ms": 1792993865445,
+              "last_used_ms": 1792995107473,
+              "last_worktree": "/workspace/qa-oss/worktrees/ripgrep-2",
+              "source_root": "/workspace/qa-oss/worktrees/ripgrep-2",
+              "last_head": "4649aa9700619f94cf9c66876e9549d83420e16c",
+              "last_cmd": "",
+              "jobs": 10,
+              "size_bytes": 487841792,
+              "size_ms": 1792995107468,
+              "size_accounting": "allocated"
+            }
+          }
+        ],
+        "shared": 0
+      },
+      {
+        "name": "tokio-8301c862",
+        "dir": "/workspace/qa-oss/cache/pools/tokio-8301c862",
+        "info": {
+          "repo": "tokio",
+          "repo_key": "/workspace/qa-oss/repos/tokio/.git",
+          "toolchain": "1.89.0",
+          "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+          "created_ms": 1792993865159,
+          "last_used_ms": 1792995100961
+        },
+        "members": [
+          {
+            "id": 0,
+            "dir": "/workspace/qa-oss/cache/pools/tokio-8301c862/m0",
+            "busy": true,
+            "size": 603066368,
+            "shared": 0,
+            "meta": {
+              "id": 0,
+              "created_ms": 1792993865462,
+              "last_used_ms": 1792995102352,
+              "last_worktree": "/workspace/qa-oss/worktrees/tokio-2",
+              "source_root": "/workspace/qa-oss/worktrees/tokio-2",
+              "last_head": "3768696d92d403d98b7d559934617890f882ec02",
+              "last_cmd": "",
+              "jobs": 13,
+              "size_bytes": 603066368,
+              "size_ms": 1792995102336,
+              "size_accounting": "allocated"
+            }
+          },
+          {
+            "id": 1,
+            "dir": "/workspace/qa-oss/cache/pools/tokio-8301c862/m1",
+            "busy": true,
+            "size": 7987200,
+            "shared": 0,
+            "meta": {
+              "id": 1,
+              "created_ms": 1792995020078,
+              "last_used_ms": 1792995105557,
+              "last_worktree": "/workspace/qa-oss/worktrees/tokio-2",
+              "source_root": "/workspace/qa-oss/worktrees/tokio-2",
+              "last_head": "3768696d92d403d98b7d559934617890f882ec02",
+              "last_cmd": "",
+              "jobs": 3,
+              "size_bytes": 7987200,
+              "size_ms": 1792995105549,
+              "size_accounting": "allocated"
+            }
+          },
+          {
+            "id": 2,
+            "dir": "/workspace/qa-oss/cache/pools/tokio-8301c862/m2",
+            "busy": true,
+            "size": 414273536,
+            "shared": 0,
+            "meta": {
+              "id": 2,
+              "created_ms": 1792995020128,
+              "last_used_ms": 1792995105122,
+              "last_worktree": "/workspace/qa-oss/worktrees/tokio-2",
+              "source_root": "/workspace/qa-oss/worktrees/tokio-2",
+              "last_head": "3768696d92d403d98b7d559934617890f882ec02",
+              "last_cmd": "",
+              "jobs": 2,
+              "size_bytes": 414273536,
+              "size_ms": 1792995105077,
+              "size_accounting": "allocated"
+            }
+          }
+        ],
+        "shared": 0
+      },
+      {
+        "name": "bevy-fa4906ee",
+        "dir": "/workspace/qa-oss/cache/pools/bevy-fa4906ee",
+        "info": {
+          "repo": "bevy",
+          "repo_key": "/workspace/qa-oss/repos/bevy/.git",
+          "toolchain": "1.89.0",
+          "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+          "created_ms": 1792993832525,
+          "last_used_ms": 1792995100936
+        },
+        "members": [
+          {
+            "id": 0,
+            "dir": "/workspace/qa-oss/cache/pools/bevy-fa4906ee/m0",
+            "busy": true,
+            "size": 100564992,
+            "shared": 0,
+            "meta": {
+              "id": 0,
+              "created_ms": 1792995101198,
+              "last_used_ms": 1792995101254,
+              "last_worktree": "/workspace/qa-oss/worktrees/bevy-0",
+              "source_root": "/workspace/qa-oss/worktrees/bevy-0",
+              "last_head": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+              "last_cmd": "",
+              "jobs": 1,
+              "size_bytes": 100564992,
+              "size_ms": 1792995191964,
+              "size_accounting": "allocated"
+            }
+          },
+          {
+            "id": 1,
+            "dir": "/workspace/qa-oss/cache/pools/bevy-fa4906ee/m1",
+            "busy": true,
+            "size": 71647232,
+            "shared": 0,
+            "meta": {
+              "id": 1,
+              "created_ms": 1792995101293,
+              "last_used_ms": 1792995101294,
+              "last_worktree": "/workspace/qa-oss/worktrees/bevy-1",
+              "source_root": "/workspace/qa-oss/worktrees/bevy-1",
+              "last_head": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+              "last_cmd": "",
+              "jobs": 1,
+              "size_bytes": 71647232,
+              "size_ms": 1792995191971,
+              "size_accounting": "allocated"
+            }
+          },
+          {
+            "id": 2,
+            "dir": "/workspace/qa-oss/cache/pools/bevy-fa4906ee/m2",
+            "busy": true,
+            "size": 0,
+            "shared": 0,
+            "meta": {
+              "id": 2,
+              "created_ms": 1792995101388,
+              "last_used_ms": 1792995101388,
+              "last_worktree": "/workspace/qa-oss/worktrees/bevy-0",
+              "source_root": "/workspace/qa-oss/worktrees/bevy-0",
+              "last_head": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+              "last_cmd": "",
+              "jobs": 1,
+              "size_bytes": 0,
+              "size_ms": 1792995191971,
+              "size_accounting": "allocated"
+            }
+          }
+        ],
+        "shared": 0
+      }
+    ],
+    "runs": [],
+    "total": 6164594688,
+    "trash_bytes": 0,
+    "budget": 5368709120,
+    "effective_budget": 5368709120,
+    "accounting": "allocated",
+    "over_budget": true,
+    "over_budget_bytes": 795885568,
+    "over_budget_reasons": [
+      "busy artifacts are protected; retry GC after jobs finish"
+    ],
+    "free_disk": 14216245248,
+    "external": [],
+    "external_total": 0,
+    "mbx_budget_bytes": 0
+  },
+  "active_owned_buildq": 56,
+  "visible_owned_buildq": 12,
+  "missing_owned_buildq": [
+    {
+      "pid": 463074,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463103,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463134,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463149,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463157,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463173,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463207,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463225,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463237,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463247,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463273,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463285,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463308,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463320,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463329,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463342,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463375,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463378,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463389,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463411,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463447,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463469,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463508,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463536,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463556,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463566,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463572,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463581,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463607,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463674,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463684,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463688,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463692,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463704,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463721,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463737,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463738,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463763,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463808,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463814,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    },
+    {
+      "pid": 463815,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "bevy_ecs"
+      ]
+    },
+    {
+      "pid": 463826,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "tokio@1.45.1"
+      ]
+    },
+    {
+      "pid": 463842,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "ripgrep"
+      ]
+    },
+    {
+      "pid": 463848,
+      "ppid": 462962,
+      "status": "sleeping",
+      "name": "buildq",
+      "argv": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "syntax"
+      ]
+    }
+  ],
+  "pool_waiting_logs": 53
+}

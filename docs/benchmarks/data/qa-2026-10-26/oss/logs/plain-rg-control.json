@@ -1,0 +1,52 @@
+{
+  "t_ms": 1792995830935,
+  "cwd": "/workspace/qa-oss/plain-rg-control",
+  "expected_without_git_marker": "bar\nfoo\n",
+  "controls": [
+    {
+      "command": [
+        "/usr/local/bin/rg",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": "ripgrep 15.2.0 (rev e89fff89ac)\n\nfeatures:+pcre2\nsimd(compile):+SSE2,-SSSE3,-AVX2\nsimd(runtime):+SSE2,+SSSE3,+AVX2\n\nPCRE2 10.45 is available (JIT is available)\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/local/bin/rg",
+        "--sort",
+        "path",
+        "--files"
+      ],
+      "exit": 0,
+      "stdout": "bar\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/local/bin/rg",
+        "--no-ignore-parent",
+        "--sort",
+        "path",
+        "--files"
+      ],
+      "exit": 0,
+      "stdout": "bar\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "--show-toplevel"
+      ],
+      "exit": 128,
+      "stdout": "",
+      "stderr": "fatal: not a git repository (or any of the parent directories): .git\n"
+    }
+  ],
+  "git_markers": [
+    "/workspace/.git"
+  ]
+}

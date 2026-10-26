@@ -1,0 +1,84 @@
+{
+  "pools": [
+    {
+      "name": "repo-9868d12a",
+      "dir": "/workspace/qa-root/eviction-rebate-regex/cache/pools/repo-9868d12a",
+      "info": {
+        "repo": "repo",
+        "repo_key": "/workspace/qa-root/eviction-rebate-regex/repo/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792995755618,
+        "last_used_ms": 1792995777451
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-root/eviction-rebate-regex/cache/pools/repo-9868d12a/m0",
+          "busy": false,
+          "size": 76663624,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792995777536,
+            "last_used_ms": 1792995789973,
+            "last_worktree": "/workspace/qa-root/eviction-rebate-regex/repo",
+            "source_root": "/workspace/qa-root/eviction-rebate-regex/repo",
+            "last_head": "7ddecb9e80b58fe857cd63f44213abd08cf892ab",
+            "last_cmd": "",
+            "jobs": 1,
+            "size_bytes": 76663624,
+            "size_ms": 1792995800015,
+            "size_accounting": "logical"
+          }
+        },
+        {
+          "id": 1,
+          "dir": "/workspace/qa-root/eviction-rebate-regex/cache/pools/repo-9868d12a/m1",
+          "busy": false,
+          "size": 78618288,
+          "shared": 0,
+          "meta": {
+            "id": 1,
+            "created_ms": 1792995799973,
+            "last_used_ms": 1792995799973,
+            "last_worktree": null,
+            "source_root": null,
+            "last_head": null,
+            "last_cmd": "",
+            "jobs": 0,
+            "size_bytes": 78618288,
+            "size_ms": 1792995800019,
+            "size_accounting": "logical"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [],
+  "total": 155281912,
+  "trash_bytes": 0,
+  "budget": 154352456,
+  "effective_budget": 135166722,
+  "accounting": "logical",
+  "over_budget": true,
+  "over_budget_bytes": 20115190,
+  "over_budget_reasons": [
+    "mbx's store takes 18.3 MiB of the budget and buildq never deletes it; tighten mbx's own GC limits or raise [cache].budget"
+  ],
+  "free_disk": 14432706560,
+  "external": [],
+  "external_total": 0,
+  "mbx": {
+    "store": "/workspace/qa-root/eviction-rebate-regex/mbx/actions",
+    "store_bytes": 76700887,
+    "target_bytes": 0,
+    "incremental_bytes": 81857,
+    "generated_bytes": 0,
+    "combined_bytes": 76782744,
+    "shared_with_mbx_bytes": 57597010,
+    "combined_unique_bytes": 174467646
+  },
+  "mbx_budget_bytes": 19185734
+}
