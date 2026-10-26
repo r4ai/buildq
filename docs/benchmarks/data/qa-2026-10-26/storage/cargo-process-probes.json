@@ -1,0 +1,1126 @@
+[
+  {
+    "t": 1792994047.024071,
+    "cargos": [
+      {
+        "pid": 62089,
+        "ppid": 62088,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "-V"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62113,
+        "ppid": 62065,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62070,
+        "ppid": 62063,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "-V"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62101,
+        "ppid": 62046,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62096,
+        "ppid": 62033,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62112,
+        "ppid": 62031,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62064,
+        "ppid": 62024,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994047.0619175,
+    "cargos": [
+      {
+        "pid": 62132,
+        "ppid": 62088,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62113,
+        "ppid": 62065,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62122,
+        "ppid": 62063,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62101,
+        "ppid": 62046,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62096,
+        "ppid": 62033,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62136,
+        "ppid": 62032,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62112,
+        "ppid": 62031,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62064,
+        "ppid": 62024,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994047.1159503,
+    "cargos": [
+      {
+        "pid": 62132,
+        "ppid": 62088,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62122,
+        "ppid": 62063,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62164,
+        "ppid": 62033,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "test",
+          "--offline",
+          "-q",
+          "--target-dir=/workspace/qa-storage/soak-subreaper/cache/pools/fixture-d-6cb1806a/m0"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62136,
+        "ppid": 62032,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62112,
+        "ppid": 62031,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994047.151303,
+    "cargos": [
+      {
+        "pid": 62122,
+        "ppid": 62063,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62189,
+        "ppid": 62046,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62164,
+        "ppid": 62033,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "test",
+          "--offline",
+          "-q",
+          "--target-dir=/workspace/qa-storage/soak-subreaper/cache/pools/fixture-d-6cb1806a/m0"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62136,
+        "ppid": 62032,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62177,
+        "ppid": 62024,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994047.1826143,
+    "cargos": [
+      {
+        "pid": 62215,
+        "ppid": 62088,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62201,
+        "ppid": 62065,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "test",
+          "--offline",
+          "-q",
+          "--target-dir=/workspace/qa-storage/soak-subreaper/cache/pools/fixture-d-6cb1806a/m1"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62237,
+        "ppid": 62063,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "disk-sleep"
+      },
+      {
+        "pid": 62164,
+        "ppid": 62033,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "test",
+          "--offline",
+          "-q",
+          "--target-dir=/workspace/qa-storage/soak-subreaper/cache/pools/fixture-d-6cb1806a/m0"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 62222,
+        "ppid": 62031,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994070.2907937,
+    "cargos": [
+      {
+        "pid": 71368,
+        "ppid": 71319,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "disk-sleep"
+      },
+      {
+        "pid": 71353,
+        "ppid": 71318,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 71359,
+        "ppid": 71317,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 71350,
+        "ppid": 71314,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 71358,
+        "ppid": 71313,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994070.316589,
+    "cargos": [
+      {
+        "pid": 71368,
+        "ppid": 71319,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "disk-sleep"
+      },
+      {
+        "pid": 71353,
+        "ppid": 71318,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 71359,
+        "ppid": 71317,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "disk-sleep"
+      },
+      {
+        "pid": 71350,
+        "ppid": 71314,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 71358,
+        "ppid": 71313,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994073.6605275,
+    "cargos": [
+      {
+        "pid": 72952,
+        "ppid": 72883,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 72951,
+        "ppid": 72881,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "disk-sleep"
+      },
+      {
+        "pid": 72930,
+        "ppid": 72876,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 72926,
+        "ppid": 72867,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 72934,
+        "ppid": 72863,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 72887,
+        "ppid": 72844,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994073.6847267,
+    "cargos": [
+      {
+        "pid": 72952,
+        "ppid": 72883,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 72951,
+        "ppid": 72881,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 72971,
+        "ppid": 72866,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 72934,
+        "ppid": 72863,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 72990,
+        "ppid": 72847,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "test",
+          "--offline",
+          "-q",
+          "--target-dir=/workspace/qa-storage/soak-subreaper/cache/pools/fixture-a-db1290bd/m0"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994073.7683892,
+    "cargos": [
+      {
+        "pid": 73039,
+        "ppid": 72881,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "disk-sleep"
+      },
+      {
+        "pid": 73010,
+        "ppid": 72867,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "test",
+          "--offline",
+          "-q",
+          "--target-dir=/workspace/qa-storage/soak-subreaper/cache/pools/fixture-a-db1290bd/m1"
+        ],
+        "status": "sleeping"
+      },
+      {
+        "pid": 73033,
+        "ppid": 72863,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 72990,
+        "ppid": 72847,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "test",
+          "--offline",
+          "-q",
+          "--target-dir=/workspace/qa-storage/soak-subreaper/cache/pools/fixture-a-db1290bd/m0"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 73008,
+        "ppid": 72844,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994082.8846922,
+    "cargos": [
+      {
+        "pid": 77387,
+        "ppid": 77346,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 77384,
+        "ppid": 77344,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "disk-sleep"
+      },
+      {
+        "pid": 77381,
+        "ppid": 77342,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 77375,
+        "ppid": 77341,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 77388,
+        "ppid": 77340,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "disk-sleep"
+      }
+    ]
+  },
+  {
+    "t": 1792994105.1875684,
+    "cargos": [
+      {
+        "pid": 85946,
+        "ppid": 85909,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "disk-sleep"
+      },
+      {
+        "pid": 85945,
+        "ppid": 85908,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 85947,
+        "ppid": 85906,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 85935,
+        "ppid": 85896,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 85944,
+        "ppid": 85891,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994105.2211444,
+    "cargos": [
+      {
+        "pid": 85946,
+        "ppid": 85909,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 85945,
+        "ppid": 85908,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 85947,
+        "ppid": 85906,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 85935,
+        "ppid": 85896,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 85944,
+        "ppid": 85891,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994124.628705,
+    "cargos": [
+      {
+        "pid": 91393,
+        "ppid": 91321,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 91370,
+        "ppid": 91320,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 91367,
+        "ppid": 91302,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 91373,
+        "ppid": 91301,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 91372,
+        "ppid": 91288,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 91343,
+        "ppid": 91282,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      }
+    ]
+  },
+  {
+    "t": 1792994124.7577648,
+    "cargos": [
+      {
+        "pid": 91500,
+        "ppid": 91321,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "disk-sleep"
+      },
+      {
+        "pid": 91462,
+        "ppid": 91302,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "test",
+          "--offline",
+          "-q",
+          "--target-dir=/workspace/qa-storage/soak-subreaper/cache/pools/fixture-c-bfe4c09e/m0"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 91504,
+        "ppid": 91301,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 91474,
+        "ppid": 91288,
+        "cmd": [
+          "/workspace/.buildq-env/rustup/toolchains/1.89.0-x86_64-unknown-linux-gnu/bin/cargo",
+          "metadata",
+          "--no-deps",
+          "--format-version",
+          "1",
+          "--offline"
+        ],
+        "status": "running"
+      },
+      {
+        "pid": 91512,
+        "ppid": 91282,
+        "cmd": [
+          "/workspace/.buildq-env/cargo/bin/cargo",
+          "test",
+          "--offline",
+          "-q",
+          "--target-dir=/workspace/qa-storage/soak-subreaper/cache/pools/fixture-c-bfe4c09e/m1"
+        ],
+        "status": "running"
+      }
+    ]
+  }
+]

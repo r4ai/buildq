@@ -1,0 +1,162 @@
+[
+  {
+    "number": 138,
+    "url": "https://github.com/r4ai/buildq/issues/138",
+    "title": "mbx: combined budget overflow disappears after GC empties the buildq pool",
+    "labels": [
+      "bug",
+      "priority: medium"
+    ],
+    "key": "mbx-overflow"
+  },
+  {
+    "number": 139,
+    "url": "https://github.com/r4ai/buildq/issues/139",
+    "title": "mbx: shared usage cache reuses another MBX_CACHE_DIR's budget and evicts a fitting member",
+    "labels": [
+      "bug",
+      "priority: medium"
+    ],
+    "key": "mbx-identity"
+  },
+  {
+    "number": 140,
+    "url": "https://github.com/r4ai/buildq/issues/140",
+    "title": "Dedupe: uplifted hardlinks bypass dedupe_max_index and restore unbounded index memory",
+    "labels": [
+      "bug",
+      "priority: medium"
+    ],
+    "key": "hardlink-index"
+  },
+  {
+    "number": 141,
+    "url": "https://github.com/r4ai/buildq/issues/141",
+    "title": "Tests: target_dir_config_is_rerooted fails when CARGO_TARGET_DIR is set",
+    "labels": [
+      "bug",
+      "priority: low"
+    ],
+    "key": "test-env"
+  },
+  {
+    "number": 142,
+    "url": "https://github.com/r4ai/buildq/issues/142",
+    "title": "Pool: switching worktrees silently reuses stale nested codegen output; mbx preserves it after pool clean",
+    "labels": [
+      "bug",
+      "priority: high"
+    ],
+    "key": "nested-stale"
+  },
+  {
+    "number": 143,
+    "url": "https://github.com/r4ai/buildq/issues/143",
+    "title": "Soak: Cargo metadata/version probes cause false slot_limit failures before admission",
+    "labels": [
+      "bug",
+      "priority: medium"
+    ],
+    "key": "soak-metadata"
+  },
+  {
+    "number": 144,
+    "url": "https://github.com/r4ai/buildq/issues/144",
+    "title": "Soak: classify unreaped zombies separately from live orphan workloads and cleanup failures",
+    "labels": [
+      "bug",
+      "priority: low"
+    ],
+    "key": "soak-zombies"
+  },
+  {
+    "number": 145,
+    "url": "https://github.com/r4ai/buildq/issues/145",
+    "title": "Soak: max_tree_rss_kb includes unrelated host processes from other queues",
+    "labels": [
+      "bug",
+      "priority: medium"
+    ],
+    "key": "soak-rss"
+  },
+  {
+    "number": 146,
+    "url": "https://github.com/r4ai/buildq/issues/146",
+    "title": "Performance: reuse safe Cargo preflight metadata for warm builds in large workspaces",
+    "labels": [
+      "enhancement",
+      "priority: low"
+    ],
+    "key": "metadata-reuse"
+  },
+  {
+    "number": 147,
+    "url": "https://github.com/r4ai/buildq/issues/147",
+    "title": "Dedupe: cross-member hardlinks are compared and reported as new sharing potential",
+    "labels": [
+      "bug",
+      "priority: medium"
+    ],
+    "key": "cross-member-links"
+  },
+  {
+    "number": 148,
+    "url": "https://github.com/r4ai/buildq/issues/148",
+    "title": "Cache observability: mark stale/busy size estimates alongside headline usage and budget status",
+    "labels": [
+      "enhancement",
+      "priority: medium"
+    ],
+    "key": "usage-freshness"
+  },
+  {
+    "number": 149,
+    "url": "https://github.com/r4ai/buildq/issues/149",
+    "title": "GC recovery: account for and reclaim abandoned .seed-mN staging trees",
+    "labels": [
+      "enhancement",
+      "priority: medium"
+    ],
+    "key": "abandoned-seed"
+  },
+  {
+    "number": 150,
+    "url": "https://github.com/r4ai/buildq/issues/150",
+    "title": "Observability: expose pool-member waiters before queue admission in status/top/history",
+    "labels": [
+      "enhancement",
+      "priority: medium"
+    ],
+    "key": "member-wait"
+  },
+  {
+    "number": 151,
+    "url": "https://github.com/r4ai/buildq/issues/151",
+    "title": "mbx: GC keeps a stale sharing rebate after evicting the last pool hardlinks",
+    "labels": [
+      "bug",
+      "priority: medium"
+    ],
+    "key": "stale-overlap"
+  },
+  {
+    "number": 152,
+    "url": "https://github.com/r4ai/buildq/issues/152",
+    "title": "Soak: pinned Tokio test preset omits required full feature and fails before exercising buildq",
+    "labels": [
+      "bug",
+      "priority: medium"
+    ],
+    "key": "tokio-soak-preset"
+  },
+  {
+    "number": 153,
+    "url": "https://github.com/r4ai/buildq/issues/153",
+    "title": "Pool admission: bound long-tail waits when later builds overtake an earlier submission",
+    "labels": [
+      "enhancement",
+      "priority: medium"
+    ],
+    "key": "pool-fairness"
+  }
+]

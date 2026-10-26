@@ -1,0 +1,4567 @@
+[
+  {
+    "name": "inline-0-build-0",
+    "exit": 0,
+    "seconds": 3.6818
+  },
+  {
+    "name": "inline-0-build-1",
+    "exit": 0,
+    "seconds": 3.5911
+  },
+  {
+    "name": "inline-0-gc-0",
+    "exit": 0,
+    "seconds": 0.0066,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1396736,
+      "after": 1400832,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-0-gc-1",
+    "exit": 0,
+    "seconds": 0.0057,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1400832,
+      "after": 1400832,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-0-after",
+    "exit": 0,
+    "seconds": 0.0074,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 28109828096,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-1-build-0",
+    "exit": 0,
+    "seconds": 3.7144
+  },
+  {
+    "name": "inline-1-build-1",
+    "exit": 0,
+    "seconds": 3.7818
+  },
+  {
+    "name": "inline-1-gc-0",
+    "exit": 0,
+    "seconds": 0.0062,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1519616,
+      "after": 1519616,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-1-gc-1",
+    "exit": 0,
+    "seconds": 0.0071,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1519616,
+      "after": 1519616,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-1-after",
+    "exit": 0,
+    "seconds": 0.0043,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 28079898624,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-2-build-0",
+    "exit": 0,
+    "seconds": 3.5348
+  },
+  {
+    "name": "inline-2-build-1",
+    "exit": 0,
+    "seconds": 3.8329
+  },
+  {
+    "name": "inline-2-gc-0",
+    "exit": 0,
+    "seconds": 0.0143,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1634304,
+      "after": 1638400,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-2-gc-1",
+    "exit": 0,
+    "seconds": 0.0241,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1658880,
+      "after": 1658880,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-2-after",
+    "exit": 0,
+    "seconds": 0.0045,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 28022472704,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-3-build-0",
+    "exit": 0,
+    "seconds": 3.2038
+  },
+  {
+    "name": "inline-3-build-1",
+    "exit": 0,
+    "seconds": 3.3366
+  },
+  {
+    "name": "inline-3-gc-0",
+    "exit": 0,
+    "seconds": 0.0275,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1744896,
+      "after": 1744896,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-3-gc-1",
+    "exit": 0,
+    "seconds": 0.0281,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1744896,
+      "after": 1744896,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-3-after",
+    "exit": 0,
+    "seconds": 0.0045,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 27908534272,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-4-build-0",
+    "exit": 0,
+    "seconds": 3.2964
+  },
+  {
+    "name": "inline-4-build-1",
+    "exit": 0,
+    "seconds": 3.2341
+  },
+  {
+    "name": "inline-4-gc-0",
+    "exit": 0,
+    "seconds": 0.01,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2498560,
+      "after": 2498560,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-4-gc-1",
+    "exit": 0,
+    "seconds": 0.0156,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2498560,
+      "after": 2498560,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-4-after",
+    "exit": 0,
+    "seconds": 0.0048,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 27839782912,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-5-build-0",
+    "exit": 0,
+    "seconds": 3.282
+  },
+  {
+    "name": "inline-5-build-1",
+    "exit": 0,
+    "seconds": 3.5442
+  },
+  {
+    "name": "inline-5-gc-0",
+    "exit": 0,
+    "seconds": 0.015,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1708032,
+      "after": 1744896,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-5-gc-1",
+    "exit": 0,
+    "seconds": 0.0059,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1716224,
+      "after": 1716224,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-5-after",
+    "exit": 0,
+    "seconds": 0.0016,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 27787939840,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-6-build-0",
+    "exit": 0,
+    "seconds": 3.3536
+  },
+  {
+    "name": "inline-6-build-1",
+    "exit": 0,
+    "seconds": 3.4403
+  },
+  {
+    "name": "inline-6-gc-0",
+    "exit": 0,
+    "seconds": 0.0315,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1617920,
+      "after": 1630208,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-6-gc-1",
+    "exit": 0,
+    "seconds": 0.0051,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1609728,
+      "after": 1609728,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-6-after",
+    "exit": 0,
+    "seconds": 0.0047,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 27784757248,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-7-build-0",
+    "exit": 0,
+    "seconds": 3.2184
+  },
+  {
+    "name": "inline-7-build-1",
+    "exit": 0,
+    "seconds": 3.2091
+  },
+  {
+    "name": "inline-7-gc-0",
+    "exit": 0,
+    "seconds": 0.0055,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2179072,
+      "after": 2179072,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-7-gc-1",
+    "exit": 0,
+    "seconds": 0.0093,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2379776,
+      "after": 1523712,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-7-after",
+    "exit": 0,
+    "seconds": 0.0049,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 27705274368,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-8-build-0",
+    "exit": 0,
+    "seconds": 3.1259
+  },
+  {
+    "name": "inline-8-build-1",
+    "exit": 0,
+    "seconds": 3.0192
+  },
+  {
+    "name": "inline-8-gc-0",
+    "exit": 0,
+    "seconds": 0.0069,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 6377472,
+      "after": 6377472,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-8-gc-1",
+    "exit": 0,
+    "seconds": 0.009,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 6377472,
+      "after": 6377472,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-8-after",
+    "exit": 0,
+    "seconds": 0.0051,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 27647569920,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-9-build-0",
+    "exit": 0,
+    "seconds": 3.2165
+  },
+  {
+    "name": "inline-9-build-1",
+    "exit": 0,
+    "seconds": 3.3241
+  },
+  {
+    "name": "inline-9-gc-0",
+    "exit": 0,
+    "seconds": 0.0083,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2068480,
+      "after": 2068480,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-9-gc-1",
+    "exit": 0,
+    "seconds": 0.0067,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2072576,
+      "after": 2072576,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-9-after",
+    "exit": 0,
+    "seconds": 0.0037,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 27598196736,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-10-build-0",
+    "exit": 0,
+    "seconds": 3.5336
+  },
+  {
+    "name": "inline-10-build-1",
+    "exit": 0,
+    "seconds": 3.5174
+  },
+  {
+    "name": "inline-10-gc-0",
+    "exit": 0,
+    "seconds": 0.0144,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1798144,
+      "after": 1806336,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-10-gc-1",
+    "exit": 0,
+    "seconds": 0.0122,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1814528,
+      "after": 1814528,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-10-after",
+    "exit": 0,
+    "seconds": 0.0025,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26997665792,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-11-build-0",
+    "exit": 0,
+    "seconds": 3.3402
+  },
+  {
+    "name": "inline-11-build-1",
+    "exit": 0,
+    "seconds": 3.4482
+  },
+  {
+    "name": "inline-11-gc-0",
+    "exit": 0,
+    "seconds": 0.0271,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2142208,
+      "after": 2142208,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-11-gc-1",
+    "exit": 0,
+    "seconds": 0.0264,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2138112,
+      "after": 2138112,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-11-after",
+    "exit": 0,
+    "seconds": 0.0029,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26912079872,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-12-build-0",
+    "exit": 0,
+    "seconds": 3.5187
+  },
+  {
+    "name": "inline-12-build-1",
+    "exit": 0,
+    "seconds": 3.192
+  },
+  {
+    "name": "inline-12-gc-0",
+    "exit": 0,
+    "seconds": 0.0114,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2162688,
+      "after": 2166784,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-12-gc-1",
+    "exit": 0,
+    "seconds": 0.0095,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2166784,
+      "after": 2166784,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-12-after",
+    "exit": 0,
+    "seconds": 0.0021,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26763689984,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-13-build-0",
+    "exit": 0,
+    "seconds": 3.5606
+  },
+  {
+    "name": "inline-13-build-1",
+    "exit": 0,
+    "seconds": 3.4601
+  },
+  {
+    "name": "inline-13-gc-0",
+    "exit": 0,
+    "seconds": 0.0131,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1761280,
+      "after": 1761280,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-13-gc-1",
+    "exit": 0,
+    "seconds": 0.0152,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1761280,
+      "after": 1765376,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-13-after",
+    "exit": 0,
+    "seconds": 0.002,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26664009728,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-14-build-0",
+    "exit": 0,
+    "seconds": 3.4505
+  },
+  {
+    "name": "inline-14-build-1",
+    "exit": 0,
+    "seconds": 3.4158
+  },
+  {
+    "name": "inline-14-gc-0",
+    "exit": 0,
+    "seconds": 0.0092,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1777664,
+      "after": 1777664,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-14-gc-1",
+    "exit": 0,
+    "seconds": 0.0127,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1773568,
+      "after": 1785856,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-14-after",
+    "exit": 0,
+    "seconds": 0.03,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26598457344,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-15-build-0",
+    "exit": 0,
+    "seconds": 3.893
+  },
+  {
+    "name": "inline-15-build-1",
+    "exit": 0,
+    "seconds": 3.7224
+  },
+  {
+    "name": "inline-15-gc-0",
+    "exit": 0,
+    "seconds": 0.004,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1298432,
+      "after": 1298432,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-15-gc-1",
+    "exit": 0,
+    "seconds": 0.0105,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1298432,
+      "after": 1298432,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-15-after",
+    "exit": 0,
+    "seconds": 0.0021,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26509746176,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-16-build-0",
+    "exit": 0,
+    "seconds": 3.4511
+  },
+  {
+    "name": "inline-16-build-1",
+    "exit": 0,
+    "seconds": 3.4257
+  },
+  {
+    "name": "inline-16-gc-0",
+    "exit": 0,
+    "seconds": 0.006,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2154496,
+      "after": 2154496,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-16-gc-1",
+    "exit": 0,
+    "seconds": 0.0077,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2154496,
+      "after": 2154496,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-16-after",
+    "exit": 0,
+    "seconds": 0.007,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26485936128,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-17-build-0",
+    "exit": 0,
+    "seconds": 3.7591
+  },
+  {
+    "name": "inline-17-build-1",
+    "exit": 0,
+    "seconds": 3.6967
+  },
+  {
+    "name": "inline-17-gc-0",
+    "exit": 0,
+    "seconds": 0.0262,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1454080,
+      "after": 1454080,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-17-gc-1",
+    "exit": 0,
+    "seconds": 0.0056,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1462272,
+      "after": 1470464,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-17-after",
+    "exit": 0,
+    "seconds": 0.0104,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26398244864,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-18-build-0",
+    "exit": 0,
+    "seconds": 3.4814
+  },
+  {
+    "name": "inline-18-build-1",
+    "exit": 0,
+    "seconds": 3.6968
+  },
+  {
+    "name": "inline-18-gc-0",
+    "exit": 0,
+    "seconds": 0.0497,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1441792,
+      "after": 1458176,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-18-gc-1",
+    "exit": 0,
+    "seconds": 0.0084,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1433600,
+      "after": 1433600,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-18-after",
+    "exit": 0,
+    "seconds": 0.0084,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26348421120,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-19-build-0",
+    "exit": 0,
+    "seconds": 3.3995
+  },
+  {
+    "name": "inline-19-build-1",
+    "exit": 0,
+    "seconds": 3.341
+  },
+  {
+    "name": "inline-19-gc-0",
+    "exit": 0,
+    "seconds": 0.0072,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2154496,
+      "after": 2154496,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-19-gc-1",
+    "exit": 0,
+    "seconds": 0.0073,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2154496,
+      "after": 2154496,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-19-after",
+    "exit": 0,
+    "seconds": 0.0029,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26350526464,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-20-build-0",
+    "exit": 0,
+    "seconds": 3.0777
+  },
+  {
+    "name": "inline-20-build-1",
+    "exit": 0,
+    "seconds": 3.0943
+  },
+  {
+    "name": "inline-20-gc-0",
+    "exit": 0,
+    "seconds": 0.0371,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 44867584,
+      "after": 67948544,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": true,
+      "over_budget_bytes": 839680,
+      "over_budget_reasons": [
+        "busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "cache exceeds its effective budget by 820.0 KiB (soft limit): busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-20-gc-1",
+    "exit": 0,
+    "seconds": 0.0186,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 74240000,
+      "after": 99409920,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": true,
+      "over_budget_bytes": 32301056,
+      "over_budget_reasons": [
+        "busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "cache exceeds its effective budget by 30.8 MiB (soft limit): busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-20-after",
+    "exit": 0,
+    "seconds": 0.0021,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26307948544,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-21-build-0",
+    "exit": 0,
+    "seconds": 2.9738
+  },
+  {
+    "name": "inline-21-build-1",
+    "exit": 0,
+    "seconds": 3.0926
+  },
+  {
+    "name": "inline-21-gc-0",
+    "exit": 0,
+    "seconds": 0.0386,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 6377472,
+      "after": 6389760,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-21-gc-1",
+    "exit": 0,
+    "seconds": 0.0298,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 6389760,
+      "after": 6389760,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-21-after",
+    "exit": 0,
+    "seconds": 0.0018,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26224410624,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-22-build-0",
+    "exit": 0,
+    "seconds": 2.8708
+  },
+  {
+    "name": "inline-22-build-1",
+    "exit": 0,
+    "seconds": 2.8613
+  },
+  {
+    "name": "inline-22-gc-0",
+    "exit": 0,
+    "seconds": 0.0046,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 211615744,
+      "after": 211615744,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": true,
+      "over_budget_bytes": 144506880,
+      "over_budget_reasons": [
+        "busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "cache exceeds its effective budget by 137.8 MiB (soft limit): busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-22-gc-1",
+    "exit": 0,
+    "seconds": 0.0262,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 211615744,
+      "after": 211615744,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": true,
+      "over_budget_bytes": 144506880,
+      "over_budget_reasons": [
+        "busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "cache exceeds its effective budget by 137.8 MiB (soft limit): busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-22-after",
+    "exit": 0,
+    "seconds": 0.008,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26175016960,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-23-build-0",
+    "exit": 0,
+    "seconds": 3.4135
+  },
+  {
+    "name": "inline-23-build-1",
+    "exit": 0,
+    "seconds": 3.2168
+  },
+  {
+    "name": "inline-23-gc-0",
+    "exit": 0,
+    "seconds": 0.0122,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2162688,
+      "after": 2170880,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-23-gc-1",
+    "exit": 0,
+    "seconds": 0.0047,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2162688,
+      "after": 2162688,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-23-after",
+    "exit": 0,
+    "seconds": 0.0021,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26140803072,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-24-build-0",
+    "exit": 0,
+    "seconds": 3.5763
+  },
+  {
+    "name": "inline-24-build-1",
+    "exit": 0,
+    "seconds": 3.361
+  },
+  {
+    "name": "inline-24-gc-0",
+    "exit": 0,
+    "seconds": 0.0069,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1527808,
+      "after": 1531904,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-24-gc-1",
+    "exit": 0,
+    "seconds": 0.0055,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1531904,
+      "after": 1531904,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-24-after",
+    "exit": 0,
+    "seconds": 0.0058,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26139631616,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-25-build-0",
+    "exit": 0,
+    "seconds": 3.3485
+  },
+  {
+    "name": "inline-25-build-1",
+    "exit": 0,
+    "seconds": 3.0632
+  },
+  {
+    "name": "inline-25-gc-0",
+    "exit": 0,
+    "seconds": 0.0319,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2146304,
+      "after": 2146304,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-25-gc-1",
+    "exit": 0,
+    "seconds": 0.0272,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2146304,
+      "after": 2146304,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-25-after",
+    "exit": 0,
+    "seconds": 0.0022,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26079481856,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-26-build-0",
+    "exit": 0,
+    "seconds": 3.2181
+  },
+  {
+    "name": "inline-26-build-1",
+    "exit": 0,
+    "seconds": 3.1099
+  },
+  {
+    "name": "inline-26-gc-0",
+    "exit": 0,
+    "seconds": 0.0151,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2760704,
+      "after": 5668864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-26-gc-1",
+    "exit": 0,
+    "seconds": 0.0037,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 3588096,
+      "after": 3588096,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-26-after",
+    "exit": 0,
+    "seconds": 0.0028,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 26087342080,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-27-build-0",
+    "exit": 0,
+    "seconds": 3.2334
+  },
+  {
+    "name": "inline-27-build-1",
+    "exit": 0,
+    "seconds": 3.318
+  },
+  {
+    "name": "inline-27-gc-0",
+    "exit": 0,
+    "seconds": 0.0066,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2498560,
+      "after": 2498560,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-27-gc-1",
+    "exit": 0,
+    "seconds": 0.0074,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2498560,
+      "after": 2498560,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-27-after",
+    "exit": 0,
+    "seconds": 0.0072,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 25981480960,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-28-build-0",
+    "exit": 0,
+    "seconds": 3.441
+  },
+  {
+    "name": "inline-28-build-1",
+    "exit": 0,
+    "seconds": 3.2697
+  },
+  {
+    "name": "inline-28-gc-0",
+    "exit": 0,
+    "seconds": 0.0117,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1511424,
+      "after": 1511424,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-28-gc-1",
+    "exit": 0,
+    "seconds": 0.0098,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1503232,
+      "after": 1515520,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-28-after",
+    "exit": 0,
+    "seconds": 0.0057,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 25854861312,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-29-build-0",
+    "exit": 0,
+    "seconds": 3.2083
+  },
+  {
+    "name": "inline-29-build-1",
+    "exit": 0,
+    "seconds": 3.1644
+  },
+  {
+    "name": "inline-29-gc-0",
+    "exit": 0,
+    "seconds": 0.0083,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2142208,
+      "after": 2146304,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-29-gc-1",
+    "exit": 0,
+    "seconds": 0.0054,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2142208,
+      "after": 2142208,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "inline-29-after",
+    "exit": 0,
+    "seconds": 0.0029,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 25778806784,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-0-build-0",
+    "exit": 0,
+    "seconds": 2.9897
+  },
+  {
+    "name": "background-0-build-1",
+    "exit": 0,
+    "seconds": 3.086
+  },
+  {
+    "name": "background-0-gc-0",
+    "exit": 0,
+    "seconds": 0.0136,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 8531968,
+      "after": 8531968,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-0-gc-1",
+    "exit": 0,
+    "seconds": 0.0234,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 7245824,
+      "after": 10252288,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-0-after",
+    "exit": 0,
+    "seconds": 0.0141,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 25687748608,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-1-build-0",
+    "exit": 0,
+    "seconds": 3.3537
+  },
+  {
+    "name": "background-1-build-1",
+    "exit": 0,
+    "seconds": 3.3264
+  },
+  {
+    "name": "background-1-gc-0",
+    "exit": 0,
+    "seconds": 0.0125,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 3751936,
+      "after": 5906432,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-1-gc-1",
+    "exit": 0,
+    "seconds": 0.0083,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 3751936,
+      "after": 3751936,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-1-after",
+    "exit": 0,
+    "seconds": 0.0033,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 25643245568,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-2-build-0",
+    "exit": 0,
+    "seconds": 3.6699
+  },
+  {
+    "name": "background-2-build-1",
+    "exit": 0,
+    "seconds": 3.6789
+  },
+  {
+    "name": "background-2-gc-0",
+    "exit": 0,
+    "seconds": 0.0307,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1585152,
+      "after": 1585152,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-2-gc-1",
+    "exit": 0,
+    "seconds": 0.0296,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1613824,
+      "after": 1613824,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-2-after",
+    "exit": 0,
+    "seconds": 0.0039,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 25584881664,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-3-build-0",
+    "exit": 0,
+    "seconds": 3.8768
+  },
+  {
+    "name": "background-3-build-1",
+    "exit": 0,
+    "seconds": 3.4817
+  },
+  {
+    "name": "background-3-gc-0",
+    "exit": 0,
+    "seconds": 0.0379,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1478656,
+      "after": 1478656,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-3-gc-1",
+    "exit": 0,
+    "seconds": 0.0436,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1474560,
+      "after": 1499136,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-3-after",
+    "exit": 0,
+    "seconds": 0.0044,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 25407029248,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-4-build-0",
+    "exit": 0,
+    "seconds": 3.6663
+  },
+  {
+    "name": "background-4-build-1",
+    "exit": 0,
+    "seconds": 3.8158
+  },
+  {
+    "name": "background-4-gc-0",
+    "exit": 0,
+    "seconds": 0.0124,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1331200,
+      "after": 1331200,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-4-gc-1",
+    "exit": 0,
+    "seconds": 0.0332,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1331200,
+      "after": 1429504,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-4-after",
+    "exit": 0,
+    "seconds": 0.0023,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 25354268672,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-5-build-0",
+    "exit": 0,
+    "seconds": 3.7674
+  },
+  {
+    "name": "background-5-build-1",
+    "exit": 0,
+    "seconds": 3.8708
+  },
+  {
+    "name": "background-5-gc-0",
+    "exit": 0,
+    "seconds": 0.0103,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1449984,
+      "after": 1449984,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-5-gc-1",
+    "exit": 0,
+    "seconds": 0.0327,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1449984,
+      "after": 1478656,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-5-after",
+    "exit": 0,
+    "seconds": 0.0059,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 25289375744,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-6-build-0",
+    "exit": 0,
+    "seconds": 3.6565
+  },
+  {
+    "name": "background-6-build-1",
+    "exit": 0,
+    "seconds": 3.4468
+  },
+  {
+    "name": "background-6-gc-0",
+    "exit": 0,
+    "seconds": 0.0076,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1536000,
+      "after": 1536000,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-6-gc-1",
+    "exit": 0,
+    "seconds": 0.0089,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1523712,
+      "after": 1540096,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-6-after",
+    "exit": 0,
+    "seconds": 0.0053,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 25200443392,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-7-build-0",
+    "exit": 0,
+    "seconds": 4.0451
+  },
+  {
+    "name": "background-7-build-1",
+    "exit": 0,
+    "seconds": 4.0961
+  },
+  {
+    "name": "background-7-gc-0",
+    "exit": 0,
+    "seconds": 0.0087,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1531904,
+      "after": 1531904,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-7-gc-1",
+    "exit": 0,
+    "seconds": 0.0032,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1531904,
+      "after": 1531904,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-7-after",
+    "exit": 0,
+    "seconds": 0.006,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 25106710528,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-8-build-0",
+    "exit": 0,
+    "seconds": 4.4777
+  },
+  {
+    "name": "background-8-build-1",
+    "exit": 0,
+    "seconds": 4.5822
+  },
+  {
+    "name": "background-8-gc-0",
+    "exit": 0,
+    "seconds": 0.0038,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 483328,
+      "after": 548864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-8-gc-1",
+    "exit": 0,
+    "seconds": 0.0054,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 548864,
+      "after": 614400,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-8-after",
+    "exit": 0,
+    "seconds": 0.0042,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 24925908992,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-9-build-0",
+    "exit": 0,
+    "seconds": 3.9005
+  },
+  {
+    "name": "background-9-build-1",
+    "exit": 0,
+    "seconds": 4.2912
+  },
+  {
+    "name": "background-9-gc-0",
+    "exit": 0,
+    "seconds": 0.0106,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1265664,
+      "after": 1265664,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-9-gc-1",
+    "exit": 0,
+    "seconds": 0.0101,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1265664,
+      "after": 1265664,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-9-after",
+    "exit": 0,
+    "seconds": 0.0126,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 24848621568,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-10-build-0",
+    "exit": 0,
+    "seconds": 3.8891
+  },
+  {
+    "name": "background-10-build-1",
+    "exit": 0,
+    "seconds": 3.6899
+  },
+  {
+    "name": "background-10-gc-0",
+    "exit": 0,
+    "seconds": 0.0501,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1204224,
+      "after": 1339392,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-10-gc-1",
+    "exit": 0,
+    "seconds": 0.0124,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1204224,
+      "after": 1204224,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-10-after",
+    "exit": 0,
+    "seconds": 0.0029,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 24908410880,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-11-build-0",
+    "exit": 0,
+    "seconds": 3.6468
+  },
+  {
+    "name": "background-11-build-1",
+    "exit": 0,
+    "seconds": 3.8825
+  },
+  {
+    "name": "background-11-gc-0",
+    "exit": 0,
+    "seconds": 0.0073,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1531904,
+      "after": 1531904,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-11-gc-1",
+    "exit": 0,
+    "seconds": 0.0049,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1531904,
+      "after": 1531904,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-11-after",
+    "exit": 0,
+    "seconds": 0.0054,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 24756453376,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-12-build-0",
+    "exit": 0,
+    "seconds": 3.5476
+  },
+  {
+    "name": "background-12-build-1",
+    "exit": 0,
+    "seconds": 3.6685
+  },
+  {
+    "name": "background-12-gc-0",
+    "exit": 0,
+    "seconds": 0.0114,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1667072,
+      "after": 1687552,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-12-gc-1",
+    "exit": 0,
+    "seconds": 0.0099,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1679360,
+      "after": 1679360,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-12-after",
+    "exit": 0,
+    "seconds": 0.0046,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 24739614720,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-13-build-0",
+    "exit": 0,
+    "seconds": 3.6073
+  },
+  {
+    "name": "background-13-build-1",
+    "exit": 0,
+    "seconds": 3.6278
+  },
+  {
+    "name": "background-13-gc-0",
+    "exit": 0,
+    "seconds": 0.0139,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1716224,
+      "after": 1736704,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-13-gc-1",
+    "exit": 0,
+    "seconds": 0.0074,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1716224,
+      "after": 1716224,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-13-after",
+    "exit": 0,
+    "seconds": 0.0065,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 24577753088,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-14-build-0",
+    "exit": 0,
+    "seconds": 3.3691
+  },
+  {
+    "name": "background-14-build-1",
+    "exit": 0,
+    "seconds": 3.1303
+  },
+  {
+    "name": "background-14-gc-0",
+    "exit": 0,
+    "seconds": 0.0253,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2498560,
+      "after": 2498560,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-14-gc-1",
+    "exit": 0,
+    "seconds": 0.0116,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2498560,
+      "after": 2498560,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-14-after",
+    "exit": 0,
+    "seconds": 0.0015,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 24447815680,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-15-build-0",
+    "exit": 0,
+    "seconds": 3.5809
+  },
+  {
+    "name": "background-15-build-1",
+    "exit": 0,
+    "seconds": 3.5778
+  },
+  {
+    "name": "background-15-gc-0",
+    "exit": 0,
+    "seconds": 0.005,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2162688,
+      "after": 2162688,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-15-gc-1",
+    "exit": 0,
+    "seconds": 0.0072,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2166784,
+      "after": 2166784,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-15-after",
+    "exit": 0,
+    "seconds": 0.0078,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 24375947264,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-16-build-0",
+    "exit": 0,
+    "seconds": 3.6775
+  },
+  {
+    "name": "background-16-build-1",
+    "exit": 0,
+    "seconds": 3.6058
+  },
+  {
+    "name": "background-16-gc-0",
+    "exit": 0,
+    "seconds": 0.0128,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1564672,
+      "after": 1589248,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-16-gc-1",
+    "exit": 0,
+    "seconds": 0.0094,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1576960,
+      "after": 1576960,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-16-after",
+    "exit": 0,
+    "seconds": 0.0019,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 24278212608,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-17-build-0",
+    "exit": 0,
+    "seconds": 3.6023
+  },
+  {
+    "name": "background-17-build-1",
+    "exit": 0,
+    "seconds": 3.6714
+  },
+  {
+    "name": "background-17-gc-0",
+    "exit": 0,
+    "seconds": 0.01,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1478656,
+      "after": 1478656,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-17-gc-1",
+    "exit": 0,
+    "seconds": 0.0359,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1470464,
+      "after": 1490944,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-17-after",
+    "exit": 0,
+    "seconds": 0.0056,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 24068653056,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-18-build-0",
+    "exit": 0,
+    "seconds": 3.0207
+  },
+  {
+    "name": "background-18-build-1",
+    "exit": 0,
+    "seconds": 3.211
+  },
+  {
+    "name": "background-18-gc-0",
+    "exit": 0,
+    "seconds": 0.0082,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2142208,
+      "after": 2142208,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-18-gc-1",
+    "exit": 0,
+    "seconds": 0.01,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2142208,
+      "after": 2146304,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-18-after",
+    "exit": 0,
+    "seconds": 0.0041,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23988920320,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-19-build-0",
+    "exit": 0,
+    "seconds": 3.418
+  },
+  {
+    "name": "background-19-build-1",
+    "exit": 0,
+    "seconds": 3.0683
+  },
+  {
+    "name": "background-19-gc-0",
+    "exit": 0,
+    "seconds": 0.0113,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2048000,
+      "after": 2048000,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-19-gc-1",
+    "exit": 0,
+    "seconds": 0.01,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2043904,
+      "after": 2048000,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-19-after",
+    "exit": 0,
+    "seconds": 0.0021,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23977656320,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-20-build-0",
+    "exit": 0,
+    "seconds": 3.1077
+  },
+  {
+    "name": "background-20-build-1",
+    "exit": 0,
+    "seconds": 3.0333
+  },
+  {
+    "name": "background-20-gc-0",
+    "exit": 0,
+    "seconds": 0.0073,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2125824,
+      "after": 2125824,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-20-gc-1",
+    "exit": 0,
+    "seconds": 0.0124,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2125824,
+      "after": 2129920,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-20-after",
+    "exit": 0,
+    "seconds": 0.0043,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23969923072,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-21-build-0",
+    "exit": 0,
+    "seconds": 3.3067
+  },
+  {
+    "name": "background-21-build-1",
+    "exit": 0,
+    "seconds": 3.3979
+  },
+  {
+    "name": "background-21-gc-0",
+    "exit": 0,
+    "seconds": 0.0063,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2498560,
+      "after": 2498560,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-21-gc-1",
+    "exit": 0,
+    "seconds": 0.0033,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2498560,
+      "after": 2498560,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-21-after",
+    "exit": 0,
+    "seconds": 0.0071,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23859773440,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-22-build-0",
+    "exit": 0,
+    "seconds": 3.3845
+  },
+  {
+    "name": "background-22-build-1",
+    "exit": 0,
+    "seconds": 3.3655
+  },
+  {
+    "name": "background-22-gc-0",
+    "exit": 0,
+    "seconds": 0.0112,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1683456,
+      "after": 1699840,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-22-gc-1",
+    "exit": 0,
+    "seconds": 0.009,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1691648,
+      "after": 1691648,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-22-after",
+    "exit": 0,
+    "seconds": 0.0027,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23856201728,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-23-build-0",
+    "exit": 0,
+    "seconds": 3.3521
+  },
+  {
+    "name": "background-23-build-1",
+    "exit": 0,
+    "seconds": 3.4808
+  },
+  {
+    "name": "background-23-gc-0",
+    "exit": 0,
+    "seconds": 0.0096,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1601536,
+      "after": 1605632,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-23-gc-1",
+    "exit": 0,
+    "seconds": 0.0047,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1601536,
+      "after": 1601536,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-23-after",
+    "exit": 0,
+    "seconds": 0.0027,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23834185728,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-24-build-0",
+    "exit": 0,
+    "seconds": 3.4025
+  },
+  {
+    "name": "background-24-build-1",
+    "exit": 0,
+    "seconds": 3.384
+  },
+  {
+    "name": "background-24-gc-0",
+    "exit": 0,
+    "seconds": 0.0114,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2494464,
+      "after": 2494464,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-24-gc-1",
+    "exit": 0,
+    "seconds": 0.0031,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2494464,
+      "after": 2494464,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-24-after",
+    "exit": 0,
+    "seconds": 0.0058,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23795363840,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-25-build-0",
+    "exit": 0,
+    "seconds": 3.5718
+  },
+  {
+    "name": "background-25-build-1",
+    "exit": 0,
+    "seconds": 3.6421
+  },
+  {
+    "name": "background-25-gc-0",
+    "exit": 0,
+    "seconds": 0.0095,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1683456,
+      "after": 1687552,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-25-gc-1",
+    "exit": 0,
+    "seconds": 0.0065,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1687552,
+      "after": 1687552,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-25-after",
+    "exit": 0,
+    "seconds": 0.0065,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23714340864,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-26-build-0",
+    "exit": 0,
+    "seconds": 3.6342
+  },
+  {
+    "name": "background-26-build-1",
+    "exit": 0,
+    "seconds": 3.4144
+  },
+  {
+    "name": "background-26-gc-0",
+    "exit": 0,
+    "seconds": 0.0067,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2023424,
+      "after": 2023424,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-26-gc-1",
+    "exit": 0,
+    "seconds": 0.0155,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 2019328,
+      "after": 2023424,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-26-after",
+    "exit": 0,
+    "seconds": 0.0022,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23675609088,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-27-build-0",
+    "exit": 0,
+    "seconds": 3.7867
+  },
+  {
+    "name": "background-27-build-1",
+    "exit": 0,
+    "seconds": 3.9541
+  },
+  {
+    "name": "background-27-gc-0",
+    "exit": 0,
+    "seconds": 0.018,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1413120,
+      "after": 1421312,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-27-gc-1",
+    "exit": 0,
+    "seconds": 0.0069,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1413120,
+      "after": 1413120,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-27-after",
+    "exit": 0,
+    "seconds": 0.0041,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23643574272,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-28-build-0",
+    "exit": 0,
+    "seconds": 3.4185
+  },
+  {
+    "name": "background-28-build-1",
+    "exit": 0,
+    "seconds": 4.0482
+  },
+  {
+    "name": "background-28-gc-0",
+    "exit": 0,
+    "seconds": 0.0077,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1265664,
+      "after": 1265664,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-28-gc-1",
+    "exit": 0,
+    "seconds": 0.0062,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1269760,
+      "after": 1269760,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": "another gc is running",
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-28-after",
+    "exit": 0,
+    "seconds": 0.0042,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23583862784,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "background-29-build-0",
+    "exit": 0,
+    "seconds": 3.463
+  },
+  {
+    "name": "background-29-build-1",
+    "exit": 0,
+    "seconds": 3.2363
+  },
+  {
+    "name": "background-29-gc-0",
+    "exit": 0,
+    "seconds": 0.0177,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1806336,
+      "after": 1810432,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-29-gc-1",
+    "exit": 0,
+    "seconds": 0.0063,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 1765376,
+      "after": 1773568,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "background-29-after",
+    "exit": 0,
+    "seconds": 0.0058,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 23573495808,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "minfree-admission",
+    "exit": 125,
+    "seconds": 0.1417
+  },
+  {
+    "name": "minfree-status",
+    "exit": 0,
+    "seconds": 0.0059,
+    "json": {
+      "classes": [
+        {
+          "class": "build",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        },
+        {
+          "class": "run",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        }
+      ],
+      "hosts": {}
+    }
+  }
+]

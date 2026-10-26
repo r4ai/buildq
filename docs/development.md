@@ -162,6 +162,8 @@ Do not commit `.venv`, tool caches, or `__pycache__`.
 
 ## Soak testing
 
+The [2026-10-26 complex OSS and mbx QA report](benchmarks/qa-2026-10-26.md) records a bounded run with real repositories, GC pressure, correctness checks, and registered findings.
+
 `scripts/soak.py` is a bounded, resumable endurance runner (issue #38).
 It rotates pinned repositories (Bevy v0.16.1, Tokio tokio-1.45.1 with `-p tokio@1.45.1`, ripgrep 14.1.1, rust-analyzer 2025-06-02) across several worktrees.
 The seeded schedule mixes cold and warm builds, tests, `--release` and feature changes, source edits (reverted later), bursts of queued jobs, SIGTERM/SIGINT cancellation, and periodic `gc --json` (some with a 1M budget to force eviction).

@@ -1,0 +1,21 @@
+{
+  "actions": [
+    "evict repo-87abe8d1/m0 (last used 3s ago, over budget 64.0 MiB) (path footprint 136.7 MiB)"
+  ],
+  "freed": 143351808,
+  "before": 143351808,
+  "after": 0,
+  "effective_budget": 67108864,
+  "accounting": "allocated",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "skipped": null,
+  "follow_ups": 0,
+  "external": 0,
+  "warnings": [
+    "completed cache member /workspace/qa-storage/probes/cache/pools/repo-87abe8d1/m0 (136.7 MiB) exceeds the entire cache budget 64.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse"
+  ],
+  "failed_deletions": 0,
+  "dedupe": null
+}

@@ -1,0 +1,17 @@
+{
+  "actions": [],
+  "freed": 0,
+  "before": 644546560,
+  "after": 644546560,
+  "effective_budget": 2147483648,
+  "accounting": "allocated",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "skipped": null,
+  "follow_ups": 0,
+  "external": 0,
+  "warnings": [],
+  "failed_deletions": 0,
+  "dedupe": null
+}

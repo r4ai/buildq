@@ -1,0 +1,10 @@
+slots=1
+[cache]
+budget="1G"
+min_free="0"
+gc_mode="inline"
+[cargo]
+backend="cargo"
+mbx="/workspace/qa-mbx/mbx"
+nested_mbx=true
+mirror_bins=false

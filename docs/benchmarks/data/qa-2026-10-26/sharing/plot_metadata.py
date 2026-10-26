@@ -35,7 +35,10 @@ for ax, values, ylabel in [
     ax.bar_label(bars, labels=[f"{v:,.1f}" if ax == axes[0] else f"{v:,}" for v in values],
                  padding=5)
     ax.margins(y=0.15)
-axes[1].axhline(1000, color="#218578", linewidth=1, linestyle="--")
+axes[1].scatter(range(len(rows)), [r["max_index"] for r in rows],
+                marker="_", s=600, linewidths=2, color="#173b52",
+                label="Configured index cap", zorder=4)
+axes[1].legend(loc="upper left", frameon=False)
 fig.supxlabel("Four members; 64 KiB sparse artifacts; max_read = 1 byte; actual read_bytes = 0\n"
               "Linux overlay, buildq 1391d00; synthetic metadata workload, not an OSS build", fontsize=10)
 fig.savefig(root / "dedupe-index-memory.png", dpi=160)

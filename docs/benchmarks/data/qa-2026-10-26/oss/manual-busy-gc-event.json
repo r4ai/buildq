@@ -1,0 +1,12 @@
+{
+  "t": 1792994749.4131448,
+  "command": [
+    "/workspace/qa-bin/buildq",
+    "gc",
+    "--budget",
+    "1G",
+    "--json"
+  ],
+  "cwd": "/workspace/buildq",
+  "active_builds": true
+}

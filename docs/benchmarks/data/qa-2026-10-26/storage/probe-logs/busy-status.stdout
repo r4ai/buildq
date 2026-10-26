@@ -1,0 +1,51 @@
+{
+  "classes": [
+    {
+      "class": "build",
+      "holders": [
+        {
+          "busy": true,
+          "job": {
+            "class": "build",
+            "cmd": "cargo build --offline",
+            "cwd": "/workspace/qa-storage/probes/repo",
+            "enqueued_ms": 1792993832157,
+            "label": null,
+            "pid": 2893,
+            "priority": 0,
+            "seq": 1792993832157,
+            "started_ms": 1792993832157,
+            "target": "repo-87abe8d1/m0",
+            "worktree": "/workspace/qa-storage/probes/repo"
+          },
+          "slot": 0
+        },
+        {
+          "busy": false,
+          "job": null,
+          "slot": 1
+        }
+      ],
+      "slots": 2,
+      "waiters": []
+    },
+    {
+      "class": "run",
+      "holders": [
+        {
+          "busy": false,
+          "job": null,
+          "slot": 0
+        },
+        {
+          "busy": false,
+          "job": null,
+          "slot": 1
+        }
+      ],
+      "slots": 2,
+      "waiters": []
+    }
+  ],
+  "hosts": {}
+}

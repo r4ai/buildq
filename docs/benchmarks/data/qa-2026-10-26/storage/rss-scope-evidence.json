@@ -1,0 +1,741 @@
+{
+  "host_wide_peak_kb": 2828744,
+  "owned_rss_at_host_peak_kb": 16860,
+  "owned_peak_kb": 290820,
+  "peak_sample": {
+    "accounting_mismatch": null,
+    "cache": {
+      "accounting": "allocated",
+      "budget": 62914560,
+      "effective_budget": 62914560,
+      "external": [],
+      "external_total": 0,
+      "free_disk": 28420444160,
+      "mbx_budget_bytes": 0,
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "pools": [
+        {
+          "dir": "/workspace/qa-storage/soak-subreaper/cache/pools/fixture-a-db1290bd",
+          "info": {
+            "created_ms": 1792993908118,
+            "last_used_ms": 1792993960884,
+            "repo": "fixture-a",
+            "repo_key": "/workspace/qa-storage/soak-subreaper/repos/fixture-a/.git",
+            "toolchain": "1.89.0",
+            "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n"
+          },
+          "members": [
+            {
+              "busy": true,
+              "dir": "/workspace/qa-storage/soak-subreaper/cache/pools/fixture-a-db1290bd/m0",
+              "id": 0,
+              "meta": {
+                "created_ms": 1792993960986,
+                "id": 0,
+                "jobs": 1,
+                "last_cmd": "",
+                "last_head": "9dac2cb6b4837a8d9c7a8f5213da4c637e0fb68e",
+                "last_used_ms": 1792993960986,
+                "last_worktree": "/workspace/qa-storage/soak-subreaper/worktrees/fixture-a-3",
+                "size_accounting": "allocated",
+                "size_bytes": 0,
+                "size_ms": 1792993961134,
+                "source_root": "/workspace/qa-storage/soak-subreaper/worktrees/fixture-a-3"
+              },
+              "shared": 0,
+              "size": 0
+            }
+          ],
+          "name": "fixture-a-db1290bd",
+          "shared": 0
+        }
+      ],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0
+    },
+    "dead_groups": [
+      17599,
+      18005,
+      18487,
+      18618,
+      19033,
+      19544,
+      19611,
+      20324,
+      20376,
+      21091,
+      21092,
+      21099,
+      22351,
+      22947,
+      23009,
+      23010,
+      23014,
+      24069,
+      24298,
+      24319,
+      24591,
+      24981,
+      24998,
+      25380,
+      25546,
+      25812,
+      25856,
+      26134,
+      26280,
+      26291,
+      26429,
+      26585,
+      26605,
+      26758,
+      26954,
+      26955,
+      26962,
+      26967,
+      26970,
+      26975,
+      26978,
+      27015,
+      28246,
+      28266,
+      28522,
+      28776,
+      29177,
+      29203,
+      29555,
+      29853,
+      30097,
+      30122,
+      30408,
+      30736,
+      31515,
+      31616,
+      31625,
+      31628,
+      31629,
+      31630,
+      33466,
+      34162,
+      34842
+    ],
+    "du_bytes": 77824,
+    "free_disk": 28420444160,
+    "idle": false,
+    "live_groups": [
+      34891
+    ],
+    "page_cache_kb": 3803144,
+    "processes": [
+      {
+        "comm": "buildq",
+        "pgid": 2075,
+        "pid": 2075,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 3113,
+        "pid": 3113,
+        "ppid": 2000,
+        "rss_kb": 7356
+      },
+      {
+        "comm": "cargo",
+        "pgid": 3113,
+        "pid": 3190,
+        "ppid": 3113,
+        "rss_kb": 280888
+      },
+      {
+        "comm": "buildq",
+        "pgid": 3191,
+        "pid": 3191,
+        "ppid": 3113,
+        "rss_kb": 3300
+      },
+      {
+        "comm": "buildq",
+        "pgid": 3247,
+        "pid": 3247,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 3474,
+        "pid": 3474,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 3583,
+        "pid": 3583,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "cargo",
+        "pgid": 4744,
+        "pid": 4757,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 4758,
+        "pid": 4758,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 9519,
+        "pid": 9519,
+        "ppid": 9479,
+        "rss_kb": 7412
+      },
+      {
+        "comm": "buildq",
+        "pgid": 9520,
+        "pid": 9520,
+        "ppid": 9479,
+        "rss_kb": 4800
+      },
+      {
+        "comm": "buildq",
+        "pgid": 9521,
+        "pid": 9521,
+        "ppid": 9479,
+        "rss_kb": 4352
+      },
+      {
+        "comm": "buildq",
+        "pgid": 9522,
+        "pid": 9522,
+        "ppid": 9479,
+        "rss_kb": 5640
+      },
+      {
+        "comm": "buildq",
+        "pgid": 9526,
+        "pid": 9526,
+        "ppid": 9479,
+        "rss_kb": 7340
+      },
+      {
+        "comm": "buildq",
+        "pgid": 9527,
+        "pid": 9527,
+        "ppid": 9479,
+        "rss_kb": 4932
+      },
+      {
+        "comm": "buildq",
+        "pgid": 9545,
+        "pid": 9545,
+        "ppid": 9479,
+        "rss_kb": 5636
+      },
+      {
+        "comm": "buildq",
+        "pgid": 9548,
+        "pid": 9548,
+        "ppid": 9479,
+        "rss_kb": 7396
+      },
+      {
+        "comm": "buildq",
+        "pgid": 9549,
+        "pid": 9549,
+        "ppid": 9479,
+        "rss_kb": 4792
+      },
+      {
+        "comm": "buildq",
+        "pgid": 9562,
+        "pid": 9562,
+        "ppid": 9479,
+        "rss_kb": 4432
+      },
+      {
+        "comm": "buildq",
+        "pgid": 9570,
+        "pid": 9570,
+        "ppid": 9479,
+        "rss_kb": 5700
+      },
+      {
+        "comm": "buildq",
+        "pgid": 10241,
+        "pid": 10241,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 12519,
+        "pid": 12519,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 12775,
+        "pid": 12775,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "rustc",
+        "pgid": 3113,
+        "pid": 20553,
+        "ppid": 3190,
+        "rss_kb": 693752
+      },
+      {
+        "comm": "buildq",
+        "pgid": 7594,
+        "pid": 21165,
+        "ppid": 7602,
+        "rss_kb": 4196
+      },
+      {
+        "comm": "buildq",
+        "pgid": 7594,
+        "pid": 21168,
+        "ppid": 7602,
+        "rss_kb": 4088
+      },
+      {
+        "comm": "buildq",
+        "pgid": 7594,
+        "pid": 21172,
+        "ppid": 7602,
+        "rss_kb": 4184
+      },
+      {
+        "comm": "buildq",
+        "pgid": 7594,
+        "pid": 21179,
+        "ppid": 7602,
+        "rss_kb": 4056
+      },
+      {
+        "comm": "buildq",
+        "pgid": 7594,
+        "pid": 21180,
+        "ppid": 7602,
+        "rss_kb": 4136
+      },
+      {
+        "comm": "buildq",
+        "pgid": 7594,
+        "pid": 21183,
+        "ppid": 7602,
+        "rss_kb": 4128
+      },
+      {
+        "comm": "cargo",
+        "pgid": 7594,
+        "pid": 21342,
+        "ppid": 21165,
+        "rss_kb": 15840
+      },
+      {
+        "comm": "buildq",
+        "pgid": 21344,
+        "pid": 21344,
+        "ppid": 21165,
+        "rss_kb": 3352
+      },
+      {
+        "comm": "cargo",
+        "pgid": 7594,
+        "pid": 21360,
+        "ppid": 21172,
+        "rss_kb": 15880
+      },
+      {
+        "comm": "buildq",
+        "pgid": 21361,
+        "pid": 21361,
+        "ppid": 21172,
+        "rss_kb": 3296
+      },
+      {
+        "comm": "cargo",
+        "pgid": 6568,
+        "pid": 23769,
+        "ppid": 6575,
+        "rss_kb": 23600
+      },
+      {
+        "comm": "buildq",
+        "pgid": 25560,
+        "pid": 25560,
+        "ppid": 3912,
+        "rss_kb": 4364
+      },
+      {
+        "comm": "buildq",
+        "pgid": 25594,
+        "pid": 25594,
+        "ppid": 25560,
+        "rss_kb": 3412
+      },
+      {
+        "comm": "cargo",
+        "pgid": 25560,
+        "pid": 25603,
+        "ppid": 25593,
+        "rss_kb": 23740
+      },
+      {
+        "comm": "buildq",
+        "pgid": 28720,
+        "pid": 28720,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "cargo",
+        "pgid": 9562,
+        "pid": 28725,
+        "ppid": 9562,
+        "rss_kb": 23596
+      },
+      {
+        "comm": "buildq",
+        "pgid": 28726,
+        "pid": 28726,
+        "ppid": 9562,
+        "rss_kb": 3256
+      },
+      {
+        "comm": "rustc",
+        "pgid": 25560,
+        "pid": 29090,
+        "ppid": 29071,
+        "rss_kb": 292284
+      },
+      {
+        "comm": "rustc",
+        "pgid": 7594,
+        "pid": 29764,
+        "ppid": 21360,
+        "rss_kb": 241456
+      },
+      {
+        "comm": "rustc",
+        "pgid": 25560,
+        "pid": 30263,
+        "ppid": 30260,
+        "rss_kb": 153112
+      },
+      {
+        "comm": "rustc",
+        "pgid": 7594,
+        "pid": 30712,
+        "ppid": 21342,
+        "rss_kb": 242100
+      },
+      {
+        "comm": "cargo",
+        "pgid": 30724,
+        "pid": 30730,
+        "ppid": 30726,
+        "rss_kb": 23676
+      },
+      {
+        "comm": "buildq",
+        "pgid": 30724,
+        "pid": 30906,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 30724,
+        "pid": 31179,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 31181,
+        "pid": 31181,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 30724,
+        "pid": 31183,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 30724,
+        "pid": 31807,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 31811,
+        "pid": 31811,
+        "ppid": 1,
+        "rss_kb": 0
+      },
+      {
+        "comm": "buildq",
+        "pgid": 31899,
+        "pid": 32181,
+        "ppid": 31936,
+        "rss_kb": 4800
+      },
+      {
+        "comm": "cargo",
+        "pgid": 6568,
+        "pid": 33578,
+        "ppid": 23824,
+        "rss_kb": 16148
+      },
+      {
+        "comm": "rustc",
+        "pgid": 6568,
+        "pid": 33748,
+        "ppid": 33578,
+        "rss_kb": 187028
+      },
+      {
+        "comm": "buildq",
+        "pgid": 30724,
+        "pid": 33792,
+        "ppid": 32265,
+        "rss_kb": 8564
+      },
+      {
+        "comm": "buildq",
+        "pgid": 30724,
+        "pid": 33843,
+        "ppid": 32265,
+        "rss_kb": 8464
+      },
+      {
+        "comm": "rustc",
+        "pgid": 6568,
+        "pid": 34344,
+        "ppid": 33578,
+        "rss_kb": 112696
+      },
+      {
+        "comm": "rustc",
+        "pgid": 9562,
+        "pid": 34421,
+        "ppid": 28725,
+        "rss_kb": 114392
+      },
+      {
+        "comm": "buildq",
+        "pgid": 34703,
+        "pid": 34703,
+        "ppid": 33792,
+        "rss_kb": 6340
+      },
+      {
+        "comm": "buildq",
+        "pgid": 30724,
+        "pid": 34715,
+        "ppid": 32265,
+        "rss_kb": 8196
+      },
+      {
+        "comm": "buildq",
+        "pgid": 30724,
+        "pid": 34778,
+        "ppid": 32265,
+        "rss_kb": 8340
+      },
+      {
+        "comm": "buildq",
+        "pgid": 34794,
+        "pid": 34794,
+        "ppid": 33843,
+        "rss_kb": 6344
+      },
+      {
+        "comm": "buildq",
+        "pgid": 30724,
+        "pid": 34808,
+        "ppid": 32265,
+        "rss_kb": 8396
+      },
+      {
+        "comm": "cargo",
+        "pgid": 30724,
+        "pid": 34844,
+        "ppid": 34778,
+        "rss_kb": 13004
+      },
+      {
+        "comm": "buildq",
+        "pgid": 34845,
+        "pid": 34845,
+        "ppid": 34778,
+        "rss_kb": 6480
+      },
+      {
+        "comm": "buildq",
+        "pgid": 30724,
+        "pid": 34856,
+        "ppid": 32265,
+        "rss_kb": 8600
+      },
+      {
+        "comm": "buildq",
+        "pgid": 34891,
+        "pid": 34891,
+        "ppid": 17113,
+        "rss_kb": 4188
+      },
+      {
+        "comm": "cargo",
+        "pgid": 30724,
+        "pid": 34903,
+        "ppid": 34808,
+        "rss_kb": 14384
+      },
+      {
+        "comm": "buildq",
+        "pgid": 34907,
+        "pid": 34907,
+        "ppid": 34808,
+        "rss_kb": 6384
+      },
+      {
+        "comm": "rustc",
+        "pgid": 30724,
+        "pid": 34925,
+        "ppid": 34844,
+        "rss_kb": 42244
+      },
+      {
+        "comm": "cargo",
+        "pgid": 30724,
+        "pid": 34975,
+        "ppid": 34856,
+        "rss_kb": 12324
+      },
+      {
+        "comm": "buildq",
+        "pgid": 34980,
+        "pid": 34980,
+        "ppid": 34856,
+        "rss_kb": 6336
+      },
+      {
+        "comm": "buildq",
+        "pgid": 30724,
+        "pid": 34987,
+        "ppid": 32265,
+        "rss_kb": 8200
+      },
+      {
+        "comm": "cargo",
+        "pgid": 34891,
+        "pid": 34996,
+        "ppid": 34891,
+        "rss_kb": 12672
+      },
+      {
+        "comm": "buildq",
+        "pgid": 35000,
+        "pid": 35000,
+        "ppid": 34891,
+        "rss_kb": 3360
+      },
+      {
+        "comm": "rustc",
+        "pgid": 30724,
+        "pid": 35018,
+        "ppid": 34903,
+        "rss_kb": 49104
+      },
+      {
+        "comm": "rustc",
+        "pgid": 34891,
+        "pid": 35052,
+        "ppid": 34996,
+        "rss_kb": 0
+      },
+      {
+        "comm": "cargo",
+        "pgid": 30724,
+        "pid": 35053,
+        "ppid": 34987,
+        "rss_kb": 6276
+      }
+    ],
+    "status": {
+      "classes": [
+        {
+          "class": "build",
+          "holders": [
+            {
+              "busy": true,
+              "job": {
+                "class": "build",
+                "cmd": "cargo run --offline -q -p soak-app --release",
+                "cwd": "/workspace/qa-storage/soak-subreaper/worktrees/fixture-a-3",
+                "enqueued_ms": 1792993961012,
+                "label": "soak-56",
+                "pid": 34891,
+                "priority": 0,
+                "seq": 1792993961012,
+                "started_ms": 1792993961012,
+                "target": "fixture-a-db1290bd/m0",
+                "worktree": "/workspace/qa-storage/soak-subreaper/worktrees/fixture-a-3"
+              },
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        },
+        {
+          "class": "run",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        }
+      ],
+      "hosts": {}
+    },
+    "t": 1792993961.1401427,
+    "type": "sample",
+    "violations": []
+  }
+}

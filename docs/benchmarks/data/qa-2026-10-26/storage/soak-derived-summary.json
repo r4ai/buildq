@@ -1,0 +1,77 @@
+{
+  "revision": "1391d00",
+  "started_utc_epoch": 1792993905.5100632,
+  "last_record_utc_epoch": 1792996611.442928,
+  "observed_elapsed_s": 2705.933,
+  "seed": 26027,
+  "repo_count": 4,
+  "worktrees_per_repo": 6,
+  "slots": 2,
+  "budget": "60M",
+  "resumes": [
+    {
+      "actions_done": 1079,
+      "t": 1792995016.331556,
+      "type": "resume"
+    }
+  ],
+  "actions": 2954,
+  "actions_by_kind": {
+    "edit": 204,
+    "build_release": 293,
+    "build": 494,
+    "gc": 369,
+    "revert": 204,
+    "gc_pressure": 369,
+    "build_features": 278,
+    "burst": 185,
+    "test": 379,
+    "cancel": 179
+  },
+  "actions_by_repo": {
+    "fixture-b": 753,
+    "fixture-d": 710,
+    "fixture-a": 743,
+    "fixture-c": 748
+  },
+  "cargo_commands_including_burst_children": 2607,
+  "cancellations": 179,
+  "output_marker_checks": 1719,
+  "output_marker_failures": 0,
+  "unexpected_action_exit_failures": [],
+  "leftover_process_actions": [],
+  "gc_invocations": 738,
+  "gc_failed_actions": [],
+  "gc_cumulative_freed_bytes": 16016752640,
+  "gc_duration_s": {
+    "median": 0.122,
+    "p95_nearest_rank": 0.157,
+    "max": 0.263
+  },
+  "gc_timing_note": "Runner end-to-end command duration with a 100ms poll loop; not isolated collector CPU time or sub-100ms latency.",
+  "samples": 537,
+  "sample_violations": {
+    "slot_limit": 2
+  },
+  "slot_holder_limit_exceeding_samples": [],
+  "cargo_process_count_alarms": [
+    {
+      "t": 1792993966.2184653,
+      "detail": "5 cargo processes for 2 slots"
+    },
+    {
+      "t": 1792996344.1919513,
+      "detail": "6 cargo processes for 2 slots"
+    }
+  ],
+  "peak_allocated_cache_du_bytes": 87183360,
+  "peak_trash_bytes": 10866688,
+  "minimum_global_free_disk_bytes": 11445780480,
+  "peak_owned_group_rss_kib": 360268,
+  "rss_scope_note": "Only owned live/dead PGIDs, not an exact full descendant tree. New-group watchdogs may be omitted. Raw runner max_tree_rss includes unrelated host compiler processes.",
+  "queue_wait": {
+    "jobs": 4326,
+    "max_wait_s": 2.018,
+    "p95_wait_s": 0.589
+  }
+}

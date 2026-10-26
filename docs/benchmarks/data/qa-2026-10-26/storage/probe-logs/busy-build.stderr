@@ -1,0 +1,4 @@
+buildq: target repo-87abe8d1/m0 (1 package(s) invalidated: storage-probe)
+   Compiling storage-probe v0.1.0 (/workspace/qa-storage/probes/repo)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 12.56s
+buildq: warning: completed cache member /workspace/qa-storage/probes/cache/pools/repo-87abe8d1/m0 (136.7 MiB) exceeds the entire cache budget 64.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse

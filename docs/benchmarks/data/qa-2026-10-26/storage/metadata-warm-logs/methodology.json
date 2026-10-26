@@ -1,0 +1,23 @@
+{
+  "revision": "1391d00",
+  "members": 1000,
+  "repetitions": 10,
+  "order": "alternating plain/buildq; reverse on odd repetition",
+  "cwd": "/workspace/qa-storage/metadata/repo",
+  "args": [
+    "build",
+    "--offline",
+    "-p",
+    "part0000"
+  ],
+  "plain_cargo": "/workspace/.buildq-env/cargo/bin/cargo",
+  "plain_CARGO_TARGET_DIR": "/workspace/qa-storage/metadata/direct-target",
+  "buildq": "/workspace/qa-bin/buildq",
+  "buildq_state": "/workspace/qa-storage/metadata/state",
+  "buildq_cache": "/workspace/qa-storage/metadata/cache",
+  "BUILDQ_GC": "0",
+  "BUILDQ_TRACE": "1",
+  "CARGO_BUILD_JOBS": "1",
+  "warmup": "plain target seeded once; buildq pool reused from twelve successful metadata-burst jobs",
+  "caveat": "CPU and filesystem shared with other QA agents; no isolation"
+}

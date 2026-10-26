@@ -1,0 +1,20 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests/e2e.rs (/workspace/qa-root/test-target/debug/deps/e2e-a864582c4b95d214)
+first build stderr:
+buildq: target ws-d4c4bd07/m0 (new member (full build))
+mbx[setup]: first build on this machine
+mbx[setup]:   cache is /tmp/.tmpwbXYq1/mbx-cache, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
+mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling mbx-app v0.1.0 (/tmp/.tmpwbXYq1/ws)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.60s
+mbx[cache]: 0 hits, 0 misses, 2 not looked up; 0 B downloaded, 0 B uploaded, 3.7 MiB stored locally
+
+second build stderr:
+buildq: target ws-d4c4bd07/m0 (1 package(s) invalidated: mbx-app)
+   Compiling mbx-app v0.1.0 (/tmp/.tmpwbXYq1/ws2)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+mbx[cache]: 2 hits, 0 misses; 0 B downloaded, 0 B uploaded, 0 B stored locally
+

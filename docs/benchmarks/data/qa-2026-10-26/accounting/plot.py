@@ -56,3 +56,31 @@ for (r,c),cell in table.get_celld().items():
 ax.set_title('Nested codegen after switching to worktree B\nExpected output in every result cell: B',pad=18)
 fig.text(.03,.015,'All Cargo invocations exit 0. Both checkouts predate compilation; no mtime rewriting. Issue #142.',fontsize=10)
 save(fig,'nested-correctness')
+
+rebate=json.loads((ROOT/'eviction-rebate/results.json').read_text())
+rb={x['name']:x.get('json',{}) for x in rebate}
+fig,ax=plt.subplots(figsize=(9,4.8),layout='constrained')
+vals=[rb['gc']['effective_budget']/mib,rb['fresh_after']['effective_budget']/mib,rb['fresh_after']['total']/mib]
+ax.barh(['GC cached pool allowance','Fresh pool allowance','Retained private member'],vals,color=['#8ca7bc','#497ca8','#d25057'])
+for y,value in enumerate(vals):ax.text(value+.8,y,f'{value:.2f} MiB',va='center')
+ax.set_xlim(0,max(vals)*1.2);ax.set_xlabel('Bytes available / retained (MiB)');ax.invert_yaxis()
+ax.set_title('Eviction invalidates the sharing rebate, but GC keeps using it')
+fig.text(.025,-.03,'Real mbx store unchanged before/after GC: 76,782,744 bytes. Refreshed overflow: exactly 1 MiB. Issue #151.',fontsize=9)
+save(fig,'stale-sharing-rebate')
+
+burst=json.loads((ROOT.parent/'oss/logs/burst64/results.json').read_text())
+fig,ax=plt.subplots(figsize=(10,5.1),layout='constrained')
+colors={'bevy':'#497ca8','tokio':'#499471','ripgrep':'#b38b3f','rust-analyzer':'#946ca6'}
+for repo,color in colors.items():
+ points=[(i,j['finished_s']) for i,j in enumerate(burst['jobs']) if j['name'].startswith(repo+'-') and j['exit']==0]
+ ax.scatter([p[0] for p in points],[p[1] for p in points],label=repo,color=color,s=35,alpha=.85)
+for i,j in enumerate(burst['jobs']):
+ if j['exit']!=0:
+  ax.scatter([i],[j['finished_s']],marker='x',s=120,color='#bb2736',linewidth=3,label='Harness deadline (SIGTERM)')
+  ax.annotate(f'Submission {i:02d}: 793 s before queue\n+ 56.8 s queue + 50.4 s run',(i,j['finished_s']),xytext=(14,750),fontsize=9,color='#9b2130',arrowprops={'arrowstyle':'->','color':'#9b2130'})
+ax.axhline(900,color='#bb2736',linestyle='--',alpha=.5);ax.set_xlim(-2,66);ax.set_ylim(0,960)
+ax.set_xlabel('Submission index (all submitted as one burst)');ax.set_ylabel('End-to-end completion time (s)')
+ax.set_title('64 real OSS submissions: 63 successes and one 900 s deadline')
+ax.legend(loc='lower right',frameon=False,ncol=2,fontsize=9)
+fig.text(.02,-.03,'Two slots · shared host contention and GC-induced cold rebuilds · completions sampled every 2 s · issue #153.',fontsize=9)
+save(fig,'pool-admission')

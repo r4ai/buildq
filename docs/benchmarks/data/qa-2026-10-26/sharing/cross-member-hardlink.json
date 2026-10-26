@@ -1,0 +1,78 @@
+{
+  "cache dedupe --dry-run --json": {
+    "dry_run": true,
+    "accounting": "logical",
+    "pools": 1,
+    "indexed": 2,
+    "index_ms": 0,
+    "index_batches": 1,
+    "candidates": 2,
+    "compared": 1,
+    "identical": 1,
+    "identical_bytes": 65536,
+    "shared": 0,
+    "shared_bytes": 0,
+    "already_shared": 0,
+    "already_shared_bytes": 0,
+    "differing": 0,
+    "skipped_busy": 0,
+    "skipped_changed": 0,
+    "skipped_hardlinked": 0,
+    "skipped_known_different": 0,
+    "skipped_over_budget": 0,
+    "read_bytes": 131072,
+    "read_limited": false,
+    "unsupported": null,
+    "sharing": {
+      "state": "unknown"
+    },
+    "skipped": null,
+    "errors": []
+  },
+  "cache dedupe --json": {
+    "dry_run": false,
+    "accounting": "logical",
+    "pools": 1,
+    "indexed": 2,
+    "index_ms": 0,
+    "index_batches": 1,
+    "candidates": 2,
+    "compared": 1,
+    "identical": 0,
+    "identical_bytes": 0,
+    "shared": 0,
+    "shared_bytes": 0,
+    "already_shared": 0,
+    "already_shared_bytes": 0,
+    "differing": 0,
+    "skipped_busy": 0,
+    "skipped_changed": 0,
+    "skipped_hardlinked": 0,
+    "skipped_known_different": 0,
+    "skipped_over_budget": 0,
+    "read_bytes": 131072,
+    "read_limited": false,
+    "unsupported": "FIDEDUPERANGE: Invalid argument (os error 22)",
+    "sharing": {
+      "state": "unsupported",
+      "reason": "FIDEDUPERANGE: Invalid argument (os error 22)",
+      "checked_ms": 1792994541074
+    },
+    "skipped": null,
+    "errors": []
+  },
+  "identities": [
+    {
+      "dev": 27,
+      "ino": 847825,
+      "nlink": 2,
+      "size": 65536
+    },
+    {
+      "dev": 27,
+      "ino": 847825,
+      "nlink": 2,
+      "size": 65536
+    }
+  ]
+}

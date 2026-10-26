@@ -1,0 +1,3 @@
+accounting: allocated
+remove member repo-87abe8d1/m0 (path footprint 9.7 MiB)
+freed 9.7 MiB; cache 13.4 MiB -> 3.6 MiB (budget 64.0 MiB)

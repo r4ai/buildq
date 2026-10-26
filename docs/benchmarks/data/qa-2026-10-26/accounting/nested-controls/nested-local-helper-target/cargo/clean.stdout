@@ -1,3 +1,0 @@
-accounting: allocated
-remove member a-3dac3b3e/m0 (path footprint 9.3 MiB)
-freed 9.3 MiB; cache 12.9 MiB -> 3.6 MiB (budget 1.0 GiB)

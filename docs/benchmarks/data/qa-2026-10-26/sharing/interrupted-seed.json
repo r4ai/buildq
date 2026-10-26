@@ -1,0 +1,195 @@
+{
+  "fault_injection": true,
+  "natural_kill_during_reflink_reproduced": false,
+  "records": [
+    {
+      "command": [
+        "cache",
+        "ls",
+        "--refresh",
+        "--json"
+      ],
+      "exit": 0,
+      "report": {
+        "pools": [
+          {
+            "name": "recent",
+            "dir": "/workspace/qa-sharing/interrupted-seed-faithful/cache/pools/recent",
+            "info": {
+              "repo": "",
+              "repo_key": "",
+              "toolchain": "",
+              "toolchain_id": "qa-1.89",
+              "created_ms": 1792994811532,
+              "last_used_ms": 1792994811532
+            },
+            "members": [
+              {
+                "id": 0,
+                "dir": "/workspace/qa-sharing/interrupted-seed-faithful/cache/pools/recent/m0",
+                "busy": false,
+                "size": 4096,
+                "shared": 0,
+                "meta": {
+                  "id": 0,
+                  "created_ms": 1792994811532,
+                  "last_used_ms": 1792994811532,
+                  "last_worktree": null,
+                  "source_root": null,
+                  "last_head": null,
+                  "last_cmd": "",
+                  "jobs": 0,
+                  "size_bytes": 4096,
+                  "size_ms": 1792994811563,
+                  "size_accounting": "allocated"
+                }
+              },
+              {
+                "id": 1,
+                "dir": "/workspace/qa-sharing/interrupted-seed-faithful/cache/pools/recent/m1",
+                "busy": false,
+                "size": 0,
+                "shared": 0,
+                "meta": {
+                  "id": 1,
+                  "created_ms": 1792994811532,
+                  "last_used_ms": 1792994811532,
+                  "last_worktree": null,
+                  "source_root": null,
+                  "last_head": null,
+                  "last_cmd": "",
+                  "jobs": 0,
+                  "size_bytes": 0,
+                  "size_ms": 1792994811564,
+                  "size_accounting": "allocated"
+                }
+              }
+            ],
+            "shared": 0
+          }
+        ],
+        "runs": [],
+        "total": 4096,
+        "trash_bytes": 0,
+        "budget": 1048576,
+        "effective_budget": 1048576,
+        "accounting": "allocated",
+        "over_budget": false,
+        "over_budget_bytes": 0,
+        "over_budget_reasons": [],
+        "free_disk": 17024933888,
+        "external": [],
+        "external_total": 0,
+        "mbx_budget_bytes": 0
+      }
+    },
+    {
+      "command": [
+        "gc",
+        "--json"
+      ],
+      "exit": 0,
+      "report": {
+        "actions": [],
+        "freed": 0,
+        "before": 4096,
+        "after": 4096,
+        "effective_budget": 1048576,
+        "accounting": "allocated",
+        "over_budget": false,
+        "over_budget_bytes": 0,
+        "over_budget_reasons": [],
+        "skipped": null,
+        "follow_ups": 0,
+        "external": 0,
+        "warnings": [],
+        "failed_deletions": 0,
+        "dedupe": null
+      }
+    },
+    {
+      "command": [
+        "cache",
+        "ls",
+        "--refresh",
+        "--json"
+      ],
+      "exit": 0,
+      "report": {
+        "pools": [
+          {
+            "name": "recent",
+            "dir": "/workspace/qa-sharing/interrupted-seed-faithful/cache/pools/recent",
+            "info": {
+              "repo": "",
+              "repo_key": "",
+              "toolchain": "",
+              "toolchain_id": "qa-1.89",
+              "created_ms": 1792994811532,
+              "last_used_ms": 1792994811532
+            },
+            "members": [
+              {
+                "id": 0,
+                "dir": "/workspace/qa-sharing/interrupted-seed-faithful/cache/pools/recent/m0",
+                "busy": false,
+                "size": 4096,
+                "shared": 0,
+                "meta": {
+                  "id": 0,
+                  "created_ms": 1792994811532,
+                  "last_used_ms": 1792994811532,
+                  "last_worktree": null,
+                  "source_root": null,
+                  "last_head": null,
+                  "last_cmd": "",
+                  "jobs": 0,
+                  "size_bytes": 4096,
+                  "size_ms": 1792994811582,
+                  "size_accounting": "allocated"
+                }
+              },
+              {
+                "id": 1,
+                "dir": "/workspace/qa-sharing/interrupted-seed-faithful/cache/pools/recent/m1",
+                "busy": false,
+                "size": 0,
+                "shared": 0,
+                "meta": {
+                  "id": 1,
+                  "created_ms": 1792994811532,
+                  "last_used_ms": 1792994811532,
+                  "last_worktree": null,
+                  "source_root": null,
+                  "last_head": null,
+                  "last_cmd": "",
+                  "jobs": 0,
+                  "size_bytes": 0,
+                  "size_ms": 1792994811582,
+                  "size_accounting": "allocated"
+                }
+              }
+            ],
+            "shared": 0
+          }
+        ],
+        "runs": [],
+        "total": 4096,
+        "trash_bytes": 0,
+        "budget": 1048576,
+        "effective_budget": 1048576,
+        "accounting": "allocated",
+        "over_budget": false,
+        "over_budget_bytes": 0,
+        "over_budget_reasons": [],
+        "free_disk": 17023700992,
+        "external": [],
+        "external_total": 0,
+        "mbx_budget_bytes": 0
+      }
+    }
+  ],
+  "partial_exists_after_gc": true,
+  "partial_bytes": 67108864,
+  "du": "65588\t/workspace/qa-sharing/interrupted-seed-faithful/cache"
+}

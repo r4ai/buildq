@@ -162,6 +162,8 @@ uv run --directory scripts --locked ruff format --check .
 
 ## Soak testing
 
+[2026-10-26の巨大OSS・mbx QAレポート](benchmarks/qa-2026-10-26.ja.md)に、実リポジトリ、GC圧力、出力の正しさとIssue登録を含む時間制限付きの検証結果を記録している。
+
 `scripts/soak.py` は、時間を区切って実行でき、中断後に再開できる耐久テストランナーである (issue #38)。
 固定したリポジトリ (Bevy v0.16.1、Tokio tokio-1.45.1 と `-p tokio@1.45.1`、ripgrep 14.1.1、rust-analyzer 2025-06-02) を複数の worktree で順に使う。
 シード付きのスケジュールで、コールド/ウォームのビルド、テスト、`--release` と feature の変更、ソース編集 (後で revert)、キュー待ちジョブのバースト、SIGTERM/SIGINT によるキャンセル、定期的な `gc --json` (一部は予算 1M でエビクションを強制) を混ぜる。

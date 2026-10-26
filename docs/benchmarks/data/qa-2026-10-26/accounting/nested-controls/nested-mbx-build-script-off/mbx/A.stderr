@@ -1,8 +1,0 @@
-buildq: target a-8c889be7/m0 (new member (full build))
-mbx[setup]: first build on this machine
-mbx[setup]:   cache is /workspace/qa-root/nested-mbx-build-script-off/mbx/mbx-cache, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
-mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
-   Compiling nested-app v0.1.0 (/workspace/qa-root/nested-mbx-build-script-off/mbx/a)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.90s
-mbx[cache]: 0 hits, 0 misses, 2 not looked up; 0 B downloaded, 0 B uploaded, 7.4 MiB stored locally
-buildq: copied 3.6 MiB to run dir /workspace/qa-root/nested-mbx-build-script-off/mbx/cache/runs/r0

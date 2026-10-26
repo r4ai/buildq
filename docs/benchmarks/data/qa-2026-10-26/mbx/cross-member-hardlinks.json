@@ -1,0 +1,19 @@
+{
+  "count": 1,
+  "examples": [
+    {
+      "inode": [
+        27,
+        262280
+      ],
+      "size": 15759656,
+      "paths": [
+        "/workspace/qa-mbx/cache/pools/tokio-tokio-1_45-f4a64baf/m1/debug/.mbx-build-script-shims/7b42689f46abe124c48aaa23695e0c6abdb7ccbce353b1c17b1cc1a09bb02a04/mbx",
+        "/workspace/qa-mbx/cache/pools/tokio-tokio-1_45-f4a64baf/m0/debug/.mbx-build-script-shims/7b42689f46abe124c48aaa23695e0c6abdb7ccbce353b1c17b1cc1a09bb02a04/mbx",
+        "/workspace/qa-mbx/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/.mbx-build-script-shims/7b42689f46abe124c48aaa23695e0c6abdb7ccbce353b1c17b1cc1a09bb02a04/mbx",
+        "/workspace/qa-mbx/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/.mbx-build-script-shims/7b42689f46abe124c48aaa23695e0c6abdb7ccbce353b1c17b1cc1a09bb02a04/mbx",
+        "/workspace/qa-mbx/cache/pools/ripgrep-14_1_1-142e4da6/m0/release/.mbx-build-script-shims/7b42689f46abe124c48aaa23695e0c6abdb7ccbce353b1c17b1cc1a09bb02a04/mbx"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "buildq_revision": "1391d00",
+  "oss_revision": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+  "source": "/workspace/qa-oss/repos/bevy",
+  "cargo_home": "/workspace/.buildq-env/cargo",
+  "cargo_jobs": 1,
+  "offline": true,
+  "automatic_gc": false,
+  "real_cargo": "/workspace/.buildq-env/cargo/bin/cargo",
+  "root": "/workspace/qa-storage/bevy-budget",
+  "cargo_lock_sha256": "444404b2dd3193aa58d142ae2b9ef5a2cf4c51b3401da1ce2b0c8db5faa891a8",
+  "retained_cargo_lock": "Cargo.lock.gz",
+  "oss_scope": "cargo build --offline -p bevy_ecs; ECS crate and dependencies, not the full Bevy renderer",
+  "timing_method": "Exploratory original: 0.2-second monitor poll also detects command completion; observed durations can include one full interval.",
+  "primary_retimed_run": "../bevy-budget-exact-logs"
+}

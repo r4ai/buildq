@@ -1,0 +1,1 @@
+{"name": "plain-cargo-tokio-no-full", "command": ["/workspace/.buildq-env/cargo/bin/cargo", "check", "--offline", "-p", "tokio@1.45.1", "--test", "_require_full"], "cwd": "/workspace/qa-oss/worktrees/tokio-0", "wall_s": 83.57493340500014, "exit": 101, "peak_tree_rss_bytes": 388313088, "sampled_cpu_s": 39.29, "peak_processes": 5, "compiling_lines": 18}

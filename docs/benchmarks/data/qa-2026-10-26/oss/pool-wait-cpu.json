@@ -1,0 +1,209 @@
+{
+  "start_ms": 1792995416422,
+  "elapsed_s": 5.3257328719998895,
+  "initial_pool_waiters": 33,
+  "surviving_pool_waiters": 33,
+  "sampled_cpu_s": 0.07,
+  "fraction_of_one_cpu": 0.013143730953541799,
+  "rows": [
+    {
+      "pid": 463074,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463103,
+      "cpu_delta_s": 0.01,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463134,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463173,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463207,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463225,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463237,
+      "cpu_delta_s": 0.01,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463247,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463285,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463308,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463329,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463375,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463378,
+      "cpu_delta_s": 0.01,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463389,
+      "cpu_delta_s": 0.01,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463411,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463447,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463469,
+      "cpu_delta_s": 0.01,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463508,
+      "cpu_delta_s": 0.01,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463536,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463556,
+      "cpu_delta_s": 0.01,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463566,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463572,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463581,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463607,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463684,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463692,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463704,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463721,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463737,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463808,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463815,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463842,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    },
+    {
+      "pid": 463848,
+      "cpu_delta_s": 0.0,
+      "status": "sleeping",
+      "has_cargo_child": false
+    }
+  ],
+  "note": "Processes hidden from status at sample start; some may acquire a member during this five-second interval; see has_cargo_child."
+}

@@ -1,0 +1,118 @@
+{
+  "exit": 125,
+  "seconds": 0.20102055600000313,
+  "free_before": 24896135168,
+  "reserve": 24879357952,
+  "free_after": 24820678656,
+  "payload_sizes": [],
+  "status": {
+    "exit": 0,
+    "json": {
+      "classes": [
+        {
+          "class": "build",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        },
+        {
+          "class": "run",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        }
+      ],
+      "hosts": {}
+    }
+  },
+  "cache": {
+    "exit": 0,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 2147483648,
+      "effective_budget": 0,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 24812347392,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  "gc": {
+    "exit": 0,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 0,
+      "after": 0,
+      "effective_budget": 0,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": {
+        "dry_run": false,
+        "accounting": "allocated",
+        "pools": 1,
+        "indexed": 0,
+        "index_ms": 0,
+        "index_batches": 1,
+        "candidates": 0,
+        "compared": 0,
+        "identical": 0,
+        "identical_bytes": 0,
+        "shared": 0,
+        "shared_bytes": 0,
+        "already_shared": 0,
+        "already_shared_bytes": 0,
+        "differing": 0,
+        "skipped_busy": 0,
+        "skipped_changed": 0,
+        "skipped_hardlinked": 0,
+        "skipped_known_different": 0,
+        "skipped_over_budget": 0,
+        "read_bytes": 0,
+        "read_limited": false,
+        "unsupported": null,
+        "sharing": {
+          "state": "unknown"
+        },
+        "skipped": null,
+        "errors": []
+      }
+    }
+  }
+}

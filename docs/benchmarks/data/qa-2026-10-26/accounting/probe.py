@@ -2,7 +2,7 @@
 """Runtime probes for mbx budget reporting; only touches --root."""
 import argparse, json, os, pathlib, subprocess, time
 p=argparse.ArgumentParser(); p.add_argument('--root',type=pathlib.Path,required=True); p.add_argument('--buildq',required=True); p.add_argument('--mbx',required=True); a=p.parse_args()
-r=a.root.resolve(); r.mkdir(parents=True,exist_ok=True); logs=r/'logs'; logs.mkdir(exist_ok=True)
+r=a.root.resolve(); r.mkdir(parents=True,exist_ok=False); logs=r/'logs'; logs.mkdir(exist_ok=True)
 e=os.environ.copy(); e.update(BUILDQ_DIR=str(r/'queue'),BUILDQ_CACHE=str(r/'cache'),MBX_CACHE_DIR=str(r/'mbx-a'),MBX_GC_AUTO='0',CARGO_BUILD_JOBS='1',BUILDQ_GC='0'); e.pop('CARGO_TARGET_DIR',None)
 (r/'queue').mkdir(exist_ok=True)
 (r/'queue/config.toml').write_text(f'''slots=1\n[cache]\nbudget="1K"\nmin_free="0"\naccounting="logical"\ndedupe="off"\ngc_after_job=false\n[cargo]\nbackend="mbx"\nmbx={json.dumps(a.mbx)}\njobs=1\n''')
