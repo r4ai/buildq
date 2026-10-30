@@ -95,7 +95,7 @@ jobs:
           retention-days: 14
       - name: Publish coverage summary
         id: summary
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           COVERAGE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           COVERAGE_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
@@ -114,7 +114,7 @@ jobs:
       pull-requests: write
     steps:
       # This job executes no checked-out PR code and only publishes Markdown.
-      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           COVERAGE_BODY: ${{ needs.coverage.outputs.summary }}
         with:
