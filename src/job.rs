@@ -770,6 +770,9 @@ fn lease_member(cfg: &Config, ctx: &mut PoolCtx) -> Result<Lease, String> {
     };
     let asked = now_ms();
     let mut waited = false;
+    let mut waiter = None;
+    let pool_name = ctx.name.clone();
+    let waiter_cwd = ctx.wt.root.display().to_string();
     let mut lease = ctx
         .pool
         .lease(
@@ -782,10 +785,24 @@ fn lease_member(cfg: &Config, ctx: &mut PoolCtx) -> Result<Lease, String> {
             Duration::from_millis(cfg.poll_ms),
             &mut || {
                 waited = true;
-                note("all cache members busy and pool at its limit; waiting for one")
+                note("all cache members busy and pool at its limit; waiting for one");
+                // Visible in `status` while it waits (#150).
+                waiter = waiter.take().or_else(|| {
+                    crate::status::register_member_waiter(
+                        cfg,
+                        &crate::status::MemberWaiter {
+                            pid: std::process::id(),
+                            cmd: crate::util::display_cmd(&env::args().collect::<Vec<_>>()),
+                            cwd: waiter_cwd.clone(),
+                            pool: pool_name.clone(),
+                            since_ms: now_ms(),
+                        },
+                    )
+                });
             },
         )
         .map_err(|e| format!("pool {}: {e}", ctx.pool.dir.display()))?;
+    drop(waiter);
     if waited {
         lease.member_wait_ms = now_ms().saturating_sub(asked);
         note(&format!(

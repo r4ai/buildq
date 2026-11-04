@@ -141,7 +141,7 @@ buildq: target <pool>/m0 (...)
 
 | コマンド | 説明 |
 | :--- | :--- |
-| `buildq status [--hosts]` | クラスごとの実行中・待機中ジョブを表示 |
+| `buildq status [--hosts]` | クラスごとの実行中・待機中ジョブと、プールメンバー待ちのジョブを表示（`--json` では `member_waiters`） |
 | `buildq top` | ジョブ・待機時間・リモート状態・プール容量をライブ表示 |
 | `buildq history [-n N]` | 直近のジョブ履歴を表示<br>（スロット待ち時間・プールメンバー待ち時間・実行時間・終了コード・使用プール。`--json` では `member_wait_ms`） |
 | `buildq cache ls [--refresh]` | プール一覧・各メンバーの容量・空き容量を表示 |
