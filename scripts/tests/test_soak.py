@@ -494,3 +494,22 @@ def test_log_appends_and_tolerates_a_torn_last_line(tmp_path: Path) -> None:
         handle.write('{"type": "act')  # crash mid-write
     reopened = JsonlLog(log.path)
     assert [r["type"] for r in reopened.read()] == ["start", "action"]
+
+
+def test_a_zombie_must_persist_across_samples_to_fail() -> None:
+    def zombie_sample(t: float) -> dict:
+        return {
+            "type": "sample",
+            "t": t,
+            "violations": [
+                {"invariant": "zombies_reaped", "detail": "rustc[91]", "pids": [91]}
+            ],
+        }
+
+    # Seen once, it may only have been waiting for a working init's reap.
+    once = summarize([*records_for_summary(), zombie_sample(NOW)], NOW)
+    assert once["invariants"]["zombies_reaped"]["passed"]
+    twice = summarize(
+        [*records_for_summary(), zombie_sample(NOW), zombie_sample(NOW + 5)], NOW
+    )
+    assert not twice["invariants"]["zombies_reaped"]["passed"]

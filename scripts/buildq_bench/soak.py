@@ -420,6 +420,7 @@ def evaluate_sample(sample: Mapping[str, object], limits: Limits) -> list[dict]:
                 "stay unreaped (no reaping init; run under one, e.g. "
                 "`docker run --init`): "
                 + ", ".join(f"{p['comm']}[{p['pid']}]" for p in zombies[:5]),
+                "pids": [p["pid"] for p in zombies],
             }
         )
 
@@ -532,8 +533,19 @@ def summarize(records: Sequence[Mapping[str, object]], now: float) -> dict[str, 
         for problem in a.get("gc_problems", []):
             found["gc_errors"].append(f"{label}: {problem}")
     streak = 0
+    # A zombie seen once may just be awaiting a working init's reap; one
+    # still there a sample later is not being reaped.
+    zombie_sightings: dict[int, int] = {}
     for s in samples:
         for v in s.get("violations", []):
+            if v["invariant"] == "zombies_reaped" and "pids" in v:
+                for pid in v["pids"]:
+                    zombie_sightings[pid] = zombie_sightings.get(pid, 0) + 1
+    for s in samples:
+        for v in s.get("violations", []):
+            if v["invariant"] == "zombies_reaped" and "pids" in v:
+                if not any(zombie_sightings[p] > 1 for p in v["pids"]):
+                    continue
             found[v["invariant"]].append(f"t={s['t']}: {v['detail']}")
         if s.get("accounting_mismatch"):
             found["accounting_matches_disk"].append(
@@ -1039,6 +1051,17 @@ class Soak:
         if left:
             with suppress(ProcessLookupError):
                 os.killpg(pgid, signal.SIGKILL)
+        # Exited children wait briefly for their adopting init's reap; only
+        # zombies that outlast that are reported.
+        settle = time.monotonic() + 2
+        while zombies and time.monotonic() < settle:
+            time.sleep(0.2)
+            still = {
+                int(r["pid"])
+                for r in process_rows()
+                if r["pgid"] == pgid and is_zombie(r)
+            }  # type: ignore[call-overload]
+            zombies = [p for p in zombies if p in still]
         return left, zombies
 
     # sampling
