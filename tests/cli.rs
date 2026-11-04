@@ -1800,3 +1800,106 @@ fn a_lost_mbx_rebate_never_exceeds_mbx_bytes() {
     assert!(pool.join("m1").is_dir(), "{r}");
     assert_eq!(r["effective_budget"], 8191 - 1, "{r}");
 }
+
+/// Sandboxes of different users share one cache (#76): a pass skips the
+/// copies its user may not replace instead of failing on them every time,
+/// and a lock it may not open is reported as such, not as a running pass.
+/// Needs root (to own files as two users) and `setpriv`; skips otherwise.
+#[cfg(target_os = "linux")]
+#[test]
+fn dedupe_across_users_skips_copies_it_may_not_replace() {
+    use std::os::unix::fs::PermissionsExt;
+    if unsafe { libc::geteuid() } != 0 || Command::new("setpriv").arg("--version").output().is_err()
+    {
+        eprintln!("note: needs root and setpriv; skipping");
+        return;
+    }
+    let e = Env::new();
+    // Another user must be able to reach the temp dir.
+    let mut dir = e.root.clone();
+    while dir.parent().is_some() {
+        let _ = fs::set_permissions(&dir, fs::Permissions::from_mode(0o755));
+        if !dir.pop() {
+            break;
+        }
+    }
+    let cache = e.root.join("cache");
+    let rel = "debug/deps/libdep-0123456789abcdef.rlib";
+    for id in [0, 1] {
+        let p = cache.join(format!("pools/p/m{id}")).join(rel);
+        fs::create_dir_all(p.parent().unwrap()).unwrap();
+        fs::write(&p, vec![9u8; 20_000]).unwrap();
+    }
+    for d in [
+        &cache,
+        &cache.join("pools"),
+        &cache.join("pools/p"),
+        &e.root.join("q"),
+    ] {
+        fs::set_permissions(d, fs::Permissions::from_mode(0o777)).unwrap();
+    }
+    // m0 belongs to the other sandbox's user; m1 (the copy to replace) to root.
+    let chown = |p: &Path| {
+        let st = Command::new("chown")
+            .args(["-R", "65534:65534"])
+            .arg(p)
+            .status()
+            .unwrap();
+        assert!(st.success());
+    };
+    chown(&cache.join("pools/p/m0"));
+    for id in [0, 1] {
+        let lock = cache.join(format!("pools/p/m{id}.lock"));
+        fs::write(&lock, b"").unwrap();
+        fs::set_permissions(&lock, fs::Permissions::from_mode(0o666)).unwrap();
+    }
+    fs::write(
+        e.root.join("q/config.toml"),
+        "[cache]\nmin_free='0'\naccounting='logical'\ndedupe_min_size='1'\n",
+    )
+    .unwrap();
+    fs::set_permissions(
+        e.root.join("q/config.toml"),
+        fs::Permissions::from_mode(0o644),
+    )
+    .unwrap();
+    let as_nobody = |e: &Env| {
+        let mut c = Command::new("setpriv");
+        c.args([
+            "--reuid=65534",
+            "--regid=65534",
+            "--clear-groups",
+            BQ,
+            "cache",
+            "dedupe",
+            "--json",
+        ])
+        .env("BUILDQ_DIR", e.root.join("q"))
+        .env("BUILDQ_CONFIG", e.root.join("q/config.toml"))
+        .env("BUILDQ_CACHE", &cache)
+        .env_remove("BUILDQ_HELD");
+        let out = c.output().unwrap();
+        serde_json::from_slice::<serde_json::Value>(&out.stdout)
+            .unwrap_or_else(|_| panic!("{}", String::from_utf8_lossy(&out.stderr)))
+    };
+    let r = as_nobody(&e);
+    assert_eq!(r["skipped_permission"], 1, "{r}");
+    assert_eq!(
+        (r["compared"].as_u64(), r["read_bytes"].as_u64()),
+        (Some(0), Some(0)),
+        "{r}"
+    );
+    assert!(r["errors"].as_array().unwrap().is_empty(), "{r}");
+    // The cache's lock, unreadable for this user, is named as the problem.
+    let lock = cache.join("dedupe.lock");
+    let _ = fs::remove_file(&lock);
+    fs::write(&lock, b"").unwrap();
+    fs::set_permissions(&lock, fs::Permissions::from_mode(0o600)).unwrap();
+    fs::set_permissions(&cache, fs::Permissions::from_mode(0o755)).unwrap();
+    let r = as_nobody(&e);
+    let skipped = r["skipped"].as_str().unwrap_or_default();
+    assert!(
+        skipped.starts_with("cannot open") && skipped.contains("dedupe.lock"),
+        "{r}"
+    );
+}

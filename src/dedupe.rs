@@ -99,6 +99,10 @@ pub struct Report {
     /// Hard-linked copies with names outside the index, which replacing
     /// would split (macOS).
     pub skipped_hardlinked: usize,
+    /// Copies this user may not replace: another sandbox's user owns them
+    /// and they (Linux) or their member dir (macOS) are not writable here.
+    /// Left for a pass by a user who may (#76).
+    pub skipped_permission: usize,
     /// Copies an earlier pass found different, with both files unchanged since.
     pub skipped_known_different: usize,
     /// Copies too large for the whole read limit: they are never compared.
@@ -746,9 +750,22 @@ pub fn run_projected(
         ..Default::default()
     };
     let _ = fs::create_dir_all(&cfg.cache_dir);
-    let Ok(Some(_lock)) = lock::try_lock(&cfg.cache_dir.join("dedupe.lock")) else {
-        report.skipped = Some("another deduplication pass is running".into());
-        return (report, Ledger::load(&cfg.cache_dir));
+    let lock_path = cfg.cache_dir.join("dedupe.lock");
+    let _lock = match lock::try_lock(&lock_path) {
+        Ok(Some(l)) => l,
+        Ok(None) => {
+            report.skipped = Some("another deduplication pass is running".into());
+            return (report, Ledger::load(&cfg.cache_dir));
+        }
+        // A sandbox that may not open the cache's lock is not told that
+        // someone else is running (#76).
+        Err(e) => {
+            report.skipped = Some(format!("cannot open {}: {e}", lock_path.display()));
+            report
+                .errors
+                .push(format!("open {}: {e}", lock_path.display()));
+            return (report, Ledger::load(&cfg.cache_dir));
+        }
     };
     if !opts.dry_run && !SUPPORTED {
         report.unsupported = Some(UNSUPPORTED_PLATFORM.into());
@@ -1393,6 +1410,10 @@ fn share_pair(work: &[Work], opts: &Options, ledger: &mut Ledger, report: &mut R
             report.skipped_changed += 1;
             continue;
         }
+        if !opts.dry_run && !may_replace(w.other) {
+            report.skipped_permission += 1;
+            continue;
+        }
         report.compared += 1;
         report.read_bytes += 2 * len;
         pair_lock.bytes += 2 * len;
@@ -1466,6 +1487,34 @@ fn share_pair(work: &[Work], opts: &Options, ledger: &mut Ledger, report: &mut R
                 .push(format!("share {}: {e}", w.other.path.display())),
         }
     }
+}
+
+/// Whether this process may share into `c`. Linux shares in place: the
+/// kernel takes a read-only descriptor from the file's owner (or root) and
+/// otherwise needs a writable one. Elsewhere the copy is replaced by a
+/// rename, which needs a writable member directory.
+#[cfg(unix)]
+fn may_replace(c: &Candidate) -> bool {
+    use std::os::unix::ffi::OsStrExt;
+    use std::os::unix::fs::MetadataExt;
+    let euid = unsafe { libc::geteuid() };
+    if euid == 0 {
+        return true;
+    }
+    let writable = |p: &Path| {
+        std::ffi::CString::new(p.as_os_str().as_bytes())
+            .is_ok_and(|p| unsafe { libc::access(p.as_ptr(), libc::W_OK) } == 0)
+    };
+    if KEEPS_INODE {
+        c.md.uid() == euid || writable(&c.path)
+    } else {
+        writable(&c.member_dir) && c.path.parent().is_some_and(writable)
+    }
+}
+
+#[cfg(not(unix))]
+fn may_replace(_: &Candidate) -> bool {
+    true
 }
 
 /// Whether `dir`'s volume can share data: shares two small temporary files.
@@ -1873,12 +1922,13 @@ pub fn render(r: &Report) -> String {
         human_bytes(r.already_shared_bytes)
     ));
     s.push_str(&format!(
-        "differing: {} files; skipped: {} known different, {} busy, {} changed, {} hard-linked, {} over the read limit\n",
+        "differing: {} files; skipped: {} known different, {} busy, {} changed, {} hard-linked, {} not ours to replace, {} over the read limit\n",
         r.differing,
         r.skipped_known_different,
         r.skipped_busy,
         r.skipped_changed,
         r.skipped_hardlinked,
+        r.skipped_permission,
         r.skipped_over_budget
     ));
     if r.read_limited {
