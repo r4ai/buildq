@@ -92,6 +92,7 @@ plugin 内の helper は独立した target を明示する必要がある。
 ### Process Tree & Signal Handling
 
 - 子プロセス実行中、`buildq` 自身は `Ctrl+C` を無視（コンソールから子へ直接届く）し、子の終了コードをそのまま返す
+  - Unix では、別のプロセスが `kill` で送った `SIGINT` / `SIGQUIT`（エージェントが自分の起動したコマンドを中断する場合など）は子に届いていない可能性があるため、`SIGTERM` と同様に子へ転送する。転送しないとビルドが走り続け、スロットを占有したままになる
 - **Windows**
   - 子プロセスを kill-on-close 設定の Job Object 内で実行（デフォルト `kill_tree = true`）
   - `buildq` が強制終了されると、コンパイラのプロセスツリー全体も即座に終了

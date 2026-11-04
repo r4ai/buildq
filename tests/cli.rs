@@ -448,6 +448,63 @@ fn killed_holder_releases_its_slot() {
     assert_eq!(busy(&e.status(), "build"), 0);
 }
 
+/// A SIGINT sent to buildq alone (an agent interrupting the command it ran,
+/// not a terminal's Ctrl+C to the whole job) must stop the job's command
+/// tree and free the slot instead of waiting for the build to end (#156).
+#[cfg(unix)]
+fn sigint_to_buildq_alone_stops_the_job(kill_tree: bool) {
+    let e = Env::new();
+    fs::write(
+        e.root.join("q/config.toml"),
+        format!("kill_tree = {kill_tree}\n[cache]\nmin_free='0'\naccounting='logical'\n"),
+    )
+    .unwrap();
+    let pids = e.root.join("pids");
+    fs::create_dir_all(&pids).unwrap();
+    let mut holder = e
+        .cmd(1)
+        .args(["run", "--", BQ, "__helper", "tree"])
+        .arg(&pids)
+        .arg("1")
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    wait_until("holder to start", || {
+        busy(&e.status(), "build") == 1 && fs::read_dir(&pids).unwrap().count() == 2
+    });
+    let st = Command::new("kill")
+        .args(["-INT", &holder.id().to_string()])
+        .status()
+        .unwrap();
+    assert!(st.success());
+    let t = Instant::now();
+    let code = holder.wait().unwrap();
+    assert!(!code.success());
+    assert!(t.elapsed() < Duration::from_secs(20), "{:?}", t.elapsed());
+    assert_eq!(busy(&e.status(), "build"), 0);
+    if kill_tree {
+        let dead = e
+            .cmd(1)
+            .args(["__helper", "dead"])
+            .arg(&pids)
+            .status()
+            .unwrap();
+        assert!(dead.success(), "the job's command tree outlived buildq");
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn sigint_to_buildq_alone_stops_the_job_tree() {
+    sigint_to_buildq_alone_stops_the_job(true);
+}
+
+#[cfg(unix)]
+#[test]
+fn sigint_to_buildq_alone_stops_the_job_without_kill_tree() {
+    sigint_to_buildq_alone_stops_the_job(false);
+}
+
 #[test]
 fn nested_calls_do_not_deadlock() {
     let e = Env::new();
