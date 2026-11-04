@@ -445,6 +445,50 @@ fn hard_linked_names_count_once() {
     );
 }
 
+/// One inode named in two members (an mbx restore's hard link) already
+/// shares all its data: it is neither compared nor shared again (#147).
+#[cfg(unix)]
+#[test]
+fn cross_member_hard_links_are_already_shared() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    let a = put(&c, "p", 0, RLIB, &[4; 8192]);
+    let b = put(&c, "p", 1, RLIB, b"x");
+    fs::remove_file(&b).unwrap();
+    fs::hard_link(&a, &b).unwrap();
+    // A third, separate copy still pairs with them.
+    put(&c, "p", 2, RLIB, &[4; 8192]);
+    let dry = dedupe::run(&c, &opts(&c, true));
+    assert!(dry.errors.is_empty(), "{dry:?}");
+    assert_eq!(
+        (dry.compared, dry.identical, dry.identical_bytes),
+        (1, 1, 8192),
+        "{dry:?}"
+    );
+    assert_eq!(
+        (dry.already_shared, dry.already_shared_bytes),
+        (1, 8192),
+        "{dry:?}"
+    );
+    // Three fingerprints, then one comparison of two copies.
+    assert_eq!(dry.read_bytes, 3 * 8192 + 2 * 8192, "{dry:?}");
+    fs::remove_file(c.cache_dir.join("pools/p/m2").join(RLIB)).unwrap();
+    let dry = dedupe::run(&c, &opts(&c, true));
+    assert_eq!(
+        (dry.compared, dry.identical, dry.read_bytes),
+        (0, 0, 0),
+        "{dry:?}"
+    );
+    assert_eq!(
+        (dry.already_shared, dry.already_shared_bytes),
+        (1, 8192),
+        "{dry:?}"
+    );
+    // Nothing to share, so no sharing call can fail on any volume.
+    let r = dedupe::run(&c, &opts(&c, false));
+    assert_eq!((r.compared, r.shared, r.errors.len()), (0, 0, 0), "{r:?}");
+}
+
 /// An alias may pair with another counterpart than its first name did.
 #[cfg(unix)]
 #[test]
