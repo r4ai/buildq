@@ -194,6 +194,23 @@ def test_orphan_process_after_buildq_exit_is_a_violation() -> None:
     assert not evaluate_sample(sample(processes=[orphan], live_groups=[77]), LIMITS)
 
 
+def test_unreaped_zombies_are_not_live_orphans() -> None:
+    zombie = {
+        "pid": 91,
+        "ppid": 1,
+        "pgid": 77,
+        "rss_kb": 0,
+        "state": "Z",
+        "comm": "rustc",
+    }
+    found = evaluate_sample(sample(processes=[zombie], dead_groups=[77]), LIMITS)
+    assert invariants_of(found) == {"zombies_reaped"}
+    assert "reaping init" in found[0]["detail"]
+    live = {**zombie, "pid": 92, "state": "S", "rss_kb": 5}
+    both = evaluate_sample(sample(processes=[zombie, live], dead_groups=[77]), LIMITS)
+    assert invariants_of(both) == {"no_orphan_processes", "zombies_reaped"}
+
+
 def test_slot_limit_violations() -> None:
     ok = status([holder(0, 10), holder(1, 11)])
     assert not evaluate_sample(sample(status=ok), LIMITS)
@@ -293,11 +310,16 @@ def test_only_job_groups_are_owned() -> None:
 
 
 def test_ps_parsing() -> None:
-    text = "  10     1    10   2048 /usr/bin/cargo\n 11 10 10 100 rustc\nbad line\n"
+    text = (
+        "  10     1    10   2048 Ss   /usr/bin/cargo\n"
+        " 11 10 10 0 Z+ rustc\n"
+        " 12 10 10 5 R+ build script\nbad line\n"
+    )
     rows = parse_ps(text)
-    assert [(r["pid"], r["pgid"], r["comm"]) for r in rows] == [
-        (10, 10, "cargo"),
-        (11, 10, "rustc"),
+    assert [(r["pid"], r["pgid"], r["state"], r["comm"]) for r in rows] == [
+        (10, 10, "S", "cargo"),
+        (11, 10, "Z", "rustc"),
+        (12, 10, "R", "build script"),
     ]
 
 
@@ -407,6 +429,14 @@ def test_each_failure_fails_only_its_invariant() -> None:
             "repo": "a",
             "exit": -15,
             "leftover_pids": [42],
+        },
+        "zombies_reaped": {
+            "type": "action",
+            "index": 9,
+            "kind": "cancel",
+            "repo": "a",
+            "exit": -15,
+            "zombie_pids": [43],
         },
         "gc_errors": {
             "type": "action",
