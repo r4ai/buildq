@@ -142,7 +142,7 @@ buildq: target <pool>/m0 (...)
 | Command | Description |
 | :--- | :--- |
 | `buildq status [--hosts]` | Show active slot holders and waiting jobs per class, and jobs still waiting for a pool member (`member_waiters` in `--json`) |
-| `buildq top` | Live jobs, wait durations, remote status, and target pool usage |
+| `buildq top` | Live jobs, wait durations, jobs waiting for a pool member, remote status, and target pool usage |
 | `buildq history [-n N]` | Show recent jobs<br>(slot wait, time spent waiting for a pool member, run time, exit code, pool member; `member_wait_ms` in `--json`) |
 | `buildq cache ls [--refresh]` | Show target pools, member sizes, budget, and free space |
 | `buildq cache clean [--all] [--dry-run]` | Remove idle pooled targets of this repository (or all with `--all`) |

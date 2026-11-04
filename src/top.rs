@@ -46,6 +46,7 @@ pub fn run(cfg: &Config, interval: Duration, once: bool, hosts: bool) -> io::Res
         }
         let frame = render(
             &status::classes(cfg),
+            &status::member_waiters(cfg),
             &gc::scan(cfg, false),
             remote.as_deref(),
             hosts && !cfg.hosts.is_empty(),
@@ -143,6 +144,7 @@ fn clean(value: &str) -> String {
 
 fn render(
     classes: &[ClassStatus],
+    member_waiters: &[status::MemberWaiter],
     usage: &Usage,
     hosts: Option<&[(String, Result<serde_json::Value, String>)]>,
     show_hosts: bool,
@@ -252,6 +254,26 @@ fn render(
                     .as_ref()
                     .map(|r| format!(" | {}", clean(r)))
                     .unwrap_or_default()
+            );
+        }
+    }
+    // Jobs waiting for a pool member hold no slot yet, so no class lists
+    // them (#150).
+    if !member_waiters.is_empty() {
+        let _ = writeln!(
+            out,
+            "\nWaiting for a pool member (no slot yet): {}",
+            member_waiters.len()
+        );
+        for w in member_waiters {
+            let _ = writeln!(
+                out,
+                "  MEMBER {} | pid {} | {} | {} | {}",
+                duration_str(now.saturating_sub(w.since_ms) / 1000),
+                w.pid,
+                clean(&w.cmd),
+                clean(&w.pool),
+                clean(&w.cwd)
             );
         }
     }
