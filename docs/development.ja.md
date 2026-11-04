@@ -67,6 +67,16 @@ Unix では別テストの fork が exec 前に一時的にロックを継承し
 cargo test --test e2e -- --ignored --nocapture
 ```
 
+### 実 SSH サーバーに対するリモート実行
+
+`tests/ssh.rs` は使い捨ての鍵で 127.0.0.1 に専用の `sshd` を起動し、git と rsync の両方の転送方式で `buildq run --host` を実行する。
+スナップショットの push、リモートでのチェックアウト（名前に空白を含むワークツリー）、コマンドの終了コード、ホストの環境変数、`--fetch` がすべて実際の ssh と scp を通る。
+`sshd`・`ssh`・`ssh-keygen`・`scp`・`rsync` が必要で、どれかが無ければメッセージを出して成功扱いにする。
+
+```sh
+cargo test --test ssh -- --ignored --nocapture
+```
+
 ### 実 mbx に対する mbx バックエンド
 
 `mbx_backend_runs_against_a_real_mbx` は、2つの worktree を持つ小さなワークスペースで、実際の

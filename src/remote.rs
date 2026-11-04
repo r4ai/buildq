@@ -238,13 +238,37 @@ pub fn layout(root: &str, wt: &Worktree) -> Layout {
         .file_name()
         .map(|s| s.to_string_lossy().to_string())
         .unwrap_or_else(|| "wt".into());
-    let wt_id = format!("{base}-{}", short_hash(&wt.key()));
+    let wt_id = format!("{}-{}", ref_safe(&base), short_hash(&wt.key()));
     Layout {
         repo_dir: format!("{root}/{repo}/repo.git"),
         wt_dir: format!("{root}/{repo}/wt/{wt_id}"),
         remote_ref: format!("refs/buildq/{wt_id}"),
         wt_id,
     }
+}
+
+/// `name` as one component of a git ref (and a plain remote path): what
+/// `git check-ref-format` refuses (spaces, `~^:?*[\`, control characters,
+/// a leading `.`, `..`, `@{`) becomes `_`. Names that need nothing keep
+/// their remote checkout.
+fn ref_safe(name: &str) -> String {
+    let mut out: String = name
+        .chars()
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.' | '+' | ',' | '=') {
+                c
+            } else {
+                '_'
+            }
+        })
+        .collect();
+    while out.contains("..") {
+        out = out.replace("..", "._");
+    }
+    if out.starts_with('.') {
+        out.replace_range(..1, "_");
+    }
+    if out.is_empty() { "wt".into() } else { out }
 }
 
 fn ok(r: io::Result<(i32, String)>, what: &str) -> Result<String, String> {
@@ -720,6 +744,28 @@ pub fn host_status(cfg: &Config) -> Vec<(String, Result<serde_json::Value, Strin
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn worktree_ids_are_valid_ref_components() {
+        for (name, want) in [
+            ("buildq", "buildq"),
+            ("feature.x-2", "feature.x-2"),
+            ("work tree", "work_tree"),
+            ("a~b^c:d?e*f[g\\h", "a_b_c_d_e_f_g_h"),
+            ("..hidden", "__hidden"),
+            ("x@{y}", "x__y_"),
+            ("日本", "__"),
+            ("", "wt"),
+        ] {
+            assert_eq!(ref_safe(name), want, "{name}");
+            let id = format!("refs/buildq/{}-0123abcd", ref_safe(name));
+            let ok = Command::new("git")
+                .args(["check-ref-format", &id])
+                .status()
+                .is_ok_and(|s| s.success());
+            assert!(ok, "{id}");
+        }
+    }
 
     struct Probe {
         replies: std::cell::RefCell<std::collections::VecDeque<(i32, String)>>,
