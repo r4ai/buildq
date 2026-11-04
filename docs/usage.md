@@ -249,7 +249,7 @@ buildq cache dedupe             # Share now, regardless of `[cache] dedupe`
 | `dedupe` | `"auto"` | `"off"` disables passes during GC |
 | `dedupe_min_size` | `"64KiB"` | Smaller files are not compared |
 | `dedupe_max_read` | `"8G"` | Bytes one pass may read for comparisons |
-| `dedupe_max_index` | `100000` | Most candidate copies one index holds; a larger toolchain scope is indexed and shared in batches (`index_batches` in the report), walking its members once per batch |
+| `dedupe_max_index` | `100000` | Most candidate copies one index holds; a larger toolchain scope is indexed and shared in batches (`index_batches` in the report), walking its members once per batch. Hard-linked copies count like any other; their other names in a member are collected only for the batch's copies, in one more walk of those members |
 
 Sharing needs reflinks: btrfs, XFS with `reflink=1`, or bcachefs on Linux, and
 APFS on macOS. Elsewhere a pass reports `unsupported` and changes nothing; a

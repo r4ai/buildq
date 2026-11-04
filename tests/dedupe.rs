@@ -1267,3 +1267,44 @@ fn a_scope_beyond_the_index_limit_is_processed_in_batches() {
     );
     assert_eq!(batched.identical, 12);
 }
+
+/// Hard-linked names (Cargo's uplifted artifacts) stay within the batch
+/// bound too, and each batch neither re-indexes nor re-counts the inodes
+/// another batch already covered (#140).
+#[cfg(unix)]
+#[test]
+fn hard_linked_scopes_stay_within_the_index_limit() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    for g in 0..12 {
+        for id in [0, 1] {
+            let rel = format!("debug/deps/libdep{g}-0123456789abcdef.rlib");
+            let p = put(&c, "p", id, &rel, &[g as u8; 2000]);
+            let uplift = c
+                .cache_dir
+                .join(format!("pools/p/m{id}/debug/libdep{g}.rlib"));
+            fs::hard_link(&p, uplift).unwrap();
+        }
+    }
+    let whole = dedupe::run(&c, &opts(&c, true));
+    assert!(whole.errors.is_empty(), "{whole:?}");
+    assert_eq!(whole.index_batches, 1, "{whole:?}");
+    assert_eq!((whole.indexed, whole.candidates), (48, 48), "{whole:?}");
+    assert_eq!((whole.identical, whole.identical_bytes), (12, 24_000));
+    let mut o = opts(&c, true);
+    o.max_index = 5;
+    let batched = dedupe::run(&c, &o);
+    assert!(batched.errors.is_empty(), "{batched:?}");
+    assert!(batched.index_batches > 1, "{batched:?}");
+    // Every key is indexed in exactly one batch, aliases included.
+    assert_eq!(
+        (batched.indexed, batched.candidates),
+        (48, 48),
+        "{batched:?}"
+    );
+    assert_eq!(
+        (batched.identical, batched.identical_bytes),
+        (whole.identical, whole.identical_bytes),
+        "{batched:?}"
+    );
+}
