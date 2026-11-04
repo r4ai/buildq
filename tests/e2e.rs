@@ -1864,6 +1864,23 @@ fn main() {
     for kid in &mut kids.0 {
         assert!(kid.wait().unwrap().success());
     }
+    // History keeps the member wait apart from the slot queue (#153).
+    let hist = Command::new(BQ)
+        .args(["history", "--json"])
+        .env("BUILDQ_DIR", root.join("q"))
+        .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+        .output()
+        .unwrap();
+    let entries: Vec<serde_json::Value> = serde_json::from_slice(&hist.stdout).unwrap();
+    let waited = entries
+        .iter()
+        .filter(|e| e["member_wait_ms"].as_u64().unwrap_or(0) > 0)
+        .count();
+    assert!(waited >= slots, "{entries:?}");
+    for log in &logs {
+        let text = fs::read_to_string(log).unwrap();
+        assert!(text.contains("got member m"), "{text}");
+    }
 }
 
 #[cfg(unix)]

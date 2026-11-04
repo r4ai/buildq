@@ -26,6 +26,9 @@ pub struct Entry {
     /// Packages invalidated in the member before the job.
     pub invalidated: usize,
     pub fresh_member: bool,
+    /// Time spent waiting for a pool member before queueing for a slot
+    /// (`started_ms - enqueued_ms` covers only the slot queue).
+    pub member_wait_ms: u64,
     pub label: Option<String>,
 }
 

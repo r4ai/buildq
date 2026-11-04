@@ -169,6 +169,7 @@ fn record(
             external: external.map(|d| d.display().to_string()),
             invalidated: lease.map(|l| l.plan.packages.len()).unwrap_or(0),
             fresh_member: lease.map(|l| l.fresh_member).unwrap_or(false),
+            member_wait_ms: lease.map(|l| l.member_wait_ms).unwrap_or(0),
             label: g.info.label.clone(),
         },
     );
@@ -767,7 +768,9 @@ fn lease_member(cfg: &Config, ctx: &mut PoolCtx) -> Result<Lease, String> {
             .max(1);
         u.total + u.total / members as u64 <= u.effective_budget
     };
-    let lease = ctx
+    let asked = now_ms();
+    let mut waited = false;
+    let mut lease = ctx
         .pool
         .lease(
             &ctx.wt,
@@ -777,9 +780,20 @@ fn lease_member(cfg: &Config, ctx: &mut PoolCtx) -> Result<Lease, String> {
             cfg.max_members,
             &mut may_grow,
             Duration::from_millis(cfg.poll_ms),
-            &mut || note("all cache members busy and pool at its limit; waiting for one"),
+            &mut || {
+                waited = true;
+                note("all cache members busy and pool at its limit; waiting for one")
+            },
         )
         .map_err(|e| format!("pool {}: {e}", ctx.pool.dir.display()))?;
+    if waited {
+        lease.member_wait_ms = now_ms().saturating_sub(asked);
+        note(&format!(
+            "got member {} after {}s",
+            lease.name(),
+            lease.member_wait_ms / 1000
+        ));
+    }
     let touched = pool::touch(&ctx.wt.root, &lease.plan.outside);
     let what = if let Some(src) = lease.seeded_from {
         format!(

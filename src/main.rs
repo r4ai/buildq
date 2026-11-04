@@ -225,8 +225,13 @@ fn main() -> ExitCode {
                 for e in entries {
                     let wait = e.started_ms.saturating_sub(e.enqueued_ms) / 1000;
                     let run = e.ended_ms.saturating_sub(e.started_ms) / 1000;
+                    let member = if e.member_wait_ms >= 1000 {
+                        format!(" (+{} for a member)", duration_str(e.member_wait_ms / 1000))
+                    } else {
+                        String::new()
+                    };
                     println!(
-                        "{:>5} ago  {:<6} exit {:<4} wait {:>4} run {:>4}  {}  {}{}",
+                        "{:>5} ago  {:<6} exit {:<4} wait {:>4}{member} run {:>4}  {}  {}{}",
                         ago(e.ended_ms),
                         e.class,
                         e.exit,
