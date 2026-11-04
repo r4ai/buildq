@@ -1543,3 +1543,73 @@ fn gc_leaves_room_in_the_budget_for_mbx_without_running_it_each_time() {
     assert_eq!(u["mbx_budget_bytes"], 0);
     assert_eq!(u["effective_budget"], 8192);
 }
+
+/// mbx's store alone beyond the whole budget stays reported (and explained)
+/// after GC has emptied the pool, apart from what buildq can evict (#138).
+#[cfg(unix)]
+#[test]
+fn mbx_beyond_the_whole_budget_stays_over_budget_with_an_empty_pool() {
+    use std::os::unix::fs::PermissionsExt;
+    let e = Env::new();
+    let now = buildq::util::now_ms();
+    let pool = e.root.join("cache/pools/p");
+    let dir = pool.join("m0");
+    fs::create_dir_all(&dir).unwrap();
+    fs::write(dir.join("own"), vec![1; 3000]).unwrap();
+    let meta = serde_json::json!({ "id": 0, "created_ms": now, "last_used_ms": now });
+    fs::write(pool.join("m0.json"), meta.to_string()).unwrap();
+    let info = serde_json::json!({ "created_ms": now, "last_used_ms": now });
+    fs::write(pool.join("pool.json"), info.to_string()).unwrap();
+    let store = e.root.join("mbxstore/actions");
+    fs::create_dir_all(&store).unwrap();
+    let mbx = e.root.join("mbxbin/mbx");
+    fs::create_dir_all(mbx.parent().unwrap()).unwrap();
+    let report = format!(
+        r#"{{"version":1,"store":"{}","total_bytes":5000,"combined_total_bytes":5000}}"#,
+        store.display()
+    );
+    fs::write(&mbx, format!("#!/bin/sh\ncat <<'JSON'\n{report}\nJSON\n")).unwrap();
+    fs::set_permissions(&mbx, fs::Permissions::from_mode(0o755)).unwrap();
+    fs::write(
+        e.root.join("q/config.toml"),
+        format!(
+            "[cache]\nmin_free='0'\naccounting='logical'\nbudget='1K'\n[cargo]\nbackend = \"mbx\"\nmbx = {mbx:?}\n"
+        ),
+    )
+    .unwrap();
+    let json = |args: &[&str]| {
+        let out = e.cmd(1).args(args).output().unwrap();
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()
+    };
+    let check = |r: &serde_json::Value| {
+        assert_eq!(r["over_budget"], true, "{r}");
+        assert_eq!(r["mbx_overflow_bytes"], 5000 - 1024, "{r}");
+        let reasons = r["over_budget_reasons"].to_string();
+        assert!(reasons.contains("tighten mbx's own GC limits"), "{r}");
+    };
+    // The member goes; mbx's overflow remains and is not buildq's to evict.
+    let r = json(&["gc", "--json"]);
+    assert!(!dir.exists());
+    assert_eq!(r["after"], 0);
+    assert_eq!(r["over_budget_bytes"], 5000 - 1024);
+    check(&r);
+    assert!(
+        r["warnings"]
+            .to_string()
+            .contains("exceeds its effective budget")
+    );
+    // Repeated GC and a fresh inventory agree.
+    check(&json(&["gc", "--json"]));
+    let u = json(&["cache", "ls", "--refresh", "--json"]);
+    assert_eq!(
+        (u["total"].as_u64(), u["effective_budget"].as_u64()),
+        (Some(0), Some(0))
+    );
+    assert_eq!(u["over_budget_bytes"], 5000 - 1024);
+    check(&u);
+}

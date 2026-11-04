@@ -97,7 +97,12 @@ pub struct Usage {
     pub effective_budget: u64,
     pub accounting: CacheAccounting,
     pub over_budget: bool,
+    /// Bytes beyond the budget: what buildq could still evict, plus
+    /// `mbx_overflow_bytes`.
     pub over_budget_bytes: u64,
+    /// The part of `over_budget_bytes` mbx's store holds beyond the whole
+    /// budget: buildq never deletes it, so even an empty pool leaves it.
+    pub mbx_overflow_bytes: u64,
     pub over_budget_reasons: Vec<String>,
     pub free_disk: Option<u64>,
     /// Explicit target dirs jobs used outside the pool (filled by `scan_all`).
@@ -115,7 +120,11 @@ pub struct Usage {
 
 impl Usage {
     fn budget_state(&mut self) {
-        self.over_budget_bytes = self.total.saturating_sub(self.effective_budget);
+        // mbx beyond the whole budget saturates `effective_budget` at 0, so
+        // the pool alone would look compliant once GC has emptied it.
+        self.mbx_overflow_bytes = self.mbx_budget_bytes.saturating_sub(self.budget);
+        self.over_budget_bytes =
+            self.total.saturating_sub(self.effective_budget) + self.mbx_overflow_bytes;
         self.over_budget = self.over_budget_bytes > 0;
         self.over_budget_reasons.clear();
         if !self.over_budget {
@@ -132,7 +141,15 @@ impl Usage {
                 "pending trash still consumes space; resolve deletion errors and retry GC".into(),
             );
         }
-        if self.mbx_budget_bytes > 0 {
+        if self.mbx_overflow_bytes > 0 {
+            self.over_budget_reasons.push(format!(
+                "mbx's store alone ({}) exceeds the budget by {} and buildq never \
+                 deletes it; tighten mbx's own GC limits (mbx's config or MBX_GC_*) \
+                 or raise [cache].budget",
+                human_bytes(self.mbx_budget_bytes),
+                human_bytes(self.mbx_overflow_bytes)
+            ));
+        } else if self.mbx_budget_bytes > 0 {
             self.over_budget_reasons.push(format!(
                 "mbx's store takes {} of the budget and buildq never deletes it; \
                  tighten mbx's own GC limits or raise [cache].budget",
@@ -346,6 +363,7 @@ fn scan_with(cfg: &Config, refresh: bool, mbx_max_age_ms: u64) -> Usage {
     let mut usage = Usage {
         over_budget: false,
         over_budget_bytes: 0,
+        mbx_overflow_bytes: 0,
         over_budget_reasons: Vec::new(),
         effective_budget: effective_budget(
             cfg.budget.saturating_sub(mbx_budget_bytes),
@@ -397,6 +415,8 @@ pub struct Report {
     pub accounting: CacheAccounting,
     pub over_budget: bool,
     pub over_budget_bytes: u64,
+    /// See `Usage::mbx_overflow_bytes`.
+    pub mbx_overflow_bytes: u64,
     pub over_budget_reasons: Vec<String>,
     pub skipped: Option<String>,
     /// Extra passes run for automatic requests that arrived during this one.
@@ -417,6 +437,7 @@ impl Report {
         self.accounting = usage.accounting;
         self.over_budget = usage.over_budget;
         self.over_budget_bytes = usage.over_budget_bytes;
+        self.mbx_overflow_bytes = usage.mbx_overflow_bytes;
         self.over_budget_reasons = usage.over_budget_reasons.clone();
         self.warnings.extend(usage.budget_warning());
     }

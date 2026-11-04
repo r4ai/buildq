@@ -263,6 +263,8 @@ GC 側でもロック取得後に再判定する。両モードとも予算超�
 使用中のメンバーと実行用コピーは保護するため、実行中は一時的に超過しうる。
 `cache ls --json` と `gc --json` は `over_budget`、`over_budget_bytes`、
 `over_budget_reasons` を返す。テキスト出力と `top` にも警告を表示する。
+`backend = "mbx"` では、`mbx_overflow_bytes` が `over_budget_bytes` のうち mbx のストアが予算全体を超えて保持する分を表す。
+buildq はこれを削除しないため、GC がプールを空にした後も（mbx 自身の GC 上限を絞る助言とともに）超過として報告し続ける。
 GC は使用中の成果物による超過を削除失敗として扱わない。
 削除失敗がなければ終了コードは成功である。
 
