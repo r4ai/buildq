@@ -239,6 +239,9 @@ pub struct Lease {
     pub fresh_member: bool,
     /// The member a new one was cloned from, if seeding succeeded.
     pub seeded_from: Option<usize>,
+    /// How long the job waited for a member (all busy, pool at its limit),
+    /// before it queued for a slot.
+    pub member_wait_ms: u64,
     _lock: LockFile,
 }
 
@@ -680,6 +683,7 @@ impl Pool {
                 }
                 drop(seed_lock);
                 return Ok(Lease {
+                    member_wait_ms: 0,
                     id,
                     target_dir,
                     meta_path,
