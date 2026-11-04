@@ -649,3 +649,70 @@ fn contended_automatic_gc_leaves_a_request_for_a_follow_up_pass() {
     assert_eq!(report.follow_ups, 1, "{report:?}");
     assert!(!pending.exists());
 }
+
+/// A seeding killed before its rename leaves `.seed-m<id>` behind: the
+/// inventory counts it, and GC removes it once no seeding holds the
+/// member's lock (#149).
+#[test]
+fn abandoned_seed_clones_are_counted_and_reclaimed() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut c = cfg(temp.path());
+    c.budget = 1 << 20;
+    member(&c.cache_dir, "p", 0, now_ms(), 4096);
+    let pool = c.cache_dir.join("pools/p");
+    fs::create_dir_all(pool.join("m1")).unwrap();
+    let meta = MemberMeta {
+        id: 1,
+        last_used_ms: now_ms(),
+        ..Default::default()
+    };
+    write_json(&pool.join("m1.json"), &meta).unwrap();
+    let staging = pool.join(".seed-m1");
+    file(&staging.join("debug/deps/partial.rlib"), 2 << 20, 0);
+
+    let u = scan(&c, true);
+    assert_eq!(u.staging_bytes, 2 << 20);
+    assert_eq!(u.total, 4096 + (2 << 20));
+    assert!(u.over_budget, "{:?}", u.over_budget_reasons);
+
+    // A seeding in progress holds the member lock: its clone is counted
+    // (GC would evict idle members for it) but never removed.
+    let held = lock::lock(&pool.join("m1.lock")).unwrap();
+    assert!(scan(&c, true).staging[0].busy);
+    let r = gc(
+        &c,
+        &Options {
+            dry_run: true,
+            ..Default::default()
+        },
+    );
+    assert!(!r.actions.iter().any(|a| a.contains("seed clone")), "{r:?}");
+    assert!(r.after >= 2 << 20, "{r:?}");
+    drop(held);
+
+    let dry = gc(
+        &c,
+        &Options {
+            dry_run: true,
+            ..Default::default()
+        },
+    );
+    assert!(staging.exists());
+    assert_eq!(dry.after, 4096, "{dry:?}");
+    assert!(!dry.over_budget, "{dry:?}");
+
+    let r = gc(&c, &Options::default());
+    assert!(!staging.exists(), "{r:?}");
+    assert!(
+        r.actions.iter().any(|a| a.contains("abandoned seed clone")),
+        "{r:?}"
+    );
+    assert_eq!(r.after, 4096, "{r:?}");
+    assert!(!r.over_budget);
+    // The members themselves are untouched.
+    assert!(
+        pool.join("m0/debug/deps/libbig-0000000000000001.rlib")
+            .exists()
+    );
+    assert!(pool.join("m1").is_dir());
+}

@@ -86,13 +86,29 @@ pub struct RunEntry {
     pub last_used_ms: u64,
 }
 
+/// A member seeding's clone (`.seed-m<id>`), renamed into place when done.
+/// One left behind by a killed seeding still holds its data.
+#[derive(Debug, Clone, Serialize)]
+pub struct StagingEntry {
+    pub dir: PathBuf,
+    pub size: u64,
+    /// Its member's lock is held: the seeding may still be running.
+    pub busy: bool,
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct Usage {
     pub pools: Vec<PoolEntry>,
     pub runs: Vec<RunEntry>,
-    /// Pools, run dirs, and pending trash: what the budget governs.
+    /// Pools, run dirs, seed staging, and pending trash: what the budget
+    /// governs.
     pub total: u64,
     pub trash_bytes: u64,
+    /// Member seeding clones, counted in `total`; idle ones are left over
+    /// from a killed seeding and GC removes them.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub staging: Vec<StagingEntry>,
+    pub staging_bytes: u64,
     pub budget: u64,
     pub effective_budget: u64,
     pub accounting: CacheAccounting,
@@ -250,12 +266,14 @@ pub fn scan(cfg: &Config, refresh: bool) -> Usage {
 fn scan_with(cfg: &Config, refresh: bool, mbx_max_age_ms: u64) -> Usage {
     let sharing = dedupe::Sharing::load(cfg);
     let mut pools = Vec::new();
+    let mut staging = Vec::new();
     if let Ok(rd) = fs::read_dir(cfg.cache_dir.join("pools")) {
         for e in rd.flatten() {
             let dir = e.path();
             if !dir.is_dir() {
                 continue;
             }
+            staging.extend(seed_staging(&dir, cfg.accounting));
             let info = read_json::<PoolInfo>(&dir.join("pool.json")).unwrap_or_default();
             let name = e.file_name().to_string_lossy().to_string();
             let mut members = Vec::new();
@@ -339,8 +357,10 @@ fn scan_with(cfg: &Config, refresh: bool, mbx_max_age_ms: u64) -> Usage {
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => 0,
         Err(_) => estimates.values().copied().sum(),
     };
+    let staging_bytes = staging.iter().map(|s| s.size).sum::<u64>();
     let total = pools.iter().map(|p| p.size()).sum::<u64>()
         + runs.iter().map(|r| r.size).sum::<u64>()
+        + staging_bytes
         + trash_bytes;
     let free_disk = util::free_disk_bytes(&cfg.cache_dir);
     let (mbx, mbx_note) = if cfg.backend == CargoBackend::Mbx {
@@ -375,6 +395,8 @@ fn scan_with(cfg: &Config, refresh: bool, mbx_max_age_ms: u64) -> Usage {
         runs,
         total,
         trash_bytes,
+        staging,
+        staging_bytes,
         budget: cfg.budget,
         accounting: cfg.accounting,
         free_disk,
@@ -386,6 +408,28 @@ fn scan_with(cfg: &Config, refresh: bool, mbx_max_age_ms: u64) -> Usage {
     };
     usage.budget_state();
     usage
+}
+
+/// The seeding clones in a pool dir, busy while their member's lock is held
+/// (`Pool::lease` holds it through `seed_member`).
+fn seed_staging(pool_dir: &Path, mode: CacheAccounting) -> Vec<StagingEntry> {
+    let mut found = Vec::new();
+    for e in fs::read_dir(pool_dir).into_iter().flatten().flatten() {
+        let name = e.file_name().to_string_lossy().into_owned();
+        let Some(id) = name
+            .strip_prefix(".seed-m")
+            .and_then(|id| id.parse::<usize>().ok())
+        else {
+            continue;
+        };
+        let lock = pool_dir.join(format!("m{id}.lock"));
+        found.push(StagingEntry {
+            size: util::size_for(&e.path(), mode).unwrap_or(0),
+            busy: lock::is_held(&lock),
+            dir: e.path(),
+        });
+    }
+    found
 }
 
 pub fn effective_budget(budget: u64, min_free: u64, used: u64, free: Option<u64>) -> u64 {
@@ -659,6 +703,36 @@ fn gc_once(cfg: &Config, opts: &Options) -> Report {
             );
         }
     }
+    // 1b. seeding clones a killed seeding left behind, under their member's
+    // lock so a seeding that starts meanwhile is not cut short
+    for st in usage.staging.iter().filter(|s| !s.busy) {
+        let Some(id) = st.dir.file_name().and_then(|n| {
+            n.to_string_lossy()
+                .strip_prefix(".seed-m")?
+                .parse::<usize>()
+                .ok()
+        }) else {
+            continue;
+        };
+        let Some(pool_dir) = st.dir.parent() else {
+            continue;
+        };
+        let Ok(Some(_l)) = lock::try_lock(&pool_dir.join(format!("m{id}.lock"))) else {
+            continue;
+        };
+        reclaim(
+            &st.dir,
+            st.size,
+            dry,
+            &trash,
+            true,
+            &mut report,
+            format!(
+                "remove abandoned seed clone {}",
+                rel(&cfg.cache_dir, &st.dir)
+            ),
+        );
+    }
     // 2. inside idle members
     let mut pruned = BTreeMap::new();
     // Pruning a copy that another member shares frees none of its blocks.
@@ -922,6 +996,8 @@ fn gc_once(cfg: &Config, opts: &Options) -> Report {
         remaining.total = total;
         // Dry-run trash cleanup is projected as successful, like other actions.
         remaining.trash_bytes = 0;
+        remaining.staging.retain(|s| s.busy);
+        remaining.staging_bytes = remaining.staging.iter().map(|s| s.size).sum();
         remaining.budget_state();
     }
     report.observe(&remaining);
@@ -1272,6 +1348,18 @@ pub fn render(u: &Usage) -> String {
         s.push_str(&format!(
             "trash: {} (pending removal, included in total)\n",
             human_bytes(u.trash_bytes)
+        ));
+    }
+    for st in &u.staging {
+        s.push_str(&format!(
+            "seed clone {}: {} ({}, included in total)\n",
+            st.dir.display(),
+            human_bytes(st.size),
+            if st.busy {
+                "seeding"
+            } else {
+                "abandoned; gc removes it"
+            }
         ));
     }
     for p in &u.pools {

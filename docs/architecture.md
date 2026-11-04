@@ -331,7 +331,7 @@ retained when permissions prevent remeasurement.
 
 GC prunes artifacts in five stages from cheapest to most aggressive, skipping busy members:
 
-1. **Trash cleanup**: deletes leftover directories in `trash/`
+1. **Trash cleanup**: deletes leftover directories in `trash/`, and the `.seed-m<id>` clone a killed member seeding left behind. A clone whose member lock is held belongs to a running seeding: it stays, but its bytes count toward the budget like any other cache usage (`staging` in `cache ls --json`)
 2. **Stale incremental & unit artifacts** (inside idle members)
    - Incremental sessions other than the newest finalized session per crate
    - Incremental crate directories untouched for `incremental_days` (default: `3`)
