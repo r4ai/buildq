@@ -221,6 +221,13 @@ running build. Busy artifacts are protected. Use `buildq cache ls --refresh`
 or `buildq gc --json` to see remaining overflow and its reason. GC can exit
 successfully while still over budget when busy artifacts prevent reclamation.
 
+A plain `cache ls` reuses member sizes measured within the last minute, and a
+busy member's size for as long as its build runs, so the total can lag a
+growing build. Such a total is marked `estimated`, with how many sizes were
+reused, how old the oldest is, and how many of them are busy (`sizes` in
+`--json`: `state`, `estimated_members`, `busy_estimated_members`,
+`oldest_estimate_ms`). `--refresh` measures every member.
+
 A completed member larger than the entire budget warns that GC may remove it,
 causing another cold build next time. Increase `budget` to fit the working set
 or reduce build artifacts. Oversized idle members have no retention exemption.
