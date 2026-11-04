@@ -361,8 +361,15 @@ def parse_ps_args(text: str) -> dict[int, str]:
 def relevant_processes(
     rows: Iterable[Mapping[str, object]], groups: Iterable[int]
 ) -> list[dict[str, object]]:
+    """Processes in the runner's job groups (``owned``), plus every other
+    buildq, cargo or rustc on the host, which may belong to unrelated queues
+    and only tells host-wide pressure."""
     wanted = set(groups)
-    return [dict(r) for r in rows if r["pgid"] in wanted or r["comm"] in PROCESS_NAMES]
+    return [
+        {**r, "owned": r["pgid"] in wanted}
+        for r in rows
+        if r["pgid"] in wanted or r["comm"] in PROCESS_NAMES
+    ]
 
 
 def busy_holders(status: Mapping[str, object]) -> list[dict]:
@@ -553,8 +560,25 @@ def summarize(records: Sequence[Mapping[str, object]], now: float) -> dict[str, 
             (int((s.get("cache") or {}).get("trash_bytes", 0)) for s in samples),
             default=0,
         ),
+        # The runner's own job groups (live, or dead but not yet empty).
+        # Samples from before `owned` existed count every row, as they did.
         "max_tree_rss_kb": max(
-            (sum(p["rss_kb"] for p in s.get("processes", [])) for s in samples),
+            (
+                sum(p["rss_kb"] for p in s.get("processes", []) if p.get("owned", True))
+                for s in samples
+            ),
+            default=0,
+        ),
+        # Every buildq/cargo/rustc on the host, other queues' builds included.
+        "max_host_named_rss_kb": max(
+            (
+                sum(
+                    p["rss_kb"]
+                    for p in s.get("processes", [])
+                    if p.get("comm") in PROCESS_NAMES
+                )
+                for s in samples
+            ),
             default=0,
         ),
         "queue_wait": history[-1]["stats"] if history else None,
