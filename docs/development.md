@@ -68,6 +68,19 @@ Runs real `cargo` builds across two Git worktrees on `tests/fixtures/sample-ws` 
 cargo test --test e2e -- --ignored --nocapture
 ```
 
+### Remote execution against a real SSH server
+
+`tests/ssh.rs` starts a private `sshd` on 127.0.0.1 with throwaway keys and runs
+`buildq run --host` through it with both the git and the rsync transport: the
+snapshot push, the remote checkout (in a worktree whose name contains a space),
+the command's exit code, host environment, and `--fetch` all cross real ssh and scp.
+It needs `sshd`, `ssh`, `ssh-keygen`, `scp`, and `rsync`, and prints a note and
+passes when one is missing.
+
+```sh
+cargo test --test ssh -- --ignored --nocapture
+```
+
 ### mbx backend against a real mbx
 
 `mbx_backend_runs_against_a_real_mbx` runs `[cargo] backend = "mbx"` through a real
