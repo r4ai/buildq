@@ -800,6 +800,9 @@ pub fn run_projected(
             .sum();
         let batches = wanted.div_ceil(opts.max_index.max(1)).max(1) as u64;
         let resume = if n == 0 { resume.as_ref() } else { None };
+        // Across batches too: a hard-linked inode pair reached through
+        // another name in a later batch is not compared or counted again.
+        let mut planned = Planned::default();
         for batch in 0..batches {
             if report.stopped() {
                 break;
@@ -808,7 +811,14 @@ pub fn run_projected(
             let keep =
                 |key: u64| counts.get(&key).is_some_and(|&c| c > 1) && key % batches == batch;
             let groups = index(opts, scope, pools, excluded, &keep, &mut report);
-            share_scope(&groups, opts, resume, &mut ledger, &mut report);
+            share_scope(
+                &groups,
+                opts,
+                resume,
+                &mut planned,
+                &mut ledger,
+                &mut report,
+            );
         }
     }
     if !report.read_limited && report.unsupported.is_none() {
@@ -853,10 +863,10 @@ fn share_scope(
     groups: &BTreeMap<GroupKey, Vec<Candidate>>,
     opts: &Options,
     resume: Option<&[(String, usize); 2]>,
+    planned: &mut Planned,
     ledger: &mut Ledger,
     report: &mut Report,
 ) {
-    let mut planned = Planned::default();
     let mut prints = Prints::new(ledger);
     let mut first = true;
     while !report.stopped() {
@@ -870,7 +880,7 @@ fn share_scope(
             &mut errors,
             ledger,
             resume,
-            &mut planned,
+            planned,
             counts,
         );
         report.read_bytes += std::mem::take(&mut prints.read);
@@ -1192,8 +1202,9 @@ fn index(
         excluded,
         &mut || {},
         &mut |dir, name, id, path, md, key| {
-            // Every name of a hard-linked inode, so aliases can be filled in.
-            if !keep(key) && nlink(md) < 2 {
+            // Only this batch's keys, hard-linked or not: other names of a
+            // kept inode are found below, so memory stays bounded (#140).
+            if !keep(key) {
                 return;
             }
             let rel = path.strip_prefix(dir).unwrap_or(path);
@@ -1212,24 +1223,58 @@ fn index(
                 });
         },
     );
-    link_aliases(&mut groups);
     groups.retain(|_, copies| copies.len() > 1);
+    link_aliases(opts, pools, excluded, &mut groups);
     report.candidates += groups.values().map(Vec::len).sum::<usize>();
     report.index_ms += started.elapsed().as_millis() as u64;
     groups
 }
 
 /// Fills in the other names each hard-linked candidate has in its member.
-fn link_aliases(groups: &mut BTreeMap<GroupKey, Vec<Candidate>>) {
-    let mut names: BTreeMap<(String, usize, (u64, u64)), Vec<PathBuf>> = BTreeMap::new();
+/// Only the inodes of these candidates are looked for, so another walk of
+/// just their members collects only their names, whatever the batch.
+fn link_aliases(
+    opts: &Options,
+    pools: &[PathBuf],
+    excluded: &dyn Fn(&Path) -> bool,
+    groups: &mut BTreeMap<GroupKey, Vec<Candidate>>,
+) {
+    type Linked = (String, usize, (u64, u64));
+    let mut names: BTreeMap<Linked, Vec<PathBuf>> = BTreeMap::new();
     for c in groups.values().flatten() {
         if let Some(id) = file_id(&c.md).filter(|_| nlink(&c.md) > 1) {
-            names
-                .entry((c.pool.clone(), c.member, id))
-                .or_default()
-                .push(c.rel.clone());
+            names.insert((c.pool.clone(), c.member, id), Vec::new());
         }
     }
+    if names.is_empty() {
+        return;
+    }
+    let members: BTreeSet<(String, usize)> =
+        names.keys().map(|(p, m, _)| (p.clone(), *m)).collect();
+    let in_scope: Vec<PathBuf> = pools
+        .iter()
+        .filter(|p| {
+            let name = p.file_name().map(|n| n.to_string_lossy().into_owned());
+            members.iter().any(|(pool, _)| Some(pool) == name.as_ref())
+        })
+        .cloned()
+        .collect();
+    walk_scope(
+        opts,
+        &in_scope,
+        excluded,
+        &mut || {},
+        &mut |dir, name, id, path, md, _| {
+            if nlink(md) < 2 || !members.contains(&(name.to_string(), id)) {
+                return;
+            }
+            if let Some(all) =
+                file_id(md).and_then(|ino| names.get_mut(&(name.to_string(), id, ino)))
+            {
+                all.push(path.strip_prefix(dir).unwrap_or(path).to_path_buf());
+            }
+        },
+    );
     for c in groups.values_mut().flatten() {
         if let Some(id) = file_id(&c.md).filter(|_| nlink(&c.md) > 1)
             && let Some(all) = names.get(&(c.pool.clone(), c.member, id))
