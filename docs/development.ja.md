@@ -205,7 +205,8 @@ RSS は `page_cache_kb` (Linux の `/proc/meminfo`) と別に記録する。
 | `storage_policy` | アイドル中に予算超過が 3 サンプル連続、またはアイドル中の空きが `--min-free` 未満 |
 | `accounting_matches_disk` | アイドル中の `du` が buildq の報告値 (trash を含む) の 25% + 256 MiB を超過 |
 
-`max_du_bytes`・`min_free_disk_bytes`・`max_trash_bytes`・`max_tree_rss_kb`・`queue_wait` (`history` から求めたスロット待ちの最大値と p95) でリソースの全体像を確認する。
+`max_du_bytes`・`min_free_disk_bytes`・`max_trash_bytes`・`max_tree_rss_kb`・`max_host_named_rss_kb`・`queue_wait` (`history` から求めたスロット待ちの最大値と p95) でリソースの全体像を確認する。
+`max_tree_rss_kb` はランナー自身のジョブのプロセスグループ (buildq が終了してもプロセスが残っているグループを含む) の合計で、`setsid` などでグループを抜けたプロセスは数えない。`max_host_named_rss_kb` は他のキューのビルドも含め、ホスト上のすべての `buildq`・`cargo`・`rustc` の合計で、ホスト全体の負荷の目安にとどまる。どちらもプロセスごとの RSS の合計なので、共有マッピングは重複して数えられる。
 OSS リポジトリで検査するのは終了コードのみで、出力の正しさはフィクスチャで検証する。
 
 ## Container Process Lifecycle

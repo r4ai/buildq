@@ -205,7 +205,8 @@ Read `summary.json` from `passed`, then `invariants.<name>.examples` for the fir
 | `storage_policy` | Over budget while idle for 3 consecutive samples, or free space below `--min-free` while idle |
 | `accounting_matches_disk` | While idle, `du` exceeds buildq's reported total plus trash by more than 25% plus 256 MiB |
 
-`max_du_bytes`, `min_free_disk_bytes`, `max_trash_bytes`, `max_tree_rss_kb`, and `queue_wait` (maximum and p95 slot wait from `history`) give the remaining resource picture.
+`max_du_bytes`, `min_free_disk_bytes`, `max_trash_bytes`, `max_tree_rss_kb`, `max_host_named_rss_kb`, and `queue_wait` (maximum and p95 slot wait from `history`) give the remaining resource picture.
+`max_tree_rss_kb` sums the processes in the runner's own job groups, including groups whose buildq has exited but whose processes remain; a process that left its group (for example with `setsid`) is not counted. `max_host_named_rss_kb` sums every `buildq`, `cargo`, and `rustc` on the host, including other queues' builds, and only indicates host-wide pressure. Both sum RSS per process, so shared mappings are counted more than once.
 For OSS repositories only exit codes are checked; output correctness is verified with the fixtures.
 
 ## Container Process Lifecycle

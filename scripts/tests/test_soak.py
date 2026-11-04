@@ -24,6 +24,7 @@ from buildq_bench.soak import (
     parse_size,
     plan_action,
     read_marker,
+    relevant_processes,
     resolve_repos,
     summarize,
     wait_stats,
@@ -281,6 +282,16 @@ def test_gc_problems_surface_failed_reclamation() -> None:
     assert gc_problems({"dedupe": {"errors": ["EIO"]}})
 
 
+def test_only_job_groups_are_owned() -> None:
+    rows = [
+        {"pid": 1, "ppid": 0, "pgid": 7, "rss_kb": 1, "comm": "sh"},
+        {"pid": 2, "ppid": 1, "pgid": 9, "rss_kb": 1, "comm": "cargo"},
+        {"pid": 3, "ppid": 1, "pgid": 9, "rss_kb": 1, "comm": "bash"},
+    ]
+    found = relevant_processes(rows, [7])
+    assert [(p["pid"], p["owned"]) for p in found] == [(1, True), (2, False)]
+
+
 def test_ps_parsing() -> None:
     text = "  10     1    10   2048 /usr/bin/cargo\n 11 10 10 100 rustc\nbad line\n"
     rows = parse_ps(text)
@@ -340,7 +351,12 @@ def records_for_summary() -> list[dict]:
             "du_bytes": 50,
             "free_disk": 900,
             "idle": True,
-            "processes": [{"rss_kb": 10}, {"rss_kb": 5}],
+            "processes": [
+                {"rss_kb": 10, "comm": "rustc", "owned": True},
+                {"rss_kb": 5, "comm": "sh", "owned": True},
+                # Another queue's build on the same host (#145).
+                {"rss_kb": 1000, "comm": "rustc", "owned": False},
+            ],
             "violations": [],
         },
         {
@@ -360,6 +376,7 @@ def test_clean_run_passes_every_invariant() -> None:
     assert result["min_free_disk_bytes"] == 900
     assert result["max_trash_bytes"] == 7
     assert result["max_tree_rss_kb"] == 15
+    assert result["max_host_named_rss_kb"] == 1010
     assert result["queue_wait"]["max_wait_s"] == 4.0
     json.dumps(result)
 
