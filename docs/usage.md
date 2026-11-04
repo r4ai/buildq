@@ -189,6 +189,10 @@ to set (mbx's config, `MBX_GC_AUTO`, and its budget variables); if mbx alone
 outgrows `cache.budget`, GC empties the idle pool and warns. The measurement
 runs `mbx cache stats` and walks the store, so GC and admission reuse it for
 five minutes (`<cache>/mbx-usage.json`); a failing mbx is then not budgeted.
+Each measurement belongs to the setup that took it: the mbx executable, the
+`accounting` mode, and the `MBX_*`, home, and XDG variables mbx finds its
+store with. Callers that share a buildq cache but use another mbx store
+(another `MBX_CACHE_DIR`, say) never reuse each other's budget or store path.
 The `min_free` reserve already covers mbx on the cache volume; if the store
 lives on another volume, a build is also refused (or stopped) when that volume
 has `min_free` or less, since only mbx's GC can free it.

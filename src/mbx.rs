@@ -5,7 +5,8 @@
 //! volume when it differs from the cache volume. mbx's own GC limits stay the
 //! user's (mbx's config or `MBX_GC_*`).
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
+use std::ffi::OsString;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -61,15 +62,69 @@ impl MbxUsage {
     }
 }
 
-/// The last measurement, shared by every buildq process (`mbx-usage.json`).
-#[derive(Debug, Serialize, Deserialize)]
+/// One measurement (or failure to get one).
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct Cached {
     at_ms: u64,
     usage: Result<MbxUsage, String>,
 }
 
+/// The last measurement of each mbx setup, shared by every buildq process
+/// (`mbx-usage.json`). Callers sharing `BUILDQ_CACHE` may run another mbx or
+/// point it at another store (`MBX_CACHE_DIR`), so each measurement belongs
+/// to the setup that took it and is never another one's budget or store.
+#[derive(Debug, Default, Serialize, Deserialize)]
+struct CacheFile {
+    by_setup: BTreeMap<String, Cached>,
+}
+
+/// Setups kept in `mbx-usage.json`; the oldest go first.
+const MAX_SETUPS: usize = 16;
+
 fn cache_path(cfg: &Config) -> PathBuf {
     cfg.cache_dir.join("mbx-usage.json")
+}
+
+/// What decides which store mbx measures and how buildq counts it: the mbx
+/// executable, buildq's accounting mode, and the environment mbx reads its
+/// store and limits from (`MBX_*`, and the home and XDG directories its
+/// defaults derive from).
+fn setup(cfg: &Config) -> String {
+    setup_of(
+        &crate::job::find_mbx(cfg),
+        cfg.accounting,
+        std::env::vars_os(),
+    )
+}
+
+fn setup_of(
+    mbx: &Result<PathBuf, String>,
+    accounting: CacheAccounting,
+    env: impl Iterator<Item = (OsString, OsString)>,
+) -> String {
+    const DIRS: &[&str] = &[
+        "HOME",
+        "XDG_CACHE_HOME",
+        "XDG_CONFIG_HOME",
+        "XDG_DATA_HOME",
+        "LOCALAPPDATA",
+        "APPDATA",
+        "USERPROFILE",
+    ];
+    let mut vars: Vec<String> = env
+        .filter_map(|(k, v)| {
+            let k = k.into_string().ok()?;
+            (k.starts_with("MBX_") || DIRS.contains(&k.as_str()))
+                .then(|| format!("{k}={}", v.to_string_lossy()))
+        })
+        .collect();
+    vars.sort();
+    let mbx = match mbx {
+        Ok(p) => p.display().to_string(),
+        Err(e) => format!("unavailable: {e}"),
+    };
+    let key = format!("{mbx}\0{}\0{}", accounting.name(), vars.join("\0"));
+    util::short_hash(&key)
 }
 
 /// mbx's usage for a pool of `pool_total` bytes in `members`, reusing a
@@ -82,19 +137,35 @@ pub fn usage(
     max_age_ms: u64,
 ) -> Result<MbxUsage, String> {
     let path = cache_path(cfg);
-    let cached = util::read_json::<Cached>(&path)
+    let key = setup(cfg);
+    let cached = util::read_json::<CacheFile>(&path)
+        .and_then(|mut f| f.by_setup.remove(&key))
         .filter(|c| util::now_ms().saturating_sub(c.at_ms) < max_age_ms);
     let usage = match cached {
         Some(c) => c.usage,
         None => {
             let usage = scan(cfg, members);
-            let _ = util::write_json(
-                &path,
-                &Cached {
+            // Merged into the latest map under a lock, not the one read
+            // before the (slow) scan: another process may have added its
+            // own setup meanwhile.
+            let _lock = crate::lock::lock(&cfg.cache_dir.join("mbx-usage.lock"));
+            let mut file = util::read_json::<CacheFile>(&path).unwrap_or_default();
+            file.by_setup.insert(
+                key,
+                Cached {
                     at_ms: util::now_ms(),
                     usage: usage.clone(),
                 },
             );
+            while file.by_setup.len() > MAX_SETUPS {
+                let oldest = file
+                    .by_setup
+                    .iter()
+                    .min_by_key(|(_, c)| c.at_ms)
+                    .map(|(k, _)| k.clone());
+                file.by_setup.remove(&oldest.unwrap_or_default());
+            }
+            let _ = util::write_json(&path, &file);
             usage
         }
     };
@@ -105,9 +176,12 @@ pub fn usage(
     })
 }
 
-/// The store of the last successful measurement, without running mbx.
+/// The store of this setup's last successful measurement, without running
+/// mbx.
 pub fn cached_store(cfg: &Config) -> Option<PathBuf> {
-    util::read_json::<Cached>(&cache_path(cfg))?
+    util::read_json::<CacheFile>(&cache_path(cfg))?
+        .by_setup
+        .remove(&setup(cfg))?
         .usage
         .ok()
         .map(|m| m.store)
@@ -254,6 +328,125 @@ mod tests {
             (5, 9, 0)
         );
         assert!(parse_stats(b"nope").is_err());
+    }
+
+    #[test]
+    fn setups_differ_by_mbx_store_environment_and_accounting() {
+        let env = |pairs: &[(&str, &str)]| {
+            pairs
+                .iter()
+                .map(|(k, v)| (OsString::from(k), OsString::from(v)))
+                .collect::<Vec<_>>()
+                .into_iter()
+        };
+        let mbx = Ok(PathBuf::from("/bin/mbx"));
+        let logical = CacheAccounting::Logical;
+        let a = setup_of(
+            &mbx,
+            logical,
+            env(&[("MBX_CACHE_DIR", "/a"), ("PATH", "/x")]),
+        );
+        // Unrelated variables and their order do not matter.
+        let same = env(&[("PATH", "/y"), ("MBX_CACHE_DIR", "/a"), ("TERM", "x")]);
+        assert_eq!(a, setup_of(&mbx, logical, same));
+        let b = setup_of(&mbx, logical, env(&[("MBX_CACHE_DIR", "/b")]));
+        assert_ne!(a, b);
+        let home = setup_of(&mbx, logical, env(&[("HOME", "/h")]));
+        assert_ne!(home, setup_of(&mbx, logical, env(&[("HOME", "/g")])));
+        let other = Ok(PathBuf::from("/opt/mbx"));
+        let env_a = || env(&[("MBX_CACHE_DIR", "/a")]);
+        assert_ne!(a, setup_of(&other, logical, env_a()));
+        assert_ne!(a, setup_of(&Err("none".into()), logical, env_a()));
+        assert_ne!(a, setup_of(&mbx, CacheAccounting::Allocated, env_a()));
+    }
+
+    /// Two setups sharing one buildq cache within the TTL, back and forth:
+    /// each sees its own measurement and store, a failure included (#139).
+    #[cfg(unix)]
+    #[test]
+    fn cached_measurements_belong_to_their_mbx() {
+        use std::os::unix::fs::PermissionsExt;
+        let d = tempfile::tempdir().unwrap();
+        let fake = |name: &str, store: &str, bytes: u64| {
+            let p = d.path().join(name);
+            std::fs::write(
+                &p,
+                format!(
+                    "#!/bin/sh\necho '{{\"store\":\"{store}\",\"combined_total_bytes\":{bytes}}}'\n"
+                ),
+            )
+            .unwrap();
+            std::fs::set_permissions(&p, std::fs::Permissions::from_mode(0o755)).unwrap();
+            p
+        };
+        let (a, b) = (
+            fake("mbx-a", "/store/a", 3_828_730),
+            fake("mbx-b", "/store/b", 0),
+        );
+        let mut cfg = Config::from_parts(
+            d.path().join("q"),
+            d.path().join("q/config.toml"),
+            crate::config::FileConfig::default(),
+        );
+        cfg.cache_dir = d.path().join("cache");
+        std::fs::create_dir_all(&cfg.cache_dir).unwrap();
+        let measure = |cfg: &Config| usage(cfg, &[], 0, CACHE_TTL_MS).map(|m| m.combined_bytes);
+        cfg.mbx = Some(a.clone());
+        assert_eq!(measure(&cfg), Ok(3_828_730));
+        cfg.mbx = Some(b.clone());
+        assert_eq!(measure(&cfg), Ok(0));
+        assert_eq!(cached_store(&cfg), Some(PathBuf::from("/store/b")));
+        // A missing mbx is another setup: its failure is cached on its own.
+        std::fs::remove_file(&a).unwrap();
+        cfg.mbx = Some(a);
+        assert!(measure(&cfg).is_err());
+        assert_eq!(cached_store(&cfg), None);
+        // B stays healthy next to the cached failure.
+        cfg.mbx = Some(b);
+        assert_eq!(measure(&cfg), Ok(0));
+        // Back to A within the TTL: its own measurement, without rerunning
+        // it (this mbx would now report 1 byte).
+        cfg.mbx = Some(fake("mbx-a", "/store/a", 1));
+        assert_eq!(measure(&cfg), Ok(3_828_730), "A's cached measurement");
+        assert_eq!(cached_store(&cfg), Some(PathBuf::from("/store/a")));
+    }
+
+    /// Setups measured at the same time keep each other's entries.
+    #[cfg(unix)]
+    #[test]
+    fn concurrent_measurements_of_different_setups_both_stay_cached() {
+        use std::os::unix::fs::PermissionsExt;
+        let d = tempfile::tempdir().unwrap();
+        let cache_dir = d.path().join("cache");
+        std::fs::create_dir_all(&cache_dir).unwrap();
+        let cfgs: Vec<Config> = (0..8)
+            .map(|i| {
+                let p = d.path().join(format!("mbx-{i}"));
+                // Slow enough that every scan overlaps the others.
+                std::fs::write(
+                    &p,
+                    format!("#!/bin/sh\nsleep 0.3\necho '{{\"store\":\"/s/{i}\"}}'\n"),
+                )
+                .unwrap();
+                std::fs::set_permissions(&p, std::fs::Permissions::from_mode(0o755)).unwrap();
+                let mut cfg = Config::from_parts(
+                    d.path().join("q"),
+                    d.path().join("q/config.toml"),
+                    crate::config::FileConfig::default(),
+                );
+                cfg.cache_dir = cache_dir.clone();
+                cfg.mbx = Some(p);
+                cfg
+            })
+            .collect();
+        std::thread::scope(|s| {
+            for cfg in &cfgs {
+                s.spawn(move || usage(cfg, &[], 0, CACHE_TTL_MS).unwrap());
+            }
+        });
+        for (i, cfg) in cfgs.iter().enumerate() {
+            assert_eq!(cached_store(cfg), Some(PathBuf::from(format!("/s/{i}"))));
+        }
     }
 
     #[cfg(unix)]
