@@ -1670,3 +1670,84 @@ fn mbx_beyond_the_whole_budget_stays_over_budget_with_an_empty_pool() {
     assert_eq!(u["over_budget_bytes"], 5000 - 1024);
     check(&u);
 }
+
+/// Evicting the last pool member that hard-links store files makes those
+/// bytes mbx's again: GC must not keep the old rebate, keep a member that
+/// no longer fits, and claim compliance (#151).
+#[cfg(unix)]
+#[test]
+fn gc_drops_the_mbx_rebate_of_evicted_hard_links() {
+    use std::os::unix::fs::PermissionsExt;
+    let e = Env::new();
+    let now = buildq::util::now_ms();
+    let pool = e.root.join("cache/pools/p");
+    let store = e.root.join("mbxstore/actions");
+    fs::create_dir_all(&store).unwrap();
+    fs::write(store.join("blob"), vec![1; 4000]).unwrap();
+    // m0, least recently used, links the store's blob; m1 is private.
+    for (id, used) in [(0, now - 10_000), (1, now)] {
+        let dir = pool.join(format!("m{id}"));
+        fs::create_dir_all(&dir).unwrap();
+        if id == 0 {
+            fs::hard_link(store.join("blob"), dir.join("blob")).unwrap();
+        } else {
+            fs::write(dir.join("own"), vec![2; 3000]).unwrap();
+        }
+        let meta = serde_json::json!({ "id": id, "created_ms": used, "last_used_ms": used });
+        fs::write(pool.join(format!("m{id}.json")), meta.to_string()).unwrap();
+    }
+    let info = serde_json::json!({ "created_ms": now, "last_used_ms": now });
+    fs::write(pool.join("pool.json"), info.to_string()).unwrap();
+    let mbx = e.root.join("mbxbin/mbx");
+    fs::create_dir_all(mbx.parent().unwrap()).unwrap();
+    let report = format!(
+        r#"{{"version":1,"store":"{}","total_bytes":4000,"combined_total_bytes":4000}}"#,
+        store.display()
+    );
+    fs::write(&mbx, format!("#!/bin/sh\ncat <<'JSON'\n{report}\nJSON\n")).unwrap();
+    fs::set_permissions(&mbx, fs::Permissions::from_mode(0o755)).unwrap();
+    // Pool 7000 (4000 of it shared with mbx) + mbx 4000 - 4000 shared = 7000.
+    fs::write(
+        e.root.join("q/config.toml"),
+        format!(
+            "[cache]\nmin_free='0'\naccounting='logical'\nbudget='6900'\n[cargo]\nbackend = \"mbx\"\nmbx = {mbx:?}\n"
+        ),
+    )
+    .unwrap();
+    let json = |args: &[&str]| {
+        let out = e.cmd(1).args(args).output().unwrap();
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()
+    };
+    let u = json(&["cache", "ls", "--refresh", "--json"]);
+    assert_eq!(u["mbx"]["shared_with_mbx_bytes"], 4000, "{u}");
+    assert_eq!(u["over_budget"], true, "{u}");
+
+    // Evicting m0 alone would leave 3000 pool bytes next to 4000 of mbx's
+    // own: the dry run already plans m1 too.
+    let dry = json(&["gc", "--dry-run", "--json"]);
+    let planned = dry["actions"].to_string();
+    assert!(
+        planned.contains("p/m0") && planned.contains("p/m1"),
+        "{dry}"
+    );
+    assert_eq!(dry["over_budget"], false, "{dry}");
+
+    let r = json(&["gc", "--json"]);
+    assert!(
+        !pool.join("m0").exists() && !pool.join("m1").exists(),
+        "{r}"
+    );
+    assert_eq!(r["over_budget"], false, "{r}");
+    assert_eq!(r["effective_budget"], 6900 - 4000, "{r}");
+    // Within the TTL, the measurement is reused but its overlap is walked
+    // again for the members that are left.
+    let u = json(&["cache", "ls", "--json"]);
+    assert_eq!(u["mbx"]["shared_with_mbx_bytes"], 0, "{u}");
+    assert_eq!(u["over_budget"], false, "{u}");
+    assert!(store.join("blob").exists());
+}

@@ -910,8 +910,27 @@ fn gc_once(cfg: &Config, opts: &Options) -> Report {
     };
     // Both live artifacts and trash contribute to usage. Deleting either
     // decreases used and increases free equally in the dry-run projection.
-    let budget = usage.effective_budget;
+    let mut budget = usage.effective_budget;
     report.effective_budget = budget;
+    // Store files the pool also links are not counted as mbx's; evicting
+    // their last pool holder makes them mbx's again, shrinking the budget
+    // left for the pool (#151).
+    let mut rebate = usage.mbx.as_ref().map(|m| {
+        let all: Vec<(&PoolEntry, &MemberEntry)> = usage
+            .pools
+            .iter()
+            .flat_map(|p| p.members.iter().map(move |m| (p, m)))
+            .collect();
+        let dirs: Vec<&Path> = all.iter().map(|(_, m)| m.dir.as_path()).collect();
+        let held = mbx::linked_inodes(&m.store, &dirs, cfg.accounting);
+        let mut holders: BTreeMap<(u64, u64), (usize, u64)> = BTreeMap::new();
+        for (id, bytes) in held.iter().flatten() {
+            holders.entry(*id).or_insert((0, *bytes)).0 += 1;
+        }
+        let by_member: BTreeMap<PathBuf, mbx::Linked> =
+            all.iter().map(|(_, m)| m.dir.clone()).zip(held).collect();
+        (by_member, holders)
+    });
     let mut runs: Vec<_> = usage
         .runs
         .iter()
@@ -984,6 +1003,17 @@ fn gc_once(cfg: &Config, opts: &Options) -> Report {
             // A failed deletion, even from trash, leaves shared blocks in place.
             if report.failed_deletions == failures {
                 evicted.insert((p.name.clone(), m.id));
+                if let Some((by_member, holders)) = rebate.as_mut() {
+                    for (id, _) in by_member.remove(&m.dir).unwrap_or_default() {
+                        if let Some((count, bytes)) = holders.get_mut(&id) {
+                            *count -= 1;
+                            if *count == 0 {
+                                budget = budget.saturating_sub(*bytes);
+                            }
+                        }
+                    }
+                    report.effective_budget = budget;
+                }
             }
             drop(l);
             // Keep the lock inode so a concurrent lease cannot acquire a
@@ -998,6 +1028,8 @@ fn gc_once(cfg: &Config, opts: &Options) -> Report {
         remaining.trash_bytes = 0;
         remaining.staging.retain(|s| s.busy);
         remaining.staging_bytes = remaining.staging.iter().map(|s| s.size).sum();
+        // Planned evictions' lost store rebates, which a scan cannot see yet.
+        remaining.effective_budget = remaining.effective_budget.min(budget);
         remaining.budget_state();
     }
     report.observe(&remaining);
