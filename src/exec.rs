@@ -179,10 +179,20 @@ mod nix {
     }
 
     /// `kill(2)` or `sigqueue(3)`, unlike a terminal, signals one process
-    /// unless asked otherwise.
+    /// unless asked otherwise. Linux marks such a signal with its `si_code`;
+    /// macOS records the sender's pid, which is 0 for a terminal's signal.
+    /// Elsewhere every signal is taken for the terminal's, as before.
     fn sent_by_process(info: *const libc::siginfo_t) -> bool {
+        if info.is_null() {
+            return false;
+        }
         // SAFETY: the kernel passes a valid siginfo to an SA_SIGINFO handler.
-        !info.is_null() && matches!(unsafe { (*info).si_code }, libc::SI_USER | libc::SI_QUEUE)
+        #[cfg(any(target_os = "linux", target_os = "android"))]
+        return matches!(unsafe { (*info).si_code }, libc::SI_USER | libc::SI_QUEUE);
+        #[cfg(target_vendor = "apple")]
+        return unsafe { (*info).si_pid } > 0;
+        #[allow(unreachable_code)]
+        false
     }
 
     pub extern "C" fn forward(sig: libc::c_int) {
