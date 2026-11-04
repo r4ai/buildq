@@ -193,6 +193,10 @@ Each measurement belongs to the setup that took it: the mbx executable, the
 `accounting` mode, and the `MBX_*`, home, and XDG variables mbx finds its
 store with. Callers that share a buildq cache but use another mbx store
 (another `MBX_CACHE_DIR`, say) never reuse each other's budget or store path.
+When pool members come or go, the reused measurement's overlap with the pool
+is walked again (without running mbx); within one GC, evicting the last member
+that links a store file counts that file as mbx's again, so the pool's budget
+shrinks before the next eviction decision.
 The `min_free` reserve already covers mbx on the cache volume; if the store
 lives on another volume, a build is also refused (or stopped) when that volume
 has `min_free` or less, since only mbx's GC can free it.

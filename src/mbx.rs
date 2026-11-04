@@ -67,6 +67,11 @@ impl MbxUsage {
 struct Cached {
     at_ms: u64,
     usage: Result<MbxUsage, String>,
+    /// The member dirs `shared_with_mbx_bytes` was measured over. Evicting
+    /// (or adding) a member changes what the pool shares with the store,
+    /// although mbx's own figures stay valid (#151).
+    #[serde(default)]
+    members: Vec<PathBuf>,
 }
 
 /// The last measurement of each mbx setup, shared by every buildq process
@@ -138,34 +143,27 @@ pub fn usage(
 ) -> Result<MbxUsage, String> {
     let path = cache_path(cfg);
     let key = setup(cfg);
+    let mut current: Vec<PathBuf> = members.iter().map(|m| m.to_path_buf()).collect();
+    current.sort();
     let cached = util::read_json::<CacheFile>(&path)
         .and_then(|mut f| f.by_setup.remove(&key))
         .filter(|c| util::now_ms().saturating_sub(c.at_ms) < max_age_ms);
     let usage = match cached {
-        Some(c) => c.usage,
-        None => {
+        Some(c) if c.members == current || c.usage.is_err() => c.usage,
+        // mbx's figures still hold; only the pool's overlap with the store
+        // is walked again, without running mbx.
+        Some(Cached {
+            at_ms,
+            usage: Ok(mut m),
+            ..
+        }) => {
+            m.shared_with_mbx_bytes = shared_bytes(&m.store, members, cfg.accounting);
+            store_entry(cfg, key, at_ms, Ok(m.clone()), current);
+            Ok(m)
+        }
+        _ => {
             let usage = scan(cfg, members);
-            // Merged into the latest map under a lock, not the one read
-            // before the (slow) scan: another process may have added its
-            // own setup meanwhile.
-            let _lock = crate::lock::lock(&cfg.cache_dir.join("mbx-usage.lock"));
-            let mut file = util::read_json::<CacheFile>(&path).unwrap_or_default();
-            file.by_setup.insert(
-                key,
-                Cached {
-                    at_ms: util::now_ms(),
-                    usage: usage.clone(),
-                },
-            );
-            while file.by_setup.len() > MAX_SETUPS {
-                let oldest = file
-                    .by_setup
-                    .iter()
-                    .min_by_key(|(_, c)| c.at_ms)
-                    .map(|(k, _)| k.clone());
-                file.by_setup.remove(&oldest.unwrap_or_default());
-            }
-            let _ = util::write_json(&path, &file);
+            store_entry(cfg, key, util::now_ms(), usage.clone(), current);
             usage
         }
     };
@@ -174,6 +172,37 @@ pub fn usage(
             (pool_total + m.combined_bytes).saturating_sub(m.shared_with_mbx_bytes);
         m
     })
+}
+
+/// Records one setup's measurement in the latest map, under a lock: another
+/// process may have added its own setup meanwhile.
+fn store_entry(
+    cfg: &Config,
+    key: String,
+    at_ms: u64,
+    usage: Result<MbxUsage, String>,
+    members: Vec<PathBuf>,
+) {
+    let path = cache_path(cfg);
+    let _lock = crate::lock::lock(&cfg.cache_dir.join("mbx-usage.lock"));
+    let mut file = util::read_json::<CacheFile>(&path).unwrap_or_default();
+    file.by_setup.insert(
+        key,
+        Cached {
+            at_ms,
+            usage,
+            members,
+        },
+    );
+    while file.by_setup.len() > MAX_SETUPS {
+        let oldest = file
+            .by_setup
+            .iter()
+            .min_by_key(|(_, c)| c.at_ms)
+            .map(|(k, _)| k.clone());
+        file.by_setup.remove(&oldest.unwrap_or_default());
+    }
+    let _ = util::write_json(&path, &file);
 }
 
 /// The store of this setup's last successful measurement, without running
@@ -284,6 +313,46 @@ pub fn shared_bytes(store: &Path, members: &[&Path], mode: CacheAccounting) -> u
         });
     }
     total
+}
+
+/// What each member shares with the store: per member, the inodes it holds
+/// that the store links too, with their bytes. GC uses it to see when an
+/// eviction removes the pool's last hold on a store file, which then counts
+/// as mbx's again.
+/// A member's inodes that the store links too, with their bytes.
+pub type Linked = Vec<((u64, u64), u64)>;
+
+#[cfg(unix)]
+pub fn linked_inodes(store: &Path, members: &[&Path], mode: CacheAccounting) -> Vec<Linked> {
+    use std::os::unix::fs::MetadataExt;
+    let mut linked = BTreeSet::new();
+    util::walk(store, &mut |_, md| {
+        if md.nlink() > 1 {
+            linked.insert((md.dev(), md.ino()));
+        }
+    });
+    members
+        .iter()
+        .map(|m| {
+            let mut held = BTreeMap::new();
+            if !linked.is_empty() {
+                util::walk(m, &mut |p, md| {
+                    let id = (md.dev(), md.ino());
+                    if linked.contains(&id)
+                        && let Ok((_, bytes)) = util::file_footprint(p, md, mode)
+                    {
+                        held.insert(id, bytes);
+                    }
+                });
+            }
+            held.into_iter().collect()
+        })
+        .collect()
+}
+
+#[cfg(not(unix))]
+pub fn linked_inodes(_: &Path, members: &[&Path], _: CacheAccounting) -> Vec<Linked> {
+    vec![Vec::new(); members.len()]
 }
 
 #[cfg(not(unix))]
