@@ -236,6 +236,14 @@ Pick a directory with a **short path** on the same volume as your worktrees (dee
 - **Windows**: `C:\bq`
 - **Unix / macOS**: `/tmp/bq` or `/var/tmp/bq`
 
+When sandboxes run as **different users**, make the shared directory writable
+for all of them (for example `chmod 1777`, or a common group with `setgid`).
+Deduplication only replaces copies its user may replace: on Linux files the
+user owns or may write, on macOS files in member directories the user may
+write. Other copies are left for another user's pass and counted as
+`skipped_permission`, not reported as errors. A pass whose user cannot open
+the cache's `dedupe.lock` says so instead of reporting another pass as running.
+
 ### 2. Configure Sandbox Permissions
 
 - **Agent writable roots**
