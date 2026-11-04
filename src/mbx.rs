@@ -138,15 +138,18 @@ pub fn usage(
 ) -> Result<MbxUsage, String> {
     let path = cache_path(cfg);
     let key = setup(cfg);
-    let mut file = util::read_json::<CacheFile>(&path).unwrap_or_default();
-    let cached = file
-        .by_setup
-        .get(&key)
+    let cached = util::read_json::<CacheFile>(&path)
+        .and_then(|mut f| f.by_setup.remove(&key))
         .filter(|c| util::now_ms().saturating_sub(c.at_ms) < max_age_ms);
     let usage = match cached {
-        Some(c) => c.usage.clone(),
+        Some(c) => c.usage,
         None => {
             let usage = scan(cfg, members);
+            // Merged into the latest map under a lock, not the one read
+            // before the (slow) scan: another process may have added its
+            // own setup meanwhile.
+            let _lock = crate::lock::lock(&cfg.cache_dir.join("mbx-usage.lock"));
+            let mut file = util::read_json::<CacheFile>(&path).unwrap_or_default();
             file.by_setup.insert(
                 key,
                 Cached {
@@ -406,6 +409,44 @@ mod tests {
         cfg.mbx = Some(fake("mbx-a", "/store/a", 1));
         assert_eq!(measure(&cfg), Ok(3_828_730), "A's cached measurement");
         assert_eq!(cached_store(&cfg), Some(PathBuf::from("/store/a")));
+    }
+
+    /// Setups measured at the same time keep each other's entries.
+    #[cfg(unix)]
+    #[test]
+    fn concurrent_measurements_of_different_setups_both_stay_cached() {
+        use std::os::unix::fs::PermissionsExt;
+        let d = tempfile::tempdir().unwrap();
+        let cache_dir = d.path().join("cache");
+        std::fs::create_dir_all(&cache_dir).unwrap();
+        let cfgs: Vec<Config> = (0..8)
+            .map(|i| {
+                let p = d.path().join(format!("mbx-{i}"));
+                // Slow enough that every scan overlaps the others.
+                std::fs::write(
+                    &p,
+                    format!("#!/bin/sh\nsleep 0.3\necho '{{\"store\":\"/s/{i}\"}}'\n"),
+                )
+                .unwrap();
+                std::fs::set_permissions(&p, std::fs::Permissions::from_mode(0o755)).unwrap();
+                let mut cfg = Config::from_parts(
+                    d.path().join("q"),
+                    d.path().join("q/config.toml"),
+                    crate::config::FileConfig::default(),
+                );
+                cfg.cache_dir = cache_dir.clone();
+                cfg.mbx = Some(p);
+                cfg
+            })
+            .collect();
+        std::thread::scope(|s| {
+            for cfg in &cfgs {
+                s.spawn(move || usage(cfg, &[], 0, CACHE_TTL_MS).unwrap());
+            }
+        });
+        for (i, cfg) in cfgs.iter().enumerate() {
+            assert_eq!(cached_store(cfg), Some(PathBuf::from(format!("/s/{i}"))));
+        }
     }
 
     #[cfg(unix)]
