@@ -316,6 +316,44 @@ def parse_ps(text: str) -> list[dict[str, object]]:
     return rows
 
 
+# Cargo invocations buildq (or Cargo itself) runs before slot admission to
+# learn about a workspace; they compile nothing and hold no build slot.
+PROBE_SUBCOMMANDS = frozenset(
+    {"metadata", "locate-project", "pkgid", "read-manifest", "version", "help"}
+)
+# Global options that take a value before the subcommand.
+_CARGO_VALUE_FLAGS = frozenset({"--config", "-Z", "-C", "--color"})
+
+
+def cargo_role(args: str) -> str:
+    """``probe`` for a version or metadata query, else ``heavy``."""
+    words = args.split()[1:]  # argv[0] is cargo itself
+    i = 0
+    while i < len(words):
+        word = words[i]
+        if word in {"-V", "--version", "-vV", "-Vv"}:
+            return "probe"
+        if word.startswith("+") and i == 0:
+            i += 1
+        elif word in _CARGO_VALUE_FLAGS:
+            i += 2
+        elif word.startswith("-"):
+            i += 1
+        else:
+            return "probe" if word in PROBE_SUBCOMMANDS else "heavy"
+    return "probe"  # bare `cargo` prints help
+
+
+def parse_ps_args(text: str) -> dict[int, str]:
+    """Parse ``ps -o pid=,args=`` output."""
+    found: dict[int, str] = {}
+    for line in text.splitlines():
+        pid, _, args = line.strip().partition(" ")
+        if pid.isdigit():
+            found[int(pid)] = args.strip()
+    return found
+
+
 def relevant_processes(
     rows: Iterable[Mapping[str, object]], groups: Iterable[int]
 ) -> list[dict[str, object]]:
@@ -381,12 +419,20 @@ def evaluate_sample(sample: Mapping[str, object], limits: Limits) -> list[dict]:
                         f"({'free slot' if free_slot else 'slots busy'})",
                     }
                 )
-    cargos = sum(1 for p in processes if p["comm"] == "cargo" and p["pgid"] in live)
+    # Version and metadata probes run before admission and hold no slot.
+    cargos = sum(
+        1
+        for p in processes
+        if p["comm"] == "cargo"
+        and p["pgid"] in live
+        and p.get("role", "heavy") != "probe"
+    )
     if cargos > 2 * limits.slots:  # one cargo per build slot plus one per run slot
         violations.append(
             {
                 "invariant": "slot_limit",
-                "detail": f"{cargos} cargo processes for {limits.slots} slots",
+                "detail": f"{cargos} non-probe cargo processes "
+                f"for {limits.slots} slots",
             }
         )
     return violations
@@ -676,7 +722,22 @@ def process_rows() -> list[dict[str, object]]:
         text=True,
         check=False,
     )
-    return parse_ps(result.stdout)
+    rows = parse_ps(result.stdout)
+    cargos = [r for r in rows if r["comm"] == "cargo"]
+    if cargos:
+        # Separately, as a command line may contain anything.
+        listed = subprocess.run(
+            ["ps", "-o", "pid=,args=", "-p", ",".join(str(r["pid"]) for r in cargos)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        args = parse_ps_args(listed.stdout)
+        for row in cargos:
+            if (line := args.get(int(row["pid"]))) is not None:  # type: ignore[call-overload]
+                row["args"] = line[:500]
+                row["role"] = cargo_role(line)
+    return rows
 
 
 def directory_kib(path: Path) -> int | None:
