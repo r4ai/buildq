@@ -96,6 +96,7 @@ constraints; `BUILDQ_HELD` prevents queue reentry only.
 ### Process Tree & Signal Handling
 
 - Ignores `Ctrl+C` in `buildq` while a child runs (the terminal delivers it to the child) and forwards the exit code
+  - On Unix, a `SIGINT` or `SIGQUIT` that another process sent with `kill` (for example an agent interrupting the command it started) is forwarded to the child like `SIGTERM`, because it may not have reached the child; otherwise the build would keep running and hold its slot
 - **Windows**
   - Runs the child inside a kill-on-close Job Object (`kill_tree = true` by default)
   - Terminating `buildq` immediately terminates the entire compiler process tree

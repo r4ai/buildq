@@ -12,6 +12,12 @@
 //! child's tree before the child hears of it, and the guard kills what is left
 //! of that tree when the child exits, so a build script orphaned by Cargo's
 //! exit cannot keep writing to a member that is already free again.
+//!
+//! Only a terminal's Ctrl+C is known to reach the child as well. A SIGINT or
+//! SIGQUIT that another process sent with `kill` (an agent interrupting the
+//! command it started, say) may have been meant for buildq alone, so it is
+//! forwarded to the child like SIGTERM: otherwise the build would run on and
+//! hold its slot until it ended by itself.
 
 use std::io;
 use std::process::{Child, Command, ExitStatus};
@@ -155,13 +161,32 @@ mod nix {
     /// Write end of the running [`Tracker`]'s pipe, -1 without one.
     static TRACKER: AtomicI32 = AtomicI32::new(-1);
 
-    /// Ctrl+C reaches the child from the terminal; only the tracker hears it.
-    pub extern "C" fn on_int(sig: libc::c_int) {
-        notify(sig);
+    /// Set on a byte to the tracker: the child must be sent the signal too.
+    const FORWARD: u8 = 0x80;
+
+    /// Ctrl+C reaches the child from the terminal, so only the tracker hears
+    /// of it. One another process sent with `kill` is forwarded instead.
+    pub extern "C" fn on_int(
+        sig: libc::c_int,
+        info: *mut libc::siginfo_t,
+        _ctx: *mut libc::c_void,
+    ) {
+        if sent_by_process(info) {
+            forward(sig);
+        } else {
+            notify(sig, false);
+        }
+    }
+
+    /// `kill(2)` or `sigqueue(3)`, unlike a terminal, signals one process
+    /// unless asked otherwise.
+    fn sent_by_process(info: *const libc::siginfo_t) -> bool {
+        // SAFETY: the kernel passes a valid siginfo to an SA_SIGINFO handler.
+        !info.is_null() && matches!(unsafe { (*info).si_code }, libc::SI_USER | libc::SI_QUEUE)
     }
 
     pub extern "C" fn forward(sig: libc::c_int) {
-        if notify(sig) {
+        if notify(sig, true) {
             return;
         }
         let pid = CHILD.load(Ordering::SeqCst);
@@ -172,13 +197,13 @@ mod nix {
         }
     }
 
-    /// Hands the signal to the tracker, which forwards it itself.
-    fn notify(sig: libc::c_int) -> bool {
+    /// Hands the signal to the tracker, which forwards it itself if asked.
+    fn notify(sig: libc::c_int, forward: bool) -> bool {
         let fd = TRACKER.load(Ordering::SeqCst);
         if fd < 0 {
             return false;
         }
-        let b = sig as u8;
+        let b = sig as u8 | if forward { FORWARD } else { 0 };
         unsafe { libc::write(fd, (&raw const b).cast(), 1) };
         true
     }
@@ -193,7 +218,7 @@ mod nix {
     #[derive(Default)]
     pub struct Tracked {
         pub tree: Vec<i32>,
-        /// Ctrl+C (or SIGQUIT) reached the whole job, not just buildq.
+        /// Ctrl+C (or SIGQUIT) may have reached the whole job, not just buildq.
         pub interrupted: bool,
         /// Orphans already in our process group when the child started.
         pub foreign: Vec<i32>,
@@ -230,8 +255,9 @@ mod nix {
         }
     }
 
-    /// Reads one signal number per byte; 0 means the child is gone.
-    fn next_signal(fd: i32, timeout_ms: i32) -> Option<Option<i32>> {
+    /// Reads one signal number per byte, with whether to forward it; 0 means
+    /// the child is gone.
+    fn next_signal(fd: i32, timeout_ms: i32) -> Option<Option<(i32, bool)>> {
         let mut p = libc::pollfd {
             fd,
             events: libc::POLLIN,
@@ -244,7 +270,7 @@ mod nix {
         if unsafe { libc::read(fd, (&raw mut b).cast(), 1) } != 1 || b == 0 {
             return None;
         }
-        Some(Some(i32::from(b)))
+        Some(Some((i32::from(b & !FORWARD), b & FORWARD != 0)))
     }
 
     fn track(child: i32, fd: i32) -> Tracked {
@@ -256,7 +282,7 @@ mod nix {
         // A child that survives the signal (a REPL after Ctrl+C) may run on
         // for long: follow its forks, but at a modest rate.
         while let Some(sig) = next_signal(fd, if tree.is_empty() { -1 } else { 250 }) {
-            let Some(sig) = sig else {
+            let Some((sig, forward)) = sig else {
                 extend(tree, false);
                 continue;
             };
@@ -268,8 +294,10 @@ mod nix {
                 extend(tree, true);
             }
             if sig == libc::SIGINT || sig == libc::SIGQUIT {
+                // Possibly sent to the whole job: Cargo may already be gone.
                 tracked.interrupted = true;
-            } else {
+            }
+            if forward {
                 unsafe { libc::kill(child, sig) };
             }
             for &pid in tree.iter() {
@@ -494,11 +522,12 @@ impl ChildGuard {
         {
             nix::CHILD.store(child.id() as i32, std::sync::atomic::Ordering::SeqCst);
             unsafe {
-                libc::signal(libc::SIGINT, nix::on_int as *const () as libc::sighandler_t);
-                libc::signal(
-                    libc::SIGQUIT,
-                    nix::on_int as *const () as libc::sighandler_t,
-                );
+                let mut act: libc::sigaction = std::mem::zeroed();
+                act.sa_sigaction = nix::on_int as *const () as libc::sighandler_t;
+                act.sa_flags = libc::SA_SIGINFO | libc::SA_RESTART;
+                libc::sigemptyset(&mut act.sa_mask);
+                libc::sigaction(libc::SIGINT, &act, std::ptr::null_mut());
+                libc::sigaction(libc::SIGQUIT, &act, std::ptr::null_mut());
                 libc::signal(
                     libc::SIGTERM,
                     nix::forward as *const () as libc::sighandler_t,
