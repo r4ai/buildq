@@ -302,6 +302,15 @@ pub enum TargetDirChoice {
 /// Follows cargo's precedence: `--target-dir` > `CARGO_TARGET_DIR` >
 /// `--config build.target-dir` > `CARGO_BUILD_TARGET_DIR`.
 pub fn target_dir_choice(parsed: &Parsed) -> TargetDirChoice {
+    target_dir_choice_in(parsed, &|var| env::var_os(var))
+}
+
+/// `target_dir_choice` with the environment given, so tests do not depend
+/// on (or have to change) the process's.
+fn target_dir_choice_in(
+    parsed: &Parsed,
+    env: &dyn Fn(&str) -> Option<std::ffi::OsString>,
+) -> TargetDirChoice {
     let end = parsed
         .args
         .iter()
@@ -323,7 +332,7 @@ pub fn target_dir_choice(parsed: &Parsed) -> TargetDirChoice {
         }
     }
     let from_env = |var: &str| {
-        env::var_os(var)
+        env(var)
             .filter(|v| !v.is_empty())
             .map(|v| TargetDirChoice::Explicit {
                 value: v.to_string_lossy().to_string(),
@@ -477,6 +486,9 @@ mod tests {
 
     #[test]
     fn target_dir_config_is_rerooted() {
+        // The caller's CARGO_TARGET_DIR must not leak into these cases (#141).
+        let no_env = |_: &str| None;
+        let target_dir_choice = |p: &Parsed| target_dir_choice_in(p, &no_env);
         let p = parse(&v("trainer train"), &aliases());
         match target_dir_choice(&p) {
             TargetDirChoice::Config(i, val) => {
@@ -507,6 +519,47 @@ mod tests {
             }
         );
         assert_eq!(p.args[1], "--target-dir=../y");
+    }
+
+    #[test]
+    fn target_dir_environment_precedence() {
+        let env = |pairs: &'static [(&'static str, &'static str)]| {
+            move |var: &str| {
+                pairs
+                    .iter()
+                    .find(|(k, _)| *k == var)
+                    .map(|(_, v)| std::ffi::OsString::from(v))
+            }
+        };
+        let explicit = |value: &str| TargetDirChoice::Explicit {
+            value: value.into(),
+            arg: None,
+        };
+        let alias = parse(&v("trainer train"), &aliases());
+        let both = env(&[
+            ("CARGO_TARGET_DIR", "/env"),
+            ("CARGO_BUILD_TARGET_DIR", "/b"),
+        ]);
+        // CARGO_TARGET_DIR wins over a --config target dir, as before.
+        assert_eq!(target_dir_choice_in(&alias, &both), explicit("/env"));
+        // The flag wins over the environment.
+        let flag = parse(&v("build --target-dir x"), &aliases());
+        assert!(matches!(
+            target_dir_choice_in(&flag, &both),
+            TargetDirChoice::Explicit { arg: Some(2), .. }
+        ));
+        // CARGO_BUILD_TARGET_DIR only applies without --config; empty is unset.
+        let build_only = env(&[("CARGO_TARGET_DIR", ""), ("CARGO_BUILD_TARGET_DIR", "/b")]);
+        assert!(matches!(
+            target_dir_choice_in(&alias, &build_only),
+            TargetDirChoice::Config(..)
+        ));
+        let plain = parse(&v("build"), &aliases());
+        assert_eq!(target_dir_choice_in(&plain, &build_only), explicit("/b"));
+        assert_eq!(
+            target_dir_choice_in(&plain, &|_: &str| None),
+            TargetDirChoice::Default
+        );
     }
 
     #[test]
