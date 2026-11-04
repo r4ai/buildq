@@ -41,12 +41,16 @@ fn waiters_dir(cfg: &Config) -> std::path::PathBuf {
 /// of the listing by itself.
 pub struct WaiterGuard {
     record: std::path::PathBuf,
-    _lock: crate::lock::LockFile,
+    lock: Option<crate::lock::LockFile>,
 }
 
 impl Drop for WaiterGuard {
     fn drop(&mut self) {
         let _ = std::fs::remove_file(&self.record);
+        // Released first (Windows cannot delete an open file); the name is
+        // unique to this registration, so no other waiter reuses it.
+        drop(self.lock.take());
+        let _ = std::fs::remove_file(self.record.with_extension("lock"));
     }
 }
 
@@ -65,23 +69,33 @@ pub fn register_member_waiter(cfg: &Config, w: &MemberWaiter) -> Option<WaiterGu
     crate::util::write_json(&record, w).ok()?;
     Some(WaiterGuard {
         record,
-        _lock: lock,
+        lock: Some(lock),
     })
 }
 
-/// Jobs waiting for a pool member now, oldest first. Records whose lock
-/// is no longer held (the waiter died) are skipped and removed.
+/// Jobs waiting for a pool member now, oldest first. Records and lock
+/// files no live waiter holds (it died mid-wait) are skipped and removed.
+/// A registering waiter takes its lock before writing its record, so a
+/// held lock without a record is left alone.
 pub fn member_waiters(cfg: &Config) -> Vec<MemberWaiter> {
     let dir = waiters_dir(cfg);
     let mut found = Vec::new();
     for e in std::fs::read_dir(&dir).into_iter().flatten().flatten() {
         let path = e.path();
-        if path.extension().is_none_or(|x| x != "json") {
+        let ext = path.extension().and_then(|x| x.to_str()).unwrap_or("");
+        let lock = path.with_extension("lock");
+        if ext == "lock" {
+            if !path.with_extension("json").exists() && !crate::lock::is_held(&path) {
+                let _ = std::fs::remove_file(&path);
+            }
             continue;
         }
-        let lock = path.with_extension("lock");
+        if ext != "json" {
+            continue;
+        }
         if !crate::lock::is_held(&lock) {
             let _ = std::fs::remove_file(&path);
+            let _ = std::fs::remove_file(&lock);
             continue;
         }
         if let Some(w) = crate::util::read_json::<MemberWaiter>(&path) {
@@ -129,5 +143,13 @@ mod tests {
         drop(twin);
         drop(later);
         assert!(member_waiters(&cfg).is_empty());
+        // Nothing is left behind, an orphaned lock file included.
+        std::fs::write(waiters_dir(&cfg).join("4-1.lock"), b"").unwrap();
+        member_waiters(&cfg);
+        let left: Vec<_> = std::fs::read_dir(waiters_dir(&cfg))
+            .unwrap()
+            .flatten()
+            .collect();
+        assert!(left.is_empty(), "{left:?}");
     }
 }
