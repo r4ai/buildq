@@ -53,8 +53,15 @@ impl Drop for WaiterGuard {
 pub fn register_member_waiter(cfg: &Config, w: &MemberWaiter) -> Option<WaiterGuard> {
     let dir = waiters_dir(cfg);
     std::fs::create_dir_all(&dir).ok()?;
-    let lock = crate::lock::lock(&dir.join(format!("{}.lock", w.pid))).ok()?;
-    let record = dir.join(format!("{}.json", w.pid));
+    // Unique per registration, not just per pid: builds in containers with
+    // their own PID namespaces may share the queue dir. Never waits: a
+    // taken name only costs this waiter its listing.
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_nanos());
+    let id = format!("{}-{nanos}", w.pid);
+    let lock = crate::lock::try_lock(&dir.join(format!("{id}.lock"))).ok()??;
+    let record = dir.join(format!("{id}.json"));
     crate::util::write_json(&record, w).ok()?;
     Some(WaiterGuard {
         record,
@@ -111,10 +118,15 @@ mod tests {
         drop(first);
         assert_eq!(pids(member_waiters(&cfg)), [2]);
         // A waiter killed mid-wait leaves its record, but not its lock.
-        let dead = waiters_dir(&cfg).join("3.json");
+        let dead = waiters_dir(&cfg).join("3-1.json");
         crate::util::write_json(&dead, &w(3, 5)).unwrap();
         assert_eq!(pids(member_waiters(&cfg)), [2]);
         assert!(!dead.exists());
+        // The same pid twice (separate PID namespaces) neither blocks nor
+        // replaces the other.
+        let twin = register_member_waiter(&cfg, &w(2, 30)).unwrap();
+        assert_eq!(pids(member_waiters(&cfg)), [2, 2]);
+        drop(twin);
         drop(later);
         assert!(member_waiters(&cfg).is_empty());
     }
