@@ -161,6 +161,45 @@ fn automatic_host_selection_uses_live_remote_load() {
     assert!(String::from_utf8_lossy(&top.stdout).contains("box / build: 1/1 busy"));
 }
 
+/// Jobs waiting for a pool member hold no slot, but top lists them (#150).
+#[test]
+fn top_and_status_show_pool_member_waiters() {
+    let e = Env::new();
+    let cfg = buildq::config::Config::from_parts(
+        e.root.join("q"),
+        e.root.join("q/config.toml"),
+        buildq::config::FileConfig::default(),
+    );
+    let waiter = buildq::status::register_member_waiter(
+        &cfg,
+        &buildq::status::MemberWaiter {
+            pid: 4242,
+            cmd: "cargo build -p app".into(),
+            cwd: "/w/feature".into(),
+            pool: "app-0123abcd".into(),
+            since_ms: buildq::util::now_ms() - 65_000,
+        },
+    )
+    .unwrap();
+    let out = e.cmd(1).args(["top", "--no-hosts"]).output().unwrap();
+    let text = String::from_utf8_lossy(&out.stdout);
+    assert!(
+        text.contains("Waiting for a pool member (no slot yet): 1"),
+        "{text}"
+    );
+    assert!(
+        text.contains("  MEMBER 6")
+            && text.contains("pid 4242 | cargo build -p app | app-0123abcd"),
+        "{text}"
+    );
+    let status = e.status();
+    assert_eq!(status["member_waiters"][0]["pid"], 4242, "{status}");
+    drop(waiter);
+    let out = e.cmd(1).args(["top", "--no-hosts"]).output().unwrap();
+    assert!(!String::from_utf8_lossy(&out.stdout).contains("pool member"));
+    assert!(e.status()["member_waiters"].as_array().unwrap().is_empty());
+}
+
 #[test]
 fn top_snapshot_shows_a_running_job_and_a_waiter_without_terminal_codes() {
     let e = Env::new();
