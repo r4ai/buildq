@@ -716,3 +716,54 @@ fn abandoned_seed_clones_are_counted_and_reclaimed() {
     );
     assert!(pool.join("m1").is_dir());
 }
+
+/// The inventory says when its total reuses member sizes, how old the
+/// oldest is, and how many reused ones are busy; a refresh measures all (#148).
+#[test]
+fn inventory_marks_reused_and_busy_size_estimates() {
+    let temp = tempfile::tempdir().unwrap();
+    let c = cfg(temp.path());
+    let pool = c.cache_dir.join("pools/p");
+    let now = now_ms();
+    for (id, measured_ago_ms) in [(0, 10_000), (1, 732_000)] {
+        member(&c.cache_dir, "p", id, now, 4096);
+        let meta = MemberMeta {
+            id,
+            last_used_ms: now,
+            size_bytes: 100,
+            size_ms: now - measured_ago_ms,
+            size_accounting: Some(CacheAccounting::Logical),
+            ..Default::default()
+        };
+        write_json(&pool.join(format!("m{id}.json")), &meta).unwrap();
+    }
+    // m0 is fresh enough to reuse; m1 is busy, so its old size is reused too.
+    let held = lock::lock(&pool.join("m1.lock")).unwrap();
+    let u = scan(&c, false);
+    assert_eq!(u.sizes.state, "estimated");
+    assert_eq!(
+        (u.sizes.estimated_members, u.sizes.busy_estimated_members),
+        (2, 1)
+    );
+    assert_eq!(u.sizes.oldest_estimate_ms, Some(now - 732_000));
+    assert_eq!(u.total, 200, "the headline total is the estimate");
+    let text = render(&u);
+    assert!(
+        text.contains("estimated: 2 member size(s) reused"),
+        "{text}"
+    );
+    assert!(
+        text.contains("1 busy") && text.contains("--refresh"),
+        "{text}"
+    );
+    let json = serde_json::to_value(&u).unwrap();
+    assert_eq!(json["sizes"]["state"], "estimated");
+
+    let u = scan(&c, true);
+    assert_eq!(u.sizes.state, "measured");
+    assert_eq!(u.sizes.estimated_members, 0);
+    assert_eq!(u.sizes.oldest_estimate_ms, None);
+    assert_eq!(u.total, 2 * 4096);
+    assert!(!render(&u).contains("estimated:"));
+    drop(held);
+}

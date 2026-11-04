@@ -96,6 +96,30 @@ pub struct StagingEntry {
     pub busy: bool,
 }
 
+/// How current the member sizes behind `Usage::total` are. A scan reuses a
+/// member's size for a minute, and a busy member's for as long as its build
+/// runs, so the headline total can lag a growing build.
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct SizeFreshness {
+    /// `measured` when this scan walked every member, else `estimated`.
+    pub state: &'static str,
+    /// Members whose size this scan reused instead of measuring.
+    pub estimated_members: usize,
+    /// Of those, the busy ones: a build may have grown them since.
+    pub busy_estimated_members: usize,
+    /// When the oldest reused size was measured (ms since the epoch).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub oldest_estimate_ms: Option<u64>,
+}
+
+impl SizeFreshness {
+    fn reused(&mut self, size_ms: u64, busy: bool) {
+        self.estimated_members += 1;
+        self.busy_estimated_members += usize::from(busy);
+        self.oldest_estimate_ms = Some(self.oldest_estimate_ms.map_or(size_ms, |t| t.min(size_ms)));
+    }
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct Usage {
     pub pools: Vec<PoolEntry>,
@@ -121,6 +145,8 @@ pub struct Usage {
     pub mbx_overflow_bytes: u64,
     pub over_budget_reasons: Vec<String>,
     pub free_disk: Option<u64>,
+    /// Whether `total` (and so the budget state) includes reused estimates.
+    pub sizes: SizeFreshness,
     /// Explicit target dirs jobs used outside the pool (filled by `scan_all`).
     pub external: Vec<ExternalDir>,
     pub external_total: u64,
@@ -267,6 +293,7 @@ fn scan_with(cfg: &Config, refresh: bool, mbx_max_age_ms: u64) -> Usage {
     let sharing = dedupe::Sharing::load(cfg);
     let mut pools = Vec::new();
     let mut staging = Vec::new();
+    let mut sizes = SizeFreshness::default();
     if let Ok(rd) = fs::read_dir(cfg.cache_dir.join("pools")) {
         for e in rd.flatten() {
             let dir = e.path();
@@ -307,6 +334,8 @@ fn scan_with(cfg: &Config, refresh: bool, mbx_max_age_ms: u64) -> Usage {
                     if !busy {
                         let _ = write_json(&meta_path, &meta);
                     }
+                } else {
+                    sizes.reused(meta.size_ms, busy);
                 }
                 members.push(MemberEntry {
                     id,
@@ -400,6 +429,14 @@ fn scan_with(cfg: &Config, refresh: bool, mbx_max_age_ms: u64) -> Usage {
         budget: cfg.budget,
         accounting: cfg.accounting,
         free_disk,
+        sizes: SizeFreshness {
+            state: if sizes.estimated_members == 0 {
+                "measured"
+            } else {
+                "estimated"
+            },
+            ..sizes
+        },
         external: Vec::new(),
         external_total: 0,
         mbx,
@@ -1337,6 +1374,23 @@ fn find_named_dirs(root: &Path, name: &str, depth: usize) -> Vec<PathBuf> {
     out
 }
 
+/// Says that the total includes reused member sizes, how old the oldest is,
+/// and how to measure afresh.
+fn size_note(f: &SizeFreshness) -> Option<String> {
+    let oldest = f.oldest_estimate_ms?;
+    let busy = if f.busy_estimated_members > 0 {
+        format!("; {} busy, possibly grown since", f.busy_estimated_members)
+    } else {
+        String::new()
+    };
+    Some(format!(
+        "estimated: {} member size(s) reused, oldest measured {} ago{busy} \
+         (`buildq cache ls --refresh` measures every member now)",
+        f.estimated_members,
+        util::ago(oldest)
+    ))
+}
+
 fn rel(base: &Path, p: &Path) -> String {
     p.strip_prefix(base).unwrap_or(p).display().to_string()
 }
@@ -1408,6 +1462,9 @@ pub fn render(u: &Usage) -> String {
         u.free_disk.map(human_bytes).unwrap_or_else(|| "?".into()),
         u.accounting.name()
     ));
+    if let Some(note) = size_note(&u.sizes) {
+        s.push_str(&format!("{note}\n"));
+    }
     if let Some(warning) = u.budget_warning() {
         s.push_str(&format!("warning: {warning}\n"));
     }
