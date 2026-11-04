@@ -932,11 +932,12 @@ fn plan<'a>(
             .filter(|(_, e)| e.matches(&c.md))
             .map(|(g, _)| *g)
     };
-    // A pair needing no comparison: one inode, one shared group, or known
-    // to differ.
+    // A pair needing no comparison: one inode (in one member or, hard-linked
+    // by mbx's restore, across members), one shared group, or known to differ.
     let settled = |a: &Candidate, b: &Candidate| {
-        let same = |x: &Candidate, y: &Candidate| matches!((file_id(&x.md), file_id(&y.md)), (Some(i), Some(j)) if i == j && x.member_key() == y.member_key());
-        same(a, b) || group_of(a).is_some_and(|g| group_of(b) == Some(g)) || known_different(a, b)
+        same_inode(a, b)
+            || group_of(a).is_some_and(|g| group_of(b) == Some(g))
+            || known_different(a, b)
     };
     let mut work: Vec<Work> = Vec::new();
     // Hard-linked names of one inode are one copy: count each inode once,
@@ -963,7 +964,9 @@ fn plan<'a>(
         {
             let first_time = inode(other).is_none_or(|id| counted.insert(id));
             let group = group_of(other);
-            if group.is_some() && firsts.iter().any(|f| group_of(f) == group) {
+            if firsts.iter().any(|f| same_inode(f, other))
+                || group.is_some() && firsts.iter().any(|f| group_of(f) == group)
+            {
                 if first_time {
                     report.already_shared += 1;
                     report.already_shared_bytes += footprint(&other.md, report.accounting);
@@ -1479,6 +1482,11 @@ fn file_id(md: &fs::Metadata) -> Option<(u64, u64)> {
 #[cfg(not(unix))]
 fn file_id(_: &fs::Metadata) -> Option<(u64, u64)> {
     None
+}
+
+/// Two names of one file: they already share all their data.
+fn same_inode(a: &Candidate, b: &Candidate) -> bool {
+    matches!((file_id(&a.md), file_id(&b.md)), (Some(i), Some(j)) if i == j)
 }
 
 #[cfg(unix)]
