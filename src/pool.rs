@@ -405,27 +405,59 @@ impl PackageOwners {
     }
 }
 
-/// Deletes every fingerprint of `packages` anywhere in a target dir
-/// (`<profile>/.fingerprint`, `<triple>/<profile>/.fingerprint`, ...).
-/// Returns the number of unit fingerprints removed.
+/// Before a build: deletes every fingerprint of `packages` anywhere in a
+/// target dir (`<profile>/.fingerprint`, `<triple>/<profile>/.fingerprint`,
+/// ...), and empties their build scripts' `OUT_DIR`s
+/// (`<profile>/build/<pkg>-<hash>/out`). Returns the number of unit
+/// fingerprints removed.
+///
+/// Cargo keeps an `OUT_DIR` across build-script reruns, so whatever a script
+/// left there survives the fingerprint: a nested Cargo target inside it, for
+/// example, judges its own sources by mtime and would hand another
+/// worktree's generated output to the rerun (#142).
 pub fn invalidate(target_dir: &Path, packages: &BTreeSet<String>) -> usize {
+    invalidate_units(target_dir, packages, true)
+}
+
+/// After a build: deletes only the fingerprints. The `OUT_DIR`s stay, as the
+/// app about to run may load native libraries from them; the next build of
+/// another source state invalidates them with [`invalidate`].
+pub fn invalidate_fingerprints(target_dir: &Path, packages: &BTreeSet<String>) -> usize {
+    invalidate_units(target_dir, packages, false)
+}
+
+fn invalidate_units(target_dir: &Path, packages: &BTreeSet<String>, out_dirs: bool) -> usize {
     if packages.is_empty() {
         return 0;
     }
     let mut removed = 0;
     for fp in fingerprint_dirs(target_dir) {
-        let Ok(rd) = fs::read_dir(&fp) else { continue };
-        for e in rd.flatten() {
-            let name = e.file_name().to_string_lossy().to_string();
-            if let Some((pkg, _)) = split_unit(&name)
-                && packages.contains(pkg)
-                && fs::remove_dir_all(e.path()).is_ok()
-            {
+        for path in units_of(&fp, packages) {
+            if fs::remove_dir_all(path).is_ok() {
                 removed += 1;
+            }
+        }
+        if let Some(build) = fp.parent().filter(|_| out_dirs).map(|p| p.join("build")) {
+            for unit in units_of(&build, packages) {
+                let _ = fs::remove_dir_all(unit.join("out"));
             }
         }
     }
     removed
+}
+
+/// Unit directories (`<pkg>-<hash>`) of `packages` directly inside `dir`.
+fn units_of(dir: &Path, packages: &BTreeSet<String>) -> Vec<PathBuf> {
+    let Ok(rd) = fs::read_dir(dir) else {
+        return Vec::new();
+    };
+    rd.flatten()
+        .filter_map(|e| {
+            let name = e.file_name().to_string_lossy().to_string();
+            let (pkg, _) = split_unit(&name)?;
+            packages.contains(pkg).then(|| e.path())
+        })
+        .collect()
 }
 
 /// `foo-bar-0123456789abcdef` -> ("foo-bar", "0123456789abcdef")
@@ -1016,6 +1048,41 @@ mod tests {
         let n = invalidate(t, &BTreeSet::from(["core".to_string()]));
         assert_eq!(n, 3);
         assert!(t.join("debug/.fingerprint/serde-0123456789abcdef").exists());
+    }
+
+    #[test]
+    fn invalidate_clears_build_script_out_dirs() {
+        let dir = tempfile::tempdir().unwrap();
+        let t = dir.path();
+        for f in [
+            "debug/.fingerprint/app-0123456789abcdef/run-build-script-build-script-build",
+            // A nested Cargo target a build script keeps in OUT_DIR (#142).
+            "debug/build/app-0123456789abcdef/out/helper-target/debug/helper",
+            "debug/build/app-0123456789abcdef/output",
+            "debug/build/app-fedcba9876543210/build-script-build",
+            "debug/build/serde-0123456789abcdef/out/gen.rs",
+            "sub/x/x86_64-unknown-linux-gnu/release/.fingerprint/app-1111111111111111/f",
+            "sub/x/x86_64-unknown-linux-gnu/release/build/app-1111111111111111/out/gen.rs",
+        ] {
+            let p = t.join(f);
+            fs::create_dir_all(p.parent().unwrap()).unwrap();
+            fs::write(p, b"x").unwrap();
+        }
+        invalidate(t, &BTreeSet::from(["app".to_string()]));
+        assert!(!t.join("debug/build/app-0123456789abcdef/out").exists());
+        assert!(t.join("debug/build/app-0123456789abcdef/output").exists());
+        assert!(
+            t.join("debug/build/app-fedcba9876543210/build-script-build")
+                .exists()
+        );
+        assert!(
+            t.join("debug/build/serde-0123456789abcdef/out/gen.rs")
+                .exists()
+        );
+        assert!(
+            !t.join("sub/x/x86_64-unknown-linux-gnu/release/build/app-1111111111111111/out")
+                .exists()
+        );
     }
 
     fn wt(name: &str) -> Worktree {

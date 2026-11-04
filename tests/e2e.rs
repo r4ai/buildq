@@ -1390,6 +1390,76 @@ fn reads_own_data() {
     }
 }
 
+/// A build script that runs an excluded helper workspace into a nested
+/// target inside its `OUT_DIR` must see the current worktree's helper: the
+/// nested target judges freshness by mtime, so switching worktrees in a
+/// reused member must not hand the helper's old output to the rerun (#142).
+#[test]
+#[ignore = "compiles a tiny real workspace; run with --ignored"]
+fn nested_codegen_in_out_dir_follows_the_current_worktree() {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = buildq::util::canonical(tmp.path());
+    let w = tiny_world(
+        &root,
+        &[
+            (
+                "Cargo.toml",
+                "[package]\nname='codegen'\nversion='0.1.0'\nedition='2021'\n[workspace]\nexclude=['tools/helper']\n",
+            ),
+            (
+                "build.rs",
+                r#"fn main() {
+    let out = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    let run = std::process::Command::new(std::env::var("CARGO").unwrap())
+        .args(["run", "--offline", "--quiet", "--manifest-path", "tools/helper/Cargo.toml"])
+        .env("CARGO_TARGET_DIR", out.join("helper-target"))
+        .output()
+        .unwrap();
+    assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+    std::fs::write(out.join("generated.rs"), run.stdout).unwrap();
+    println!("cargo:rerun-if-changed=tools/helper/src/main.rs");
+}
+"#,
+            ),
+            (
+                "src/main.rs",
+                "fn main() { println!(\"generated={}\", include!(concat!(env!(\"OUT_DIR\"), \"/generated.rs\"))); }\n",
+            ),
+            (
+                "tools/helper/Cargo.toml",
+                "[package]\nname='helper'\nversion='0.1.0'\nedition='2021'\n[workspace]\n",
+            ),
+            (
+                "tools/helper/src/main.rs",
+                "fn main() { print!(\"\\\"A\\\"\"); }\n",
+            ),
+            (".gitignore", "target/\n"),
+        ],
+    );
+    let a = root.join("ws");
+    let b = root.join("other");
+    git(&a, &["init", "-q"]);
+    git(&a, &["add", "-A"]);
+    git(&a, &["commit", "-q", "-m", "init"]);
+    git(
+        &a,
+        &["worktree", "add", "-q", "--detach", b.to_str().unwrap()],
+    );
+    // B's edit exists (and is older than A's build) before anything compiles.
+    let helper = b.join("tools/helper/src/main.rs");
+    fs::write(&helper, "fn main() { print!(\"\\\"B\\\"\"); }\n").unwrap();
+    set_old_mtime(&helper);
+    for (dir, expected) in [(&a, "A"), (&b, "B"), (&a, "A")] {
+        let (out, _) = w.cargo(dir, &["run", "--offline", "--quiet"]);
+        assert_eq!(
+            stdout(&out).trim(),
+            format!("generated={expected}"),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+}
+
 /// A same-size edit that keeps the old mtime can look clean to Git's stat
 /// cache; the pooled build must still compile the worktree's content.
 /// `checkStat=minimal` reproduces Git's same-second blind spot deterministically.

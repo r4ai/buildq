@@ -174,6 +174,7 @@ Before starting a build on member `m<i>`:
    - Maps each changed file to its owning Cargo package (nearest ancestor `Cargo.toml` with `[package]`)
 3. **Invalidate fingerprints**
    - Deletes `.fingerprint/<pkg>-*` across all profiles and target triples inside `m<i>`
+   - Empties those packages' build-script `OUT_DIR`s (`build/<pkg>-*/out`): Cargo keeps an `OUT_DIR` across reruns, and anything a script left there (such as a nested Cargo target for a code generator) would otherwise judge the new worktree's sources by `mtime`
    - Forces Cargo to rebuild those packages and their dependents regardless of `mtime`
    - Preserves `rustc`'s incremental cache so the rebuild remains incremental
 4. **Update manifest**

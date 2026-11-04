@@ -876,7 +876,7 @@ fn after_job(cfg: &Config, ctx: &mut PoolCtx, lease: &mut Lease, snapshot_ms: u6
         if now != ctx.manifest {
             let mut owners = PackageOwners::new(vec![PathBuf::from(&ctx.wt.root)]);
             let p = pool::plan(&ctx.manifest, &now, &mut |f| owners.owner(f));
-            pool::invalidate(&lease.target_dir, &p.packages);
+            pool::invalidate_fingerprints(&lease.target_dir, &p.packages);
             let _ = pool::write_manifest(&ctx.pool.manifest_path(lease.id), &now);
         }
     }
