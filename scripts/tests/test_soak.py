@@ -145,8 +145,13 @@ def test_repo_resolution_and_pinned_arguments() -> None:
     assert list(oss) == ["bevy", "tokio", "ripgrep", "rust-analyzer"]
     assert (oss["bevy"].ref, oss["tokio"].ref) == ("v0.16.1", "tokio-1.45.1")
     assert (oss["ripgrep"].ref, oss["rust-analyzer"].ref) == ("14.1.1", "2025-06-02")
-    assert cargo_arguments(oss["tokio"], "test") == ["test", "-p", "tokio@1.45.1"]
+    # Tokio's test suite refuses to compile without `full`; builds stay as-is.
+    assert cargo_arguments(oss["tokio"], "test") == [
+        "test", "-p", "tokio@1.45.1", "--features", "full",
+    ]  # fmt: skip
+    assert cargo_arguments(oss["tokio"], "build") == ["build", "-p", "tokio@1.45.1"]
     assert cargo_arguments(oss["tokio"], "build_release")[-1] == "--release"
+    assert cargo_arguments(oss["bevy"], "test") == ["test", "-p", "bevy_ecs"]
     assert len(resolve_repos(None, local_fixtures=True)) == 4
     with pytest.raises(ValueError):
         resolve_repos("nope", local_fixtures=False)

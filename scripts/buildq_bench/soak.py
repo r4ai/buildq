@@ -90,6 +90,8 @@ class RepoSpec:
     feature_flags: tuple[str, ...]
     edit_file: str
     cancel_flags: tuple[str, ...] = ("--release",)
+    # Features the test suite itself needs (only the test action uses them).
+    test_flags: tuple[str, ...] = ()
 
     @property
     def is_fixture(self) -> bool:
@@ -116,6 +118,8 @@ OSS_REPOS: Mapping[str, RepoSpec] = {
             ("-p", "tokio@1.45.1"),
             ("--features", "full"),
             "tokio/src/lib.rs",
+            # tests/_require_full.rs is a compile_error! without `full`.
+            test_flags=("--features", "full"),
         ),
         RepoSpec(
             "ripgrep",
@@ -260,7 +264,7 @@ def cargo_arguments(repo: RepoSpec, kind: str) -> list[str]:
         test = ["test", "--offline", "-q"]
     else:
         run = build = ["build", *repo.packages]
-        test = ["test", *repo.test_packages]
+        test = ["test", *repo.test_packages, *repo.test_flags]
     if kind == "build":
         return run
     if kind == "build_release":
