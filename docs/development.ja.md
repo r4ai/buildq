@@ -197,7 +197,8 @@ RSS は `page_cache_kb` (Linux の `/proc/meminfo`) と別に記録する。
 | :--- | :--- |
 | `exit_codes` | ビルド・テスト・バースト・GC が非 0 で終了 (キャンセルしたジョブを除く) |
 | `correct_outputs` | フィクスチャのビルドが、その worktree の現在のソースと異なるマーカーを出力 |
-| `no_orphan_processes` | 終了済みの buildq のプロセスグループにプロセスが残存 |
+| `no_orphan_processes` | 終了済みの buildq のプロセスグループに実行中のプロセスが残存 |
+| `zombies_reaped` | 終了したジョブのプロセスが回収されずに残る（ゾンビ）。ホストに回収する init がないため、init の下で実行する（例: `docker run --init`）。ゾンビは待機も kill もせず、後始末の失敗としても数えない |
 | `slot_limit` | 稼働中ホルダーがスロット数を超過、または cargo プロセス数がビルド+実行スロット数を超過 |
 | `no_stranded_tickets` | 待機者が `--stranded-after` を超えて空きスロットがある、または空きの有無にかかわらず 3 倍を超過 |
 | `cancellation_cleanup` | キャンセルしたジョブがプロセスを残した、または 60 秒間シグナルを無視 |

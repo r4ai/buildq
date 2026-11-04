@@ -197,7 +197,8 @@ Read `summary.json` from `passed`, then `invariants.<name>.examples` for the fir
 | :--- | :--- |
 | `exit_codes` | A build, test, burst job, or GC exited non-zero (cancelled jobs excluded) |
 | `correct_outputs` | A fixture build printed a marker different from its worktree's current source |
-| `no_orphan_processes` | A process remains in the group of a buildq that has exited |
+| `no_orphan_processes` | A live process remains in the group of a buildq that has exited |
+| `zombies_reaped` | An exited process of a finished job stays unreaped (a zombie): the host has no reaping init, so run the soak under one (e.g. `docker run --init`). Zombies are neither waited for nor killed, and do not count as cleanup failures |
 | `slot_limit` | More busy holders than slots, or more cargo processes than build plus run slots |
 | `no_stranded_tickets` | A waiter exceeds `--stranded-after` with a free slot, or three times that regardless |
 | `cancellation_cleanup` | A cancelled job left processes behind or ignored its signal for 60 s |

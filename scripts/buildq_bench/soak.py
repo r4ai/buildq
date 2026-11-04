@@ -34,6 +34,7 @@ INVARIANTS = (
     "exit_codes",
     "correct_outputs",
     "no_orphan_processes",
+    "zombies_reaped",
     "slot_limit",
     "no_stranded_tickets",
     "cancellation_cleanup",
@@ -301,11 +302,11 @@ class Limits:
 
 
 def parse_ps(text: str) -> list[dict[str, object]]:
-    """Parse ``ps -axo pid=,ppid=,pgid=,rss=,comm=`` output."""
+    """Parse ``ps -axo pid=,ppid=,pgid=,rss=,stat=,comm=`` output."""
     rows: list[dict[str, object]] = []
     for line in text.splitlines():
-        fields = line.split(None, 4)
-        if len(fields) < 5 or not all(f.isdigit() for f in fields[:4]):
+        fields = line.split(None, 5)
+        if len(fields) < 6 or not all(f.isdigit() for f in fields[:4]):
             continue
         pid, ppid, pgid, rss = (int(f) for f in fields[:4])
         rows.append(
@@ -314,10 +315,16 @@ def parse_ps(text: str) -> list[dict[str, object]]:
                 "ppid": ppid,
                 "pgid": pgid,
                 "rss_kb": rss,
-                "comm": Path(fields[4].strip()).name,
+                "state": fields[4][:1],
+                "comm": Path(fields[5].strip()).name,
             }
         )
     return rows
+
+
+def is_zombie(row: Mapping[str, object]) -> bool:
+    """Terminated but not yet reaped: it runs nothing and cannot be killed."""
+    return row.get("state") == "Z"
 
 
 # Cargo invocations buildq (or Cargo itself) runs before slot admission to
@@ -392,13 +399,28 @@ def evaluate_sample(sample: Mapping[str, object], limits: Limits) -> list[dict]:
     dead = set(sample.get("dead_groups", []))
     live = set(sample.get("live_groups", []))
 
-    orphans = [p for p in processes if p["pgid"] in dead]
+    left = [p for p in processes if p["pgid"] in dead]
+    orphans = [p for p in left if not is_zombie(p)]
     if orphans:
         violations.append(
             {
                 "invariant": "no_orphan_processes",
                 "detail": f"{len(orphans)} process(es) outlive their buildq: "
                 + ", ".join(f"{p['comm']}[{p['pid']}]" for p in orphans[:5]),
+            }
+        )
+    # Exited, but nothing reaps them: an init/supervision problem, not a
+    # workload buildq left running.
+    zombies = [p for p in left if is_zombie(p)]
+    if zombies:
+        violations.append(
+            {
+                "invariant": "zombies_reaped",
+                "detail": f"{len(zombies)} exited process(es) of a finished job "
+                "stay unreaped (no reaping init; run under one, e.g. "
+                "`docker run --init`): "
+                + ", ".join(f"{p['comm']}[{p['pid']}]" for p in zombies[:5]),
+                "pids": [p["pid"] for p in zombies],
             }
         )
 
@@ -502,13 +524,28 @@ def summarize(records: Sequence[Mapping[str, object]], now: float) -> dict[str, 
             found["cancellation_cleanup"].append(
                 f"{label}: leftover pids {a['leftover_pids']}"
             )
+        if a.get("zombie_pids"):
+            found["zombies_reaped"].append(
+                f"{label}: unreaped exited pids {a['zombie_pids']} (no reaping init)"
+            )
         if a.get("cancel_hung"):
             found["cancellation_cleanup"].append(f"{label}: ignored the signal")
         for problem in a.get("gc_problems", []):
             found["gc_errors"].append(f"{label}: {problem}")
     streak = 0
+    # A zombie seen once may just be awaiting a working init's reap; one
+    # still there a sample later is not being reaped.
+    zombie_sightings: dict[int, int] = {}
     for s in samples:
         for v in s.get("violations", []):
+            if v["invariant"] == "zombies_reaped" and "pids" in v:
+                for pid in v["pids"]:
+                    zombie_sightings[pid] = zombie_sightings.get(pid, 0) + 1
+    for s in samples:
+        for v in s.get("violations", []):
+            if v["invariant"] == "zombies_reaped" and "pids" in v:
+                if not any(zombie_sightings[p] > 1 for p in v["pids"]):
+                    continue
             found[v["invariant"]].append(f"t={s['t']}: {v['detail']}")
         if s.get("accounting_mismatch"):
             found["accounting_matches_disk"].append(
@@ -745,7 +782,7 @@ class ProcessRegistry:
 
 def process_rows() -> list[dict[str, object]]:
     result = subprocess.run(
-        ["ps", "-axo", "pid=,ppid=,pgid=,rss=,comm="],
+        ["ps", "-axo", "pid=,ppid=,pgid=,rss=,stat=,comm="],
         capture_output=True,
         text=True,
         check=False,
@@ -797,6 +834,7 @@ class JobResult:
     peak_rss_bytes: int = 0
     signal_sent: str | None = None
     leftover_pids: list[int] = field(default_factory=list)
+    zombie_pids: list[int] = field(default_factory=list)
     hung: bool = False
     timed_out: bool = False
 
@@ -964,7 +1002,7 @@ class Soak:
                 self.wait(process, result, started, cancel)
             result.peak_rss_bytes = sampler.stats.peak_rss_bytes
             result.exit = process.returncode
-            result.leftover_pids = self.reap_group(process.pid)
+            result.leftover_pids, result.zombie_pids = self.reap_group(process.pid)
             self.registry.release(process)
         result.duration_s = round(time.monotonic() - started, 3)
         result.stdout = (jobs / f"{name}.out").read_text(errors="replace")
@@ -998,18 +1036,33 @@ class Soak:
                 stop_command(process)
             time.sleep(0.1)
 
-    def reap_group(self, pgid: int) -> list[int]:
-        """Pids still in the finished job's own group; kill them (they are ours)."""
+    def reap_group(self, pgid: int) -> tuple[list[int], list[int]]:
+        """Pids still running in the finished job's own group, killed (they
+        are ours), and its unreaped zombies, which only an init can clear:
+        those are neither waited for nor killed."""
         deadline = time.monotonic() + 15
         while True:
-            left = [int(r["pid"]) for r in process_rows() if r["pgid"] == pgid]  # type: ignore[call-overload]
+            rows = [r for r in process_rows() if r["pgid"] == pgid]
+            left = [int(r["pid"]) for r in rows if not is_zombie(r)]  # type: ignore[call-overload]
+            zombies = [int(r["pid"]) for r in rows if is_zombie(r)]  # type: ignore[call-overload]
             if not left or time.monotonic() > deadline:
                 break
             time.sleep(0.5)
         if left:
             with suppress(ProcessLookupError):
                 os.killpg(pgid, signal.SIGKILL)
-        return left
+        # Exited children wait briefly for their adopting init's reap; only
+        # zombies that outlast that are reported.
+        settle = time.monotonic() + 2
+        while zombies and time.monotonic() < settle:
+            time.sleep(0.2)
+            still = {
+                int(r["pid"])
+                for r in process_rows()
+                if r["pgid"] == pgid and is_zombie(r)
+            }  # type: ignore[call-overload]
+            zombies = [p for p in zombies if p in still]
+        return left, zombies
 
     # sampling
     def buildq_json(self, *args: str) -> object | None:
@@ -1095,6 +1148,7 @@ class Soak:
             "stderr_tail": result.stderr[-STDERR_TAIL_CHARS:],
             "peak_tree_rss_bytes": result.peak_rss_bytes,
             "leftover_pids": result.leftover_pids,
+            "zombie_pids": result.zombie_pids,
             "timed_out": result.timed_out,
         }
 
@@ -1171,6 +1225,7 @@ class Soak:
             "duration_s": max(float(j["duration_s"]) for j in jobs),  # type: ignore[arg-type]
             "expect_success": not self.stop.is_set(),
             "leftover_pids": [p for j in jobs for p in j["leftover_pids"]],  # type: ignore[union-attr]
+            "zombie_pids": [p for j in jobs for p in j.get("zombie_pids", [])],  # type: ignore[union-attr]
             "cmd": [str(self.buildq), "cargo", "...", f"x{action.burst_size}"],
         }
         if mismatched:
