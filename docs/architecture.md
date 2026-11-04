@@ -277,7 +277,11 @@ bounded collector lifecycle. Neither mode adds a persistent daemon. See
 The cache budget is a soft retention limit. Busy members and run copies are
 protected, so active builds may temporarily exceed it. `cache ls --json` and
 `gc --json` expose `over_budget`, `over_budget_bytes`, and
-`over_budget_reasons`; text output and `top` also show warnings. GC reports
+`over_budget_reasons`; text output and `top` also show warnings. With
+`backend = "mbx"`, `mbx_overflow_bytes` is the part of `over_budget_bytes` that
+mbx's store holds beyond the whole budget. buildq never deletes it, so it stays
+reported (with advice to tighten mbx's own GC limits) after GC has emptied the
+pool. GC reports
 remaining overflow without treating protected busy artifacts as a deletion
 failure. Its exit status remains successful unless a deletion fails.
 
