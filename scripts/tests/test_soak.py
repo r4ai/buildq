@@ -10,6 +10,7 @@ from buildq_bench.soak import (
     SoakError,
     accounting_mismatch,
     cargo_arguments,
+    cargo_role,
     dirty_after,
     ensure_inside,
     evaluate_sample,
@@ -19,6 +20,7 @@ from buildq_bench.soak import (
     output_matches,
     parse_duration,
     parse_ps,
+    parse_ps_args,
     parse_size,
     plan_action,
     read_marker,
@@ -207,6 +209,40 @@ def test_slot_limit_violations() -> None:
         sample(status=ok, processes=cargos, live_groups=[5]), LIMITS
     )
     assert invariants_of(found) == {"slot_limit"}
+    # Metadata and version probes before admission hold no slot (#143).
+    probes = [{**c, "pid": 100 + c["pid"], "role": "probe"} for c in cargos * 3]
+    with_probes = sample(status=ok, processes=cargos[:4] + probes, live_groups=[5])
+    assert not evaluate_sample(with_probes, LIMITS)
+    heavy = [{**c, "role": "heavy"} for c in cargos]
+    found = evaluate_sample(
+        sample(status=ok, processes=heavy + probes, live_groups=[5]), LIMITS
+    )
+    assert invariants_of(found) == {"slot_limit"}
+
+
+def test_cargo_roles() -> None:
+    for probe in (
+        "cargo -V",
+        "/home/u/.cargo/bin/cargo --version",
+        "cargo -vV",
+        "cargo metadata --no-deps --format-version 1 --offline",
+        "cargo +1.89.0 --config net.offline=true metadata --format-version 1",
+        "cargo locate-project --workspace",
+        "cargo",
+    ):
+        assert cargo_role(probe) == "probe", probe
+    for heavy in (
+        "cargo build -p tokio@1.45.1",
+        "cargo +nightly test --features full",
+        "cargo --config build.jobs=2 -Z unstable-options check",
+        "cargo run --offline -q -- --version",
+        "cargo test -- metadata",
+    ):
+        assert cargo_role(heavy) == "heavy", heavy
+    assert parse_ps_args("  12 cargo -V\nnope\n 13 cargo build -p a\n") == {
+        12: "cargo -V",
+        13: "cargo build -p a",
+    }
 
 
 def test_stranded_ticket_needs_age_and_a_reason() -> None:
