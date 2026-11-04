@@ -1908,7 +1908,7 @@ fn sync_into(dir: &Path, files: &[PathBuf]) -> io::Result<u64> {
         let stamp = (md.len(), md.modified().map(system_time_ms).unwrap_or(0));
         let dest = dir.join(&name);
         if index.files.get(&name) != Some(&stamp) || !dest.exists() {
-            fs::copy(f, &dest)?;
+            replace_copy(f, &dest)?;
             copied += md.len();
         }
         keep.insert(name, stamp);
@@ -1916,7 +1916,7 @@ fn sync_into(dir: &Path, files: &[PathBuf]) -> io::Result<u64> {
     for e in fs::read_dir(dir)?.flatten() {
         let n = e.file_name().to_string_lossy().to_string();
         if !keep.contains_key(&n) {
-            let _ = fs::remove_file(e.path());
+            let _ = remove_file_forced(&e.path());
         }
     }
     index.exe = files
@@ -1927,6 +1927,40 @@ fn sync_into(dir: &Path, files: &[PathBuf]) -> io::Result<u64> {
     index.files = keep;
     write_json(&index_path, &index)?;
     Ok(copied)
+}
+
+/// Copies `src` over `dest` even when `dest` is read-only (mbx stores
+/// artifacts as `r-x`, and `fs::copy` keeps that mode): copy to a sibling,
+/// then rename over `dest`, removing a read-only `dest` first where rename
+/// refuses to replace it (Windows).
+fn replace_copy(src: &Path, dest: &Path) -> io::Result<()> {
+    let mut tmp = dest.as_os_str().to_owned();
+    tmp.push(format!(".tmp{}", std::process::id()));
+    let tmp = PathBuf::from(tmp);
+    let _ = remove_file_forced(&tmp);
+    fs::copy(src, &tmp)?;
+    let renamed = fs::rename(&tmp, dest).or_else(|_| {
+        remove_file_forced(dest)?;
+        fs::rename(&tmp, dest)
+    });
+    if renamed.is_err() {
+        let _ = remove_file_forced(&tmp);
+    }
+    renamed
+}
+
+/// Removes a file, clearing a read-only attribute that blocks it (Windows).
+fn remove_file_forced(path: &Path) -> io::Result<()> {
+    match fs::remove_file(path) {
+        Err(e) if e.kind() == io::ErrorKind::PermissionDenied => {
+            let mut perms = fs::symlink_metadata(path)?.permissions();
+            #[allow(clippy::permissions_set_readonly_false)]
+            perms.set_readonly(false);
+            fs::set_permissions(path, perms)?;
+            fs::remove_file(path)
+        }
+        r => r,
+    }
 }
 
 #[cfg(test)]
@@ -2091,5 +2125,55 @@ mod tests {
         assert!(!run.join("stale.dll").exists());
         assert!(!run.join("dep.dll").exists());
         assert!(run.join("app.exe").exists());
+    }
+
+    #[test]
+    fn sync_replaces_read_only_copies() {
+        let d = tempfile::tempdir().unwrap();
+        let src = d.path().join("src");
+        fs::create_dir_all(&src).unwrap();
+        let exe = src.join("app");
+        let lib = src.join("libx.so");
+        let read_only = |p: &Path| {
+            let mut perms = fs::metadata(p).unwrap().permissions();
+            perms.set_readonly(true);
+            fs::set_permissions(p, perms).unwrap();
+        };
+        let writable = |p: &Path| {
+            let mut perms = fs::metadata(p).unwrap().permissions();
+            #[allow(clippy::permissions_set_readonly_false)]
+            perms.set_readonly(false);
+            fs::set_permissions(p, perms).unwrap();
+        };
+        fs::write(&exe, b"v1").unwrap();
+        fs::write(&lib, b"lib1").unwrap();
+        read_only(&exe);
+        read_only(&lib);
+        let run = d.path().join("r0");
+        sync_into(&run, &[exe.clone(), lib.clone()]).unwrap();
+        assert!(
+            fs::metadata(run.join("app"))
+                .unwrap()
+                .permissions()
+                .readonly()
+        );
+
+        // A rebuilt binary must replace the read-only copy from the last run.
+        writable(&exe);
+        fs::write(&exe, b"version 2").unwrap();
+        read_only(&exe);
+        assert_eq!(sync_into(&run, &[exe.clone(), lib.clone()]).unwrap(), 9);
+        assert_eq!(fs::read(run.join("app")).unwrap(), b"version 2");
+        // A read-only file the run no longer needs is removed.
+        sync_into(&run, std::slice::from_ref(&exe)).unwrap();
+        assert!(!run.join("libx.so").exists());
+        let names: Vec<_> = fs::read_dir(&run)
+            .unwrap()
+            .flatten()
+            .map(|e| e.file_name())
+            .collect();
+        assert_eq!(names, ["app"]);
+        writable(&exe);
+        writable(&lib);
     }
 }
