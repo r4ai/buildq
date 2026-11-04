@@ -1751,3 +1751,52 @@ fn gc_drops_the_mbx_rebate_of_evicted_hard_links() {
     assert_eq!(u["over_budget"], false, "{u}");
     assert!(store.join("blob").exists());
 }
+
+/// A lost rebate costs at most mbx's own share: under allocated accounting
+/// a tiny store file's footprint can exceed what mbx reports, and evicting
+/// its holder must not shrink the budget by more than that.
+#[cfg(target_os = "linux")]
+#[test]
+fn a_lost_mbx_rebate_never_exceeds_mbx_bytes() {
+    use std::os::unix::fs::PermissionsExt;
+    let e = Env::new();
+    let now = buildq::util::now_ms();
+    let pool = e.root.join("cache/pools/p");
+    let store = e.root.join("mbxstore/actions");
+    fs::create_dir_all(&store).unwrap();
+    fs::write(store.join("blob"), b"x").unwrap();
+    for (id, used) in [(0, now - 10_000), (1, now)] {
+        let dir = pool.join(format!("m{id}"));
+        fs::create_dir_all(&dir).unwrap();
+        if id == 0 {
+            fs::hard_link(store.join("blob"), dir.join("blob")).unwrap();
+        } else {
+            fs::write(dir.join("own"), vec![2; 4096]).unwrap();
+        }
+        let meta = serde_json::json!({ "id": id, "created_ms": used, "last_used_ms": used });
+        fs::write(pool.join(format!("m{id}.json")), meta.to_string()).unwrap();
+    }
+    let info = serde_json::json!({ "created_ms": now, "last_used_ms": now });
+    fs::write(pool.join("pool.json"), info.to_string()).unwrap();
+    let mbx = e.root.join("mbxbin/mbx");
+    fs::create_dir_all(mbx.parent().unwrap()).unwrap();
+    let report = format!(
+        r#"{{"version":1,"store":"{}","total_bytes":1,"combined_total_bytes":1}}"#,
+        store.display()
+    );
+    fs::write(&mbx, format!("#!/bin/sh\ncat <<'JSON'\n{report}\nJSON\n")).unwrap();
+    fs::set_permissions(&mbx, fs::Permissions::from_mode(0o755)).unwrap();
+    fs::write(
+        e.root.join("q/config.toml"),
+        format!(
+            "[cache]\nmin_free='0'\naccounting='allocated'\nbudget='8191'\n[cargo]\nbackend = \"mbx\"\nmbx = {mbx:?}\n"
+        ),
+    )
+    .unwrap();
+    let out = e.cmd(1).args(["gc", "--json"]).output().unwrap();
+    let r: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    // m0 (one allocated block) goes; m1 fits the 8190 bytes left.
+    assert!(!pool.join("m0").exists(), "{r}");
+    assert!(pool.join("m1").is_dir(), "{r}");
+    assert_eq!(r["effective_budget"], 8191 - 1, "{r}");
+}

@@ -929,8 +929,15 @@ fn gc_once(cfg: &Config, opts: &Options) -> Report {
         }
         let by_member: BTreeMap<PathBuf, mbx::Linked> =
             all.iter().map(|(_, m)| m.dir.clone()).zip(held).collect();
-        (by_member, holders)
+        // The overlap still held, as the measurement counted it (`held`
+        // may differ slightly: it is walked again here).
+        let shared_left = m.shared_with_mbx_bytes;
+        (by_member, holders, m.combined_bytes, shared_left)
     });
+    // The budget as `scan` derives it, for a changed mbx share: mbx's bytes
+    // never count below zero, so a lost rebate costs at most what mbx
+    // reports beyond the overlap still held.
+    let free_limit = effective_budget(u64::MAX, cfg.min_free, usage.total, usage.free_disk);
     let mut runs: Vec<_> = usage
         .runs
         .iter()
@@ -1003,15 +1010,17 @@ fn gc_once(cfg: &Config, opts: &Options) -> Report {
             // A failed deletion, even from trash, leaves shared blocks in place.
             if report.failed_deletions == failures {
                 evicted.insert((p.name.clone(), m.id));
-                if let Some((by_member, holders)) = rebate.as_mut() {
+                if let Some((by_member, holders, combined, shared_left)) = rebate.as_mut() {
                     for (id, _) in by_member.remove(&m.dir).unwrap_or_default() {
                         if let Some((count, bytes)) = holders.get_mut(&id) {
                             *count -= 1;
                             if *count == 0 {
-                                budget = budget.saturating_sub(*bytes);
+                                *shared_left = shared_left.saturating_sub(*bytes);
                             }
                         }
                     }
+                    let counted = combined.saturating_sub(*shared_left);
+                    budget = budget.min(free_limit.min(cfg.budget.saturating_sub(counted)));
                     report.effective_budget = budget;
                 }
             }
