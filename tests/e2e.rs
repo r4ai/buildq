@@ -1845,6 +1845,18 @@ fn main() {
             fs::read_to_string(log).is_ok_and(|s| s.contains("waiting for one"))
         });
     }
+    // The member waiters hold no slot, yet status shows them (#150).
+    let status = || {
+        let out = Command::new(BQ)
+            .args(["status", "--json"])
+            .env("BUILDQ_DIR", root.join("q"))
+            .env("BUILDQ_CONFIG", root.join("q/config.toml"))
+            .output()
+            .unwrap();
+        serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()
+    };
+    let shown = status()["member_waiters"].as_array().unwrap().len();
+    assert_eq!(shown, slots, "{}", status());
     let mut other = w
         .command(&b, &["build", "--offline"])
         .stderr(Stdio::null())
@@ -1881,6 +1893,7 @@ fn main() {
         let text = fs::read_to_string(log).unwrap();
         assert!(text.contains("got member m"), "{text}");
     }
+    assert!(status()["member_waiters"].as_array().unwrap().is_empty());
 }
 
 #[cfg(unix)]

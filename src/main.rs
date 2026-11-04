@@ -448,12 +448,33 @@ fn status(cfg: &Config, json: bool, hosts: bool) -> ExitCode {
             .into_iter()
             .map(|(h, r)| (h, r.unwrap_or_else(|e| serde_json::json!({ "error": e }))))
             .collect();
-        let v = serde_json::json!({ "classes": classes, "hosts": hosts });
+        let v = serde_json::json!({
+            "classes": classes,
+            "member_waiters": buildq::status::member_waiters(cfg),
+            "hosts": hosts,
+        });
         println!("{}", serde_json::to_string_pretty(&v).unwrap());
         return ExitCode::SUCCESS;
     }
     for st in &classes {
         print_class(st, "");
+    }
+    let waiters = buildq::status::member_waiters(cfg);
+    if !waiters.is_empty() {
+        println!(
+            "waiting for a pool member (no slot held yet): {}",
+            waiters.len()
+        );
+        for w in &waiters {
+            println!(
+                "  {:>5}  {}  (pid {}, pool {}, {})",
+                ago(w.since_ms),
+                w.cmd,
+                w.pid,
+                w.pool,
+                w.cwd
+            );
+        }
     }
     for (h, r) in remote {
         println!("== host {h}");
