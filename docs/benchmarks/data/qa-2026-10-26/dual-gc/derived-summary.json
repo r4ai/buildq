@@ -1,0 +1,144 @@
+{
+  "duration_seconds": 1800.2282224360001,
+  "jobs": 8235,
+  "bad_output_jobs": 0,
+  "nonzero_commands": 0,
+  "pressure_cycles": 30,
+  "pressure_nonzero": 0,
+  "pressure_mbx_removed_bytes": 2048944,
+  "pressure_buildq_freed_bytes": 42655744,
+  "final_status": {
+    "classes": [
+      {
+        "class": "build",
+        "holders": [
+          {
+            "busy": false,
+            "job": null,
+            "slot": 0
+          },
+          {
+            "busy": false,
+            "job": null,
+            "slot": 1
+          }
+        ],
+        "slots": 2,
+        "waiters": []
+      },
+      {
+        "class": "run",
+        "holders": [
+          {
+            "busy": false,
+            "job": null,
+            "slot": 0
+          },
+          {
+            "busy": false,
+            "job": null,
+            "slot": 1
+          }
+        ],
+        "slots": 2,
+        "waiters": []
+      }
+    ],
+    "hosts": {}
+  },
+  "final_inventory": {
+    "pools": [
+      {
+        "name": "repo-392ebbc8",
+        "dir": "/workspace/qa-root/dual-gc-live/cache/pools/repo-392ebbc8",
+        "info": {
+          "repo": "repo",
+          "repo_key": "/workspace/qa-root/dual-gc-live/repo/.git",
+          "toolchain": "1.89.0",
+          "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+          "created_ms": 1792994694736,
+          "last_used_ms": 1792996494469
+        },
+        "members": [
+          {
+            "id": 0,
+            "dir": "/workspace/qa-root/dual-gc-live/cache/pools/repo-392ebbc8/m0",
+            "busy": false,
+            "size": 925696,
+            "shared": 0,
+            "meta": {
+              "id": 0,
+              "created_ms": 1792995961524,
+              "last_used_ms": 1792996494645,
+              "last_worktree": "/workspace/qa-root/dual-gc-live/wt0",
+              "source_root": "/workspace/qa-root/dual-gc-live/wt0",
+              "last_head": "95793f756e389b28d58362d36f0da2f7eb2cc480",
+              "last_cmd": "",
+              "jobs": 2076,
+              "size_bytes": 925696,
+              "size_ms": 1792996494677,
+              "size_accounting": "allocated"
+            }
+          },
+          {
+            "id": 1,
+            "dir": "/workspace/qa-root/dual-gc-live/cache/pools/repo-392ebbc8/m1",
+            "busy": false,
+            "size": 925696,
+            "shared": 0,
+            "meta": {
+              "id": 1,
+              "created_ms": 1792996141625,
+              "last_used_ms": 1792996494643,
+              "last_worktree": "/workspace/qa-root/dual-gc-live/wt1",
+              "source_root": "/workspace/qa-root/dual-gc-live/wt1",
+              "last_head": "95793f756e389b28d58362d36f0da2f7eb2cc480",
+              "last_cmd": "",
+              "jobs": 1437,
+              "size_bytes": 925696,
+              "size_ms": 1792996494677,
+              "size_accounting": "allocated"
+            }
+          }
+        ],
+        "shared": 0
+      }
+    ],
+    "runs": [
+      {
+        "dir": "/workspace/qa-root/dual-gc-live/cache/runs/r0",
+        "busy": false,
+        "size": 446464,
+        "last_used_ms": 1792996494638
+      },
+      {
+        "dir": "/workspace/qa-root/dual-gc-live/cache/runs/r1",
+        "busy": false,
+        "size": 446464,
+        "last_used_ms": 1792996494641
+      }
+    ],
+    "total": 2744320,
+    "trash_bytes": 0,
+    "budget": 33554432,
+    "effective_budget": 32843008,
+    "accounting": "allocated",
+    "over_budget": false,
+    "over_budget_bytes": 0,
+    "over_budget_reasons": [],
+    "free_disk": 15886618624,
+    "external": [],
+    "external_total": 0,
+    "mbx": {
+      "store": "/workspace/qa-root/dual-gc-live/mbx/actions",
+      "store_bytes": 3360,
+      "target_bytes": 0,
+      "incremental_bytes": 708064,
+      "generated_bytes": 0,
+      "combined_bytes": 711424,
+      "shared_with_mbx_bytes": 0,
+      "combined_unique_bytes": 3455744
+    },
+    "mbx_budget_bytes": 711424
+  }
+}

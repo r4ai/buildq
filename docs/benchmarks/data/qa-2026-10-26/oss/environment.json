@@ -1,0 +1,18 @@
+{
+  "buildq_commit": "1391d005b732a858140bbf7f8f76df9397b2a90b",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "cpu_quota": "400000 100000",
+  "memory_limit_bytes": 17179869184,
+  "filesystem": "overlay; reflink support is measured separately by sharing QA",
+  "cargo_build_jobs": 1,
+  "slots": 2,
+  "parallel_submitted_jobs": 12,
+  "concurrent_experiments": "Other QA agents ran independent workloads on the same 4-CPU/16GiB host; wall times are contention measurements, not isolated speedup claims.",
+  "cargo_registry": "Shared /workspace/.buildq-env/cargo/registry, initially 54 source packages; target cache initially empty",
+  "repos": {
+    "bevy": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+    "tokio": "3768696d92d403d98b7d559934617890f882ec02",
+    "ripgrep": "4649aa9700619f94cf9c66876e9549d83420e16c",
+    "rust-analyzer": "2a388d1103450d814a84eda98efe89c01b158343"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "actions": 102,
+  "actions_by_kind": {
+    "build": 16,
+    "build_features": 13,
+    "build_release": 13,
+    "burst": 4,
+    "cancel": 4,
+    "edit": 8,
+    "gc": 13,
+    "gc_pressure": 12,
+    "revert": 8,
+    "test": 11
+  },
+  "elapsed_s": 167.1,
+  "ended": 1792993996.8257732,
+  "gc_runs": 25,
+  "interrupted": true,
+  "invariants": {
+    "accounting_matches_disk": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "cancellation_cleanup": {
+      "examples": [
+        "#12 cancel fixture-a: leftover pids [3904]",
+        "#62 cancel fixture-d: leftover pids [14127]",
+        "#77 cancel fixture-c: leftover pids [24267]",
+        "#90 cancel fixture-b: leftover pids [31245]",
+        "#101 build_release fixture-b: leftover pids [42986]"
+      ],
+      "passed": false,
+      "violations": 5
+    },
+    "correct_outputs": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "exit_codes": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "gc_errors": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "no_orphan_processes": {
+      "examples": [
+        "t=1792993854.8244298: 1 process(es) outlive their buildq: build-script-bu[3904]",
+        "t=1792993859.8402503: 1 process(es) outlive their buildq: build-script-bu[3904]",
+        "t=1792993864.8720772: 1 process(es) outlive their buildq: build-script-bu[3904]",
+        "t=1792993869.9407237: 1 process(es) outlive their buildq: build-script-bu[3904]",
+        "t=1792993874.973739: 1 process(es) outlive their buildq: build-script-bu[3904]"
+      ],
+      "passed": false,
+      "violations": 27
+    },
+    "no_stranded_tickets": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "slot_limit": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "storage_policy": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    }
+  },
+  "max_du_bytes": 69713920,
+  "max_trash_bytes": 0,
+  "max_tree_rss_kb": 2755472,
+  "min_free_disk_bytes": 27717746688,
+  "passed": false,
+  "queue_wait": {
+    "jobs": 140,
+    "max_wait_s": 1.33,
+    "p95_wait_s": 0.541
+  },
+  "samples": 32,
+  "seed": 26026,
+  "started": 1792993829.7224667
+}

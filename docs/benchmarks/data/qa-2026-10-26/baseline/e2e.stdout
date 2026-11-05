@@ -1,0 +1,19 @@
+
+running 3 tests
+test run_starts_a_dylib_linked_binary ... ok
+mbx cache hits in the second worktree: 2
+test mbx_backend_runs_against_a_real_mbx ... ok
+
+step                                        wall  compiled
+wt1 cold build (new member)               19.28s         8
+wt2 first build, shared member             2.00s         3
+control: wt2 with its own target/         12.59s         8
+wt2 edit core + run (old mtime)            2.12s         3
+wt1 run via alias after wt2 edit           2.31s         3
+
+pool member m0: 78.5 MiB for both worktrees; one own target/: 77.5 MiB
+naive shared CARGO_TARGET_DIR after the same edit prints: "greeting v1 (3 words)" (stale)
+test two_worktrees_share_a_pool_member ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 22 filtered out; finished in 55.61s
+

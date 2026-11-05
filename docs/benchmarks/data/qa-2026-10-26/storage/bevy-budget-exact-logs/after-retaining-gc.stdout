@@ -1,0 +1,52 @@
+{
+  "pools": [
+    {
+      "name": "repo-0d2c9488",
+      "dir": "/workspace/qa-storage/bevy-budget-exact/cache/pools/repo-0d2c9488",
+      "info": {
+        "repo": "repo",
+        "repo_key": "/workspace/qa-storage/bevy-budget-exact/repo/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792996063037,
+        "last_used_ms": 1792996189635
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-storage/bevy-budget-exact/cache/pools/repo-0d2c9488/m0",
+          "busy": false,
+          "size": 644550656,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792996126633,
+            "last_used_ms": 1792996190159,
+            "last_worktree": "/workspace/qa-storage/bevy-budget-exact/repo",
+            "source_root": "/workspace/qa-storage/bevy-budget-exact/repo",
+            "last_head": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+            "last_cmd": "",
+            "jobs": 2,
+            "size_bytes": 644550656,
+            "size_ms": 1792996190261,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [],
+  "total": 644550656,
+  "trash_bytes": 0,
+  "budget": 2147483648,
+  "effective_budget": 2147483648,
+  "accounting": "allocated",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "free_disk": 15910330368,
+  "external": [],
+  "external_total": 0,
+  "mbx_budget_bytes": 0
+}

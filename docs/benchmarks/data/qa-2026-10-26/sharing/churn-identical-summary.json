@@ -1,0 +1,8 @@
+{
+  "seed_members": "false",
+  "jobs": 180,
+  "correct": 180,
+  "seconds": 309.122770868,
+  "median_job_seconds": 4.314161049500001,
+  "max_job_seconds": 83.57344592499999
+}

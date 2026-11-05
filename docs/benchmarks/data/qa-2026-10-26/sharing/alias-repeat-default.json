@@ -1,0 +1,42 @@
+{
+  "files_per_member": 100,
+  "members": 2,
+  "hardlinks": true,
+  "max_index": 100000,
+  "artifact_bytes": 1024,
+  "max_read": "1G",
+  "exit": 0,
+  "setup_seconds": 0.005777018000003409,
+  "seconds": 0.04765542600000572,
+  "max_rss_kib": 10368,
+  "report": {
+    "dry_run": true,
+    "accounting": "logical",
+    "pools": 1,
+    "indexed": 400,
+    "index_ms": 10,
+    "index_batches": 1,
+    "candidates": 400,
+    "compared": 100,
+    "identical": 100,
+    "identical_bytes": 102400,
+    "shared": 0,
+    "shared_bytes": 0,
+    "already_shared": 0,
+    "already_shared_bytes": 0,
+    "differing": 0,
+    "skipped_busy": 0,
+    "skipped_changed": 0,
+    "skipped_hardlinked": 0,
+    "skipped_known_different": 0,
+    "skipped_over_budget": 0,
+    "read_bytes": 204800,
+    "read_limited": false,
+    "unsupported": null,
+    "sharing": {
+      "state": "unknown"
+    },
+    "skipped": null,
+    "errors": []
+  }
+}

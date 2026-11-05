@@ -1,0 +1,16 @@
+{
+  "native": {
+    "samples": 301,
+    "max_busy_build_slots": 2,
+    "configured_slots": 2,
+    "max_queue_waiters": 0,
+    "slot_limit_passed": true
+  },
+  "static-native": {
+    "samples": 51,
+    "max_busy_build_slots": 2,
+    "configured_slots": 2,
+    "max_queue_waiters": 0,
+    "slot_limit_passed": true
+  }
+}

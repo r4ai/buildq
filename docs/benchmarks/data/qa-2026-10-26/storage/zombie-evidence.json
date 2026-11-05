@@ -1,0 +1,518 @@
+{
+  "cancel_actions": [
+    {
+      "burst_size": 0,
+      "cancel_delay_s": 2.8,
+      "cancel_hung": false,
+      "cancel_signal": "SIGTERM",
+      "cmd": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline",
+        "-q",
+        "-p",
+        "soak-app",
+        "--features",
+        "slow"
+      ],
+      "config": {
+        "budget": "60M",
+        "min_free": "1G",
+        "slots": 2
+      },
+      "cwd": "/workspace/qa-storage/soak/worktrees/fixture-a-4",
+      "duration_s": 18.157,
+      "env": {
+        "BUILDQ_CONFIG": "/workspace/qa-storage/soak/state/config.toml",
+        "TMPDIR": "/workspace/qa-storage/soak/tmp"
+      },
+      "exit": 143,
+      "expect_success": false,
+      "index": 12,
+      "iso": "2026-10-26T05:50:35+00:00",
+      "kind": "cancel",
+      "leftover_pids": [
+        3904
+      ],
+      "peak_tree_rss_bytes": 87773184,
+      "repo": "fixture-a",
+      "revision": {
+        "dirty": true,
+        "head": "5c6d927ba3e869a77c89c60a21eb960a5fe70bf9"
+      },
+      "signal_sent": "SIGTERM",
+      "stderr_tail": "",
+      "t": 1792993835.6420724,
+      "timed_out": false,
+      "type": "action",
+      "worktree": 4
+    },
+    {
+      "burst_size": 0,
+      "cancel_delay_s": 2.7,
+      "cancel_hung": false,
+      "cancel_signal": "SIGINT",
+      "cmd": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline",
+        "-q",
+        "-p",
+        "soak-app",
+        "--features",
+        "slow"
+      ],
+      "config": {
+        "budget": "60M",
+        "min_free": "1G",
+        "slots": 2
+      },
+      "cwd": "/workspace/qa-storage/soak/worktrees/fixture-d-2",
+      "duration_s": 17.901,
+      "env": {
+        "BUILDQ_CONFIG": "/workspace/qa-storage/soak/state/config.toml",
+        "TMPDIR": "/workspace/qa-storage/soak/tmp"
+      },
+      "exit": 130,
+      "expect_success": false,
+      "index": 62,
+      "iso": "2026-10-26T05:51:28+00:00",
+      "kind": "cancel",
+      "leftover_pids": [
+        14127
+      ],
+      "peak_tree_rss_bytes": 94822400,
+      "repo": "fixture-d",
+      "revision": {
+        "dirty": true,
+        "head": "93d5ac61031958b79c2bf35020f8345913267621"
+      },
+      "signal_sent": "SIGINT",
+      "stderr_tail": "",
+      "t": 1792993888.2489138,
+      "timed_out": false,
+      "type": "action",
+      "worktree": 2
+    },
+    {
+      "burst_size": 0,
+      "cancel_delay_s": 4.8,
+      "cancel_hung": false,
+      "cancel_signal": "SIGINT",
+      "cmd": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline",
+        "-q",
+        "-p",
+        "soak-app",
+        "--features",
+        "slow"
+      ],
+      "config": {
+        "budget": "60M",
+        "min_free": "1G",
+        "slots": 2
+      },
+      "cwd": "/workspace/qa-storage/soak/worktrees/fixture-c-0",
+      "duration_s": 20.297,
+      "env": {
+        "BUILDQ_CONFIG": "/workspace/qa-storage/soak/state/config.toml",
+        "TMPDIR": "/workspace/qa-storage/soak/tmp"
+      },
+      "exit": 130,
+      "expect_success": false,
+      "index": 77,
+      "iso": "2026-10-26T05:51:59+00:00",
+      "kind": "cancel",
+      "leftover_pids": [
+        24267
+      ],
+      "peak_tree_rss_bytes": 117354496,
+      "repo": "fixture-c",
+      "revision": {
+        "dirty": true,
+        "head": "4ff448f13b2960471070f92586fd8f04c759275b"
+      },
+      "signal_sent": "SIGINT",
+      "stderr_tail": "",
+      "t": 1792993919.9285703,
+      "timed_out": false,
+      "type": "action",
+      "worktree": 0
+    },
+    {
+      "burst_size": 0,
+      "cancel_delay_s": 6.0,
+      "cancel_hung": false,
+      "cancel_signal": "SIGINT",
+      "cmd": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "--offline",
+        "-q",
+        "-p",
+        "soak-app",
+        "--features",
+        "slow"
+      ],
+      "config": {
+        "budget": "60M",
+        "min_free": "1G",
+        "slots": 2
+      },
+      "cwd": "/workspace/qa-storage/soak/worktrees/fixture-b-4",
+      "duration_s": 21.314,
+      "env": {
+        "BUILDQ_CONFIG": "/workspace/qa-storage/soak/state/config.toml",
+        "TMPDIR": "/workspace/qa-storage/soak/tmp"
+      },
+      "exit": 130,
+      "expect_success": false,
+      "index": 90,
+      "iso": "2026-10-26T05:52:31+00:00",
+      "kind": "cancel",
+      "leftover_pids": [
+        31245
+      ],
+      "peak_tree_rss_bytes": 106668032,
+      "repo": "fixture-b",
+      "revision": {
+        "dirty": true,
+        "head": "d735b27bddf542c9384e267617b79fa15f882e27"
+      },
+      "signal_sent": "SIGINT",
+      "stderr_tail": "",
+      "t": 1792993951.748256,
+      "timed_out": false,
+      "type": "action",
+      "worktree": 4
+    },
+    {
+      "burst_size": 0,
+      "cancel_delay_s": 0.0,
+      "cancel_signal": "",
+      "cmd": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "run",
+        "--offline",
+        "-q",
+        "-p",
+        "soak-app",
+        "--release"
+      ],
+      "config": {
+        "budget": "60M",
+        "min_free": "1G",
+        "slots": 2
+      },
+      "cwd": "/workspace/qa-storage/soak/worktrees/fixture-b-4",
+      "duration_s": 15.988,
+      "env": {
+        "BUILDQ_CONFIG": "/workspace/qa-storage/soak/state/config.toml",
+        "TMPDIR": "/workspace/qa-storage/soak/tmp"
+      },
+      "exit": 143,
+      "expect_success": false,
+      "index": 101,
+      "iso": "2026-10-26T05:53:00+00:00",
+      "kind": "build_release",
+      "leftover_pids": [
+        42986
+      ],
+      "peak_tree_rss_bytes": 83148800,
+      "repo": "fixture-b",
+      "revision": {
+        "dirty": true,
+        "head": "d735b27bddf542c9384e267617b79fa15f882e27"
+      },
+      "stderr_tail": "",
+      "t": 1792993980.750701,
+      "timed_out": false,
+      "type": "action",
+      "worktree": 4
+    }
+  ],
+  "first_bad_sample": [
+    {
+      "accounting_mismatch": null,
+      "cache": {
+        "accounting": "allocated",
+        "budget": 62914560,
+        "effective_budget": 62914560,
+        "external": [],
+        "external_total": 0,
+        "free_disk": 30762889216,
+        "mbx_budget_bytes": 0,
+        "over_budget": false,
+        "over_budget_bytes": 0,
+        "over_budget_reasons": [],
+        "pools": [
+          {
+            "dir": "/workspace/qa-storage/soak/cache/pools/fixture-b-fde6bb7a",
+            "info": {
+              "created_ms": 1792993829752,
+              "last_used_ms": 1792993854162,
+              "repo": "fixture-b",
+              "repo_key": "/workspace/qa-storage/soak/repos/fixture-b/.git",
+              "toolchain": "1.89.0",
+              "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n"
+            },
+            "members": [
+              {
+                "busy": false,
+                "dir": "/workspace/qa-storage/soak/cache/pools/fixture-b-fde6bb7a/m0",
+                "id": 0,
+                "meta": {
+                  "created_ms": 1792993854183,
+                  "id": 0,
+                  "jobs": 1,
+                  "last_cmd": "",
+                  "last_head": "d735b27bddf542c9384e267617b79fa15f882e27",
+                  "last_used_ms": 1792993854699,
+                  "last_worktree": "/workspace/qa-storage/soak/worktrees/fixture-b-4",
+                  "size_accounting": "allocated",
+                  "size_bytes": 17096704,
+                  "size_ms": 1792993854777,
+                  "source_root": "/workspace/qa-storage/soak/worktrees/fixture-b-4"
+                },
+                "shared": 0,
+                "size": 17096704
+              }
+            ],
+            "name": "fixture-b-fde6bb7a",
+            "shared": 0
+          }
+        ],
+        "runs": [],
+        "total": 17096704,
+        "trash_bytes": 0
+      },
+      "dead_groups": [
+        1937,
+        2079,
+        2308,
+        2483,
+        2545,
+        2546,
+        2547,
+        2548,
+        2549,
+        2552,
+        3368,
+        3490,
+        3599,
+        3606,
+        3736,
+        3836,
+        3850,
+        6122,
+        6224,
+        6253
+      ],
+      "du_bytes": 17260544,
+      "free_disk": 30762889216,
+      "idle": true,
+      "live_groups": [
+        6498
+      ],
+      "page_cache_kb": 1255952,
+      "processes": [
+        {
+          "comm": "buildq",
+          "pgid": 2075,
+          "pid": 2075,
+          "ppid": 1,
+          "rss_kb": 0
+        },
+        {
+          "comm": "buildq",
+          "pgid": 3113,
+          "pid": 3113,
+          "ppid": 2000,
+          "rss_kb": 7356
+        },
+        {
+          "comm": "cargo",
+          "pgid": 3113,
+          "pid": 3190,
+          "ppid": 3113,
+          "rss_kb": 280736
+        },
+        {
+          "comm": "buildq",
+          "pgid": 3191,
+          "pid": 3191,
+          "ppid": 3113,
+          "rss_kb": 3300
+        },
+        {
+          "comm": "buildq",
+          "pgid": 3247,
+          "pid": 3247,
+          "ppid": 1,
+          "rss_kb": 0
+        },
+        {
+          "comm": "buildq",
+          "pgid": 3474,
+          "pid": 3474,
+          "ppid": 1,
+          "rss_kb": 0
+        },
+        {
+          "comm": "buildq",
+          "pgid": 3583,
+          "pid": 3583,
+          "ppid": 1,
+          "rss_kb": 0
+        },
+        {
+          "comm": "build-script-bu",
+          "pgid": 3850,
+          "pid": 3904,
+          "ppid": 1,
+          "rss_kb": 0
+        },
+        {
+          "comm": "buildq",
+          "pgid": 3913,
+          "pid": 3913,
+          "ppid": 3912,
+          "rss_kb": 4376
+        },
+        {
+          "comm": "cargo",
+          "pgid": 3913,
+          "pid": 3933,
+          "ppid": 3913,
+          "rss_kb": 28648
+        },
+        {
+          "comm": "buildq",
+          "pgid": 3934,
+          "pid": 3934,
+          "ppid": 3913,
+          "rss_kb": 3332
+        },
+        {
+          "comm": "cargo",
+          "pgid": 4744,
+          "pid": 4757,
+          "ppid": 1,
+          "rss_kb": 0
+        },
+        {
+          "comm": "buildq",
+          "pgid": 4758,
+          "pid": 4758,
+          "ppid": 1,
+          "rss_kb": 0
+        },
+        {
+          "comm": "rustc",
+          "pgid": 3113,
+          "pid": 5930,
+          "ppid": 3190,
+          "rss_kb": 162080
+        },
+        {
+          "comm": "rustc",
+          "pgid": 3913,
+          "pid": 5937,
+          "ppid": 3933,
+          "rss_kb": 216224
+        },
+        {
+          "comm": "buildq",
+          "pgid": 2135,
+          "pid": 6310,
+          "ppid": 2152,
+          "rss_kb": 4156
+        },
+        {
+          "comm": "cargo",
+          "pgid": 2135,
+          "pid": 6369,
+          "ppid": 6310,
+          "rss_kb": 14460
+        },
+        {
+          "comm": "buildq",
+          "pgid": 6370,
+          "pid": 6370,
+          "ppid": 6310,
+          "rss_kb": 3296
+        },
+        {
+          "comm": "rustc",
+          "pgid": 2135,
+          "pid": 6495,
+          "ppid": 6369,
+          "rss_kb": 44512
+        },
+        {
+          "comm": "buildq",
+          "pgid": 6498,
+          "pid": 6498,
+          "ppid": 1753,
+          "rss_kb": 0
+        }
+      ],
+      "status": {
+        "classes": [
+          {
+            "class": "build",
+            "holders": [
+              {
+                "busy": false,
+                "job": null,
+                "slot": 0
+              },
+              {
+                "busy": false,
+                "job": null,
+                "slot": 1
+              }
+            ],
+            "slots": 2,
+            "waiters": []
+          },
+          {
+            "class": "run",
+            "holders": [
+              {
+                "busy": false,
+                "job": null,
+                "slot": 0
+              },
+              {
+                "busy": false,
+                "job": null,
+                "slot": 1
+              }
+            ],
+            "slots": 2,
+            "waiters": []
+          }
+        ],
+        "hosts": {}
+      },
+      "t": 1792993854.8244298,
+      "type": "sample",
+      "violations": [
+        {
+          "detail": "1 process(es) outlive their buildq: build-script-bu[3904]",
+          "invariant": "no_orphan_processes"
+        }
+      ]
+    }
+  ],
+  "ps_columns": "pid ppid pgid stat rss_kb etimes comm",
+  "ps": "   3904       1    3850 Z        0     273 build-script-bu\n  14127       1   14060 Z        0     220 build-script-bu\n  24267       1   24151 Z        0     189 build-script-bu\n  31245       1   30774 Z        0     157 build-script-bu\n  42986       1   42820 Z        0     128 rustc\n"
+}

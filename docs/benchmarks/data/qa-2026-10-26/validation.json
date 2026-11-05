@@ -1,0 +1,12 @@
+{
+  "counts": {
+    "json": 130,
+    "jsonl": 14,
+    "python": 41,
+    "gz_jsonl": 3,
+    "archives": 5
+  },
+  "markdown_files": 12,
+  "english_japanese_headings_match": true,
+  "problems": []
+}

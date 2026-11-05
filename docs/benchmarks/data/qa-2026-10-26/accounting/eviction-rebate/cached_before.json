@@ -1,0 +1,15 @@
+{
+  "at_ms": 1792995800044,
+  "usage": {
+    "Ok": {
+      "store": "/workspace/qa-root/eviction-rebate-regex/mbx/actions",
+      "store_bytes": 76700887,
+      "target_bytes": 0,
+      "incremental_bytes": 81857,
+      "generated_bytes": 0,
+      "combined_bytes": 76782744,
+      "shared_with_mbx_bytes": 57597010,
+      "combined_unique_bytes": 0
+    }
+  }
+}

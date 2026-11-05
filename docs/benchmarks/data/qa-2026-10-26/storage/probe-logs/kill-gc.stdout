@@ -1,0 +1,23 @@
+{
+  "actions": [
+    "evict run dir /workspace/qa-storage/probes/cache/runs/r0 (over budget) (path footprint 3.6 MiB)"
+  ],
+  "freed": 3825664,
+  "before": 143187968,
+  "after": 139362304,
+  "effective_budget": 67108864,
+  "accounting": "allocated",
+  "over_budget": true,
+  "over_budget_bytes": 72253440,
+  "over_budget_reasons": [
+    "busy artifacts are protected; retry GC after jobs finish"
+  ],
+  "skipped": null,
+  "follow_ups": 0,
+  "external": 0,
+  "warnings": [
+    "cache exceeds its effective budget by 68.9 MiB (soft limit): busy artifacts are protected; retry GC after jobs finish"
+  ],
+  "failed_deletions": 0,
+  "dedupe": null
+}

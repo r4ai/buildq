@@ -1,0 +1,162 @@
+{
+  "pools": [
+    {
+      "name": "rust-analyzer-e644142e",
+      "dir": "/workspace/qa-oss/cache/pools/rust-analyzer-e644142e",
+      "info": {
+        "repo": "rust-analyzer",
+        "repo_key": "/workspace/qa-oss/repos/rust-analyzer/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792993865173,
+        "last_used_ms": 1792995665484
+      },
+      "members": [
+        {
+          "id": 2,
+          "dir": "/workspace/qa-oss/cache/pools/rust-analyzer-e644142e/m2",
+          "busy": false,
+          "size": 317837312,
+          "shared": 0,
+          "meta": {
+            "id": 2,
+            "created_ms": 1792995100932,
+            "last_used_ms": 1792995904681,
+            "last_worktree": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+            "source_root": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+            "last_head": "2a388d1103450d814a84eda98efe89c01b158343",
+            "last_cmd": "",
+            "jobs": 6,
+            "size_bytes": 317837312,
+            "size_ms": 1792996109674,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    },
+    {
+      "name": "ripgrep-b273e1b5",
+      "dir": "/workspace/qa-oss/cache/pools/ripgrep-b273e1b5",
+      "info": {
+        "repo": "ripgrep",
+        "repo_key": "/workspace/qa-oss/repos/ripgrep/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792993865155,
+        "last_used_ms": 1792995904829
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-oss/cache/pools/ripgrep-b273e1b5/m0",
+          "busy": false,
+          "size": 339804160,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792995692182,
+            "last_used_ms": 1792995959425,
+            "last_worktree": "/workspace/qa-oss/worktrees/ripgrep-1",
+            "source_root": "/workspace/qa-oss/worktrees/ripgrep-1",
+            "last_head": "4649aa9700619f94cf9c66876e9549d83420e16c",
+            "last_cmd": "",
+            "jobs": 2,
+            "size_bytes": 339804160,
+            "size_ms": 1792996109679,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    },
+    {
+      "name": "bevy-fa4906ee",
+      "dir": "/workspace/qa-oss/cache/pools/bevy-fa4906ee",
+      "info": {
+        "repo": "bevy",
+        "repo_key": "/workspace/qa-oss/repos/bevy/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792993832525,
+        "last_used_ms": 1792995100936
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-oss/cache/pools/bevy-fa4906ee/m0",
+          "busy": false,
+          "size": 644567040,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792995101198,
+            "last_used_ms": 1792995959175,
+            "last_worktree": "/workspace/qa-oss/worktrees/bevy-0",
+            "source_root": "/workspace/qa-oss/worktrees/bevy-0",
+            "last_head": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+            "last_cmd": "",
+            "jobs": 6,
+            "size_bytes": 644567040,
+            "size_ms": 1792996109685,
+            "size_accounting": "allocated"
+          }
+        },
+        {
+          "id": 1,
+          "dir": "/workspace/qa-oss/cache/pools/bevy-fa4906ee/m1",
+          "busy": false,
+          "size": 644558848,
+          "shared": 0,
+          "meta": {
+            "id": 1,
+            "created_ms": 1792995101293,
+            "last_used_ms": 1792995949845,
+            "last_worktree": "/workspace/qa-oss/worktrees/bevy-2",
+            "source_root": "/workspace/qa-oss/worktrees/bevy-2",
+            "last_head": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+            "last_cmd": "",
+            "jobs": 5,
+            "size_bytes": 644558848,
+            "size_ms": 1792996109691,
+            "size_accounting": "allocated"
+          }
+        },
+        {
+          "id": 2,
+          "dir": "/workspace/qa-oss/cache/pools/bevy-fa4906ee/m2",
+          "busy": false,
+          "size": 768253952,
+          "shared": 0,
+          "meta": {
+            "id": 2,
+            "created_ms": 1792995101388,
+            "last_used_ms": 1792996000275,
+            "last_worktree": "/workspace/qa-oss/worktrees/bevy-2",
+            "source_root": "/workspace/qa-oss/worktrees/bevy-2",
+            "last_head": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+            "last_cmd": "",
+            "jobs": 5,
+            "size_bytes": 768253952,
+            "size_ms": 1792996109696,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [],
+  "total": 2715021312,
+  "trash_bytes": 0,
+  "budget": 5368709120,
+  "effective_budget": 5368709120,
+  "accounting": "allocated",
+  "over_budget": false,
+  "over_budget_bytes": 0,
+  "over_budget_reasons": [],
+  "free_disk": 16174026752,
+  "external": [],
+  "external_total": 0,
+  "mbx_budget_bytes": 0
+}

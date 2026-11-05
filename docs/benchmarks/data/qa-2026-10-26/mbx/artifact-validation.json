@@ -1,0 +1,9 @@
+{
+  "validation_counts": {
+    "json": 26,
+    "jsonl": 4,
+    "python": 12,
+    "markdown_local_links": 28
+  },
+  "errors": []
+}

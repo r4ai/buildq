@@ -1,0 +1,32 @@
+{
+  "dry_run": true,
+  "accounting": "allocated",
+  "pools": 1,
+  "indexed": 164,
+  "index_ms": 3,
+  "index_batches": 1,
+  "candidates": 164,
+  "compared": 80,
+  "identical": 79,
+  "identical_bytes": 234098688,
+  "shared": 0,
+  "shared_bytes": 0,
+  "already_shared": 0,
+  "already_shared_bytes": 0,
+  "differing": 1,
+  "skipped_busy": 0,
+  "skipped_changed": 0,
+  "skipped_hardlinked": 0,
+  "skipped_known_different": 0,
+  "skipped_over_budget": 0,
+  "read_bytes": 468706260,
+  "read_limited": true,
+  "unsupported": null,
+  "sharing": {
+    "state": "unsupported",
+    "reason": "FIDEDUPERANGE: Invalid argument (os error 22)",
+    "checked_ms": 1792994736070
+  },
+  "skipped": null,
+  "errors": []
+}

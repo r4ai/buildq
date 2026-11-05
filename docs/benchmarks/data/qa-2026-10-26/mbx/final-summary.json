@@ -1,0 +1,29 @@
+{
+  "measurement_records": 352,
+  "duplicate_measurement_names": 0,
+  "rotation": {
+    "duration_s": 722.595,
+    "iterations": 28,
+    "project_jobs": 140,
+    "marker_checks": 56,
+    "passed": true
+  },
+  "cancellation": {
+    "exit": 143,
+    "cancel_to_exit_s": 0.16615456699992137,
+    "live_children_after": 0,
+    "zombie_children_after": 5,
+    "fully_reaped": false
+  },
+  "visibility": {
+    "submitted": 8,
+    "alive": 8,
+    "busy_build_holders": 2,
+    "pool_member_waiters_from_stderr": 6,
+    "visible_queue_waiters": 0
+  },
+  "mbx_verify": "verified 3686 objects and 630 action results",
+  "tokio_library_tests_passed": 135,
+  "bevy_output_checks_all_match": true,
+  "bevy_marker_checks": 9
+}

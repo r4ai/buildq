@@ -1,0 +1,58 @@
+
+running 41 tests
+test cargo::tests::alias_expansion_keeps_args ... ok
+test cargo::tests::aliases_from_config_files ... ok
+test cargo::tests::routes_heavy_and_passthrough ... ok
+test cargo::tests::target_dir_config_is_rerooted ... FAILED
+test dedupe::tests::shareable_bytes_stop_at_the_logical_range ... ok
+test cargo_config::tests::merges_fields_and_retains_value_origin ... ok
+test cargo_config::tests::relative_values_follow_the_running_cargos_rule ... ok
+test cargo_config::tests::discovery_legacy_precedence_and_cli_overrides ... ok
+test git::tests::ls_files_debug_parse ... ok
+test external::tests::records_measures_and_forgets ... ok
+test job::tests::artifacts_from_messages ... ok
+test git::tests::porcelain_parse ... ok
+test job::tests::mbx_args_move_cargo_globals_after_the_subcommand ... ok
+test job::tests::build_dirs_cover_deps_for_bins_and_examples ... ok
+test job::tests::mbx_launcher_refuses_loops_and_explicit_wrappers ... ok
+test job::tests::package_ids ... ok
+test job::tests::sync_copies_only_changes ... ok
+test mbx::tests::stats_ignore_unknown_and_missing_fields ... ok
+test pool::tests::empty_manifest_needs_no_outside_touches ... ok
+test mbx::tests::shared_bytes_counts_hard_linked_inodes_once ... ok
+test pool::tests::fingerprints_include_rerooted_sub_dirs ... ok
+test pool::tests::invalidate_removes_only_named_packages ... ok
+test pool::tests::outside_touches_only_include_manifest_differences ... ok
+test pool::tests::lease_prefers_two_leaves_over_a_shared_foundation ... ok
+test pool::tests::path_deps_outside_the_manifest_are_reported ... ok
+test pool::tests::plan_groups_by_package ... ok
+test pool::tests::owners_from_manifests ... ok
+test pool::tests::rebuild_graph_counts_transitive_union_and_handles_cycles_and_unknowns ... ok
+test pool::tests::unit_names ... ok
+test remote::tests::host_choice ... ok
+test pool::tests::seeding_drops_units_the_source_may_still_be_writing ... ok
+test exec::tests::a_terminated_unreaped_child_is_not_running ... ok
+test remote::tests::quoting ... ok
+test remote::tests::probes_validate_load_and_required_rust_release ... ok
+test remote::tests::unreachable_candidates_do_not_fall_back_outside_the_requested_list ... ok
+test util::tests::hardlinks_are_counted_once_per_tree ... ok
+test util::tests::hash_is_stable ... ok
+test util::tests::sparse_file_allocation_is_distinct_from_logical_length ... ok
+test util::tests::sizes_parse ... ok
+test git::tests::manifest_hashes_a_backdated_edit_git_status_calls_clean ... ok
+test remote::tests::probe_capture_has_a_deadline ... ok
+
+failures:
+
+---- cargo::tests::target_dir_config_is_rerooted stdout ----
+
+thread 'cargo::tests::target_dir_config_is_rerooted' panicked at src/cargo.rs:488:22:
+Explicit { value: "/workspace/qa-root/test-target", arg: None }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    cargo::tests::target_dir_config_is_rerooted
+
+test result: FAILED. 40 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+

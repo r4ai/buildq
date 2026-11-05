@@ -1,0 +1,733 @@
+{
+  "groups": 66,
+  "already_same_inode_duplicate_bytes": 153937082,
+  "examples": [
+    {
+      "dev": 27,
+      "ino": 1186967,
+      "size": 5159197,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libserde-805af0e17b885cc1.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libserde-805af0e17b885cc1.rmeta"
+      ],
+      "allocated_footprint": 5160960
+    },
+    {
+      "dev": 27,
+      "ino": 1186882,
+      "size": 1089506,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libencoding_rs-79ad79d9e839651c.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libencoding_rs-79ad79d9e839651c.rmeta"
+      ],
+      "allocated_footprint": 1089536
+    },
+    {
+      "dev": 27,
+      "ino": 1185249,
+      "size": 329114,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/liblog-d31a820804a8ed9b.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/liblog-d31a820804a8ed9b.rlib"
+      ],
+      "allocated_footprint": 331776
+    },
+    {
+      "dev": 27,
+      "ino": 1187582,
+      "size": 1191422,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libwalkdir-742d7f303f7cfcda.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libwalkdir-742d7f303f7cfcda.rlib"
+      ],
+      "allocated_footprint": 1191936
+    },
+    {
+      "dev": 27,
+      "ino": 1185934,
+      "size": 13723776,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libregex_syntax-56149cfd4432cd7c.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libregex_syntax-56149cfd4432cd7c.rlib"
+      ],
+      "allocated_footprint": 13725696
+    },
+    {
+      "dev": 27,
+      "ino": 1180997,
+      "size": 1451890,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_regex-daffffdb0e07e6ef.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_regex-daffffdb0e07e6ef.rlib"
+      ],
+      "allocated_footprint": 1454080
+    },
+    {
+      "dev": 27,
+      "ino": 1186725,
+      "size": 1276446,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libserde_json-094fa92987f8b1cc.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libserde_json-094fa92987f8b1cc.rmeta"
+      ],
+      "allocated_footprint": 1277952
+    },
+    {
+      "dev": 27,
+      "ino": 1184295,
+      "size": 1273932,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libmemchr-3cee6db17bbe0dde.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libmemchr-3cee6db17bbe0dde.rmeta"
+      ],
+      "allocated_footprint": 1277952
+    },
+    {
+      "dev": 27,
+      "ino": 1186660,
+      "size": 511059,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libignore-ec9668a2441d4077.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libignore-ec9668a2441d4077.rmeta"
+      ],
+      "allocated_footprint": 512000
+    },
+    {
+      "dev": 27,
+      "ino": 1186727,
+      "size": 4260178,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libserde_json-094fa92987f8b1cc.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libserde_json-094fa92987f8b1cc.rlib"
+      ],
+      "allocated_footprint": 4263936
+    },
+    {
+      "dev": 27,
+      "ino": 1184366,
+      "size": 3332376,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/liblibc-96a9935079032de1.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/liblibc-96a9935079032de1.rlib"
+      ],
+      "allocated_footprint": 3334144
+    },
+    {
+      "dev": 27,
+      "ino": 1186820,
+      "size": 4109955,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libregex_automata-7295c6cdebc23f9d.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libregex_automata-7295c6cdebc23f9d.rmeta"
+      ],
+      "allocated_footprint": 4112384
+    },
+    {
+      "dev": 27,
+      "ino": 1187356,
+      "size": 178324,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libcrossbeam_deque-ea11fe804ac72653.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libcrossbeam_deque-ea11fe804ac72653.rmeta"
+      ],
+      "allocated_footprint": 180224
+    },
+    {
+      "dev": 27,
+      "ino": 1187809,
+      "size": 222514,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libsame_file-82920d733726b0a3.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libsame_file-82920d733726b0a3.rlib"
+      ],
+      "allocated_footprint": 225280
+    },
+    {
+      "dev": 27,
+      "ino": 1186902,
+      "size": 167920,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libencoding_rs_io-02043998810986b8.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libencoding_rs_io-02043998810986b8.rlib"
+      ],
+      "allocated_footprint": 167936
+    },
+    {
+      "dev": 27,
+      "ino": 1186804,
+      "size": 349732,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libmemmap2-6b70d4fd1d61fcdf.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libmemmap2-6b70d4fd1d61fcdf.rlib"
+      ],
+      "allocated_footprint": 352256
+    },
+    {
+      "dev": 27,
+      "ino": 1186757,
+      "size": 405496,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_searcher-b90e9dbf759dd060.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_searcher-b90e9dbf759dd060.rmeta"
+      ],
+      "allocated_footprint": 405504
+    },
+    {
+      "dev": 27,
+      "ino": 1180370,
+      "size": 745516,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_printer-620813a388c7d3e2.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_printer-620813a388c7d3e2.rmeta"
+      ],
+      "allocated_footprint": 749568
+    },
+    {
+      "dev": 27,
+      "ino": 1185231,
+      "size": 10431326,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libaho_corasick-4faf1ab2f37c32c1.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libaho_corasick-4faf1ab2f37c32c1.rlib"
+      ],
+      "allocated_footprint": 10432512
+    },
+    {
+      "dev": 27,
+      "ino": 1186577,
+      "size": 1541338,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libanyhow-f0d8ca215f7bd3fa.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libanyhow-f0d8ca215f7bd3fa.rlib"
+      ],
+      "allocated_footprint": 1544192
+    },
+    {
+      "dev": 27,
+      "ino": 1180642,
+      "size": 171810,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_cli-3a59562a7bd059d7.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_cli-3a59562a7bd059d7.rmeta"
+      ],
+      "allocated_footprint": 172032
+    },
+    {
+      "dev": 27,
+      "ino": 1186792,
+      "size": 310786,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libryu-06f37ed5945aa699.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libryu-06f37ed5945aa699.rlib"
+      ],
+      "allocated_footprint": 311296
+    },
+    {
+      "dev": 27,
+      "ino": 1180866,
+      "size": 94397,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libjobserver-7874e96da74a0963.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libjobserver-7874e96da74a0963.rmeta"
+      ],
+      "allocated_footprint": 98304
+    },
+    {
+      "dev": 27,
+      "ino": 1186837,
+      "size": 103835,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libitoa-a4e015144ec6a903.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libitoa-a4e015144ec6a903.rmeta"
+      ],
+      "allocated_footprint": 106496
+    },
+    {
+      "dev": 27,
+      "ino": 1187604,
+      "size": 959988,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libpkg_config-5e14bc71a9f8e5aa.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libpkg_config-5e14bc71a9f8e5aa.rlib"
+      ],
+      "allocated_footprint": 962560
+    },
+    {
+      "dev": 27,
+      "ino": 1186526,
+      "size": 176400,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libtextwrap-9795af0285001018.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libtextwrap-9795af0285001018.rmeta"
+      ],
+      "allocated_footprint": 180224
+    },
+    {
+      "dev": 27,
+      "ino": 1186766,
+      "size": 1076738,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libtermcolor-76102a3ec9c9bba2.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libtermcolor-76102a3ec9c9bba2.rlib"
+      ],
+      "allocated_footprint": 1077248
+    },
+    {
+      "dev": 27,
+      "ino": 1187483,
+      "size": 428747,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libcc-78677ce965aea174.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libcc-78677ce965aea174.rmeta"
+      ],
+      "allocated_footprint": 430080
+    },
+    {
+      "dev": 27,
+      "ino": 1186576,
+      "size": 422790,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libanyhow-f0d8ca215f7bd3fa.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libanyhow-f0d8ca215f7bd3fa.rmeta"
+      ],
+      "allocated_footprint": 425984
+    },
+    {
+      "dev": 27,
+      "ino": 1187040,
+      "size": 3522918,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libbstr-a80abfd415c932d5.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libbstr-a80abfd415c932d5.rlib"
+      ],
+      "allocated_footprint": 3526656
+    },
+    {
+      "dev": 27,
+      "ino": 1187606,
+      "size": 67865,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libpkg_config-5e14bc71a9f8e5aa.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libpkg_config-5e14bc71a9f8e5aa.rmeta"
+      ],
+      "allocated_footprint": 69632
+    },
+    {
+      "dev": 27,
+      "ino": 1185098,
+      "size": 1840661,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libaho_corasick-4faf1ab2f37c32c1.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libaho_corasick-4faf1ab2f37c32c1.rmeta"
+      ],
+      "allocated_footprint": 1843200
+    },
+    {
+      "dev": 27,
+      "ino": 1181058,
+      "size": 157052,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_regex-daffffdb0e07e6ef.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_regex-daffffdb0e07e6ef.rmeta"
+      ],
+      "allocated_footprint": 159744
+    },
+    {
+      "dev": 27,
+      "ino": 1186802,
+      "size": 139534,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libmemmap2-6b70d4fd1d61fcdf.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libmemmap2-6b70d4fd1d61fcdf.rmeta"
+      ],
+      "allocated_footprint": 143360
+    },
+    {
+      "dev": 27,
+      "ino": 1186527,
+      "size": 1576664,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libtextwrap-9795af0285001018.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libtextwrap-9795af0285001018.rlib"
+      ],
+      "allocated_footprint": 1576960
+    },
+    {
+      "dev": 27,
+      "ino": 1186934,
+      "size": 761565,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libcrossbeam_utils-c2be6600c2b5f8c8.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libcrossbeam_utils-c2be6600c2b5f8c8.rmeta"
+      ],
+      "allocated_footprint": 761856
+    },
+    {
+      "dev": 27,
+      "ino": 1187363,
+      "size": 179856,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libcrossbeam_deque-ea11fe804ac72653.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libcrossbeam_deque-ea11fe804ac72653.rlib"
+      ],
+      "allocated_footprint": 180224
+    },
+    {
+      "dev": 27,
+      "ino": 1186559,
+      "size": 76560,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/liblexopt-38584d374ebf9ba0.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/liblexopt-38584d374ebf9ba0.rmeta"
+      ],
+      "allocated_footprint": 77824
+    },
+    {
+      "dev": 27,
+      "ino": 1187690,
+      "size": 166868,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_matcher-7fcedf4f31e40731.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_matcher-7fcedf4f31e40731.rmeta"
+      ],
+      "allocated_footprint": 167936
+    },
+    {
+      "dev": 27,
+      "ino": 1187574,
+      "size": 100090,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libwalkdir-742d7f303f7cfcda.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libwalkdir-742d7f303f7cfcda.rmeta"
+      ],
+      "allocated_footprint": 102400
+    },
+    {
+      "dev": 27,
+      "ino": 1186560,
+      "size": 619856,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/liblexopt-38584d374ebf9ba0.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/liblexopt-38584d374ebf9ba0.rlib"
+      ],
+      "allocated_footprint": 622592
+    },
+    {
+      "dev": 27,
+      "ino": 1184292,
+      "size": 2590096,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libmemchr-3cee6db17bbe0dde.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libmemchr-3cee6db17bbe0dde.rlib"
+      ],
+      "allocated_footprint": 2592768
+    },
+    {
+      "dev": 27,
+      "ino": 1186843,
+      "size": 105338,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libitoa-a4e015144ec6a903.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libitoa-a4e015144ec6a903.rlib"
+      ],
+      "allocated_footprint": 106496
+    },
+    {
+      "dev": 27,
+      "ino": 1187146,
+      "size": 139572,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libshlex-9ec73c791a70e40d.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libshlex-9ec73c791a70e40d.rlib"
+      ],
+      "allocated_footprint": 143360
+    },
+    {
+      "dev": 27,
+      "ino": 1180354,
+      "size": 1898432,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_printer-620813a388c7d3e2.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_printer-620813a388c7d3e2.rlib"
+      ],
+      "allocated_footprint": 1900544
+    },
+    {
+      "dev": 27,
+      "ino": 1180626,
+      "size": 1831668,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_cli-3a59562a7bd059d7.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_cli-3a59562a7bd059d7.rlib"
+      ],
+      "allocated_footprint": 1835008
+    },
+    {
+      "dev": 27,
+      "ino": 1186682,
+      "size": 316469,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libcrossbeam_epoch-e87c23062b44b730.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libcrossbeam_epoch-e87c23062b44b730.rmeta"
+      ],
+      "allocated_footprint": 319488
+    },
+    {
+      "dev": 27,
+      "ino": 1186938,
+      "size": 1755334,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libcrossbeam_utils-c2be6600c2b5f8c8.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libcrossbeam_utils-c2be6600c2b5f8c8.rlib"
+      ],
+      "allocated_footprint": 1757184
+    },
+    {
+      "dev": 27,
+      "ino": 1186900,
+      "size": 70227,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libencoding_rs_io-02043998810986b8.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libencoding_rs_io-02043998810986b8.rmeta"
+      ],
+      "allocated_footprint": 73728
+    },
+    {
+      "dev": 27,
+      "ino": 1187477,
+      "size": 3085122,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libcc-78677ce965aea174.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libcc-78677ce965aea174.rlib"
+      ],
+      "allocated_footprint": 3088384
+    },
+    {
+      "dev": 27,
+      "ino": 1186997,
+      "size": 5770690,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libserde-805af0e17b885cc1.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libserde-805af0e17b885cc1.rlib"
+      ],
+      "allocated_footprint": 5771264
+    },
+    {
+      "dev": 27,
+      "ino": 1186765,
+      "size": 261875,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libtermcolor-76102a3ec9c9bba2.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libtermcolor-76102a3ec9c9bba2.rmeta"
+      ],
+      "allocated_footprint": 262144
+    },
+    {
+      "dev": 27,
+      "ino": 1185936,
+      "size": 4438766,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libregex_syntax-56149cfd4432cd7c.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libregex_syntax-56149cfd4432cd7c.rmeta"
+      ],
+      "allocated_footprint": 4440064
+    },
+    {
+      "dev": 27,
+      "ino": 1186740,
+      "size": 784580,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_searcher-b90e9dbf759dd060.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_searcher-b90e9dbf759dd060.rlib"
+      ],
+      "allocated_footprint": 786432
+    },
+    {
+      "dev": 27,
+      "ino": 1185251,
+      "size": 171712,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/liblog-d31a820804a8ed9b.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/liblog-d31a820804a8ed9b.rmeta"
+      ],
+      "allocated_footprint": 172032
+    },
+    {
+      "dev": 27,
+      "ino": 1184368,
+      "size": 3025594,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/liblibc-96a9935079032de1.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/liblibc-96a9935079032de1.rmeta"
+      ],
+      "allocated_footprint": 3026944
+    },
+    {
+      "dev": 27,
+      "ino": 1187044,
+      "size": 1480403,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libbstr-a80abfd415c932d5.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libbstr-a80abfd415c932d5.rmeta"
+      ],
+      "allocated_footprint": 1482752
+    },
+    {
+      "dev": 27,
+      "ino": 1186661,
+      "size": 9890956,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libignore-ec9668a2441d4077.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libignore-ec9668a2441d4077.rlib"
+      ],
+      "allocated_footprint": 9891840
+    },
+    {
+      "dev": 27,
+      "ino": 1186883,
+      "size": 5448180,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libencoding_rs-79ad79d9e839651c.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libencoding_rs-79ad79d9e839651c.rlib"
+      ],
+      "allocated_footprint": 5451776
+    },
+    {
+      "dev": 27,
+      "ino": 1187689,
+      "size": 203604,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libgrep_matcher-7fcedf4f31e40731.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libgrep_matcher-7fcedf4f31e40731.rlib"
+      ],
+      "allocated_footprint": 204800
+    },
+    {
+      "dev": 27,
+      "ino": 1186811,
+      "size": 24693340,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libregex_automata-7295c6cdebc23f9d.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libregex_automata-7295c6cdebc23f9d.rlib"
+      ],
+      "allocated_footprint": 24694784
+    },
+    {
+      "dev": 27,
+      "ino": 1180817,
+      "size": 529274,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libjobserver-7874e96da74a0963.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libjobserver-7874e96da74a0963.rlib"
+      ],
+      "allocated_footprint": 532480
+    },
+    {
+      "dev": 27,
+      "ino": 1186684,
+      "size": 889860,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libcrossbeam_epoch-e87c23062b44b730.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libcrossbeam_epoch-e87c23062b44b730.rlib"
+      ],
+      "allocated_footprint": 892928
+    },
+    {
+      "dev": 27,
+      "ino": 1187129,
+      "size": 3894856,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libglobset-62a9bbf92794701f.rlib",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libglobset-62a9bbf92794701f.rlib"
+      ],
+      "allocated_footprint": 3895296
+    },
+    {
+      "dev": 27,
+      "ino": 1186814,
+      "size": 195481,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/deps/libglobset-62a9bbf92794701f.rmeta",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/deps/libglobset-62a9bbf92794701f.rmeta"
+      ],
+      "allocated_footprint": 196608
+    },
+    {
+      "dev": 27,
+      "ino": 262280,
+      "size": 15759656,
+      "members": 2,
+      "paths": [
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m1/debug/.mbx-build-script-shims/7b42689f46abe124c48aaa23695e0c6abdb7ccbce353b1c17b1cc1a09bb02a04/mbx",
+        "/workspace/qa-mbx/native/cache/pools/ripgrep-14_1_1-142e4da6/m0/debug/.mbx-build-script-shims/7b42689f46abe124c48aaa23695e0c6abdb7ccbce353b1c17b1cc1a09bb02a04/mbx"
+      ],
+      "allocated_footprint": 15761408
+    }
+  ],
+  "already_same_inode_duplicate_allocated_bytes": 154066944
+}

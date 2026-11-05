@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-26",
+  "reported_timezone": "Asia/Tokyo",
+  "tested_commit": "1391d005b732a858140bbf7f8f76df9397b2a90b",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "cpu_quota": "400000 100000",
+  "memory_limit_bytes": 17179869184,
+  "filesystem": "overlay",
+  "reflink_supported": false,
+  "rustc": "1.89.0 (29483883e 2025-08-04)",
+  "cargo": "1.89.0 (c24e10642 2025-06-23)",
+  "mbx": "1.27.0",
+  "buildq_binary_sha256": "b7053faaa13d1f614809396a135ed88c38cd214fe6cf9c5e2daf0f1f6d4951a1",
+  "mbx_binary_sha256": "d02159722e826f1ed0729b07abaa5767907b7f5f9d3c2658f832e33da42c1907",
+  "init": "tail",
+  "limit_notes": [
+    "Concurrent QA tracks share the host CPU quota; times include contention.",
+    "No external OSS repository was modified remotely.",
+    "Real elapsed endurance is bounded to this session, not multi-day validation."
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "argv": [
+    "/workspace/qa-bin/buildq",
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--offline"
+  ],
+  "cwd": "/workspace/qa-mbx/bevy/a",
+  "signal": "SIGTERM sent to buildq parent PID only",
+  "exit": 143,
+  "wall_s": 1.213,
+  "cancel_to_exit_s": 0.16615456699992137,
+  "observed_children": [
+    {
+      "pid": 816786,
+      "created": 1792995770.32,
+      "name": "mbx"
+    },
+    {
+      "pid": 816787,
+      "created": 1792995770.32,
+      "name": "buildq"
+    },
+    {
+      "pid": 816805,
+      "created": 1792995770.39,
+      "name": "cargo"
+    },
+    {
+      "pid": 817033,
+      "created": 1792995770.94,
+      "name": "mbx-rustc"
+    },
+    {
+      "pid": 817053,
+      "created": 1792995771.05,
+      "name": "mbx-rustc"
+    },
+    {
+      "pid": 817054,
+      "created": 1792995771.07,
+      "name": "rustc"
+    },
+    {
+      "pid": 817038,
+      "created": 1792995770.95,
+      "name": "rustc"
+    }
+  ],
+  "live_children_after": [],
+  "zombie_children_after": [
+    {
+      "pid": 816805,
+      "created": 1792995770.39,
+      "name": "cargo"
+    },
+    {
+      "pid": 817033,
+      "created": 1792995770.94,
+      "name": "mbx-rustc"
+    },
+    {
+      "pid": 817053,
+      "created": 1792995771.05,
+      "name": "mbx-rustc"
+    },
+    {
+      "pid": 817054,
+      "created": 1792995771.07,
+      "name": "rustc"
+    },
+    {
+      "pid": 817038,
+      "created": 1792995770.95,
+      "name": "rustc"
+    }
+  ],
+  "passed": true
+}

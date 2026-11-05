@@ -1,0 +1,10 @@
+buildq: target repo-f1914973/m0 (new member (full build))
+mbx[setup]: first build on this machine
+mbx[setup]:   cache is /workspace/qa-root/accounting/mbx-a, shared by every checkout and worktree; automatic collection is off, so only `mbx gc` reclaims it
+mbx[setup]:   `mbx gc --dry-run` previews cleanup; `mbx settings ls gc` shows every limit
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling accounting-probe v0.1.0 (/workspace/qa-root/accounting/repo)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.02s
+mbx[cache]: 0 hits, 0 misses, 1 not looked up; 0 B downloaded, 0 B uploaded, 3.6 MiB stored locally
+buildq: warning: completed cache member /workspace/qa-root/accounting/cache/pools/repo-f1914973/m0 (3.6 MiB) exceeds the entire cache budget 1.0 KiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse

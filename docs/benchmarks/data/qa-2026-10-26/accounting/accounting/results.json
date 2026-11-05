@@ -1,0 +1,313 @@
+[
+  {
+    "name": "build",
+    "argv": [
+      "/workspace/qa-bin/buildq",
+      "cargo",
+      "build",
+      "--offline"
+    ],
+    "seconds": 2.332268354000007,
+    "code": 0
+  },
+  {
+    "name": "fresh_before_gc",
+    "argv": [
+      "/workspace/qa-bin/buildq",
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "seconds": 0.028758602999999994,
+    "code": 0,
+    "json": {
+      "pools": [
+        {
+          "name": "repo-f1914973",
+          "dir": "/workspace/qa-root/accounting/cache/pools/repo-f1914973",
+          "info": {
+            "repo": "repo",
+            "repo_key": "/workspace/qa-root/accounting/repo/.git",
+            "toolchain": "1.89.0",
+            "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+            "created_ms": 1792993921661,
+            "last_used_ms": 1792993921661
+          },
+          "members": [
+            {
+              "id": 0,
+              "dir": "/workspace/qa-root/accounting/cache/pools/repo-f1914973/m0",
+              "busy": false,
+              "size": 3824854,
+              "shared": 0,
+              "meta": {
+                "id": 0,
+                "created_ms": 1792993921716,
+                "last_used_ms": 1792993923953,
+                "last_worktree": "/workspace/qa-root/accounting/repo",
+                "source_root": "/workspace/qa-root/accounting/repo",
+                "last_head": "e86f7fc32e31b88c581a52d934e4c8005a7b2914",
+                "last_cmd": "",
+                "jobs": 1,
+                "size_bytes": 3824854,
+                "size_ms": 1792993923960,
+                "size_accounting": "logical"
+              }
+            }
+          ],
+          "shared": 0
+        }
+      ],
+      "runs": [],
+      "total": 3824854,
+      "trash_bytes": 0,
+      "budget": 1024,
+      "effective_budget": 0,
+      "accounting": "logical",
+      "over_budget": true,
+      "over_budget_bytes": 3824854,
+      "over_budget_reasons": [
+        "mbx's store takes 3.7 MiB of the budget and buildq never deletes it; tighten mbx's own GC limits or raise [cache].budget"
+      ],
+      "free_disk": 28831834112,
+      "external": [],
+      "external_total": 0,
+      "mbx": {
+        "store": "/workspace/qa-root/accounting/mbx-a/actions",
+        "store_bytes": 3827620,
+        "target_bytes": 0,
+        "incremental_bytes": 1077,
+        "generated_bytes": 0,
+        "combined_bytes": 3828697,
+        "shared_with_mbx_bytes": 0,
+        "combined_unique_bytes": 7653551
+      },
+      "mbx_budget_bytes": 3828697
+    }
+  },
+  {
+    "name": "gc",
+    "argv": [
+      "/workspace/qa-bin/buildq",
+      "gc",
+      "--json"
+    ],
+    "seconds": 0.03493278499999519,
+    "code": 0,
+    "json": {
+      "actions": [
+        "evict repo-f1914973/m0 (last used 0s ago, over budget 0 B) (path footprint 3.6 MiB)"
+      ],
+      "freed": 3824854,
+      "before": 3824854,
+      "after": 0,
+      "effective_budget": 0,
+      "accounting": "logical",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "completed cache member /workspace/qa-root/accounting/cache/pools/repo-f1914973/m0 (3.6 MiB) exceeds the entire cache budget 1.0 KiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "fresh_after_gc",
+    "argv": [
+      "/workspace/qa-bin/buildq",
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "seconds": 0.026515849999981356,
+    "code": 0,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 1024,
+      "effective_budget": 0,
+      "accounting": "logical",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 28835401728,
+      "external": [],
+      "external_total": 0,
+      "mbx": {
+        "store": "/workspace/qa-root/accounting/mbx-a/actions",
+        "store_bytes": 3827620,
+        "target_bytes": 0,
+        "incremental_bytes": 1077,
+        "generated_bytes": 0,
+        "combined_bytes": 3828697,
+        "shared_with_mbx_bytes": 0,
+        "combined_unique_bytes": 3828697
+      },
+      "mbx_budget_bytes": 3828697
+    }
+  },
+  {
+    "name": "gc_again",
+    "argv": [
+      "/workspace/qa-bin/buildq",
+      "gc",
+      "--json"
+    ],
+    "seconds": 0.00855646499999807,
+    "code": 0,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 0,
+      "after": 0,
+      "effective_budget": 0,
+      "accounting": "logical",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "store_b_gc_cached",
+    "argv": [
+      "/workspace/qa-bin/buildq",
+      "gc",
+      "--json"
+    ],
+    "seconds": 0.007343244999987064,
+    "code": 0,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 0,
+      "after": 0,
+      "effective_budget": 0,
+      "accounting": "logical",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "store_b_fresh",
+    "argv": [
+      "/workspace/qa-bin/buildq",
+      "cache",
+      "ls",
+      "--json"
+    ],
+    "seconds": 0.05457686099998682,
+    "code": 0,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 1024,
+      "effective_budget": 1024,
+      "accounting": "logical",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 28835184640,
+      "external": [],
+      "external_total": 0,
+      "mbx": {
+        "store": "/workspace/qa-root/accounting/mbx-b/actions",
+        "store_bytes": 0,
+        "target_bytes": 0,
+        "incremental_bytes": 0,
+        "generated_bytes": 0,
+        "combined_bytes": 0,
+        "shared_with_mbx_bytes": 0,
+        "combined_unique_bytes": 0
+      },
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "store_a_gc_cached",
+    "argv": [
+      "/workspace/qa-bin/buildq",
+      "gc",
+      "--json"
+    ],
+    "seconds": 0.004744977000001427,
+    "code": 0,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 0,
+      "after": 0,
+      "effective_budget": 1024,
+      "accounting": "logical",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "store_a_fresh",
+    "argv": [
+      "/workspace/qa-bin/buildq",
+      "cache",
+      "ls",
+      "--json"
+    ],
+    "seconds": 0.032444892999990316,
+    "code": 0,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 1024,
+      "effective_budget": 0,
+      "accounting": "logical",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 28835110912,
+      "external": [],
+      "external_total": 0,
+      "mbx": {
+        "store": "/workspace/qa-root/accounting/mbx-a/actions",
+        "store_bytes": 3827620,
+        "target_bytes": 0,
+        "incremental_bytes": 1077,
+        "generated_bytes": 0,
+        "combined_bytes": 3828697,
+        "shared_with_mbx_bytes": 0,
+        "combined_unique_bytes": 3828697
+      },
+      "mbx_budget_bytes": 3828697
+    }
+  }
+]

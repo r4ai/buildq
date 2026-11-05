@@ -1,0 +1,2953 @@
+buildq: [     0 ms] start
+buildq: [     0 ms] parsed
+buildq: [   232 ms] pool opened (git + toolchain + manifest)
+buildq: target repo-5d3d2632/m0 (no source differences)
+buildq: [   234 ms] member leased
+buildq: [   239 ms] slot acquired
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/derive/src/derive_data.rs:334:22
+    |
+334 |     pub fn remote_ty(&self) -> Option<RemoteType> {
+    |                      ^^^^^            ---------- the same lifetime is hidden here
+    |                      |
+    |                      the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: `#[warn(mismatched_lifetime_syntaxes)]` on by default
+help: use `'_` for type paths
+    |
+334 |     pub fn remote_ty(&self) -> Option<RemoteType<'_>> {
+    |                                                 ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/derive/src/derive_data.rs:345:17
+    |
+345 |     pub fn meta(&self) -> &ReflectMeta {
+    |                 ^^^^^     ------------
+    |                 |         ||
+    |                 |         |the same lifetime is hidden here
+    |                 |         the same lifetime is elided here
+    |                 the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+345 |     pub fn meta(&self) -> &ReflectMeta<'_> {
+    |                                       ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/derive/src/derive_data.rs:353:33
+    |
+353 |     pub fn where_clause_options(&self) -> WhereClauseOptions {
+    |                                 ^^^^^     ------------------
+    |                                 |         |
+    |                                 |         the same lifetime is hidden here
+    |                                 |         the same lifetime is hidden here
+    |                                 the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+353 |     pub fn where_clause_options(&self) -> WhereClauseOptions<'_> {
+    |                                                             ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/derive/src/derive_data.rs:464:22
+    |
+464 |     pub fn remote_ty(&self) -> Option<RemoteType> {
+    |                      ^^^^^            ---------- the same lifetime is hidden here
+    |                      |
+    |                      the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+464 |     pub fn remote_ty(&self) -> Option<RemoteType<'_>> {
+    |                                                 ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/derive/src/derive_data.rs:632:33
+    |
+632 |     pub fn where_clause_options(&self) -> WhereClauseOptions {
+    |                                 ^^^^^     ------------------
+    |                                 |         |
+    |                                 |         the same lifetime is hidden here
+    |                                 |         the same lifetime is hidden here
+    |                                 the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+632 |     pub fn where_clause_options(&self) -> WhereClauseOptions<'_> {
+    |                                                             ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/derive/src/derive_data.rs:859:33
+    |
+859 |     pub fn where_clause_options(&self) -> WhereClauseOptions {
+    |                                 ^^^^^     ------------------
+    |                                 |         |
+    |                                 |         the same lifetime is hidden here
+    |                                 |         the same lifetime is hidden here
+    |                                 the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+859 |     pub fn where_clause_options(&self) -> WhereClauseOptions<'_> {
+    |                                                             ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_reflect/derive/src/enum_utility.rs:40:21
+   |
+40 |     fn reflect_enum(&self) -> &ReflectEnum;
+   |                     ^^^^^     ------------
+   |                     |         ||
+   |                     |         |the same lifetime is hidden here
+   |                     |         the same lifetime is elided here
+   |                     the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+40 |     fn reflect_enum(&self) -> &ReflectEnum<'_>;
+   |                                           ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/derive/src/enum_utility.rs:220:21
+    |
+220 |     fn reflect_enum(&self) -> &ReflectEnum {
+    |                     ^^^^^     ------------
+    |                     |         ||
+    |                     |         |the same lifetime is hidden here
+    |                     |         the same lifetime is elided here
+    |                     the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+220 |     fn reflect_enum(&self) -> &ReflectEnum<'_> {
+    |                                           ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/derive/src/enum_utility.rs:252:21
+    |
+252 |     fn reflect_enum(&self) -> &ReflectEnum {
+    |                     ^^^^^     ------------
+    |                     |         ||
+    |                     |         |the same lifetime is hidden here
+    |                     |         the same lifetime is elided here
+    |                     the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+252 |     fn reflect_enum(&self) -> &ReflectEnum<'_> {
+    |                                           ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/derive/src/enum_utility.rs:308:21
+    |
+308 |     fn reflect_enum(&self) -> &ReflectEnum {
+    |                     ^^^^^     ------------
+    |                     |         ||
+    |                     |         |the same lifetime is hidden here
+    |                     |         the same lifetime is elided here
+    |                     the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+308 |     fn reflect_enum(&self) -> &ReflectEnum<'_> {
+    |                                           ++++
+
+warning: `bevy_reflect_derive` (lib) generated 10 warnings
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_reflect/src/array.rs:66:13
+   |
+66 |     fn iter(&self) -> ArrayIter;
+   |             ^^^^^     --------- the same lifetime is hidden here
+   |             |
+   |             the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+   = note: `#[warn(mismatched_lifetime_syntaxes)]` on by default
+help: use `'_` for type paths
+   |
+66 |     fn iter(&self) -> ArrayIter<'_>;
+   |                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/array.rs:251:20
+    |
+251 |     fn reflect_ref(&self) -> ReflectRef {
+    |                    ^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+251 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/array.rs:256:20
+    |
+256 |     fn reflect_mut(&mut self) -> ReflectMut {
+    |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+256 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/array.rs:303:13
+    |
+303 |     fn iter(&self) -> ArrayIter {
+    |             ^^^^^     --------- the same lifetime is hidden here
+    |             |
+    |             the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+303 |     fn iter(&self) -> ArrayIter<'_> {
+    |                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/array.rs:360:29
+    |
+360 |     pub const fn new(array: &dyn Array) -> ArrayIter {
+    |                             ^^^^^^^^^^     --------- the same lifetime is hidden here
+    |                             |
+    |                             the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+360 |     pub const fn new(array: &dyn Array) -> ArrayIter<'_> {
+    |                                                     ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_reflect/src/list.rs:98:13
+   |
+98 |     fn iter(&self) -> ListIter;
+   |             ^^^^^     -------- the same lifetime is hidden here
+   |             |
+   |             the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+98 |     fn iter(&self) -> ListIter<'_>;
+   |                               ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/list.rs:248:13
+    |
+248 |     fn iter(&self) -> ListIter {
+    |             ^^^^^     -------- the same lifetime is hidden here
+    |             |
+    |             the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+248 |     fn iter(&self) -> ListIter<'_> {
+    |                               ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/list.rs:304:20
+    |
+304 |     fn reflect_ref(&self) -> ReflectRef {
+    |                    ^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+304 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/list.rs:309:20
+    |
+309 |     fn reflect_mut(&mut self) -> ReflectMut {
+    |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+309 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/list.rs:392:28
+    |
+392 |     pub const fn new(list: &dyn List) -> ListIter {
+    |                            ^^^^^^^^^     -------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+392 |     pub const fn new(list: &dyn List) -> ListIter<'_> {
+    |                                                  ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_reflect/src/map.rs:77:13
+   |
+77 |     fn iter(&self) -> MapIter;
+   |             ^^^^^     ------- the same lifetime is hidden here
+   |             |
+   |             the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+77 |     fn iter(&self) -> MapIter<'_>;
+   |                              ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/map.rs:310:13
+    |
+310 |     fn iter(&self) -> MapIter {
+    |             ^^^^^     ------- the same lifetime is hidden here
+    |             |
+    |             the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+310 |     fn iter(&self) -> MapIter<'_> {
+    |                              ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/map.rs:423:20
+    |
+423 |     fn reflect_ref(&self) -> ReflectRef {
+    |                    ^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+423 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/map.rs:427:20
+    |
+427 |     fn reflect_mut(&mut self) -> ReflectMut {
+    |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+427 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/map.rs:468:27
+    |
+468 |     pub const fn new(map: &dyn Map) -> MapIter {
+    |                           ^^^^^^^^     ------- the same lifetime is hidden here
+    |                           |
+    |                           the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+468 |     pub const fn new(map: &dyn Map) -> MapIter<'_> {
+    |                                               ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/path/mod.rs:416:26
+    |
+416 |     pub fn parse(string: &str) -> PathResult<Self> {
+    |                          ^^^^     ---------------- the same lifetime is hidden here
+    |                          |
+    |                          the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+416 |     pub fn parse(string: &str) -> PathResult<'_, Self> {
+    |                                              +++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_reflect/src/path/error.rs:67:25
+   |
+67 |     pub const fn access(&self) -> &Access {
+   |                         ^^^^^     -------
+   |                         |         ||
+   |                         |         |the same lifetime is hidden here
+   |                         |         the same lifetime is elided here
+   |                         the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+67 |     pub const fn access(&self) -> &Access<'_> {
+   |                                          ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/reflect.rs:209:20
+    |
+209 |     fn reflect_ref(&self) -> ReflectRef;
+    |                    ^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+209 |     fn reflect_ref(&self) -> ReflectRef<'_>;
+    |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/reflect.rs:214:20
+    |
+214 |     fn reflect_mut(&mut self) -> ReflectMut;
+    |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+214 |     fn reflect_mut(&mut self) -> ReflectMut<'_>;
+    |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/set.rs:302:20
+    |
+302 |     fn reflect_ref(&self) -> ReflectRef {
+    |                    ^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+302 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/set.rs:306:20
+    |
+306 |     fn reflect_mut(&mut self) -> ReflectMut {
+    |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+306 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_reflect/src/struct_trait.rs:72:20
+   |
+72 |     fn iter_fields(&self) -> FieldIter;
+   |                    ^^^^^     --------- the same lifetime is hidden here
+   |                    |
+   |                    the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+72 |     fn iter_fields(&self) -> FieldIter<'_>;
+   |                                       ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/struct_trait.rs:379:20
+    |
+379 |     fn iter_fields(&self) -> FieldIter {
+    |                    ^^^^^     --------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+379 |     fn iter_fields(&self) -> FieldIter<'_> {
+    |                                       ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/struct_trait.rs:437:20
+    |
+437 |     fn reflect_ref(&self) -> ReflectRef {
+    |                    ^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+437 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/struct_trait.rs:442:20
+    |
+442 |     fn reflect_mut(&mut self) -> ReflectMut {
+    |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+442 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_reflect/src/tuple.rs:53:20
+   |
+53 |     fn iter_fields(&self) -> TupleFieldIter;
+   |                    ^^^^^     -------------- the same lifetime is hidden here
+   |                    |
+   |                    the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+53 |     fn iter_fields(&self) -> TupleFieldIter<'_>;
+   |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:273:20
+    |
+273 |     fn iter_fields(&self) -> TupleFieldIter {
+    |                    ^^^^^     -------------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+273 |     fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:327:20
+    |
+327 |     fn reflect_ref(&self) -> ReflectRef {
+    |                    ^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+327 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:332:20
+    |
+332 |     fn reflect_mut(&mut self) -> ReflectMut {
+    |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+332 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+657 | impl_reflect_tuple! {}
+    | ---------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+657 | impl_reflect_tuple! {}
+    | ---------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+657 | impl_reflect_tuple! {}
+    | ---------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+658 | impl_reflect_tuple! {0: A}
+    | -------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+658 | impl_reflect_tuple! {0: A}
+    | -------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+658 | impl_reflect_tuple! {0: A}
+    | -------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+659 | impl_reflect_tuple! {0: A, 1: B}
+    | -------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+659 | impl_reflect_tuple! {0: A, 1: B}
+    | -------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+659 | impl_reflect_tuple! {0: A, 1: B}
+    | -------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+660 | impl_reflect_tuple! {0: A, 1: B, 2: C}
+    | -------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+660 | impl_reflect_tuple! {0: A, 1: B, 2: C}
+    | -------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+660 | impl_reflect_tuple! {0: A, 1: B, 2: C}
+    | -------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+661 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D}
+    | -------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+661 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D}
+    | -------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+661 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D}
+    | -------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+662 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E}
+    | -------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+662 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E}
+    | -------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+662 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E}
+    | -------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+663 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F}
+    | -------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+663 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F}
+    | -------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+663 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F}
+    | -------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+664 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G}
+    | -------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+664 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G}
+    | -------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+664 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G}
+    | -------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+665 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H}
+    | -------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+665 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H}
+    | -------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+665 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H}
+    | -------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+666 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I}
+    | -------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+666 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I}
+    | -------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+666 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I}
+    | -------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+667 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J}
+    | -------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+667 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J}
+    | -------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+667 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J}
+    | -------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+668 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J, 10: K}
+    | --------------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+668 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J, 10: K}
+    | --------------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+668 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J, 10: K}
+    | --------------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:502:28
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter {
+    |                            ^^^^^     -------------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+669 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J, 10: K, 11: L}
+    | ---------------------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+502 |             fn iter_fields(&self) -> TupleFieldIter<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:551:28
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+669 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J, 10: K, 11: L}
+    | ---------------------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+551 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple.rs:555:28
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+669 | impl_reflect_tuple! {0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J, 10: K, 11: L}
+    | ---------------------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_tuple` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+555 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_reflect/src/tuple_struct.rs:56:20
+   |
+56 |     fn iter_fields(&self) -> TupleStructFieldIter;
+   |                    ^^^^^     -------------------- the same lifetime is hidden here
+   |                    |
+   |                    the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+56 |     fn iter_fields(&self) -> TupleStructFieldIter<'_>;
+   |                                                  ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple_struct.rs:287:20
+    |
+287 |     fn iter_fields(&self) -> TupleStructFieldIter {
+    |                    ^^^^^     -------------------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+287 |     fn iter_fields(&self) -> TupleStructFieldIter<'_> {
+    |                                                  ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple_struct.rs:346:20
+    |
+346 |     fn reflect_ref(&self) -> ReflectRef {
+    |                    ^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+346 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/tuple_struct.rs:351:20
+    |
+351 |     fn reflect_mut(&mut self) -> ReflectMut {
+    |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+351 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:434:32
+    |
+434 |                   fn reflect_ref(&self) -> ReflectRef {
+    |                                  ^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+466 | / impl_reflect_for_atomic!(
+467 | |     ::core::sync::atomic::AtomicIsize,
+468 | |     ::core::sync::atomic::Ordering::SeqCst
+469 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+434 |                 fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:438:32
+    |
+438 |                   fn reflect_mut(&mut self) -> ReflectMut {
+    |                                  ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+466 | / impl_reflect_for_atomic!(
+467 | |     ::core::sync::atomic::AtomicIsize,
+468 | |     ::core::sync::atomic::Ordering::SeqCst
+469 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+438 |                 fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:434:32
+    |
+434 |                   fn reflect_ref(&self) -> ReflectRef {
+    |                                  ^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+470 | / impl_reflect_for_atomic!(
+471 | |     ::core::sync::atomic::AtomicUsize,
+472 | |     ::core::sync::atomic::Ordering::SeqCst
+473 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+434 |                 fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:438:32
+    |
+438 |                   fn reflect_mut(&mut self) -> ReflectMut {
+    |                                  ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+470 | / impl_reflect_for_atomic!(
+471 | |     ::core::sync::atomic::AtomicUsize,
+472 | |     ::core::sync::atomic::Ordering::SeqCst
+473 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+438 |                 fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:434:32
+    |
+434 |                   fn reflect_ref(&self) -> ReflectRef {
+    |                                  ^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+475 | / impl_reflect_for_atomic!(
+476 | |     ::core::sync::atomic::AtomicI64,
+477 | |     ::core::sync::atomic::Ordering::SeqCst
+478 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+434 |                 fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:438:32
+    |
+438 |                   fn reflect_mut(&mut self) -> ReflectMut {
+    |                                  ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+475 | / impl_reflect_for_atomic!(
+476 | |     ::core::sync::atomic::AtomicI64,
+477 | |     ::core::sync::atomic::Ordering::SeqCst
+478 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+438 |                 fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:434:32
+    |
+434 |                   fn reflect_ref(&self) -> ReflectRef {
+    |                                  ^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+480 | / impl_reflect_for_atomic!(
+481 | |     ::core::sync::atomic::AtomicU64,
+482 | |     ::core::sync::atomic::Ordering::SeqCst
+483 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+434 |                 fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:438:32
+    |
+438 |                   fn reflect_mut(&mut self) -> ReflectMut {
+    |                                  ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+480 | / impl_reflect_for_atomic!(
+481 | |     ::core::sync::atomic::AtomicU64,
+482 | |     ::core::sync::atomic::Ordering::SeqCst
+483 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+438 |                 fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:434:32
+    |
+434 |                   fn reflect_ref(&self) -> ReflectRef {
+    |                                  ^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+484 | / impl_reflect_for_atomic!(
+485 | |     ::core::sync::atomic::AtomicI32,
+486 | |     ::core::sync::atomic::Ordering::SeqCst
+487 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+434 |                 fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:438:32
+    |
+438 |                   fn reflect_mut(&mut self) -> ReflectMut {
+    |                                  ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+484 | / impl_reflect_for_atomic!(
+485 | |     ::core::sync::atomic::AtomicI32,
+486 | |     ::core::sync::atomic::Ordering::SeqCst
+487 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+438 |                 fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:434:32
+    |
+434 |                   fn reflect_ref(&self) -> ReflectRef {
+    |                                  ^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+488 | / impl_reflect_for_atomic!(
+489 | |     ::core::sync::atomic::AtomicU32,
+490 | |     ::core::sync::atomic::Ordering::SeqCst
+491 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+434 |                 fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:438:32
+    |
+438 |                   fn reflect_mut(&mut self) -> ReflectMut {
+    |                                  ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+488 | / impl_reflect_for_atomic!(
+489 | |     ::core::sync::atomic::AtomicU32,
+490 | |     ::core::sync::atomic::Ordering::SeqCst
+491 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+438 |                 fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:434:32
+    |
+434 |                   fn reflect_ref(&self) -> ReflectRef {
+    |                                  ^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+492 | / impl_reflect_for_atomic!(
+493 | |     ::core::sync::atomic::AtomicI16,
+494 | |     ::core::sync::atomic::Ordering::SeqCst
+495 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+434 |                 fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:438:32
+    |
+438 |                   fn reflect_mut(&mut self) -> ReflectMut {
+    |                                  ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+492 | / impl_reflect_for_atomic!(
+493 | |     ::core::sync::atomic::AtomicI16,
+494 | |     ::core::sync::atomic::Ordering::SeqCst
+495 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+438 |                 fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:434:32
+    |
+434 |                   fn reflect_ref(&self) -> ReflectRef {
+    |                                  ^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+496 | / impl_reflect_for_atomic!(
+497 | |     ::core::sync::atomic::AtomicU16,
+498 | |     ::core::sync::atomic::Ordering::SeqCst
+499 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+434 |                 fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:438:32
+    |
+438 |                   fn reflect_mut(&mut self) -> ReflectMut {
+    |                                  ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+496 | / impl_reflect_for_atomic!(
+497 | |     ::core::sync::atomic::AtomicU16,
+498 | |     ::core::sync::atomic::Ordering::SeqCst
+499 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+438 |                 fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:434:32
+    |
+434 |                   fn reflect_ref(&self) -> ReflectRef {
+    |                                  ^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+500 | / impl_reflect_for_atomic!(
+501 | |     ::core::sync::atomic::AtomicI8,
+502 | |     ::core::sync::atomic::Ordering::SeqCst
+503 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+434 |                 fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:438:32
+    |
+438 |                   fn reflect_mut(&mut self) -> ReflectMut {
+    |                                  ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+500 | / impl_reflect_for_atomic!(
+501 | |     ::core::sync::atomic::AtomicI8,
+502 | |     ::core::sync::atomic::Ordering::SeqCst
+503 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+438 |                 fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:434:32
+    |
+434 |                   fn reflect_ref(&self) -> ReflectRef {
+    |                                  ^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+504 | / impl_reflect_for_atomic!(
+505 | |     ::core::sync::atomic::AtomicU8,
+506 | |     ::core::sync::atomic::Ordering::SeqCst
+507 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+434 |                 fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:438:32
+    |
+438 |                   fn reflect_mut(&mut self) -> ReflectMut {
+    |                                  ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+504 | / impl_reflect_for_atomic!(
+505 | |     ::core::sync::atomic::AtomicU8,
+506 | |     ::core::sync::atomic::Ordering::SeqCst
+507 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+438 |                 fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:434:32
+    |
+434 |                   fn reflect_ref(&self) -> ReflectRef {
+    |                                  ^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+508 | / impl_reflect_for_atomic!(
+509 | |     ::core::sync::atomic::AtomicBool,
+510 | |     ::core::sync::atomic::Ordering::SeqCst
+511 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+434 |                 fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:438:32
+    |
+438 |                   fn reflect_mut(&mut self) -> ReflectMut {
+    |                                  ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                                  |
+    |                                  the lifetime is elided here
+...
+508 | / impl_reflect_for_atomic!(
+509 | |     ::core::sync::atomic::AtomicBool,
+510 | |     ::core::sync::atomic::Ordering::SeqCst
+511 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_atomic` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+438 |                 fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:562:21
+    |
+562 |             fn iter(&self) -> ListIter {
+    |                     ^^^^^     -------- the same lifetime is hidden here
+    |                     |
+    |                     the lifetime is elided here
+...
+702 | impl_reflect_for_veclike!(Vec<T>, Vec::insert, Vec::remove, Vec::push, Vec::pop, [T]);
+    | ------------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_veclike` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+562 |             fn iter(&self) -> ListIter<'_> {
+    |                                       ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:612:28
+    |
+612 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+702 | impl_reflect_for_veclike!(Vec<T>, Vec::insert, Vec::remove, Vec::push, Vec::pop, [T]);
+    | ------------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_veclike` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+612 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:616:28
+    |
+616 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+702 | impl_reflect_for_veclike!(Vec<T>, Vec::insert, Vec::remove, Vec::push, Vec::pop, [T]);
+    | ------------------------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_veclike` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+616 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:562:21
+    |
+562 |               fn iter(&self) -> ListIter {
+    |                       ^^^^^     -------- the same lifetime is hidden here
+    |                       |
+    |                       the lifetime is elided here
+...
+707 | / impl_reflect_for_veclike!(
+708 | |     VecDeque<T>,
+709 | |     VecDeque::insert,
+710 | |     VecDeque::remove,
+...   |
+713 | |     VecDeque::<T>
+714 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_veclike` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+562 |             fn iter(&self) -> ListIter<'_> {
+    |                                       ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:612:28
+    |
+612 |               fn reflect_ref(&self) -> ReflectRef {
+    |                              ^^^^^     ---------- the same lifetime is hidden here
+    |                              |
+    |                              the lifetime is elided here
+...
+707 | / impl_reflect_for_veclike!(
+708 | |     VecDeque<T>,
+709 | |     VecDeque::insert,
+710 | |     VecDeque::remove,
+...   |
+713 | |     VecDeque::<T>
+714 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_veclike` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+612 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:616:28
+    |
+616 |               fn reflect_mut(&mut self) -> ReflectMut {
+    |                              ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                              |
+    |                              the lifetime is elided here
+...
+707 | / impl_reflect_for_veclike!(
+708 | |     VecDeque<T>,
+709 | |     VecDeque::insert,
+710 | |     VecDeque::remove,
+...   |
+713 | |     VecDeque::<T>
+714 | | );
+    | |_- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_veclike` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+616 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:758:21
+    |
+758 |             fn iter(&self) -> MapIter {
+    |                     ^^^^^     ------- the same lifetime is hidden here
+    |                     |
+    |                     the lifetime is elided here
+...
+978 | impl_reflect_for_hashmap!(::std::collections::HashMap<K, V, S>);
+    | --------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_hashmap` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+758 |             fn iter(&self) -> MapIter<'_> {
+    |                                      ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:862:28
+    |
+862 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+978 | impl_reflect_for_hashmap!(::std::collections::HashMap<K, V, S>);
+    | --------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_hashmap` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+862 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:866:28
+    |
+866 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+978 | impl_reflect_for_hashmap!(::std::collections::HashMap<K, V, S>);
+    | --------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_hashmap` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+866 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:758:21
+    |
+758 |             fn iter(&self) -> MapIter {
+    |                     ^^^^^     ------- the same lifetime is hidden here
+    |                     |
+    |                     the lifetime is elided here
+...
+993 | impl_reflect_for_hashmap!(bevy_platform::collections::HashMap<K, V, S>);
+    | ----------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_hashmap` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+758 |             fn iter(&self) -> MapIter<'_> {
+    |                                      ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:862:28
+    |
+862 |             fn reflect_ref(&self) -> ReflectRef {
+    |                            ^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+993 | impl_reflect_for_hashmap!(bevy_platform::collections::HashMap<K, V, S>);
+    | ----------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_hashmap` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+862 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/std.rs:866:28
+    |
+866 |             fn reflect_mut(&mut self) -> ReflectMut {
+    |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                            |
+    |                            the lifetime is elided here
+...
+993 | impl_reflect_for_hashmap!(bevy_platform::collections::HashMap<K, V, S>);
+    | ----------------------------------------------------------------------- in this macro invocation
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: this warning originates in the macro `impl_reflect_for_hashmap` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+    |
+866 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1128:28
+     |
+1128 |             fn reflect_ref(&self) -> ReflectRef {
+     |                            ^^^^^     ---------- the same lifetime is hidden here
+     |                            |
+     |                            the lifetime is elided here
+...
+1235 | impl_reflect_for_hashset!(::std::collections::HashSet<V,S>);
+     | ----------------------------------------------------------- in this macro invocation
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+     = note: this warning originates in the macro `impl_reflect_for_hashset` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+     |
+1128 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+     |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1132:28
+     |
+1132 |             fn reflect_mut(&mut self) -> ReflectMut {
+     |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+     |                            |
+     |                            the lifetime is elided here
+...
+1235 | impl_reflect_for_hashset!(::std::collections::HashSet<V,S>);
+     | ----------------------------------------------------------- in this macro invocation
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+     = note: this warning originates in the macro `impl_reflect_for_hashset` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+     |
+1132 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+     |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1128:28
+     |
+1128 |             fn reflect_ref(&self) -> ReflectRef {
+     |                            ^^^^^     ---------- the same lifetime is hidden here
+     |                            |
+     |                            the lifetime is elided here
+...
+1246 | impl_reflect_for_hashset!(::bevy_platform::collections::HashSet<V,S>);
+     | --------------------------------------------------------------------- in this macro invocation
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+     = note: this warning originates in the macro `impl_reflect_for_hashset` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+     |
+1128 |             fn reflect_ref(&self) -> ReflectRef<'_> {
+     |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1132:28
+     |
+1132 |             fn reflect_mut(&mut self) -> ReflectMut {
+     |                            ^^^^^^^^^     ---------- the same lifetime is hidden here
+     |                            |
+     |                            the lifetime is elided here
+...
+1246 | impl_reflect_for_hashset!(::bevy_platform::collections::HashSet<V,S>);
+     | --------------------------------------------------------------------- in this macro invocation
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+     = note: this warning originates in the macro `impl_reflect_for_hashset` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use `'_` for type paths
+     |
+1132 |             fn reflect_mut(&mut self) -> ReflectMut<'_> {
+     |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1304:13
+     |
+1304 |     fn iter(&self) -> MapIter {
+     |             ^^^^^     ------- the same lifetime is hidden here
+     |             |
+     |             the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1304 |     fn iter(&self) -> MapIter<'_> {
+     |                              ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1406:20
+     |
+1406 |     fn reflect_ref(&self) -> ReflectRef {
+     |                    ^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1406 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+     |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1410:20
+     |
+1410 |     fn reflect_mut(&mut self) -> ReflectMut {
+     |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1410 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+     |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1539:13
+     |
+1539 |     fn iter(&self) -> ArrayIter {
+     |             ^^^^^     --------- the same lifetime is hidden here
+     |             |
+     |             the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1539 |     fn iter(&self) -> ArrayIter<'_> {
+     |                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1589:20
+     |
+1589 |     fn reflect_ref(&self) -> ReflectRef {
+     |                    ^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1589 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+     |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1594:20
+     |
+1594 |     fn reflect_mut(&mut self) -> ReflectMut {
+     |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1594 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+     |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1785:20
+     |
+1785 |     fn reflect_ref(&self) -> ReflectRef {
+     |                    ^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1785 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+     |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1789:20
+     |
+1789 |     fn reflect_mut(&mut self) -> ReflectMut {
+     |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1789 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+     |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1925:13
+     |
+1925 |     fn iter(&self) -> ListIter {
+     |             ^^^^^     -------- the same lifetime is hidden here
+     |             |
+     |             the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1925 |     fn iter(&self) -> ListIter<'_> {
+     |                               ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1973:20
+     |
+1973 |     fn reflect_ref(&self) -> ReflectRef {
+     |                    ^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1973 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+     |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:1977:20
+     |
+1977 |     fn reflect_mut(&mut self) -> ReflectMut {
+     |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1977 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+     |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:2082:20
+     |
+2082 |     fn reflect_ref(&self) -> ReflectRef {
+     |                    ^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+2082 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+     |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:2086:20
+     |
+2086 |     fn reflect_mut(&mut self) -> ReflectMut {
+     |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+2086 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+     |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:2221:20
+     |
+2221 |     fn reflect_ref(&self) -> ReflectRef {
+     |                    ^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+2221 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+     |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:2225:20
+     |
+2225 |     fn reflect_mut(&mut self) -> ReflectMut {
+     |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+2225 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+     |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:2360:20
+     |
+2360 |     fn reflect_ref(&self) -> ReflectRef {
+     |                    ^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+2360 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+     |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:2364:20
+     |
+2364 |     fn reflect_mut(&mut self) -> ReflectMut {
+     |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+2364 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+     |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:2518:20
+     |
+2518 |     fn reflect_ref(&self) -> ReflectRef {
+     |                    ^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+2518 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+     |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_reflect/src/impls/std.rs:2522:20
+     |
+2522 |     fn reflect_mut(&mut self) -> ReflectMut {
+     |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+     |                    |
+     |                    the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+2522 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+     |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_reflect/src/impls/smallvec.rs:70:13
+   |
+70 |     fn iter(&self) -> ListIter {
+   |             ^^^^^     -------- the same lifetime is hidden here
+   |             |
+   |             the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+70 |     fn iter(&self) -> ListIter<'_> {
+   |                               ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/smallvec.rs:125:20
+    |
+125 |     fn reflect_ref(&self) -> ReflectRef {
+    |                    ^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+125 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/impls/smallvec.rs:129:20
+    |
+129 |     fn reflect_mut(&mut self) -> ReflectMut {
+    |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+129 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/enums/dynamic_enum.rs:256:20
+    |
+256 |     fn iter_fields(&self) -> VariantFieldIter {
+    |                    ^^^^^     ---------------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+256 |     fn iter_fields(&self) -> VariantFieldIter<'_> {
+    |                                              ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/enums/dynamic_enum.rs:382:20
+    |
+382 |     fn reflect_ref(&self) -> ReflectRef {
+    |                    ^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+382 |     fn reflect_ref(&self) -> ReflectRef<'_> {
+    |                                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/enums/dynamic_enum.rs:387:20
+    |
+387 |     fn reflect_mut(&mut self) -> ReflectMut {
+    |                    ^^^^^^^^^     ---------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+387 |     fn reflect_mut(&mut self) -> ReflectMut<'_> {
+    |                                            ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_reflect/src/enums/enum_trait.rs:118:20
+    |
+118 |     fn iter_fields(&self) -> VariantFieldIter;
+    |                    ^^^^^     ---------------- the same lifetime is hidden here
+    |                    |
+    |                    the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+118 |     fn iter_fields(&self) -> VariantFieldIter<'_>;
+    |                                              ++++
+
+warning: `bevy_reflect` (lib) generated 136 warnings
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/change_detection.rs:1078:21
+     |
+1078 |     pub fn reborrow(&mut self) -> MutUntyped {
+     |                     ^^^^^^^^^     ---------- the same lifetime is hidden here
+     |                     |
+     |                     the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+     = note: `#[warn(mismatched_lifetime_syntaxes)]` on by default
+help: use `'_` for type paths
+     |
+1078 |     pub fn reborrow(&mut self) -> MutUntyped<'_> {
+     |                                             ++++
+
+warning: function pointer comparisons do not produce meaningful results since their addresses are not guaranteed to be unique
+    --> crates/bevy_ecs/src/component.rs:1208:12
+     |
+1200 | #[derive(Clone, Debug, Default, PartialEq, Eq)]
+     |                                 --------- in this derive macro expansion
+...
+1208 |     Custom(ComponentCloneFn),
+     |            ^^^^^^^^^^^^^^^^
+     |
+     = note: the address of the same function can vary between different codegen units
+     = note: furthermore, different functions could have the same address after being merged together
+     = note: for more information visit <https://doc.rust-lang.org/nightly/core/ptr/fn.fn_addr_eq.html>
+     = note: `#[warn(unpredictable_function_pointer_comparisons)]` on by default
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/entity/mod.rs:612:29
+    |
+612 |     pub fn reserve_entities(&self, count: u32) -> ReserveEntitiesIterator {
+    |                             ^^^^^                 ----------------------- the same lifetime is hidden here
+    |                             |
+    |                             the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+612 |     pub fn reserve_entities(&self, count: u32) -> ReserveEntitiesIterator<'_> {
+    |                                                                          ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/entity/clone_entities.rs:441:25
+    |
+441 |     pub fn build(world: &mut World) -> EntityClonerBuilder {
+    |                         ^^^^^^^^^^     ------------------- the same lifetime is hidden here
+    |                         |
+    |                         the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+441 |     pub fn build(world: &mut World) -> EntityClonerBuilder<'_> {
+    |                                                           ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_ecs/src/observer/mod.rs:66:22
+   |
+66 |     pub fn event_ptr(&self) -> Ptr {
+   |                      ^^^^^     --- the same lifetime is hidden here
+   |                      |
+   |                      the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+66 |     pub fn event_ptr(&self) -> Ptr<'_> {
+   |                                   ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/observer/mod.rs:566:9
+    |
+566 |         &mut self,
+    |         ^^^^^^^^^ the lifetime is elided here
+567 |         system: impl IntoObserverSystem<E, B, M>,
+568 |     ) -> EntityWorldMut {
+    |          -------------- the same lifetime is hidden here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+568 |     ) -> EntityWorldMut<'_> {
+    |                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/relationship/related_methods.rs:570:21
+    |
+570 |     pub fn commands(&mut self) -> Commands {
+    |                     ^^^^^^^^^     --------
+    |                     |             |
+    |                     |             the same lifetime is hidden here
+    |                     |             the same lifetime is hidden here
+    |                     the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+570 |     pub fn commands(&mut self) -> Commands<'_> {
+    |                                           ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/system/commands/mod.rs:322:24
+    |
+322 |     pub fn spawn_empty(&mut self) -> EntityCommands {
+    |                        ^^^^^^^^^     -------------- the same lifetime is hidden here
+    |                        |
+    |                        the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+322 |     pub fn spawn_empty(&mut self) -> EntityCommands<'_> {
+    |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/system/commands/mod.rs:384:29
+    |
+384 |     pub fn spawn<T: Bundle>(&mut self, bundle: T) -> EntityCommands {
+    |                             ^^^^^^^^^                -------------- the same lifetime is hidden here
+    |                             |
+    |                             the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+384 |     pub fn spawn<T: Bundle>(&mut self, bundle: T) -> EntityCommands<'_> {
+    |                                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/system/commands/mod.rs:445:19
+    |
+445 |     pub fn entity(&mut self, entity: Entity) -> EntityCommands {
+    |                   ^^^^^^^^^                     -------------- the same lifetime is hidden here
+    |                   |
+    |                   the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+445 |     pub fn entity(&mut self, entity: Entity) -> EntityCommands<'_> {
+    |                                                               ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/system/commands/mod.rs:494:9
+    |
+494 |         &mut self,
+    |         ^^^^^^^^^ the lifetime is elided here
+495 |         entity: Entity,
+496 |     ) -> Result<EntityCommands, EntityDoesNotExistError> {
+    |                 -------------- the same lifetime is hidden here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+496 |     ) -> Result<EntityCommands<'_>, EntityDoesNotExistError> {
+    |                               ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/system/commands/mod.rs:1165:9
+     |
+1165 |         &mut self,
+     |         ^^^^^^^^^ the lifetime is elided here
+1166 |         observer: impl IntoObserverSystem<E, B, M>,
+1167 |     ) -> EntityCommands {
+     |          -------------- the same lifetime is hidden here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1167 |     ) -> EntityCommands<'_> {
+     |                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/system/commands/mod.rs:1298:21
+     |
+1298 |     pub fn reborrow(&mut self) -> EntityCommands {
+     |                     ^^^^^^^^^     -------------- the same lifetime is hidden here
+     |                     |
+     |                     the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1298 |     pub fn reborrow(&mut self) -> EntityCommands<'_> {
+     |                                                 ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/system/commands/mod.rs:1331:32
+     |
+1331 |     pub fn entry<T: Component>(&mut self) -> EntityEntryCommands<T> {
+     |                                ^^^^^^^^^     ---------------------- the same lifetime is hidden here
+     |                                |
+     |                                the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1331 |     pub fn entry<T: Component>(&mut self) -> EntityEntryCommands<'_, T> {
+     |                                                                  +++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/system/commands/mod.rs:1934:21
+     |
+1934 |     pub fn commands(&mut self) -> Commands {
+     |                     ^^^^^^^^^     --------
+     |                     |             |
+     |                     |             the same lifetime is hidden here
+     |                     |             the same lifetime is hidden here
+     |                     the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1934 |     pub fn commands(&mut self) -> Commands<'_> {
+     |                                           ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/system/commands/mod.rs:2221:19
+     |
+2221 |     pub fn entity(&mut self) -> EntityCommands {
+     |                   ^^^^^^^^^     -------------- the same lifetime is hidden here
+     |                   |
+     |                   the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+2221 |     pub fn entity(&mut self) -> EntityCommands<'_> {
+     |                                               ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/system/system_param.rs:1435:21
+     |
+1435 |     pub fn reborrow(&mut self) -> Deferred<T> {
+     |                     ^^^^^^^^^     ----------- the same lifetime is hidden here
+     |                     |
+     |                     the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1435 |     pub fn reborrow(&mut self) -> Deferred<'_, T> {
+     |                                            +++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/world/mod.rs:235:29
+    |
+235 |     pub fn components_queue(&self) -> ComponentsQueuedRegistrator {
+    |                             ^^^^^     --------------------------- the same lifetime is hidden here
+    |                             |
+    |                             the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+235 |     pub fn components_queue(&self) -> ComponentsQueuedRegistrator<'_> {
+    |                                                                  ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/world/mod.rs:242:35
+    |
+242 |     pub fn components_registrator(&mut self) -> ComponentsRegistrator {
+    |                                   ^^^^^^^^^     --------------------- the same lifetime is hidden here
+    |                                   |
+    |                                   the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+242 |     pub fn components_registrator(&mut self) -> ComponentsRegistrator<'_> {
+    |                                                                      ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/world/mod.rs:268:21
+    |
+268 |     pub fn commands(&mut self) -> Commands {
+    |                     ^^^^^^^^^     --------
+    |                     |             |
+    |                     |             the same lifetime is hidden here
+    |                     |             the same lifetime is hidden here
+    |                     the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+268 |     pub fn commands(&mut self) -> Commands<'_> {
+    |                                           ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/world/mod.rs:1050:34
+     |
+1050 |     pub fn entities_and_commands(&mut self) -> (EntityFetcher, Commands) {
+     |                                  ^^^^^^^^^      -------------  --------
+     |                                  |              |              |
+     |                                  |              |              the same lifetime is hidden here
+     |                                  |              |              the same lifetime is hidden here
+     |                                  |              the same lifetime is hidden here
+     |                                  the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1050 |     pub fn entities_and_commands(&mut self) -> (EntityFetcher<'_>, Commands<'_>) {
+     |                                                              ++++          ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/world/mod.rs:1090:24
+     |
+1090 |     pub fn spawn_empty(&mut self) -> EntityWorldMut {
+     |                        ^^^^^^^^^     -------------- the same lifetime is hidden here
+     |                        |
+     |                        the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1090 |     pub fn spawn_empty(&mut self) -> EntityWorldMut<'_> {
+     |                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/world/mod.rs:1158:29
+     |
+1158 |     pub fn spawn<B: Bundle>(&mut self, bundle: B) -> EntityWorldMut {
+     |                             ^^^^^^^^^                -------------- the same lifetime is hidden here
+     |                             |
+     |                             the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1158 |     pub fn spawn<B: Bundle>(&mut self, bundle: B) -> EntityWorldMut<'_> {
+     |                                                                    ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/world/mod.rs:1163:9
+     |
+1163 |         &mut self,
+     |         ^^^^^^^^^ the lifetime is elided here
+...
+1166 |     ) -> EntityWorldMut {
+     |          -------------- the same lifetime is hidden here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1166 |     ) -> EntityWorldMut<'_> {
+     |                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/world/mod.rs:1196:9
+     |
+1196 |         &mut self,
+     |         ^^^^^^^^^ the lifetime is elided here
+...
+1199 |     ) -> EntityWorldMut {
+     |          -------------- the same lifetime is hidden here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1199 |     ) -> EntityWorldMut<'_> {
+     |                        ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/world/mod.rs:1284:9
+     |
+1284 |         &mut self,
+     |         ^^^^^^^^^ the lifetime is elided here
+1285 |         entity: Entity,
+1286 |     ) -> Option<Mut<T>> {
+     |                 ------ the same lifetime is hidden here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1286 |     ) -> Option<Mut<'_, T>> {
+     |                     +++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/world/mod.rs:1976:38
+     |
+1976 |     pub fn resource_ref<R: Resource>(&self) -> Ref<R> {
+     |                                      ^^^^^     ------ the same lifetime is hidden here
+     |                                      |
+     |                                      the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+1976 |     pub fn resource_ref<R: Resource>(&self) -> Ref<'_, R> {
+     |                                                    +++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+    --> crates/bevy_ecs/src/world/mod.rs:2024:42
+     |
+2024 |     pub fn get_resource_ref<R: Resource>(&self) -> Option<Ref<R>> {
+     |                                          ^^^^^            ------ the same lifetime is hidden here
+     |                                          |
+     |                                          the lifetime is elided here
+     |
+     = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+     |
+2024 |     pub fn get_resource_ref<R: Resource>(&self) -> Option<Ref<'_, R>> {
+     |                                                               +++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_ecs/src/world/deferred_world.rs:60:21
+   |
+60 |     pub fn reborrow(&mut self) -> DeferredWorld {
+   |                     ^^^^^^^^^     ------------- the same lifetime is hidden here
+   |                     |
+   |                     the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+60 |     pub fn reborrow(&mut self) -> DeferredWorld<'_> {
+   |                                                ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_ecs/src/world/deferred_world.rs:66:21
+   |
+66 |     pub fn commands(&mut self) -> Commands {
+   |                     ^^^^^^^^^     --------
+   |                     |             |
+   |                     |             the same lifetime is hidden here
+   |                     |             the same lifetime is hidden here
+   |                     the lifetime is elided here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+66 |     pub fn commands(&mut self) -> Commands<'_> {
+   |                                           ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+  --> crates/bevy_ecs/src/world/deferred_world.rs:77:9
+   |
+77 |         &mut self,
+   |         ^^^^^^^^^ the lifetime is elided here
+78 |         entity: Entity,
+79 |     ) -> Option<Mut<T>> {
+   |                 ------ the same lifetime is hidden here
+   |
+   = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+   |
+79 |     ) -> Option<Mut<'_, T>> {
+   |                     +++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/world/deferred_world.rs:407:34
+    |
+407 |     pub fn entities_and_commands(&mut self) -> (EntityFetcher, Commands) {
+    |                                  ^^^^^^^^^      -------------  --------
+    |                                  |              |              |
+    |                                  |              |              the same lifetime is hidden here
+    |                                  |              |              the same lifetime is hidden here
+    |                                  |              the same lifetime is hidden here
+    |                                  the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+407 |     pub fn entities_and_commands(&mut self) -> (EntityFetcher<'_>, Commands<'_>) {
+    |                                                              ++++          ++++
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> crates/bevy_ecs/src/world/deferred_world.rs:815:40
+    |
+815 |     pub(crate) fn as_unsafe_world_cell(&mut self) -> UnsafeWorldCell {
+    |                                        ^^^^^^^^^     --------------- the same lifetime is hidden here
+    |                                        |
+    |                                        the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+help: use `'_` for type paths
+    |
+815 |     pub(crate) fn as_unsafe_world_cell(&mut self) -> UnsafeWorldCell<'_> {
+    |                                                                     ++++
+
+warning: `bevy_ecs` (lib) generated 33 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.48s
+buildq: [   868 ms] cargo finished
+buildq: [   901 ms] after-job check
+buildq: [   901 ms] done

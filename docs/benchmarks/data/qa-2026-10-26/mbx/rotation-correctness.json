@@ -1,0 +1,1267 @@
+{
+  "duration_s": 722.595,
+  "iterations": 28,
+  "checks": [
+    {
+      "iteration": 0,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 0,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 0,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 0,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 0,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 1,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 1,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 1,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 1,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 1,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 2,
+      "project": "bevy-A",
+      "budget": "768M",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 2,
+      "project": "bevy-edited",
+      "budget": "768M",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 2,
+      "project": "ripgrep",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 2,
+      "project": "ra",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 2,
+      "project": "tokio",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 3,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 3,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 3,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 3,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 3,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 4,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 4,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 4,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 4,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 4,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 5,
+      "project": "bevy-A",
+      "budget": "768M",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 5,
+      "project": "bevy-edited",
+      "budget": "768M",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 5,
+      "project": "ripgrep",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 5,
+      "project": "ra",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 5,
+      "project": "tokio",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 6,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 6,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 6,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 6,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 6,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 7,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 7,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 7,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 7,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 7,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 8,
+      "project": "bevy-A",
+      "budget": "768M",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 8,
+      "project": "bevy-edited",
+      "budget": "768M",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 8,
+      "project": "ripgrep",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 8,
+      "project": "ra",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 8,
+      "project": "tokio",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 9,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 9,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 9,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 9,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 9,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 10,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 10,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 10,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 10,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 10,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 11,
+      "project": "bevy-A",
+      "budget": "768M",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 11,
+      "project": "bevy-edited",
+      "budget": "768M",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 11,
+      "project": "ripgrep",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 11,
+      "project": "ra",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 11,
+      "project": "tokio",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 12,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 12,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 12,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 12,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 12,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 13,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 13,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 13,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 13,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 13,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 14,
+      "project": "bevy-A",
+      "budget": "768M",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 14,
+      "project": "bevy-edited",
+      "budget": "768M",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 14,
+      "project": "ripgrep",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 14,
+      "project": "ra",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 14,
+      "project": "tokio",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 15,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 15,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 15,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 15,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 15,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 16,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 16,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 16,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 16,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 16,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 17,
+      "project": "bevy-A",
+      "budget": "768M",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 17,
+      "project": "bevy-edited",
+      "budget": "768M",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 17,
+      "project": "ripgrep",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 17,
+      "project": "ra",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 17,
+      "project": "tokio",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 18,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 18,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 18,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 18,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 18,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 19,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 19,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 19,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 19,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 19,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 20,
+      "project": "bevy-A",
+      "budget": "768M",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 20,
+      "project": "bevy-edited",
+      "budget": "768M",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 20,
+      "project": "ripgrep",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 20,
+      "project": "ra",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 20,
+      "project": "tokio",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 21,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 21,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 21,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 21,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 21,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 22,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 22,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 22,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 22,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 22,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 23,
+      "project": "bevy-A",
+      "budget": "768M",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 23,
+      "project": "bevy-edited",
+      "budget": "768M",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 23,
+      "project": "ripgrep",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 23,
+      "project": "ra",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 23,
+      "project": "tokio",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 24,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 24,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 24,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 24,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 24,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 25,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 25,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 25,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 25,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 25,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 26,
+      "project": "bevy-A",
+      "budget": "768M",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 26,
+      "project": "bevy-edited",
+      "budget": "768M",
+      "expected": "version-C:entities=1",
+      "actual": "version-C:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 26,
+      "project": "ripgrep",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 26,
+      "project": "ra",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 26,
+      "project": "tokio",
+      "budget": "768M",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 27,
+      "project": "bevy-A",
+      "budget": "4G",
+      "expected": "version-A:entities=1",
+      "actual": "version-A:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 27,
+      "project": "bevy-edited",
+      "budget": "4G",
+      "expected": "version-D:entities=1",
+      "actual": "version-D:entities=1",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 27,
+      "project": "ripgrep",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 27,
+      "project": "ra",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "iteration": 27,
+      "project": "tokio",
+      "budget": "4G",
+      "expected": null,
+      "actual": null,
+      "exit": 0,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

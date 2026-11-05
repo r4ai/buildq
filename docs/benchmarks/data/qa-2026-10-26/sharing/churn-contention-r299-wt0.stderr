@@ -1,0 +1,6 @@
+buildq: [     0 ms] start
+buildq: all cache members busy and pool at its limit; waiting for one
+buildq: target repo-8f9c05ea/m2 (1 package(s) invalidated: sharing-probe)
+buildq: waiting for a build slot: 2/2 busy, position 1 of 1
+buildq: got build slot 0 after 0s
+buildq: copied 2.7 MiB to run dir /workspace/qa-sharing/churn-contention-final/cache/runs/r0

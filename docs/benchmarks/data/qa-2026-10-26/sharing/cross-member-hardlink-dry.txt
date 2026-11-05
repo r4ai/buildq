@@ -1,0 +1,5 @@
+indexed 2 files (2 with copies elsewhere) in 0 ms
+compared 1 files in 1 pools, read 128.0 KiB [logical accounting]
+identical: 1 files, would share 64.0 KiB (identical content; this filesystem cannot share: FIDEDUPERANGE: Invalid argument (os error 22))
+already shared: 0 files, 0 B
+differing: 0 files; skipped: 0 known different, 0 busy, 0 changed, 0 hard-linked, 0 over the read limit

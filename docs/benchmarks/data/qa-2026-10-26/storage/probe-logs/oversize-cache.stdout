@@ -1,0 +1,54 @@
+{
+  "pools": [
+    {
+      "name": "repo-87abe8d1",
+      "dir": "/workspace/qa-storage/probes/cache/pools/repo-87abe8d1",
+      "info": {
+        "repo": "repo",
+        "repo_key": "/workspace/qa-storage/probes/repo/.git",
+        "toolchain": "1.89.0",
+        "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+        "created_ms": 1792993830706,
+        "last_used_ms": 1792993830706
+      },
+      "members": [
+        {
+          "id": 0,
+          "dir": "/workspace/qa-storage/probes/cache/pools/repo-87abe8d1/m0",
+          "busy": false,
+          "size": 109756416,
+          "shared": 0,
+          "meta": {
+            "id": 0,
+            "created_ms": 1792993830732,
+            "last_used_ms": 1792993831359,
+            "last_worktree": "/workspace/qa-storage/probes/repo",
+            "source_root": "/workspace/qa-storage/probes/repo",
+            "last_head": "d6805a48729bcbb3cab7008509154b89b63ba0d5",
+            "last_cmd": "",
+            "jobs": 1,
+            "size_bytes": 109756416,
+            "size_ms": 1792993831362,
+            "size_accounting": "allocated"
+          }
+        }
+      ],
+      "shared": 0
+    }
+  ],
+  "runs": [],
+  "total": 109756416,
+  "trash_bytes": 0,
+  "budget": 67108864,
+  "effective_budget": 67108864,
+  "accounting": "allocated",
+  "over_budget": true,
+  "over_budget_bytes": 42647552,
+  "over_budget_reasons": [
+    "idle artifacts await GC or could not be reclaimed"
+  ],
+  "free_disk": 31216533504,
+  "external": [],
+  "external_total": 0,
+  "mbx_budget_bytes": 0
+}

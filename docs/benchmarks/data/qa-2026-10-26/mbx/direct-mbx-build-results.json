@@ -1,0 +1,14 @@
+[
+  {
+    "worktree": "a",
+    "build_exit": 0,
+    "binary_exit": 0,
+    "binary_stdout": "generated=A"
+  },
+  {
+    "worktree": "b",
+    "build_exit": 0,
+    "binary_exit": 0,
+    "binary_stdout": "generated=B"
+  }
+]

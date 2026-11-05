@@ -1,0 +1,51 @@
+{
+  "buildq_revision": "1391d00",
+  "buildq_binary_sha256": "b7053faaa13d1f614809396a135ed88c38cd214fe6cf9c5e2daf0f1f6d4951a1",
+  "mbx_version": "1.27.0",
+  "mbx_archive_url": "https://github.com/jdx/mr-boxington/releases/download/v1.27.0/mbx-x86_64-unknown-linux-gnu.tar.gz",
+  "mbx_archive_sha256": "f530d0870efcf15c845314ffccd049f53eaec9a35e9f42c0dec0e16b3135e31c",
+  "mbx_binary_sha256": "d02159722e826f1ed0729b07abaa5767907b7f5f9d3c2658f832e33da42c1907",
+  "mbx_archive_verified_against_release_SHA256SUMS": true,
+  "rustc_version": "1.89.0 (29483883e 2025-08-04)",
+  "cargo_version": "1.89.0 (c24e10642 2025-06-23)",
+  "cpu_quota": "400000 100000 (4 CPUs)",
+  "memory_limit_bytes": 17179869184,
+  "filesystem": "Linux overlay; clone/reflink and FIDEDUPERANGE unsupported on test volume",
+  "archives": [
+    {
+      "project": "ripgrep",
+      "tag": "14.1.1",
+      "url": "https://codeload.github.com/BurntSushi/ripgrep/tar.gz/refs/tags/14.1.1",
+      "sha256": "4dad02a2f9c8c3c8d89434e47337aa654cb0e2aa50e806589132f186bf5c2b66"
+    },
+    {
+      "project": "tokio",
+      "tag": "tokio-1.45.1",
+      "url": "https://codeload.github.com/tokio-rs/tokio/tar.gz/refs/tags/tokio-1.45.1",
+      "sha256": "846f323e3884c37e73e97c619b2b57e60c3f1e45bd1e73affda2abdeee783e7f"
+    },
+    {
+      "project": "rust-analyzer",
+      "tag": "2025-06-02",
+      "url": "https://codeload.github.com/rust-lang/rust-analyzer/tar.gz/refs/tags/2025-06-02",
+      "sha256": "c993bee4845acc400e6b6b499dadb50eafca02fab4e38001663fc6003ecec623"
+    }
+  ],
+  "bevy": {
+    "crate": "0.16.1",
+    "features": [
+      "bevy_pbr",
+      "png",
+      "multi_threaded"
+    ],
+    "fixture": "bevy-fixture",
+    "generated_lock_sha256": "4277e673a2949171b03339cb4713e142584aa0233dfe2a66c9bdcd23702f6f40",
+    "is_full_bevy_repository_build": false
+  },
+  "tokio_lock": {
+    "resolver": "CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback cargo generate-lockfile",
+    "file": "tokio-generated-Cargo.lock",
+    "sha256": "b4848db0f2facf8f7b95d821b9b1a222d23166088be53f6a26ac16b7d5f6d23f"
+  },
+  "sampling": "psutil recursive process RSS/CPU every100ms; sampled CPU can undercount short-lived processes; other QA agents share host"
+}

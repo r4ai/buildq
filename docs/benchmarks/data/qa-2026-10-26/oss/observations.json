@@ -1,0 +1,1452 @@
+{
+  "elapsed_s": 2128.102,
+  "action_counts": {
+    "edit": 3,
+    "revert": 3,
+    "build": 6,
+    "burst": 3,
+    "gc": 1,
+    "test": 2,
+    "gc_pressure": 1
+  },
+  "repo_action_counts": {
+    "rust-analyzer": 3,
+    "bevy": 4,
+    "ripgrep": 9,
+    "tokio": 3
+  },
+  "unexpected_exit_failures": [
+    {
+      "index": 6,
+      "kind": "burst",
+      "repo": "ripgrep",
+      "exit": 1,
+      "timed_out": null,
+      "stderr_tail": null
+    },
+    {
+      "index": 8,
+      "kind": "test",
+      "repo": "tokio",
+      "exit": 101,
+      "timed_out": false,
+      "stderr_tail": "   Compiling tokio v1.45.1 (/workspace/qa-oss/worktrees/tokio-0/tokio)\n   Compiling tokio-stream v0.1.17 (/workspace/qa-oss/worktrees/tokio-0/tokio-stream)\n   Compiling tokio-test v0.4.4 (/workspace/qa-oss/worktrees/tokio-0/tokio-test)\nerror: run main Tokio tests with `--features full`\n --> tokio/tests/_require_full.rs:2:1\n  |\n2 | compile_error!(\"run main Tokio tests with `--features full`\");\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nerror: could not compile `tokio` (test \"_require_full\") due to 1 previous error\n"
+    },
+    {
+      "index": 14,
+      "kind": "burst",
+      "repo": "tokio",
+      "exit": 1,
+      "timed_out": null,
+      "stderr_tail": null
+    }
+  ],
+  "sample_violations": {
+    "no_orphan_processes": 1
+  },
+  "max_cache_allocated_bytes": 8112721920,
+  "min_free_bytes": 11545702400,
+  "max_build_holders": 2,
+  "max_queue_waiters": 11,
+  "rss_scope": "Use burst.peak_tree_rss_bytes for scoped RSS; soak global RSS includes other QA experiments.",
+  "burst": {
+    "wall_s": 442.368,
+    "peak_tree_rss_bytes": 1435492352,
+    "jobs": [
+      {
+        "name": "bevy-0",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-0",
+        "started_s": 0.0005772810000053141,
+        "exit": 0,
+        "finished_s": 300.939
+      },
+      {
+        "name": "tokio-0",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-0",
+        "started_s": 0.0021835440000188555,
+        "exit": 0,
+        "finished_s": 161.848
+      },
+      {
+        "name": "ripgrep-0",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-0",
+        "started_s": 0.002565370000013445,
+        "exit": 0,
+        "finished_s": 170.083
+      },
+      {
+        "name": "rust-analyzer-0",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+        "started_s": 0.005461699000022691,
+        "exit": 0,
+        "finished_s": 300.939
+      },
+      {
+        "name": "bevy-1",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-1",
+        "started_s": 0.0070542210000041905,
+        "exit": 0,
+        "finished_s": 387.991
+      },
+      {
+        "name": "tokio-1",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-1",
+        "started_s": 0.009274781000016219,
+        "exit": 0,
+        "finished_s": 174.296
+      },
+      {
+        "name": "ripgrep-1",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-1",
+        "started_s": 0.016438727000007702,
+        "exit": 0,
+        "finished_s": 78.615
+      },
+      {
+        "name": "rust-analyzer-1",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-1",
+        "started_s": 0.01843738200000189,
+        "exit": 0,
+        "finished_s": 239.68
+      },
+      {
+        "name": "bevy-2",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-2",
+        "started_s": 0.01892156300002057,
+        "exit": 0,
+        "finished_s": 442.368
+      },
+      {
+        "name": "tokio-2",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-2",
+        "started_s": 0.026498352000004388,
+        "exit": 0,
+        "finished_s": 178.418
+      },
+      {
+        "name": "ripgrep-2",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-2",
+        "started_s": 0.033632434000026024,
+        "exit": 0,
+        "finished_s": 159.841
+      },
+      {
+        "name": "rust-analyzer-2",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+        "started_s": 0.039088384000024234,
+        "exit": 0,
+        "finished_s": 204.992
+      }
+    ]
+  },
+  "burst64": {
+    "submitted_jobs": 64,
+    "wall_s": 900.3,
+    "peak_tree_rss_bytes": 1981906944,
+    "jobs": [
+      {
+        "name": "bevy-0-00",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-0",
+        "started_s": 0.0328469479998148,
+        "exit": 0,
+        "finished_s": 190.836
+      },
+      {
+        "name": "tokio-0-01",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-0",
+        "started_s": 0.03528132899987213,
+        "exit": 0,
+        "finished_s": 3.994
+      },
+      {
+        "name": "ripgrep-0-02",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-0",
+        "started_s": 0.036113273999944795,
+        "exit": 0,
+        "finished_s": 3.995
+      },
+      {
+        "name": "rust-analyzer-0-03",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+        "started_s": 0.04099895199988168,
+        "exit": 0,
+        "finished_s": 66.939
+      },
+      {
+        "name": "bevy-1-04",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-1",
+        "started_s": 0.04162196099991888,
+        "exit": 0,
+        "finished_s": 794.862
+      },
+      {
+        "name": "tokio-1-05",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-1",
+        "started_s": 0.04453883999985919,
+        "exit": 0,
+        "finished_s": 6.479
+      },
+      {
+        "name": "ripgrep-1-06",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-1",
+        "started_s": 0.04888191899999583,
+        "exit": 0,
+        "finished_s": 4.033
+      },
+      {
+        "name": "rust-analyzer-1-07",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-1",
+        "started_s": 0.056820420999883936,
+        "exit": 0,
+        "finished_s": 55.254
+      },
+      {
+        "name": "bevy-2-08",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-2",
+        "started_s": 0.059272127999975055,
+        "exit": 143,
+        "finished_s": 900.297
+      },
+      {
+        "name": "tokio-2-09",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-2",
+        "started_s": 0.07309515299994018,
+        "exit": 0,
+        "finished_s": 248.352
+      },
+      {
+        "name": "ripgrep-2-10",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-2",
+        "started_s": 0.0769871529998909,
+        "exit": 0,
+        "finished_s": 8.999
+      },
+      {
+        "name": "rust-analyzer-2-11",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+        "started_s": 0.08079380300000594,
+        "exit": 0,
+        "finished_s": 676.958
+      },
+      {
+        "name": "bevy-0-12",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-0",
+        "started_s": 0.0842516479999631,
+        "exit": 0,
+        "finished_s": 352.342
+      },
+      {
+        "name": "tokio-0-13",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-0",
+        "started_s": 0.09086536099994191,
+        "exit": 0,
+        "finished_s": 357.1
+      },
+      {
+        "name": "ripgrep-0-14",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-0",
+        "started_s": 0.09711525599982451,
+        "exit": 0,
+        "finished_s": 393.186
+      },
+      {
+        "name": "rust-analyzer-0-15",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+        "started_s": 0.10114732699980777,
+        "exit": 0,
+        "finished_s": 23.802
+      },
+      {
+        "name": "bevy-1-16",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-1",
+        "started_s": 0.14502150999987862,
+        "exit": 0,
+        "finished_s": 527.184
+      },
+      {
+        "name": "tokio-1-17",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-1",
+        "started_s": 0.15684221599985904,
+        "exit": 0,
+        "finished_s": 594.201
+      },
+      {
+        "name": "ripgrep-1-18",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-1",
+        "started_s": 0.15961949399979858,
+        "exit": 0,
+        "finished_s": 522.896
+      },
+      {
+        "name": "rust-analyzer-1-19",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-1",
+        "started_s": 0.1687809599998218,
+        "exit": 0,
+        "finished_s": 268.836
+      },
+      {
+        "name": "bevy-2-20",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-2",
+        "started_s": 0.1769194929997866,
+        "exit": 0,
+        "finished_s": 851.758
+      },
+      {
+        "name": "tokio-2-21",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-2",
+        "started_s": 0.19312253699990833,
+        "exit": 0,
+        "finished_s": 749.736
+      },
+      {
+        "name": "ripgrep-2-22",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-2",
+        "started_s": 0.2007896489999439,
+        "exit": 0,
+        "finished_s": 352.398
+      },
+      {
+        "name": "rust-analyzer-2-23",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+        "started_s": 0.24078726699985964,
+        "exit": 0,
+        "finished_s": 613.576
+      },
+      {
+        "name": "bevy-0-24",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-0",
+        "started_s": 0.25013087699994685,
+        "exit": 0,
+        "finished_s": 729.039
+      },
+      {
+        "name": "tokio-0-25",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-0",
+        "started_s": 0.259436118999929,
+        "exit": 0,
+        "finished_s": 354.802
+      },
+      {
+        "name": "ripgrep-0-26",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-0",
+        "started_s": 0.2688103460000093,
+        "exit": 0,
+        "finished_s": 449.185
+      },
+      {
+        "name": "rust-analyzer-0-27",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+        "started_s": 0.2777832369999942,
+        "exit": 0,
+        "finished_s": 395.655
+      },
+      {
+        "name": "bevy-1-28",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-1",
+        "started_s": 0.28290669399984836,
+        "exit": 0,
+        "finished_s": 205.853
+      },
+      {
+        "name": "tokio-1-29",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-1",
+        "started_s": 0.28555424599994694,
+        "exit": 0,
+        "finished_s": 679.07
+      },
+      {
+        "name": "ripgrep-1-30",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-1",
+        "started_s": 0.29053645899989533,
+        "exit": 0,
+        "finished_s": 792.855
+      },
+      {
+        "name": "rust-analyzer-1-31",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-1",
+        "started_s": 0.3318237959999806,
+        "exit": 0,
+        "finished_s": 655.993
+      },
+      {
+        "name": "bevy-2-32",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-2",
+        "started_s": 0.3394996109998374,
+        "exit": 0,
+        "finished_s": 473.866
+      },
+      {
+        "name": "tokio-2-33",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-2",
+        "started_s": 0.34905449999996563,
+        "exit": 0,
+        "finished_s": 243.544
+      },
+      {
+        "name": "ripgrep-2-34",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-2",
+        "started_s": 0.36172204299987243,
+        "exit": 0,
+        "finished_s": 248.54
+      },
+      {
+        "name": "rust-analyzer-2-35",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+        "started_s": 0.3648677169999246,
+        "exit": 0,
+        "finished_s": 288.66
+      },
+      {
+        "name": "bevy-0-36",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-0",
+        "started_s": 0.3845078749998265,
+        "exit": 0,
+        "finished_s": 414.075
+      },
+      {
+        "name": "tokio-0-37",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-0",
+        "started_s": 0.42325507599980483,
+        "exit": 0,
+        "finished_s": 446.986
+      },
+      {
+        "name": "ripgrep-0-38",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-0",
+        "started_s": 0.43725272500000756,
+        "exit": 0,
+        "finished_s": 243.566
+      },
+      {
+        "name": "rust-analyzer-0-39",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+        "started_s": 0.46883976899994195,
+        "exit": 0,
+        "finished_s": 538.144
+      },
+      {
+        "name": "bevy-1-40",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-1",
+        "started_s": 0.47826560299995435,
+        "exit": 0,
+        "finished_s": 592.076
+      },
+      {
+        "name": "tokio-1-41",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-1",
+        "started_s": 0.48703250399989884,
+        "exit": 0,
+        "finished_s": 568.556
+      },
+      {
+        "name": "ripgrep-1-42",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-1",
+        "started_s": 0.4984129359997951,
+        "exit": 0,
+        "finished_s": 676.994
+      },
+      {
+        "name": "rust-analyzer-1-43",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-1",
+        "started_s": 0.5343450629998188,
+        "exit": 0,
+        "finished_s": 491.803
+      },
+      {
+        "name": "bevy-2-44",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-2",
+        "started_s": 0.5608726369998749,
+        "exit": 0,
+        "finished_s": 747.654
+      },
+      {
+        "name": "tokio-2-45",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-2",
+        "started_s": 0.5670514649998495,
+        "exit": 0,
+        "finished_s": 594.282
+      },
+      {
+        "name": "ripgrep-2-46",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-2",
+        "started_s": 0.5912536819998877,
+        "exit": 0,
+        "finished_s": 241.043
+      },
+      {
+        "name": "rust-analyzer-2-47",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+        "started_s": 0.6003971009999987,
+        "exit": 0,
+        "finished_s": 269.062
+      },
+      {
+        "name": "bevy-0-48",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-0",
+        "started_s": 0.6729875080000056,
+        "exit": 0,
+        "finished_s": 352.58
+      },
+      {
+        "name": "tokio-0-49",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-0",
+        "started_s": 0.6808102349998535,
+        "exit": 0,
+        "finished_s": 449.279
+      },
+      {
+        "name": "ripgrep-0-50",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-0",
+        "started_s": 0.6928174319998561,
+        "exit": 0,
+        "finished_s": 354.979
+      },
+      {
+        "name": "rust-analyzer-0-51",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+        "started_s": 0.7233229449998362,
+        "exit": 0,
+        "finished_s": 522.984
+      },
+      {
+        "name": "bevy-1-52",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-1",
+        "started_s": 0.7519117580000056,
+        "exit": 0,
+        "finished_s": 662.284
+      },
+      {
+        "name": "tokio-1-53",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-1",
+        "started_s": 0.7728399279999394,
+        "exit": 0,
+        "finished_s": 451.645
+      },
+      {
+        "name": "ripgrep-1-54",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-1",
+        "started_s": 0.7768569059999209,
+        "exit": 0,
+        "finished_s": 592.136
+      },
+      {
+        "name": "rust-analyzer-1-55",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-1",
+        "started_s": 0.7933732129999953,
+        "exit": 0,
+        "finished_s": 414.16
+      },
+      {
+        "name": "bevy-2-56",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-2",
+        "started_s": 0.8575099169997884,
+        "exit": 0,
+        "finished_s": 376.755
+      },
+      {
+        "name": "tokio-2-57",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-2",
+        "started_s": 0.8729438119999031,
+        "exit": 0,
+        "finished_s": 243.687
+      },
+      {
+        "name": "ripgrep-2-58",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-2",
+        "started_s": 0.8853954489998159,
+        "exit": 0,
+        "finished_s": 638.996
+      },
+      {
+        "name": "rust-analyzer-2-59",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-2",
+        "started_s": 0.8906848659999014,
+        "exit": 0,
+        "finished_s": 376.767
+      },
+      {
+        "name": "bevy-0-60",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "bevy_ecs"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/bevy-0",
+        "started_s": 0.8953075569997964,
+        "exit": 0,
+        "finished_s": 859.85
+      },
+      {
+        "name": "tokio-0-61",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "tokio@1.45.1"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/tokio-0",
+        "started_s": 0.9259764559999439,
+        "exit": 0,
+        "finished_s": 360.138
+      },
+      {
+        "name": "ripgrep-0-62",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "ripgrep"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/ripgrep-0",
+        "started_s": 0.9528355999998439,
+        "exit": 0,
+        "finished_s": 447.083
+      },
+      {
+        "name": "rust-analyzer-0-63",
+        "command": [
+          "/workspace/qa-bin/buildq",
+          "cargo",
+          "build",
+          "-p",
+          "syntax"
+        ],
+        "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+        "started_s": 0.9684448040000007,
+        "exit": 0,
+        "finished_s": 766.258
+      }
+    ],
+    "sample_count": 398,
+    "max_visible_burst_waiters": 11,
+    "max_build_holders": 2
+  },
+  "real_edit": [
+    {
+      "index": 0,
+      "cwd": "/workspace/qa-oss/worktrees/tokio-edit-3",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "test",
+        "-p",
+        "tokio@1.45.1",
+        "--test",
+        "buildq_qa_marker",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "duration_s": 389.746
+    },
+    {
+      "index": 1,
+      "cwd": "/workspace/qa-oss/worktrees/tokio-edit-4",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "test",
+        "-p",
+        "tokio@1.45.1",
+        "--test",
+        "buildq_qa_marker",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "duration_s": 69.85
+    },
+    {
+      "index": 2,
+      "cwd": "/workspace/qa-oss/worktrees/tokio-edit-3",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "test",
+        "-p",
+        "tokio@1.45.1",
+        "--test",
+        "buildq_qa_marker",
+        "--features",
+        "full",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "duration_s": 45.08
+    },
+    {
+      "index": 3,
+      "cwd": "/workspace/qa-oss/worktrees/tokio-edit-4",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "test",
+        "-p",
+        "tokio@1.45.1",
+        "--test",
+        "buildq_qa_marker",
+        "--features",
+        "full",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "duration_s": 99.723
+    },
+    {
+      "index": 4,
+      "cwd": "/workspace/qa-oss/worktrees/tokio-edit-3",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "test",
+        "-p",
+        "tokio@1.45.1",
+        "--test",
+        "buildq_qa_marker",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "duration_s": 352.803
+    },
+    {
+      "index": 5,
+      "cwd": "/workspace/qa-oss/worktrees/tokio-edit-4",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "test",
+        "-p",
+        "tokio@1.45.1",
+        "--test",
+        "buildq_qa_marker",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "duration_s": 16.344
+    },
+    {
+      "index": 6,
+      "cwd": "/workspace/qa-oss/worktrees/tokio-edit-3",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "test",
+        "-p",
+        "tokio@1.45.1",
+        "--test",
+        "buildq_qa_marker",
+        "--features",
+        "full",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "duration_s": 45.832
+    },
+    {
+      "index": 7,
+      "cwd": "/workspace/qa-oss/worktrees/tokio-edit-4",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "test",
+        "-p",
+        "tokio@1.45.1",
+        "--test",
+        "buildq_qa_marker",
+        "--features",
+        "full",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "duration_s": 18.371
+    }
+  ],
+  "full_application": [
+    {
+      "name": "full-rust-analyzer",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "rust-analyzer"
+      ],
+      "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+      "wall_s": 762.866300525,
+      "exit": 0,
+      "peak_tree_rss_bytes": 1823993856,
+      "sampled_cpu_s": 243.3,
+      "peak_processes": 7,
+      "compiling_lines": 186
+    },
+    {
+      "name": "full-rust-analyzer-warm-1",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "rust-analyzer"
+      ],
+      "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+      "wall_s": 17.641143509999893,
+      "exit": 0,
+      "peak_tree_rss_bytes": 59867136,
+      "sampled_cpu_s": 0.30000000000000004,
+      "peak_processes": 3,
+      "compiling_lines": 0
+    },
+    {
+      "name": "full-rust-analyzer-warm-2",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "rust-analyzer"
+      ],
+      "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+      "wall_s": 37.36788567899998,
+      "exit": 0,
+      "peak_tree_rss_bytes": 59695104,
+      "sampled_cpu_s": 0.38,
+      "peak_processes": 3,
+      "compiling_lines": 0
+    },
+    {
+      "name": "full-rust-analyzer-warm-3",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "build",
+        "-p",
+        "rust-analyzer"
+      ],
+      "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+      "wall_s": 18.418150341,
+      "exit": 0,
+      "peak_tree_rss_bytes": 60325888,
+      "sampled_cpu_s": 0.26,
+      "peak_processes": 3,
+      "compiling_lines": 0
+    },
+    {
+      "name": "full-rust-analyzer-version",
+      "command": [
+        "/workspace/qa-bin/buildq",
+        "cargo",
+        "run",
+        "-p",
+        "rust-analyzer",
+        "--",
+        "--version"
+      ],
+      "cwd": "/workspace/qa-oss/worktrees/rust-analyzer-0",
+      "wall_s": 18.606268718000138,
+      "exit": 0,
+      "peak_tree_rss_bytes": 59490304,
+      "sampled_cpu_s": 0.43,
+      "peak_processes": 3,
+      "compiling_lines": 0
+    }
+  ],
+  "staged_ripgrep": [
+    {
+      "worktree": 0,
+      "exit": 0,
+      "stdout": "10000",
+      "correct": true,
+      "wall_s": 50.10745931300005
+    },
+    {
+      "worktree": 1,
+      "exit": 0,
+      "stdout": "10000",
+      "correct": true,
+      "wall_s": 409.87891019100005
+    },
+    {
+      "worktree": 2,
+      "exit": 0,
+      "stdout": "10000",
+      "correct": true,
+      "wall_s": 5.504346453999915
+    }
+  ],
+  "manual_busy_gc": {
+    "actions": [
+      "evict run dir /workspace/qa-oss/cache/runs/r0 (over budget) (path footprint 45.2 MiB)",
+      "evict tokio-8301c862/m1 (last used 11m ago, over budget 1.0 GiB) (path footprint 7.6 MiB)",
+      "evict tokio-8301c862/m2 (last used 11m ago, over budget 1.0 GiB) (path footprint 7.6 MiB)",
+      "evict rust-analyzer-e644142e/m0 (last used 11m ago, over budget 1.0 GiB) (path footprint 174.6 MiB)",
+      "evict rust-analyzer-e644142e/m2 (last used 9m ago, over budget 1.0 GiB) (path footprint 174.6 MiB)",
+      "evict bevy-fa4906ee/m2 (last used 7m ago, over budget 1.0 GiB) (path footprint 614.7 MiB)",
+      "evict bevy-fa4906ee/m1 (last used 6m ago, over budget 1.0 GiB) (path footprint 613.4 MiB)",
+      "evict bevy-fa4906ee/m0 (last used 5m ago, over budget 1.0 GiB) (path footprint 614.5 MiB)"
+    ],
+    "freed": 2361716736,
+    "before": 6302781440,
+    "after": 1946968064,
+    "effective_budget": 1073741824,
+    "accounting": "allocated",
+    "over_budget": true,
+    "over_budget_bytes": 873226240,
+    "over_budget_reasons": [
+      "busy artifacts are protected; retry GC after jobs finish"
+    ],
+    "skipped": null,
+    "follow_ups": 0,
+    "external": 0,
+    "warnings": [
+      "cache exceeds its effective budget by 832.8 MiB (soft limit): busy artifacts are protected; retry GC after jobs finish"
+    ],
+    "failed_deletions": 0,
+    "dedupe": {
+      "dry_run": false,
+      "accounting": "allocated",
+      "pools": 4,
+      "indexed": 500,
+      "index_ms": 65,
+      "index_batches": 1,
+      "candidates": 499,
+      "compared": 1,
+      "identical": 0,
+      "identical_bytes": 0,
+      "shared": 0,
+      "shared_bytes": 0,
+      "already_shared": 0,
+      "already_shared_bytes": 0,
+      "differing": 0,
+      "skipped_busy": 5,
+      "skipped_changed": 0,
+      "skipped_hardlinked": 0,
+      "skipped_known_different": 0,
+      "skipped_over_budget": 0,
+      "read_bytes": 10779488,
+      "read_limited": false,
+      "unsupported": "FIDEDUPERANGE: Invalid argument (os error 22)",
+      "sharing": {
+        "state": "unsupported",
+        "reason": "FIDEDUPERANGE: Invalid argument (os error 22)",
+        "checked_ms": 1792994748965
+      },
+      "skipped": null,
+      "errors": []
+    }
+  },
+  "post_resume_sample_violations": {}
+}

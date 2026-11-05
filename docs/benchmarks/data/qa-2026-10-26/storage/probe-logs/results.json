@@ -1,0 +1,1136 @@
+[
+  {
+    "name": "oversize-build",
+    "args": [
+      "cargo",
+      "build",
+      "--offline"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.6777
+  },
+  {
+    "name": "oversize-cache",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0021,
+    "json": {
+      "pools": [
+        {
+          "name": "repo-87abe8d1",
+          "dir": "/workspace/qa-storage/probes/cache/pools/repo-87abe8d1",
+          "info": {
+            "repo": "repo",
+            "repo_key": "/workspace/qa-storage/probes/repo/.git",
+            "toolchain": "1.89.0",
+            "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+            "created_ms": 1792993830706,
+            "last_used_ms": 1792993830706
+          },
+          "members": [
+            {
+              "id": 0,
+              "dir": "/workspace/qa-storage/probes/cache/pools/repo-87abe8d1/m0",
+              "busy": false,
+              "size": 109756416,
+              "shared": 0,
+              "meta": {
+                "id": 0,
+                "created_ms": 1792993830732,
+                "last_used_ms": 1792993831359,
+                "last_worktree": "/workspace/qa-storage/probes/repo",
+                "source_root": "/workspace/qa-storage/probes/repo",
+                "last_head": "d6805a48729bcbb3cab7008509154b89b63ba0d5",
+                "last_cmd": "",
+                "jobs": 1,
+                "size_bytes": 109756416,
+                "size_ms": 1792993831362,
+                "size_accounting": "allocated"
+              }
+            }
+          ],
+          "shared": 0
+        }
+      ],
+      "runs": [],
+      "total": 109756416,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": true,
+      "over_budget_bytes": 42647552,
+      "over_budget_reasons": [
+        "idle artifacts await GC or could not be reclaimed"
+      ],
+      "free_disk": 31216533504,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "oversize-gc-dry",
+    "args": [
+      "gc",
+      "--dry-run",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0028,
+    "json": {
+      "actions": [
+        "evict repo-87abe8d1/m0 (last used 0s ago, over budget 64.0 MiB) (path footprint 104.7 MiB)"
+      ],
+      "freed": 109756416,
+      "before": 109756416,
+      "after": 0,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "completed cache member /workspace/qa-storage/probes/cache/pools/repo-87abe8d1/m0 (104.7 MiB) exceeds the entire cache budget 64.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "oversize-gc",
+    "args": [
+      "gc",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0056,
+    "json": {
+      "actions": [
+        "evict repo-87abe8d1/m0 (last used 0s ago, over budget 64.0 MiB) (path footprint 104.7 MiB)"
+      ],
+      "freed": 109756416,
+      "before": 109756416,
+      "after": 0,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "completed cache member /workspace/qa-storage/probes/cache/pools/repo-87abe8d1/m0 (104.7 MiB) exceeds the entire cache budget 64.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "oversize-after",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0016,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 31323123712,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "oversize-cold-rebuild",
+    "args": [
+      "cargo",
+      "build",
+      "--offline"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.7491
+  },
+  {
+    "name": "clear-after-oversize",
+    "args": [
+      "gc",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0066,
+    "json": {
+      "actions": [
+        "evict repo-87abe8d1/m0 (last used 0s ago, over budget 64.0 MiB) (path footprint 104.7 MiB)"
+      ],
+      "freed": 109797376,
+      "before": 109797376,
+      "after": 0,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "completed cache member /workspace/qa-storage/probes/cache/pools/repo-87abe8d1/m0 (104.7 MiB) exceeds the entire cache budget 64.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "busy-status",
+    "args": [
+      "status",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0025,
+    "json": {
+      "classes": [
+        {
+          "class": "build",
+          "holders": [
+            {
+              "busy": true,
+              "job": {
+                "class": "build",
+                "cmd": "cargo build --offline",
+                "cwd": "/workspace/qa-storage/probes/repo",
+                "enqueued_ms": 1792993832157,
+                "label": null,
+                "pid": 2893,
+                "priority": 0,
+                "seq": 1792993832157,
+                "started_ms": 1792993832157,
+                "target": "repo-87abe8d1/m0",
+                "worktree": "/workspace/qa-storage/probes/repo"
+              },
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        },
+        {
+          "class": "run",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        }
+      ],
+      "hosts": {}
+    }
+  },
+  {
+    "name": "busy-cache",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0046,
+    "json": {
+      "pools": [
+        {
+          "name": "repo-87abe8d1",
+          "dir": "/workspace/qa-storage/probes/cache/pools/repo-87abe8d1",
+          "info": {
+            "repo": "repo",
+            "repo_key": "/workspace/qa-storage/probes/repo/.git",
+            "toolchain": "1.89.0",
+            "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+            "created_ms": 1792993830706,
+            "last_used_ms": 1792993832132
+          },
+          "members": [
+            {
+              "id": 0,
+              "dir": "/workspace/qa-storage/probes/cache/pools/repo-87abe8d1/m0",
+              "busy": true,
+              "size": 139362304,
+              "shared": 0,
+              "meta": {
+                "id": 0,
+                "created_ms": 1792993832155,
+                "last_used_ms": 1792993832155,
+                "last_worktree": "/workspace/qa-storage/probes/repo",
+                "source_root": "/workspace/qa-storage/probes/repo",
+                "last_head": "d6805a48729bcbb3cab7008509154b89b63ba0d5",
+                "last_cmd": "",
+                "jobs": 1,
+                "size_bytes": 139362304,
+                "size_ms": 1792993832639,
+                "size_accounting": "allocated"
+              }
+            }
+          ],
+          "shared": 0
+        }
+      ],
+      "runs": [],
+      "total": 139362304,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": true,
+      "over_budget_bytes": 72253440,
+      "over_budget_reasons": [
+        "busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "free_disk": 31128715264,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "busy-gc",
+    "args": [
+      "gc",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0027,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 139362304,
+      "after": 139362304,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": true,
+      "over_budget_bytes": 72253440,
+      "over_budget_reasons": [
+        "busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "cache exceeds its effective budget by 68.9 MiB (soft limit): busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "busy-busy-payload-protected",
+    "sizes": [
+      134217728
+    ]
+  },
+  {
+    "name": "busy-build-exit",
+    "exit": 0
+  },
+  {
+    "name": "busy-after-status",
+    "args": [
+      "status",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0021,
+    "json": {
+      "classes": [
+        {
+          "class": "build",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        },
+        {
+          "class": "run",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        }
+      ],
+      "hosts": {}
+    }
+  },
+  {
+    "name": "busy-after-gc",
+    "args": [
+      "gc",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0079,
+    "json": {
+      "actions": [
+        "evict repo-87abe8d1/m0 (last used 3s ago, over budget 64.0 MiB) (path footprint 136.7 MiB)"
+      ],
+      "freed": 143351808,
+      "before": 143351808,
+      "after": 0,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "completed cache member /workspace/qa-storage/probes/cache/pools/repo-87abe8d1/m0 (136.7 MiB) exceeds the entire cache budget 64.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "busy-after-cache",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0019,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 31052656640,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "busy-recovery-run",
+    "args": [
+      "cargo",
+      "run",
+      "--offline"
+    ],
+    "extra": {
+      "PAYLOAD_MB": "1",
+      "HOLD_SECONDS": "0"
+    },
+    "exit": 0,
+    "seconds": 0.5976
+  },
+  {
+    "name": "busy-final-gc",
+    "args": [
+      "gc",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0039,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 14008320,
+      "after": 14008320,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "busy-clear",
+    "args": [
+      "cache",
+      "clean",
+      "--all"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.004
+  },
+  {
+    "name": "kill-status",
+    "args": [
+      "status",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0021,
+    "json": {
+      "classes": [
+        {
+          "class": "build",
+          "holders": [
+            {
+              "busy": true,
+              "job": {
+                "class": "build",
+                "cmd": "cargo build --offline",
+                "cwd": "/workspace/qa-storage/probes/repo",
+                "enqueued_ms": 1792993848505,
+                "label": null,
+                "pid": 4744,
+                "priority": 0,
+                "seq": 1792993848505,
+                "started_ms": 1792993848505,
+                "target": "repo-87abe8d1/m0",
+                "worktree": "/workspace/qa-storage/probes/repo"
+              },
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        },
+        {
+          "class": "run",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        }
+      ],
+      "hosts": {}
+    }
+  },
+  {
+    "name": "kill-cache",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0022,
+    "json": {
+      "pools": [
+        {
+          "name": "repo-87abe8d1",
+          "dir": "/workspace/qa-storage/probes/cache/pools/repo-87abe8d1",
+          "info": {
+            "repo": "repo",
+            "repo_key": "/workspace/qa-storage/probes/repo/.git",
+            "toolchain": "1.89.0",
+            "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+            "created_ms": 1792993830706,
+            "last_used_ms": 1792993848479
+          },
+          "members": [
+            {
+              "id": 0,
+              "dir": "/workspace/qa-storage/probes/cache/pools/repo-87abe8d1/m0",
+              "busy": true,
+              "size": 139362304,
+              "shared": 0,
+              "meta": {
+                "id": 0,
+                "created_ms": 1792993848503,
+                "last_used_ms": 1792993848503,
+                "last_worktree": "/workspace/qa-storage/probes/repo",
+                "source_root": "/workspace/qa-storage/probes/repo",
+                "last_head": "d6805a48729bcbb3cab7008509154b89b63ba0d5",
+                "last_cmd": "",
+                "jobs": 1,
+                "size_bytes": 139362304,
+                "size_ms": 1792993848984,
+                "size_accounting": "allocated"
+              }
+            }
+          ],
+          "shared": 0
+        }
+      ],
+      "runs": [
+        {
+          "dir": "/workspace/qa-storage/probes/cache/runs/r0",
+          "busy": false,
+          "size": 3825664,
+          "last_used_ms": 1792993848434
+        }
+      ],
+      "total": 143187968,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": true,
+      "over_budget_bytes": 76079104,
+      "over_budget_reasons": [
+        "busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "free_disk": 30884302848,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "kill-gc",
+    "args": [
+      "gc",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0037,
+    "json": {
+      "actions": [
+        "evict run dir /workspace/qa-storage/probes/cache/runs/r0 (over budget) (path footprint 3.6 MiB)"
+      ],
+      "freed": 3825664,
+      "before": 143187968,
+      "after": 139362304,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": true,
+      "over_budget_bytes": 72253440,
+      "over_budget_reasons": [
+        "busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "cache exceeds its effective budget by 68.9 MiB (soft limit): busy artifacts are protected; retry GC after jobs finish"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "kill-busy-payload-protected",
+    "sizes": [
+      134217728
+    ]
+  },
+  {
+    "name": "kill-build-exit",
+    "exit": -9
+  },
+  {
+    "name": "kill-after-status",
+    "args": [
+      "status",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0038,
+    "json": {
+      "classes": [
+        {
+          "class": "build",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        },
+        {
+          "class": "run",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        }
+      ],
+      "hosts": {}
+    }
+  },
+  {
+    "name": "kill-after-gc",
+    "args": [
+      "gc",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0069,
+    "json": {
+      "actions": [
+        "evict repo-87abe8d1/m0 (last used 3s ago, over budget 64.0 MiB) (path footprint 132.9 MiB)"
+      ],
+      "freed": 139362304,
+      "before": 139362304,
+      "after": 0,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "completed cache member /workspace/qa-storage/probes/cache/pools/repo-87abe8d1/m0 (132.9 MiB) exceeds the entire cache budget 64.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "kill-after-cache",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.002,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 30933729280,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "kill-recovery-run",
+    "args": [
+      "cargo",
+      "run",
+      "--offline"
+    ],
+    "extra": {
+      "PAYLOAD_MB": "1",
+      "HOLD_SECONDS": "0"
+    },
+    "exit": 0,
+    "seconds": 0.6086
+  },
+  {
+    "name": "kill-final-gc",
+    "args": [
+      "gc",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0031,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 14008320,
+      "after": 14008320,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "kill-clear",
+    "args": [
+      "cache",
+      "clean",
+      "--all"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0079
+  },
+  {
+    "name": "inline-0-oversize",
+    "args": [
+      "cargo",
+      "build",
+      "--offline"
+    ],
+    "extra": {
+      "PAYLOAD_MB": "96",
+      "HOLD_SECONDS": "0"
+    },
+    "exit": 0,
+    "seconds": 0.5388
+  },
+  {
+    "name": "inline-0-after",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0018,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 30886555648,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-1-oversize",
+    "args": [
+      "cargo",
+      "build",
+      "--offline"
+    ],
+    "extra": {
+      "PAYLOAD_MB": "96",
+      "HOLD_SECONDS": "0"
+    },
+    "exit": 0,
+    "seconds": 0.5335
+  },
+  {
+    "name": "inline-1-after",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.002,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 30881759232,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-2-oversize",
+    "args": [
+      "cargo",
+      "build",
+      "--offline"
+    ],
+    "extra": {
+      "PAYLOAD_MB": "96",
+      "HOLD_SECONDS": "0"
+    },
+    "exit": 0,
+    "seconds": 0.5572
+  },
+  {
+    "name": "inline-2-after",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0018,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 30896558080,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-3-oversize",
+    "args": [
+      "cargo",
+      "build",
+      "--offline"
+    ],
+    "extra": {
+      "PAYLOAD_MB": "96",
+      "HOLD_SECONDS": "0"
+    },
+    "exit": 0,
+    "seconds": 0.691
+  },
+  {
+    "name": "inline-3-after",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0016,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 30865817600,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "inline-4-oversize",
+    "args": [
+      "cargo",
+      "build",
+      "--offline"
+    ],
+    "extra": {
+      "PAYLOAD_MB": "96",
+      "HOLD_SECONDS": "0"
+    },
+    "exit": 0,
+    "seconds": 0.8683
+  },
+  {
+    "name": "inline-4-after",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.0028,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 30860009472,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "final-status",
+    "args": [
+      "status",
+      "--json"
+    ],
+    "extra": null,
+    "exit": 0,
+    "seconds": 0.003,
+    "json": {
+      "classes": [
+        {
+          "class": "build",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        },
+        {
+          "class": "run",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        }
+      ],
+      "hosts": {}
+    }
+  }
+]

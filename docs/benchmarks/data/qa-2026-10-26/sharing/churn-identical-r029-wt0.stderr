@@ -1,0 +1,5 @@
+buildq: [     0 ms] start
+buildq: target repo-447cbbca/m1 (1 package(s) invalidated: sharing-probe)
+buildq: waiting for a build slot: 2/2 busy, position 1 of 1
+buildq: got build slot 0 after 1s
+buildq: copied 2.7 MiB to run dir /workspace/qa-sharing/churn-identical/cache/runs/r0

@@ -1,0 +1,23 @@
+[
+  {
+    "worktree": 0,
+    "exit": 0,
+    "stdout": "10000",
+    "correct": true,
+    "wall_s": 50.10745931300005
+  },
+  {
+    "worktree": 1,
+    "exit": 0,
+    "stdout": "10000",
+    "correct": true,
+    "wall_s": 409.87891019100005
+  },
+  {
+    "worktree": 2,
+    "exit": 0,
+    "stdout": "10000",
+    "correct": true,
+    "wall_s": 5.504346453999915
+  }
+]

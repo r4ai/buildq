@@ -1,0 +1,77 @@
+{
+  "actions": 5,
+  "actions_by_kind": {
+    "build": 1,
+    "burst": 1,
+    "edit": 2,
+    "revert": 1
+  },
+  "elapsed_s": 583.0,
+  "ended": 1792994414.4415436,
+  "gc_runs": 0,
+  "interrupted": true,
+  "invariants": {
+    "accounting_matches_disk": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "cancellation_cleanup": {
+      "examples": [
+        "#4 burst bevy: leftover pids [159668]"
+      ],
+      "passed": false,
+      "violations": 1
+    },
+    "correct_outputs": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "exit_codes": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "gc_errors": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "no_orphan_processes": {
+      "examples": [
+        "t=1792994414.3741155: 1 process(es) outlive their buildq: rustc[159668]"
+      ],
+      "passed": false,
+      "violations": 1
+    },
+    "no_stranded_tickets": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "slot_limit": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    },
+    "storage_policy": {
+      "examples": [],
+      "passed": true,
+      "violations": 0
+    }
+  },
+  "max_du_bytes": 4384727040,
+  "max_trash_bytes": 0,
+  "max_tree_rss_kb": 2899088,
+  "min_free_disk_bytes": 21014372352,
+  "passed": false,
+  "queue_wait": {
+    "jobs": 17,
+    "max_wait_s": 299.007,
+    "p95_wait_s": 299.007
+  },
+  "samples": 58,
+  "seed": 2718,
+  "started": 1792993831.456594
+}

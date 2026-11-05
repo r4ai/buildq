@@ -1,0 +1,10 @@
+buildq: [     0 ms] start
+buildq: [     1 ms] parsed
+buildq: [   421 ms] pool opened (git + toolchain + manifest)
+buildq: target repo-c580933c/m0 (no source differences)
+buildq: [   429 ms] member leased
+buildq: [   437 ms] slot acquired
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s
+buildq: [   847 ms] cargo finished
+buildq: [   910 ms] after-job check
+buildq: [   911 ms] done

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "byte_accounting": "logical",
+  "store": "/workspace/qa-root/eviction-rebate-regex/mbx/actions",
+  "objects": 42,
+  "object_bytes": 76698654,
+  "action_results": 6,
+  "action_result_bytes": 2233,
+  "total_bytes": 76700887,
+  "live_checkouts": 2,
+  "stale_checkouts": 0,
+  "target_directories": 0,
+  "target_bytes": 0,
+  "incremental_directories": 1,
+  "incremental_units": 0,
+  "incremental_bytes": 81857,
+  "incremental_live_checkouts": 1,
+  "incremental_stale_checkouts": 0,
+  "incremental_untracked_directories": 0,
+  "generated_directories": 0,
+  "generated_bytes": 0,
+  "combined_total_bytes": 76782744
+}

@@ -1,0 +1,8 @@
+*.json linguist-generated=true
+*.jsonl linguist-generated=true
+*.svg linguist-generated=true
+*.stdout linguist-generated=true
+*.stderr linguist-generated=true
+*.out linguist-generated=true
+*.err linguist-generated=true
+SHA256SUMS linguist-generated=true

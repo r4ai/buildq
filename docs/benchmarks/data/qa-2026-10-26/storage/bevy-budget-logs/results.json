@@ -1,0 +1,436 @@
+[
+  {
+    "name": "cold-64M",
+    "args": [
+      "cargo",
+      "build",
+      "--offline",
+      "-p",
+      "bevy_ecs"
+    ],
+    "exit": 0,
+    "seconds": 162.5566,
+    "harness_limit": null
+  },
+  {
+    "name": "cold-cache",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "exit": 0,
+    "seconds": 0.2054,
+    "harness_limit": null,
+    "json": {
+      "pools": [
+        {
+          "name": "repo-5d3d2632",
+          "dir": "/workspace/qa-storage/bevy-budget/cache/pools/repo-5d3d2632",
+          "info": {
+            "repo": "repo",
+            "repo_key": "/workspace/qa-storage/bevy-budget/repo/.git",
+            "toolchain": "1.89.0",
+            "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+            "created_ms": 1792995246736,
+            "last_used_ms": 1792995246736
+          },
+          "members": [
+            {
+              "id": 0,
+              "dir": "/workspace/qa-storage/bevy-budget/cache/pools/repo-5d3d2632/m0",
+              "busy": false,
+              "size": 644546560,
+              "shared": 0,
+              "meta": {
+                "id": 0,
+                "created_ms": 1792995247981,
+                "last_used_ms": 1792995409077,
+                "last_worktree": "/workspace/qa-storage/bevy-budget/repo",
+                "source_root": "/workspace/qa-storage/bevy-budget/repo",
+                "last_head": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+                "last_cmd": "",
+                "jobs": 1,
+                "size_bytes": 644546560,
+                "size_ms": 1792995409251,
+                "size_accounting": "allocated"
+              }
+            }
+          ],
+          "shared": 0
+        }
+      ],
+      "runs": [],
+      "total": 644546560,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": true,
+      "over_budget_bytes": 577437696,
+      "over_budget_reasons": [
+        "idle artifacts await GC or could not be reclaimed"
+      ],
+      "free_disk": 12176896000,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "evict-64M",
+    "args": [
+      "gc",
+      "--json"
+    ],
+    "exit": 0,
+    "seconds": 0.4017,
+    "harness_limit": null,
+    "json": {
+      "actions": [
+        "evict repo-5d3d2632/m0 (last used 0s ago, over budget 64.0 MiB) (path footprint 614.7 MiB)"
+      ],
+      "freed": 644546560,
+      "before": 644546560,
+      "after": 0,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [
+        "completed cache member /workspace/qa-storage/bevy-budget/cache/pools/repo-5d3d2632/m0 (614.7 MiB) exceeds the entire cache budget 64.0 MiB; GC may evict it and the next build will be cold. Increase [cache].budget or reduce build artifacts to retain reuse"
+      ],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "after-evict",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "exit": 0,
+    "seconds": 0.2011,
+    "harness_limit": null,
+    "json": {
+      "pools": [],
+      "runs": [],
+      "total": 0,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 12730576896,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "cold-rebuild-64M",
+    "args": [
+      "cargo",
+      "build",
+      "--offline",
+      "-p",
+      "bevy_ecs"
+    ],
+    "exit": 0,
+    "seconds": 159.6291,
+    "harness_limit": null
+  },
+  {
+    "name": "rebuilt-cache",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "exit": 0,
+    "seconds": 0.2014,
+    "harness_limit": null,
+    "json": {
+      "pools": [
+        {
+          "name": "repo-5d3d2632",
+          "dir": "/workspace/qa-storage/bevy-budget/cache/pools/repo-5d3d2632",
+          "info": {
+            "repo": "repo",
+            "repo_key": "/workspace/qa-storage/bevy-budget/repo/.git",
+            "toolchain": "1.89.0",
+            "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+            "created_ms": 1792995246736,
+            "last_used_ms": 1792995410052
+          },
+          "members": [
+            {
+              "id": 0,
+              "dir": "/workspace/qa-storage/bevy-budget/cache/pools/repo-5d3d2632/m0",
+              "busy": false,
+              "size": 644546560,
+              "shared": 0,
+              "meta": {
+                "id": 0,
+                "created_ms": 1792995410265,
+                "last_used_ms": 1792995569637,
+                "last_worktree": "/workspace/qa-storage/bevy-budget/repo",
+                "source_root": "/workspace/qa-storage/bevy-budget/repo",
+                "last_head": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+                "last_cmd": "",
+                "jobs": 1,
+                "size_bytes": 644546560,
+                "size_ms": 1792995569690,
+                "size_accounting": "allocated"
+              }
+            }
+          ],
+          "shared": 0
+        }
+      ],
+      "runs": [],
+      "total": 644546560,
+      "trash_bytes": 0,
+      "budget": 67108864,
+      "effective_budget": 67108864,
+      "accounting": "allocated",
+      "over_budget": true,
+      "over_budget_bytes": 577437696,
+      "over_budget_reasons": [
+        "idle artifacts await GC or could not be reclaimed"
+      ],
+      "free_disk": 11680800768,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "warm-2G",
+    "args": [
+      "cargo",
+      "build",
+      "--offline",
+      "-p",
+      "bevy_ecs"
+    ],
+    "exit": 0,
+    "seconds": 1.0083,
+    "harness_limit": null
+  },
+  {
+    "name": "warm-cache",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "exit": 0,
+    "seconds": 0.2008,
+    "harness_limit": null,
+    "json": {
+      "pools": [
+        {
+          "name": "repo-5d3d2632",
+          "dir": "/workspace/qa-storage/bevy-budget/cache/pools/repo-5d3d2632",
+          "info": {
+            "repo": "repo",
+            "repo_key": "/workspace/qa-storage/bevy-budget/repo/.git",
+            "toolchain": "1.89.0",
+            "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+            "created_ms": 1792995246736,
+            "last_used_ms": 1792995569883
+          },
+          "members": [
+            {
+              "id": 0,
+              "dir": "/workspace/qa-storage/bevy-budget/cache/pools/repo-5d3d2632/m0",
+              "busy": false,
+              "size": 644546560,
+              "shared": 0,
+              "meta": {
+                "id": 0,
+                "created_ms": 1792995410265,
+                "last_used_ms": 1792995570777,
+                "last_worktree": "/workspace/qa-storage/bevy-budget/repo",
+                "source_root": "/workspace/qa-storage/bevy-budget/repo",
+                "last_head": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+                "last_cmd": "",
+                "jobs": 2,
+                "size_bytes": 644546560,
+                "size_ms": 1792995570927,
+                "size_accounting": "allocated"
+              }
+            }
+          ],
+          "shared": 0
+        }
+      ],
+      "runs": [],
+      "total": 644546560,
+      "trash_bytes": 0,
+      "budget": 2147483648,
+      "effective_budget": 2147483648,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 11658412032,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "retaining-gc-2G",
+    "args": [
+      "gc",
+      "--json"
+    ],
+    "exit": 0,
+    "seconds": 0.2038,
+    "harness_limit": null,
+    "json": {
+      "actions": [],
+      "freed": 0,
+      "before": 644546560,
+      "after": 644546560,
+      "effective_budget": 2147483648,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "skipped": null,
+      "follow_ups": 0,
+      "external": 0,
+      "warnings": [],
+      "failed_deletions": 0,
+      "dedupe": null
+    }
+  },
+  {
+    "name": "after-retaining-gc",
+    "args": [
+      "cache",
+      "ls",
+      "--refresh",
+      "--json"
+    ],
+    "exit": 0,
+    "seconds": 0.2225,
+    "harness_limit": null,
+    "json": {
+      "pools": [
+        {
+          "name": "repo-5d3d2632",
+          "dir": "/workspace/qa-storage/bevy-budget/cache/pools/repo-5d3d2632",
+          "info": {
+            "repo": "repo",
+            "repo_key": "/workspace/qa-storage/bevy-budget/repo/.git",
+            "toolchain": "1.89.0",
+            "toolchain_id": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+            "created_ms": 1792995246736,
+            "last_used_ms": 1792995569883
+          },
+          "members": [
+            {
+              "id": 0,
+              "dir": "/workspace/qa-storage/bevy-budget/cache/pools/repo-5d3d2632/m0",
+              "busy": false,
+              "size": 644546560,
+              "shared": 0,
+              "meta": {
+                "id": 0,
+                "created_ms": 1792995410265,
+                "last_used_ms": 1792995570777,
+                "last_worktree": "/workspace/qa-storage/bevy-budget/repo",
+                "source_root": "/workspace/qa-storage/bevy-budget/repo",
+                "last_head": "383b3510455c431f34cf3f2c6e3c2d40eddce744",
+                "last_cmd": "",
+                "jobs": 2,
+                "size_bytes": 644546560,
+                "size_ms": 1792995571320,
+                "size_accounting": "allocated"
+              }
+            }
+          ],
+          "shared": 0
+        }
+      ],
+      "runs": [],
+      "total": 644546560,
+      "trash_bytes": 0,
+      "budget": 2147483648,
+      "effective_budget": 2147483648,
+      "accounting": "allocated",
+      "over_budget": false,
+      "over_budget_bytes": 0,
+      "over_budget_reasons": [],
+      "free_disk": 11639377920,
+      "external": [],
+      "external_total": 0,
+      "mbx_budget_bytes": 0
+    }
+  },
+  {
+    "name": "final-status",
+    "args": [
+      "status",
+      "--json"
+    ],
+    "exit": 0,
+    "seconds": 0.2062,
+    "harness_limit": null,
+    "json": {
+      "classes": [
+        {
+          "class": "build",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        },
+        {
+          "class": "run",
+          "holders": [
+            {
+              "busy": false,
+              "job": null,
+              "slot": 0
+            },
+            {
+              "busy": false,
+              "job": null,
+              "slot": 1
+            }
+          ],
+          "slots": 2,
+          "waiters": []
+        }
+      ],
+      "hosts": {}
+    }
+  }
+]

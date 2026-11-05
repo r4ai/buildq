@@ -1,0 +1,32 @@
+{
+  "seed_members": "true",
+  "jobs": 1800,
+  "correct": 1800,
+  "seconds": 1639.7786132370002,
+  "median_job_seconds": 2.9494486305001146,
+  "max_job_seconds": 133.288716485,
+  "verified_completed_jobs": 1800,
+  "verified_correct_jobs": 1800,
+  "queue_wait": {
+    "build": {
+      "jobs": 1800,
+      "median_seconds": 0.088,
+      "p95_seconds": 1.559,
+      "max_seconds": 89.858
+    },
+    "run": {
+      "jobs": 1800,
+      "median_seconds": 0.0,
+      "p95_seconds": 0.002,
+      "max_seconds": 0.019
+    }
+  },
+  "concurrent_dedupe": {
+    "samples": 3157,
+    "busy_skips": 7408,
+    "collector_lock_skips": 75,
+    "errors": 0,
+    "error_examples": [],
+    "max_seconds": 0.572294047000014
+  }
+}
